@@ -1,0 +1,161 @@
+name: sme01-dns
+
+mgmt:
+  network: clab-sme01-dns
+  ipv4-subnet: 172.24.0.0/24
+
+topology:
+  kinds:
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:latest
+    vyosnetworks_vyos:
+      image: vyos:1.5-stream-2025-Q1
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    # Single firewall replacing both spines. It is at once the fabric transit
+    # router, the DHCP server the leaves relay to, and the policy enforcement
+    # point between the INTERNAL, DMZ and OUTSIDE zones.
+    firewall:
+      kind: vyosnetworks_vyos
+
+    leaf1:
+      kind: nokia_srlinux
+    leaf2:
+      kind: nokia_srlinux
+
+    user1:
+      kind: linux
+      # DHCP client: address, default route and resolver all come from the
+      # lease. The healthy state starts udhcpc; nothing is configured here.
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+    guest1:
+      kind: linux
+      # DHCP client: address, default route and resolver all come from the
+      # lease. The healthy state starts udhcpc; nothing is configured here.
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+    finance1:
+      kind: linux
+      # DHCP client: address, default route and resolver all come from the
+      # lease. The healthy state starts udhcpc; nothing is configured here.
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+    admin1:
+      kind: linux
+      # DHCP client: address, default route and resolver all come from the
+      # lease. The healthy state starts udhcpc; nothing is configured here.
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+
+    # DMZ servers are cabled straight to the firewall, no leaf in between:
+    # every packet between a DMZ application and an internal endpoint is
+    # forced through the zone policy.
+    web1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.40.10/24 dev eth1
+        - ip route replace default via 10.10.40.1
+    app1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.50.10/24 dev eth1
+        - ip route replace default via 10.10.50.1
+
+    # OUTSIDE zone: the simulated Internet, also directly attached.
+    external1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 203.0.113.10/24 dev eth1
+        - ip route replace default via 203.0.113.1
+
+    # Internal resolver: authoritative for sme01.internal, forwards the public
+    # namespace to the DMZ nameserver. Stays behind leaf1, in the INTERNAL zone.
+    dns-int:
+      kind: linux
+      image: ubuntu/bind9:latest
+      binds:
+        - dns/internal:/opt/dns-src:ro
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.60.10/24 dev eth1
+        - ip route replace default via 10.10.60.1
+
+    # DMZ nameserver: authoritative for the public zone, no recursion.
+    # Cabled to the firewall like the other DMZ servers.
+    dns-dmz:
+      kind: linux
+      image: ubuntu/bind9:latest
+      binds:
+        - dns/dmz:/opt/dns-src:ro
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.41.10/24 dev eth1
+        - ip route replace default via 10.10.41.1
+
+    attacker1:
+      kind: linux
+      exec:
+        - ip link set eth1 down
+
+  # The four DHCP clients have a pinned MAC: the firewall keys its DHCP
+  # reservations on the hardware address, and containerlab would otherwise
+  # draw a fresh random one at every deployment.
+  links:
+    # Fabric: one point-to-point link per leaf toward the firewall. A single
+    # firewall replaces the spine pair, so there is no second path and no ECMP.
+    - endpoints: ["leaf1:e1-1", "firewall:eth1"]
+    - endpoints: ["leaf2:e1-1", "firewall:eth2"]
+
+    # DMZ and OUTSIDE: directly attached to the firewall.
+    - endpoints: ["firewall:eth3", "web1:eth1"]
+    - endpoints: ["firewall:eth4", "dns-dmz:eth1"]
+    - endpoints: ["firewall:eth5", "app1:eth1"]
+    - endpoints: ["firewall:eth6", "external1:eth1"]
+
+    # Routed access behind leaf1.
+    - type: veth
+      endpoints:
+        - node: user1
+          interface: eth1
+          mac: 02:c1:ab:0a:0a:0a
+        - node: leaf1
+          interface: e1-10
+    - endpoints: ["dns-int:eth1", "leaf1:e1-11"]
+    - type: veth
+      endpoints:
+        - node: guest1
+          interface: eth1
+          mac: 02:c1:ab:0a:14:0a
+        - node: leaf1
+          interface: e1-20
+    - endpoints: ["attacker1:eth1", "leaf1:e1-30"]
+    - type: veth
+      endpoints:
+        - node: admin1
+          interface: eth1
+          mac: 02:c1:ab:0a:63:64
+        - node: leaf1
+          interface: e1-57
+
+    # Routed access behind leaf2.
+    - type: veth
+      endpoints:
+        - node: finance1
+          interface: eth1
+          mac: 02:c1:ab:0a:1e:0a
+        - node: leaf2
+          interface: e1-30

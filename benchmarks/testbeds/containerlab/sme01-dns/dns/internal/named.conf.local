@@ -1,0 +1,13 @@
+// Authoritative for the internal namespace.
+zone "sme01.internal" {
+    type master;
+    file "/etc/bind/db.sme01.internal";
+};
+
+// The public namespace is served by the DMZ nameserver; the resolver forwards
+// to it instead of holding a second copy of the zone.
+zone "sme01.example" {
+    type forward;
+    forward only;
+    forwarders { 10.10.41.10; };
+};

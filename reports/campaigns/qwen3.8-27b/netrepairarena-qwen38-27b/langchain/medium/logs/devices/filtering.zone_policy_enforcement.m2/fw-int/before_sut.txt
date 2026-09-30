@@ -1,0 +1,476 @@
+firewall {
+    ipv4 {
+        name FINANCE-TO-MGMT {
+            default-action drop
+            description finance-to-mgmt
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+        }
+        name FINANCE-TO-UPLINK {
+            default-action drop
+            description finance-to-uplink
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description finance-tls-out
+                destination {
+                    port 443
+                }
+                protocol tcp
+            }
+            rule 30 {
+                action accept
+                description finance-app-out
+                destination {
+                    port 5201
+                }
+                protocol tcp
+            }
+            rule 40 {
+                action accept
+                description finance-ping-out
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+            }
+        }
+        name GUEST-TO-MGMT {
+            default-action drop
+            description guest-to-mgmt
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+        }
+        name GUEST-TO-UPLINK {
+            default-action drop
+            description guest-to-uplink
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description guest-http-out
+                destination {
+                    port 80
+                }
+                protocol tcp
+            }
+            rule 30 {
+                action accept
+                description guest-tls-out
+                destination {
+                    port 443
+                }
+                protocol tcp
+            }
+            rule 40 {
+                action accept
+                description guest-ping-out
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+            }
+        }
+        name MGMT-TO-FINANCE {
+            default-action drop
+            description mgmt-to-finance
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description admin-to-finance
+            }
+        }
+        name MGMT-TO-GUEST {
+            default-action drop
+            description mgmt-to-guest
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description admin-to-guest
+            }
+        }
+        name MGMT-TO-UPLINK {
+            default-action drop
+            description mgmt-to-uplink
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description admin-egress
+            }
+        }
+        name MGMT-TO-USERS {
+            default-action drop
+            description mgmt-to-users
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description admin-to-users
+            }
+        }
+        name UPLINK-TO-FINANCE {
+            default-action drop
+            description uplink-to-finance
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description uplink-ping-finance
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+            }
+        }
+        name UPLINK-TO-GUEST {
+            default-action drop
+            description uplink-to-guest
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description uplink-ping-guest
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+            }
+        }
+        name UPLINK-TO-MGMT {
+            default-action drop
+            description uplink-to-mgmt
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+        }
+        name UPLINK-TO-USERS {
+            default-action drop
+            description uplink-to-users
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description uplink-ping-users
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+            }
+        }
+        name USERS-TO-MGMT {
+            default-action drop
+            description users-to-mgmt
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+        }
+        name USERS-TO-UPLINK {
+            default-action drop
+            description users-to-uplink
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description users-http-out
+                destination {
+                    port 80
+                }
+                protocol tcp
+            }
+            rule 30 {
+                action accept
+                description users-tls-out
+                destination {
+                    port 443
+                }
+                protocol tcp
+            }
+            rule 40 {
+                action accept
+                description users-app-out
+                destination {
+                    port 5201
+                }
+                protocol tcp
+            }
+            rule 50 {
+                action accept
+                description users-ping-out
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+            }
+        }
+    }
+    zone FINANCE {
+        description finance-zone
+        from MGMT {
+            firewall {
+                name MGMT-TO-FINANCE
+            }
+        }
+        from UPLINK {
+            firewall {
+                name UPLINK-TO-FINANCE
+            }
+        }
+        interface eth1.30
+    }
+    zone GUEST {
+        description guest-zone
+        from MGMT {
+            firewall {
+                name MGMT-TO-GUEST
+            }
+        }
+        from UPLINK {
+            firewall {
+                name UPLINK-TO-GUEST
+            }
+        }
+        interface eth1.20
+    }
+    zone MGMT {
+        description mgmt-zone
+        from FINANCE {
+            firewall {
+                name FINANCE-TO-MGMT
+            }
+        }
+        from GUEST {
+            firewall {
+                name GUEST-TO-MGMT
+            }
+        }
+        from UPLINK {
+            firewall {
+                name UPLINK-TO-MGMT
+            }
+        }
+        from USERS {
+            firewall {
+                name USERS-TO-MGMT
+            }
+        }
+        interface eth1.99
+    }
+    zone UPLINK {
+        description uplink-zone
+        from FINANCE {
+            firewall {
+                name FINANCE-TO-UPLINK
+            }
+        }
+        from GUEST {
+            firewall {
+                name GUEST-TO-UPLINK
+            }
+        }
+        from MGMT {
+            firewall {
+                name MGMT-TO-UPLINK
+            }
+        }
+        from USERS {
+            firewall {
+                name USERS-TO-UPLINK
+            }
+        }
+        interface eth2
+    }
+    zone USERS {
+        description users-zone
+        from MGMT {
+            firewall {
+                name MGMT-TO-USERS
+            }
+        }
+        from UPLINK {
+            firewall {
+                name UPLINK-TO-USERS
+            }
+        }
+        interface eth1.10
+    }
+}
+interfaces {
+    ethernet eth1 {
+        vif 10 {
+            address 10.10.10.1/24
+            description users-gateway
+        }
+        vif 20 {
+            address 10.10.20.1/24
+            description guest-gateway
+        }
+        vif 30 {
+            address 10.10.30.1/24
+            description finance-gateway
+        }
+        vif 99 {
+            address 10.10.99.1/24
+            description mgmt-gateway
+        }
+    }
+    ethernet eth2 {
+        address 10.255.1.1/30
+        description transit-to-fw-ext
+    }
+    loopback lo {
+    }
+}
+pki {
+    ca clab {
+        certificate MIIDhTCCAm2gAwIBAgICB+MwDQYJKoZIhvcNAQELBQAwVDELMAkGA1UEBhMCVVMxCTAHBgNVBAcTADEVMBMGA1UEChMMY29udGFpbmVybGFiMQkwBwYDVQQLEwAxGDAWBgNVBAMTD3NtZTAxLWZ3IGxhYiBDQTAeFw0yNjA5MjkwODIzMjBaFw0yNzA5MjkwODIzMjBaMFQxCzAJBgNVBAYTAlVTMQkwBwYDVQQHEwAxFTATBgNVBAoTDGNvbnRhaW5lcmxhYjEJMAcGA1UECxMAMRgwFgYDVQQDEw9zbWUwMS1mdyBsYWIgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC/8cDkF61NDzcJBDdGvSLIiXZ6g91kjM82ZegYNn2xxEHgibWKuxVKaEvNop+sK7CqfrbpzexxphbiZcsnaS+7xZn15Cut38jL42ONZlyYlAlCA4DpKhR6qC1qbqMH9BXTMm8+OQ2uDMlrI34lnRJR30oJlFVzuVOk1vErkEzov6TkEgAnx32ocXZ93NAjO3TS3l/T9ZKfIoWEP5ViapqOvhky51SuQKzmDNTxXmgv4TQJDoEzkflTpRp3JzCJeaZHcM8TvUVpm/WnV2HpoZJpuWs8S9abwK08HHvE4gD3YKvyrtVTxeB1nZOVAiTybHzHhCT6kEU3cOmcJz8bRnRrAgMBAAGjYTBfMA4GA1UdDwEB/wQEAwIChDAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQULZeljDPBuEfY1O/n+UWWPvuOrz0wDQYJKoZIhvcNAQELBQADggEBAALEOTswL6cfk1RF/pvnIpMKfrkx6k/Wi/IkMXSxocJrF6SLecAExHEOLwjet8shrvAC4dhcna2wVEVqM3F0b7OHZ27cMrdb1qxBDO6u4g76oVhQSuaMxNEGfjzTZCdg0oPJ9QVvMJDNsUmXyvONFdryyiS/ipBImZMLckeuv6OETRTXnYLIik0LT+S/wqyVHPrk/jAT70KSh01mPREg7B8XijgCUmQn24ryHeX1bMEe54LXjgodNPji0gYQoaMJDLLZA4F6LuL06Bb+ZTpdPxpyllXBf1WE+e8KENotzWpgmGFhJ6Lv6/8vPseB6TyThE3trfba+s1BpnDkX44Sixc=
+    }
+    certificate self {
+        certificate MIIDyDCCArCgAwIBAgICBnowDQYJKoZIhvcNAQELBQAwVDELMAkGA1UEBhMCVVMxCTAHBgNVBAcTADEVMBMGA1UEChMMY29udGFpbmVybGFiMQkwBwYDVQQLEwAxGDAWBgNVBAMTD3NtZTAxLWZ3IGxhYiBDQTAeFw0yNjA5MjkwODIzMjBaFw0yNzA5MjkwODIzMjBaMFcxCzAJBgNVBAYTAlVTMQkwBwYDVQQHEwAxFTATBgNVBAoTDGNvbnRhaW5lcmxhYjEJMAcGA1UECxMAMRswGQYDVQQDExJmdy1pbnQuc21lMDEtZncuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCxMDIfetEmzRwGimceYTTO1PGnXdwsRZKQ2qbYsaCIAlo6qmSzN/oBRwH9erDtvCCDoC3wfx4ipbPl13dvrxUSpEV9WjR6TkP7V24rK+KU/SObB7FFiWnw2hx6n6v8QC9xgfB8X0gmlumJeHlBcFuRvzIy1RanXHigtfLW4AJFDp+svZsV7IrFA11JX97P1Ok7axMh7YFert+Q9iav9hmKS6vSEPiyYhQ34BJFblJW5//K5A+c/sSTezZ0Z/kI/DcyXMPtSDpUb/2rnfu46TbmxU/X5SfTH0qZnRpmM0Iw5lMQUbLYPXhOSdC44IMuutUXjeDdWiTnVahELEr6GSLBAgMBAAGjgaAwgZ0wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAOBgNVHQ4EBwQFAQIDBAYwHwYDVR0jBBgwFoAULZeljDPBuEfY1O/n+UWWPvuOrz0wOwYDVR0RBDQwMoIGZnctaW50ghRjbGFiLXNtZTAxLWZ3LWZ3LWludIISZnctaW50LnNtZTAxLWZ3LmlvMA0GCSqGSIb3DQEBCwUAA4IBAQAM2/6OvwGl4AmpNU4cgnAREORfuVWAgqZdwnZxOoY4zgGfh8sBolykQ7YHkAcgMWnsVWL+4+xA7IDjCEdOiA0/oDXzCRxjZQM5L7738tnkmBRTrI9YV+1sbicJYTxYsvC4lMRWQ99R7603oU9HMTOXgPS6fGgxAQf4AoIo+H3e9XJvVhofHfwRtkJ3wbx8Cv2ZPo3yYoLfrjghomOcAHBOw79oQoGJB5HxD1cWX6bmxj8h/7rq/5CU2vuKhk7qDkpHCyFMiVF4Ulrc55jUqo+mAifVC5XqXVvdil9YsopL8Ix/NyuEyCkVK2ccKu1gdGM8AqPfH4dEIA6zN530/IdO
+        private {
+            key MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCxMDIfetEmzRwGimceYTTO1PGnXdwsRZKQ2qbYsaCIAlo6qmSzN/oBRwH9erDtvCCDoC3wfx4ipbPl13dvrxUSpEV9WjR6TkP7V24rK+KU/SObB7FFiWnw2hx6n6v8QC9xgfB8X0gmlumJeHlBcFuRvzIy1RanXHigtfLW4AJFDp+svZsV7IrFA11JX97P1Ok7axMh7YFert+Q9iav9hmKS6vSEPiyYhQ34BJFblJW5//K5A+c/sSTezZ0Z/kI/DcyXMPtSDpUb/2rnfu46TbmxU/X5SfTH0qZnRpmM0Iw5lMQUbLYPXhOSdC44IMuutUXjeDdWiTnVahELEr6GSLBAgMBAAECggEAOi9adk3terFmH5u5axd+sODqjgxbbcpW6+xxV71UuvUSzisAMH4UQfEgbS2qBhd+Eds62rvTmIsTfUl5Nhqnb9yz2QsTKoqi9llqmxCpMkXCOHmZM/2A5Y+qRHZEkuw86ChEYYMkfU+XVwZRwzRzTXQctuaUrtbF4fh9yyP6etRboqG+2l9KL6IM454I6ZgSUBRofrOViTO6FVI15mRAilaghT09h/EqgpAAIqUSQxw7Q18WjacHF3zXon+/W9HRbh7MAdEheGSOnSqBBjpOucclR+G5ah+7wRDRj+1Zw8HTOr4CKtRp2JHdkYWf8vJhymNrc6hOLG0Nf2AMXl5yxQKBgQDRSSRHYoY7CONNRQsC1tWmbyvnbUjH5bDgZ2RvktuE2lD5fHUNp+6f8Juf3Ufg44UH0BBFHrtH6emA3ig6lquBdCr74mvnfefNkRwk0DZSOdDAE0FLW19TJDc/L0ez28vhJsQ+UHQIHS2QDsyVAAtWred1PagKlYGQDo14u4Q2zwKBgQDYvPbXraoVppeCcTwA6YJxrPcdG9Wx4sxaoA4sfWsySzxKD7Dkctkndh37HM1xdeD1uXI88Qj3AABq/7uETqOU+NLwLpSsp1S0aDHB9uXdjJ0F4HaYiQIeQHHgAuon75fbnp7xRF50i7V2kcwQn+C4TFlsdKAhhP/n9PBX3CxxbwKBgQCGLH41xdSIxIn1X+5PQ6x1p5BeLpIalgdv1tltLpnN8qk3SbNBrgguQfOD6jnK1BLVj27e4XTwBebN15+y8CXEONXV5rOHFhEmmYGRmGs7DBXpDm8uAMZ8ZxuERquRg7iSAGiQCsRY71vmn5ZJcF3UlGlvoLe7EV6fHLVWUeHRwQKBgQC/5f+AUwknBktbeTqxbA7M62IYac65I5/gFZq3FYzWCPsmb+IlQvK2F8TP016rOL2nkzxsbNWNLHkyQ58ZtC7t9al+cx+8BqPe3+o+XIaFtLxKucUHpTc05cZtmucL2P1RvI3p/KjM8+4FP224wnXLd/4tIs2tH/8ctygeAplvDQKBgQCilojXVmbE1s+I5yCW1xrbnucfPI1AJRijqkhvaWLbX2iyrtpkj3IxkUI94ZOJbESdt5zVDJ1UH4+sT0aIFWeqFENuZkAfO+q+N3yDmvDc6UhGGs+oogwRll2KYZov4W3rmWZ8IsQxTXJKGAkZEVKa1lMEO/vGhmO0nfK6nqBSUw==
+        }
+    }
+}
+protocols {
+    static {
+        route 10.10.40.0/24 {
+            next-hop 10.255.1.2 {
+            }
+        }
+        route 10.10.50.0/24 {
+            next-hop 10.255.1.2 {
+            }
+        }
+        route 203.0.113.0/24 {
+            next-hop 10.255.1.2 {
+            }
+        }
+    }
+}
+service {
+    https {
+        api {
+            keys {
+                id admin {
+                    key admin
+                }
+            }
+        }
+        certificates {
+            ca-certificate clab
+            certificate self
+        }
+        listen-address 0.0.0.0
+    }
+    ntp {
+        allow-client {
+            address 127.0.0.0/8
+            address 169.254.0.0/16
+            address 10.0.0.0/8
+            address 172.16.0.0/12
+            address 192.168.0.0/16
+            address ::1/128
+            address fe80::/10
+            address fc00::/7
+        }
+        server time1.vyos.net {
+        }
+        server time2.vyos.net {
+        }
+        server time3.vyos.net {
+        }
+    }
+    ssh {
+        listen-address 0.0.0.0
+    }
+}
+system {
+    config-management {
+        commit-revisions 100
+    }
+    console {
+        device ttyS0 {
+            speed 115200
+        }
+    }
+    host-name fw-int
+    login {
+        user admin {
+            authentication {
+                encrypted-password $6$rounds=656000$26.Jsfh0dCJZWJJh$4jKmqoIlv/ebJgi11UV8tL.J2SK3S8oM020wCOz3Bn.nRT8h5RiTSCu3nTBL6WuFfnr5ufVCwT108gOhnc3iR/
+                public-keys clab {
+                    key AAAAC3NzaC1lZDI1NTE5AAAAINqS93spjlcsRyDTjxTQjLXqdjO7+K06cEdOPdW9YyPI
+                    type ssh-ed25519
+                }
+            }
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level info
+            }
+            facility local7 {
+                level debug
+            }
+        }
+    }
+}

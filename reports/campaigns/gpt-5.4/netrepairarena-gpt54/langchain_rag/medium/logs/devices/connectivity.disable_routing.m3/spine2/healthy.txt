@@ -1,0 +1,2438 @@
+    !!! ACL rules allowing incoming tcp/57411 for the eda-discovery grpc server
+    interface ethernet-1/1 {
+        admin-state enable
+        subinterface 0 {
+            admin-state enable
+            ipv4 {
+                admin-state enable
+                address 10.255.0.2/31 {
+                }
+            }
+        }
+    }
+    interface ethernet-1/2 {
+        admin-state enable
+        subinterface 0 {
+            admin-state enable
+            ipv4 {
+                admin-state enable
+                address 10.255.0.6/31 {
+                }
+            }
+        }
+    }
+    interface mgmt0 {
+        admin-state enable
+        subinterface 0 {
+            admin-state enable
+            ipv4 {
+                admin-state enable
+                dhcp-client {
+                }
+            }
+            ipv6 {
+                admin-state enable
+                dhcp-client {
+                }
+            }
+        }
+    }
+    network-instance default {
+        interface ethernet-1/1.0 {
+        }
+        interface ethernet-1/2.0 {
+        }
+        static-routes {
+            route 10.10.10.0/24 {
+                admin-state enable
+                next-hop-group to-leaf1
+            }
+            route 10.10.20.0/24 {
+                admin-state enable
+                next-hop-group to-leaf1
+            }
+            route 10.10.30.0/24 {
+                admin-state enable
+                next-hop-group to-leaf2
+            }
+            route 10.10.40.0/24 {
+                admin-state enable
+                next-hop-group to-leaf2
+            }
+            route 10.10.50.0/24 {
+                admin-state enable
+                next-hop-group to-leaf2
+            }
+            route 10.10.99.0/24 {
+                admin-state enable
+                next-hop-group to-leaf1
+            }
+            route 203.0.113.0/24 {
+                admin-state enable
+                next-hop-group to-leaf2
+            }
+        }
+        next-hop-groups {
+            group to-leaf1 {
+                nexthop 1 {
+                    ip-address 10.255.0.3
+                    admin-state enable
+                }
+            }
+            group to-leaf2 {
+                nexthop 1 {
+                    ip-address 10.255.0.7
+                    admin-state enable
+                }
+            }
+        }
+    }
+    network-instance mgmt {
+        type ip-vrf
+        admin-state enable
+        description "Management network instance"
+        interface mgmt0.0 {
+        }
+        protocols {
+            linux {
+                import-routes true
+                export-routes true
+                export-neighbors true
+            }
+        }
+    }
+    system {
+        management {
+            openconfig {
+                admin-state enable
+            }
+        }
+        control-plane-traffic {
+            input {
+                acl {
+                    acl-filter cpm type ipv4 {
+                    }
+                    acl-filter cpm type ipv6 {
+                    }
+                }
+            }
+        }
+        grpc-server eda-discovery {
+            admin-state enable
+            rate-limit 65535
+            session-limit 1024
+            metadata-authentication true
+            default-tls-profile true
+            network-instance mgmt
+            port 50052
+            services [
+                gnmi
+                gnsi
+            ]
+        }
+        grpc-server eda-insecure-mgmt {
+            admin-state enable
+            rate-limit 65535
+            session-limit 1024
+            metadata-authentication true
+            port 57411
+            services [
+                gnmi
+                gnoi
+                gnsi
+            ]
+        }
+        grpc-server eda-mgmt {
+            ### Unable to retrieve TLS profile 'EDA'
+            admin-state enable
+            rate-limit 65535
+            session-limit 1024
+            metadata-authentication true
+            tls-profile EDA
+            network-instance mgmt
+            port 57410
+            services [
+                gnmi
+                gnoi
+                gnsi
+            ]
+        }
+        grpc-server insecure-mgmt {
+            admin-state enable
+            rate-limit 65000
+            network-instance mgmt
+            port 57401
+            trace-options [
+                request
+                response
+                common
+            ]
+            services [
+                gnmi
+                gnoi
+                gnsi
+                gribi
+                p4rt
+            ]
+            unix-socket {
+                admin-state enable
+            }
+        }
+        grpc-server mgmt {
+            admin-state enable
+            rate-limit 65000
+            tls-profile clab-profile
+            network-instance mgmt
+            trace-options [
+                request
+                response
+                common
+            ]
+            services [
+                gnmi
+                gnoi
+                gnsi
+                gribi
+                p4rt
+            ]
+            unix-socket {
+                admin-state enable
+            }
+        }
+        logging {
+            buffer messages {
+                rotate 3
+                size 10000000
+                facility local6 {
+                    priority {
+                        match-above informational
+                    }
+                }
+            }
+            buffer system {
+                facility auth {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility cron {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility daemon {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility ftp {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility kern {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility lpr {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility mail {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility news {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility syslog {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility user {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility uucp {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility local0 {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility local1 {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility local2 {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility local3 {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility local4 {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility local5 {
+                    priority {
+                        match-above warning
+                    }
+                }
+                facility local7 {
+                    priority {
+                        match-above warning
+                    }
+                }
+            }
+            file messages {
+                rotate 3
+                size 10000000
+                facility local6 {
+                    priority {
+                        match-above warning
+                    }
+                }
+            }
+        }
+        json-rpc-server {
+            admin-state enable
+            network-instance mgmt {
+                http {
+                    admin-state enable
+                }
+                https {
+                    admin-state enable
+                    tls-profile clab-profile
+                }
+            }
+        }
+        dns-instance clab-default {
+            network-instance mgmt
+            server-list [
+                100.100.100.100
+                fd7a:115c:a1e0::53
+            ]
+        }
+        snmp {
+            access-group SNMPv2-RO-Community {
+                security-level no-auth-no-priv
+                community-entry RO-Community {
+                    community $aes1$AWBcdz4MeCgX5m8=$yeSDD3kLusgsRBvV8FD3uw==
+                }
+            }
+            network-instance mgmt {
+                admin-state enable
+            }
+        }
+        ssh-server mgmt {
+            admin-state enable
+            network-instance mgmt
+            use-credentialz true
+        }
+        ssh-server mgmt-netconf {
+            admin-state enable
+            network-instance mgmt
+            port 830
+            disable-shell true
+        }
+        banner {
+            login-banner "................................................................
+:                  Welcome to Nokia SR Linux!                  :
+:              Open Network OS for the NetOps era.             :
+:                                                              :
+:    This is a freely distributed official container image.    :
+:                      Use it - Share it                       :
+:                                                              :
+: Get started: https://learn.srlinux.dev                       :
+: Container:   https://go.srlinux.dev/container-image          :
+: Docs:        https://doc.srlinux.dev/26-7                    :
+: Rel. notes:  https://doc.srlinux.dev/rnn                     :
+: YANG:        https://yang.srlinux.dev/26.7.1                 :
+: Discord:     https://go.srlinux.dev/discord                  :
+: Contact:     https://go.srlinux.dev/contact-sales            :
+................................................................
+"
+        }
+        tls {
+            profile clab-profile {
+                key $aes1$ATQ9CZYpDYuPY28=$OdYYtmb9astRYbkSQv55bxn9e060beWoR3AQn5C2NZIaw1liGLwIwKG+l9O3XqGDchMJTChAf6Z25ynum/9q+jAiygG30Bon/B78ZBongIZTMyN31iXR/8NOX/0fQHIyCoOjfk9ZutiN38yyt7ILe1NCv2i9BXVDH2nVjlz3eu5gJszsQDJhi5JV2347+KpJ5N5AOo6I1dfvzs6W0/eL+odJOkia5AGYGu410igoL9XtexbamJEs/FIQVZq9Cx6DFK0U+a8VBG7YfR41XNd3JH6XXMRCENMT7aDA+++Ql+VUO+xDl+Z/M3bb02PWvgFujoMo3uYJFdSPCle+g1cmY62pUPY+dLaPr1Op8K/lP5iJoZ0/NAhGlyQptlPmmwadCbiLihIB1ViSdxCEFLMR+vYYtU1rxLPPjltB0vTeUUT5jRX5lZD3ICQHorYCFkNLWZFXGekrA30l8NrKozbRqyBDon/3GCh8a0laSXpnXhPKDWEczUT5iWXYLIvIADaW/2nIgp0n8QkBl/FnpvI6iOYrMNWhOqM6LYfVb10oNVrhjNP9TiIlX5deePc0h/JCWzG5olWkreC95RGsL2z8Tf+THVLpkjWxhWFxinAg2NiW8CCa7vIbKitUb0s/hUpADQqAyRx68d3/Btdgz5BbPnhN0UtU7OX2ALxWHLHaxLR4s7Vc6lJ4+CJ7lIhnZ6P3BfVi+bCeB+00hY+s/z/TDHB1whde03sCVRZMUrkjNMOWT9gQiPNn7rPSpxO69PYc4aU84ZIh+ZmAaDY6Q7LCgwBXJ6VBcSBhzM4B8lILNzfhTqxZ+IFCOcz9LhCfRZ3SeI0VTHt1X8u7oQRQoQSS95vV3EcTKmnJIosDumvwVjBBO2v83LlfcNo+qIPLRo20QXGtOuhgK+3GQ+UiJfOMk5y5mz05koWLsxV6Fk1m3jh1IwVnD+T7ueE+BTRM1gmdAmrMQehL3DAeQ7gcSSk+ANayl1ufjKlC0iJgdyWsHg5UD/NHFO3z2nrBUdwUWSdH8mBGxDDiMNoNwCPLxNNnLL5L1I7KErtcJpltv/wbkad1RSxkCN26BmhieMAMeEavUvO09PX/gT8QqMJH68mlpLGKXmxo48J1c9Ly8DxOtELbGcOdJONWKcypDWswAVGGS+sTXodIlqPWX0KBaG9Ow7tw0Zxv8reXQOytAHLyDn8ri0nozk0rQJraoqWt4sXbKcp7MEdvPQY31Tqla/qV1nimtwjgZGoZW/ZTVYzgyymXBVvaP2PzgCoWY0H97WRT3Kn2Ya7UhX40khS72sm4/0L0nwb6BM8Fins91xIBnyoVr8rPKoWz52Y+qHMtxCaZdbkHrJX0TlRZ7ANJ6MWGQnPsOV8TCOv/oC2rZXNXwXCQrnQH/4qgwdqkyRm4g0qYQcN9KagrGpyRK95BFg+xRX2Q8sUTs8Dh6tnR1fX6U7w3W6goNPksRpDYm8vr0b3hKuU0thkbKEgw2RPk3qDX2FPuqGMbwjoP5OVQ/8sE7C/ACPXriP1ufVMzkCNSYrieHb+RK2tAcFz8e8Fwo/E0OVNPe6BwPKC+OdsBt3lDV+4t5dkWJgDWHp8RnQNFjyVax5bgJvqBHQcV337mAtuqnQlFYueU3ll1uRdr0DqPfhqHZYAn2J5mBPUp/aUba9oImzId9jtHsia6uM+zajGYyUvWXKckZucHJ/9ty6Hyb2V/qDYOoUOdf+DJHiDnWF/wyksBqFnH+q8Cbs5e1A9FRt+cTbaL8hu6eoO+HxT+LCUaCPSfmras/Zdi/GJwxiNbUnr4eknwiuwgjmdmFISxA1tLOCfKTQNavSCNPWsTkvfzeCOfYrErnLkQiwvBY+mWQ+uTHyGCN3tu/dNLMVCE5SsD8lt8uNU8ePKSfX4jWTDKtD5YQ6KFB0cyV0Vx2+Ro1lsTkXFILEp151BiE603RxDwTxAXrGVhc4dj8FACEOMc83chryNOfD3F2w3sSKapa9EvyrR2d2q1UNCqfB8EyLtI56SBEF/51EKs9biEpJLweXzycWiYmhkKxcM9u5m1R7jQwW+AQMxiXfO5TC5PmtZyGm+o2RCsx9n4ig5QQq1rsNEKGu5cJLfaQukcQG2062dy6HXiPIQmxfECvlOuDkyg/6wMohZ0uuYKJw2zFkwyK8SU7VXqm9SwZce58NkIxl3+mpKD5OXZUeTjmfX+A5BUirBs6iUC6f0IhcMpOLp83U08F2gi8SF9OzUyexBD
+                certificate "-----BEGIN CERTIFICATE-----
+MIID2jCCAsKgAwIBAgICBnowDQYJKoZIhvcNAQELBQAwVzELMAkGA1UEBhMCVVMx
+CTAHBgNVBAcTADEVMBMGA1UEChMMY29udGFpbmVybGFiMQkwBwYDVQQLEwAxGzAZ
+BgNVBAMTEnNtZTAxLXNtYWxsIGxhYiBDQTAeFw0yNjA5MjkwNTE3MjNaFw0yNzA5
+MjkwNTE3MjNaMFoxCzAJBgNVBAYTAlVTMQkwBwYDVQQHEwAxFTATBgNVBAoTDGNv
+bnRhaW5lcmxhYjEJMAcGA1UECxMAMR4wHAYDVQQDExVzcGluZTIuc21lMDEtc21h
+bGwuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCf3nmj889Id2sV
+6aQ/Ts7MFIiUWbU/zdG5ZV2vm8v8gV/s7d09UUSrDVraFL6pUQc6wfFCyYUebNDU
+NTDFH70JtIv35IKCm5oyz2BWiEerkf2wFPN9rNSwWs9IxPrRGmu9x73kas0I6zF4
+8TWiCiQyBjE68O63S3b8lX5aqHWxDqAtGE+87ifiJA8/LyT9j1UREiz8aaBuum7P
+mlHKQ74pgOEGDkSIaF4Dg9FA+bK14bYC61G93a7Jr8Q6BAxVw1LnLXdggsZ8qyim
+Za5HlNJfpGkSf6Nfgxxb4vo4cp479OCPIPrEmLJJWRrf7ZcAQ1xzV98Iz3YHdyRd
+eJoO1puzAgMBAAGjgawwgakwDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsG
+AQUFBwMCBggrBgEFBQcDATAOBgNVHQ4EBwQFAQIDBAYwHwYDVR0jBBgwFoAUYfk9
+Iec9fmn0+4B/l+EAnokuP4AwRwYDVR0RBEAwPoIGc3BpbmUyghdjbGFiLXNtZTAx
+LXNtYWxsLXNwaW5lMoIVc3BpbmUyLnNtZTAxLXNtYWxsLmlvhwSsFQAKMA0GCSqG
+SIb3DQEBCwUAA4IBAQCYSAbxRexa+mH9r/extSd299PwtDaFxLvSAVrc9g0b3ZwI
+kssW1EtBUnBO9PIyVozaDG43oh+ZzARTXtnacHtVH+Vmcctwk8JsHYCi6nphJo5u
+PbdVoaRDJV+k6METD6F+ejCF1e2aP6O4UC4+50MQjelUH6jNTBsy78LbXd+vi4e6
+Un63M3n0N/+j0K+iElitvXXjfDfj781X47Pvr1dNqgrRoCUouYNqjWWwhKHbQheE
+Kxfj1bbk0ga9TswTvvPpNN0g5jry98ju3iUCiTkbE3dmoyzKO9U1Ek++VFm/uwP/
+7zEpwyU6sNs6ATat5zWEF+abvFXt9qwi/slwc5IB
+-----END CERTIFICATE-----
+"
+                authenticate-client false
+            }
+        }
+        netconf-server mgmt {
+            admin-state enable
+            ssh-server mgmt-netconf
+        }
+        ndk-server {
+            admin-state enable
+        }
+        aaa {
+            authentication {
+                idle-timeout 7200
+                authentication-method [
+                    local
+                ]
+                admin-user {
+                    ssh-key [
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHu16EcSD/NkpiCCnr86BbXxj7cg+bi+PyrPFQiEFB47"
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA04lpGBZBADXOjmu18RwA6p1KCxazIwzk90/MzodJ2I"
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINqS93spjlcsRyDTjxTQjLXqdjO7+K06cEdOPdW9YyPI"
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvJVcyFGGDjJeTEK7tEDJO4cU70zAfHik3mIB1Rvcif"
+                    ]
+                }
+                linuxadmin-user {
+                    password $y$j9T$05ouIK74Tp/Vjui0GOLe60$J5MhdJQLeB/mpohc4pEP9bVFeBlmeNU1iHQexfaRIh4
+                    ssh-key [
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHu16EcSD/NkpiCCnr86BbXxj7cg+bi+PyrPFQiEFB47"
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA04lpGBZBADXOjmu18RwA6p1KCxazIwzk90/MzodJ2I"
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINqS93spjlcsRyDTjxTQjLXqdjO7+K06cEdOPdW9YyPI"
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvJVcyFGGDjJeTEK7tEDJO4cU70zAfHik3mIB1Rvcif"
+                    ]
+                }
+            }
+            server-group local {
+                type local
+            }
+        }
+        lldp {
+            admin-state enable
+        }
+    }
+    acl {
+        acl-filter cpm type ipv4 {
+            statistics-per-entry true
+            entry 10 {
+                description "Accept incoming ICMP unreachable messages"
+                match {
+                    ipv4 {
+                        protocol icmp
+                        icmp {
+                            type dest-unreachable
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 20 {
+                description "Accept incoming ICMP time-exceeded messages"
+                match {
+                    ipv4 {
+                        protocol icmp
+                        icmp {
+                            type time-exceeded
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 40 {
+                description "Accept incoming ICMP echo messages"
+                match {
+                    ipv4 {
+                        protocol icmp
+                        icmp {
+                            type echo
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 50 {
+                description "Accept incoming ICMP echo-reply messages"
+                match {
+                    ipv4 {
+                        protocol icmp
+                        icmp {
+                            type echo-reply
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 60 {
+                description "Accept incoming SSH when the other host initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 22
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 70 {
+                description "Accept incoming SSH when this router initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 22
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 88 {
+                description "Containerlab-added rule: Accept incoming Telnet when the other host initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 23
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 98 {
+                description "Containerlab-added rule: Accept incoming Telnet when this router initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 23
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 100 {
+                description "Accept incoming TACACS+ when the other host initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 49
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 110 {
+                description "Accept incoming TACACS+ when this router initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 49
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 120 {
+                description "Accept incoming DNS response messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 53
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 130 {
+                description "Accept incoming DHCP messages targeted for BOOTP/DHCP client"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 68
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 158 {
+                description "Containerlab-added rule: Accept incoming HTTP(JSON-RPC) when the other host initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 80
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 160 {
+                description "Accept incoming HTTP(JSON-RPC) when this router initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 80
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 170 {
+                description "Accept incoming NTP messages from servers"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 123
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 171 {
+                description "Accept NTP messages to the local NTP server"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 123
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 172 {
+                description "Accept incoming Network Time Security (NTP TLS) key establishment"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 4460
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 180 {
+                description "Accept incoming SNMP GET/GETNEXT messages from servers"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 161
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 190 {
+                description "Accept incoming BGP when the other router initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 179
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 200 {
+                description "Accept incoming BGP when this router initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 179
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 210 {
+                description "Accept incoming HTTPS(JSON-RPC) when the other host initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 443
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 220 {
+                description "Accept incoming HTTPS(JSON-RPC) when this router initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 443
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 230 {
+                description "Accept incoming single-hop BFD session messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 3784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 240 {
+                description "Accept incoming multi-hop BFD session messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 4784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 250 {
+                description "Accept incoming uBFD session messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 6784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 260 {
+                description "Accept incoming gRPC messages when the other host initiates the TCP connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57400
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 270 {
+                description "Accept incoming UDP traceroute messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            range {
+                                start 33434
+                                end 33464
+                            }
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 290 {
+                description "Accept incoming OSPF messages"
+                match {
+                    ipv4 {
+                        protocol 89
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 300 {
+                description "Accept incoming DHCP relay messages targeted for BOOTP/DHCP server"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 67
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 310 {
+                description "Accept ICMP fragment packets"
+                match {
+                    ipv4 {
+                        fragment true
+                        protocol icmp
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 320 {
+                description "Accept incoming LDP packets"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 646
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 330 {
+                description "Accept incoming LDP packets with source-port 646"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 646
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 340 {
+                description "Accept incoming LDP packets with destination-port 646"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 646
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 355 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 50052 for the eda-discovery gRPC server"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 50052
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 356 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 57410 for the eda-mgmt gRPC server"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57410
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 357 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 57411 for the eda-mgmt gRPC server"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57411
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 358 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 57401 for the insecure-mgmt gRPC server"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57401
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 370 {
+                description "Accept incoming IGMP packets"
+                match {
+                    ipv4 {
+                        protocol igmp
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 380 {
+                description "Accept incoming PIM packets"
+                match {
+                    ipv4 {
+                        protocol pim
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 390 {
+                description "Accept incoming RADIUS AAA packets"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        source-port {
+                            range {
+                                start 1812
+                                end 1813
+                            }
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 400 {
+                description "Accept incoming SSH connections on the default NETCONF port 830"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 830
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 410 {
+                description "Accept incoming PTP messages with destination-ports 319 and 320"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            range {
+                                start 319
+                                end 320
+                            }
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 420 {
+                description "Accept incoming PCEP packets with destination-port 4189"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 4189
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 430 {
+                description "Accept incoming SBFD session messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 7784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 440 {
+                description "Accept incoming SBFD session messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 7784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 450 {
+                description "Accept incoming LSP MPLS Echo requests and replies"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 3503
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 460 {
+                description "Accept incoming LSP MPLS Echo requests and replies"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 3503
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 470 {
+                description "Accept incoming TWAMP Control connection"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 862
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 550 {
+                description "Accept incoming VRRP Control packets"
+                match {
+                    ipv4 {
+                        protocol vrrp
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 560 {
+                description "Accept incoming MSDP messages"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 639
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 570 {
+                description "Accept incoming MSDP messages"
+                match {
+                    ipv4 {
+                        protocol tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 639
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 580 {
+                description "Accept incoming SBFD echo messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 3785
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 590 {
+                description "Accept incoming SBFD echo messages"
+                match {
+                    ipv4 {
+                        protocol udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 3785
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 1000 {
+                description "Drop all else"
+                action {
+                    log true
+                    drop {
+                    }
+                }
+            }
+        }
+        acl-filter cpm type ipv6 {
+            statistics-per-entry true
+            entry 10 {
+                description "Accept incoming ICMPv6 unreachable messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type dest-unreachable
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 20 {
+                description "Accept incoming ICMPv6 packet-too-big messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type packet-too-big
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 30 {
+                description "Accept incoming ICMPv6 time-exceeded messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type time-exceeded
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 50 {
+                description "Accept incoming ICMPv6 echo-request messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type echo-request
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 60 {
+                description "Accept incoming ICMPv6 echo-reply messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type echo-reply
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 70 {
+                description "Accept incoming ICMPv6 router-advertisement messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type router-advertise
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 75 {
+                description "Accept incoming ICMPv6 router-solicit messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type router-solicit
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 80 {
+                description "Accept incoming ICMPv6 neighbor-solicitation messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type neighbor-solicit
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 90 {
+                description "Accept incoming ICMPv6 neighbor-advertisement messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type neighbor-advertise
+                        }
+                    }
+                }
+                action {
+                    accept {
+                        rate-limit {
+                            system-cpu-policer icmp
+                        }
+                    }
+                }
+            }
+            entry 100 {
+                description "Accept incoming SSH when the other host initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 22
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 110 {
+                description "Accept incoming SSH when this router initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 22
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 128 {
+                description "Containerlab-added rule: Accept incoming Telnet when the other host initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 23
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 138 {
+                description "Containerlab-added rule: Accept incoming Telnet when this router initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 23
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 140 {
+                description "Accept incoming TACACS+ when the other host initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 49
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 150 {
+                description "Accept incoming TACACS+ when this router initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 49
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 160 {
+                description "Accept incoming DNS response messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 53
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 188 {
+                description "Containerlab-added rule: Accept incoming HTTP(JSON-RPC) when the other host initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 80
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 190 {
+                description "Accept incoming HTTP(JSON-RPC) when this router initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 80
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 200 {
+                description "Accept incoming NTP messages from servers"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 123
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 201 {
+                description "Accept NTP messages to the local NTP server"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 123
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 202 {
+                description "Accept incoming Network Time Security (NTP TLS) key establishment"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 4460
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 210 {
+                description "Accept incoming SNMP GET/GETNEXT messages from servers"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 161
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 220 {
+                description "Accept incoming BGP when the other router initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 179
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 230 {
+                description "Accept incoming BGP when this router initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 179
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 240 {
+                description "Accept incoming HTTPS(JSON-RPC) when the other host initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 443
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 250 {
+                description "Accept incoming HTTPS(JSON-RPC) when this router initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 443
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 260 {
+                description "Accept incoming DHCPv6 client messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 546
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 270 {
+                description "Accept incoming single-hop BFD session messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 3784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 280 {
+                description "Accept incoming multi-hop BFD session messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 4784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 290 {
+                description "Accept incoming uBFD session messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 6784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 300 {
+                description "Accept incoming gRPC messages when the other host initiates the TCP connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57400
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 310 {
+                description "Accept incoming UDP traceroute messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            range {
+                                start 33434
+                                end 33464
+                            }
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 320 {
+                description "Accept incoming IPV6 hop-in-hop messages"
+                match {
+                    ipv6 {
+                        next-header 0
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 340 {
+                description "Accept incoming OSPF messages"
+                match {
+                    ipv6 {
+                        next-header 89
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 350 {
+                description "Accept incoming DHCPv6 relay messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 547
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 365 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 50052 for the eda-discovery gRPC server"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 50052
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 366 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 57410 for the eda-mgmt gRPC server"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57410
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 367 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 57411 for the eda-mgmt gRPC server"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57411
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 368 {
+                description "Containerlab-added rule: Accept incoming gRPC over port 57401 for the insecure-mgmt gRPC server"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 57401
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 380 {
+                description "Accept incoming MLDv1 report messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type mld-report
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 390 {
+                description "Accept incoming MLDv2 report messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type mld-v2
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 400 {
+                description "Accept incoming MLDv1 done messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type mld-done
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 410 {
+                description "Accept incoming MLD query messages"
+                match {
+                    ipv6 {
+                        next-header icmp6
+                        icmp6 {
+                            type mld-query
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 420 {
+                description "Accept incoming PIM messages"
+                match {
+                    ipv6 {
+                        next-header pim
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 430 {
+                description "Accept incoming RADIUS AAA messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        source-port {
+                            range {
+                                start 1812
+                                end 1813
+                            }
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 440 {
+                description "Accept incoming SSH connections on the default NETCONF port 830"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 830
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 450 {
+                description "Accept incoming PTP messages with destination-ports 319 and 320"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            range {
+                                start 319
+                                end 320
+                            }
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 460 {
+                description "Accept incoming PCEP packets with destination-port 4189"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 4189
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 470 {
+                description "Accept incoming SBFD session messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 7784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 480 {
+                description "Accept incoming SBFD session messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 7784
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 490 {
+                description "Accept incoming LDP packets"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 646
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 500 {
+                description "Accept incoming LDP packets with source-port 646"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 646
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 510 {
+                description "Accept incoming LDP packets with destination-port 646"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 646
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 520 {
+                description "Accept incoming TWAMP Control connection"
+                match {
+                    ipv6 {
+                        next-header tcp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 862
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 530 {
+                description "Accept incoming LSP MPLS Echo requests and replies"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 3503
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 540 {
+                description "Accept incoming LSP MPLS Echo requests and replies"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 3503
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 550 {
+                description "Accept incoming VRRP Control packets"
+                match {
+                    ipv6 {
+                        next-header vrrp
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 560 {
+                description "Accept incoming SBFD echo messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        source-port {
+                            operator eq
+                            value 3785
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 570 {
+                description "Accept incoming SBFD echo messages"
+                match {
+                    ipv6 {
+                        next-header udp
+                    }
+                    transport {
+                        destination-port {
+                            operator eq
+                            value 3785
+                        }
+                    }
+                }
+                action {
+                    accept {
+                    }
+                }
+            }
+            entry 1000 {
+                description "Drop all else"
+                action {
+                    log true
+                    drop {
+                    }
+                }
+            }
+        }
+        policers {
+            system-cpu-policer icmp {
+                entry-specific false
+                peak-rate-pps 1000
+                maximum-burst-packet 1000
+            }
+        }
+    }

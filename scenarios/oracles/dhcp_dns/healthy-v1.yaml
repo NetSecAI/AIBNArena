@@ -1,0 +1,41 @@
+schema_version: "1.0"
+oracle_id: dhcp_dns.provisioning.healthy
+version: 1.1.0
+description: >-
+  Every topology-required path is loss-free before the provisioning fault. A DHCP
+  client that never obtained a lease has no address to be reached at, so this also
+  establishes that provisioning worked in the reference state. The affected client must
+  also resolve a name of the lab's own zone: a lease is an address, a gateway and a
+  resolver, and a reachable desk that cannot resolve was not provisioned either.
+  `web1` sits in the dmz zone, so the answer proves the search list the pool hands out
+  and the resolver's forwarding, not only that a resolver was named. The wait is what a
+  wrong resolver costs a musl getent (5 s per server, two attempts).
+domain: dhcp_dns
+phase: healthy
+probes:
+  - id: required_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: required_paths
+    protocol: icmp
+    scope: all
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+  - id: name_resolution
+    type: dns
+    source: "${bindings.client}"
+    destination: web1
+    protocol: dns
+    attempts: 2
+    timeout_seconds: 12
+    metrics: [success, answer_count]
+    thresholds:
+      - {metric: answer_count, operator: eq, value: 2}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

@@ -1,0 +1,24 @@
+schema_version: "1.0"
+oracle_id: dhcp_dns.unrelated_paths.preservation
+version: 1.0.0
+description: >-
+  Every required path unrelated to the affected clients remains loss-free. Reservation
+  pools are per client, so repairing one must not disturb another's lease.
+domain: dhcp_dns
+phase: preservation
+probes:
+  - id: unaffected_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: unaffected_paths
+    protocol: icmp
+    scope: unaffected
+    affected_nodes: "${bindings.affected_nodes}"
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

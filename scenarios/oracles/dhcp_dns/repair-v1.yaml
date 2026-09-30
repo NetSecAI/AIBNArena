@@ -1,0 +1,37 @@
+schema_version: "1.0"
+oracle_id: dhcp_dns.provisioning.repair
+version: 1.1.0
+description: >-
+  Every topology-required path returns to its loss-free reference behavior, and the
+  affected client resolves the lab's names again. Judged after the client renewed its
+  lease: a server-side repair changes what the next lease says, and the lease the fault
+  handed out lasts longer than the episode.
+domain: dhcp_dns
+phase: repair
+probes:
+  - id: required_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: required_paths
+    protocol: icmp
+    scope: all
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+  - id: name_resolution
+    type: dns
+    source: "${bindings.client}"
+    destination: web1
+    protocol: dns
+    attempts: 2
+    timeout_seconds: 12
+    metrics: [success, answer_count]
+    thresholds:
+      - {metric: answer_count, operator: eq, value: 2}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

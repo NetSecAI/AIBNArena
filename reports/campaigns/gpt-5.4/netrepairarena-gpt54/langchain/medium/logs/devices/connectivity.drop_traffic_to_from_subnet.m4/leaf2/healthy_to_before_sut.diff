@@ -1,0 +1,53 @@
+--- leaf2/healthy.txt
++++ leaf2/before_sut.txt
+@@ -2462,6 +2462,50 @@
+                 }
+             }
+         }
++        acl-filter ibn-subnet-guard type ipv4 {
++            entry 100 {
++                match {
++                    ipv4 {
++                        protocol icmp
++                        source-ip {
++                            prefix 203.0.113.0/24
++                        }
++                    }
++                }
++                action {
++                    drop {
++                    }
++                }
++            }
++            entry 200 {
++                match {
++                    ipv4 {
++                        protocol icmp
++                        destination-ip {
++                            prefix 203.0.113.0/24
++                        }
++                    }
++                }
++                action {
++                    drop {
++                    }
++                }
++            }
++        }
++        interface ethernet-1/58.0 {
++            interface-ref {
++                interface ethernet-1/58
++                subinterface 0
++            }
++            input {
++                acl-filter ibn-subnet-guard type ipv4 {
++                }
++            }
++            output {
++                acl-filter ibn-subnet-guard type ipv4 {
++                }
++            }
++        }
+         policers {
+             system-cpu-policer icmp {
+                 entry-specific false

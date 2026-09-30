@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b-base-20260929T092315Z/langchain_agent-openai-qwen-qwen3-8-27b-connectivity-remove_ip-m4-fault-seed533602634-831112d1d8f7.json",
+    "sha256": "0924663595a094ea6a5da934448b5a7d6b8d8fbeac986507bf0e2b41580c07ad",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-openai-qwen-qwen3-8-27b-connectivity-remove_ip-m4-fault-seed533602634-831112d1d8f7",
+    "created_at": "2026-09-29T11:50:50.951547+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-openai-qwen-qwen3-8-27b-connectivity-remove_ip-m4-fault-seed533602634",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.remove_ip.m4",
+      "sut_task_id": "sut-80d16960621adc43cd98066fb07f02ea",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "openai/qwen/qwen3.8-27b",
+        "subject": "openai/qwen/qwen3.8-27b",
+        "provider": "openai/qwen/qwen3.8-27b"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "Initial validation showed all paths healthy except those involving app1 (10.10.50.10): user1→app1 and finance1→app1 = 100% loss, and app1→user1 / app1→finance1 = \"Network unreachable\". Root cause on app1: eth1 carried 10.10.50.10/32 (a /32 kernel route blocks all off-link destinations) and there was no default route, unlike the healthy peer finance1 (/24 + default via its .1 gateway). Applied two narrow compensable changes to app1 only: added 10.10.50.10/24 on eth1 and added default via 10.10.50.1 dev eth1. Re-validated: lab_connectivity passed — all 10 endpoint pairs show 0% packet loss, including user1↔app1 and finance1↔app1, with no disruption to the previously-healthy paths.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Initial validation showed all paths healthy except those involving app1 (10.10.50.10): user1→app1 and finance1→app1 = 100% loss, and app1→user1 / app1→finance1 = \"Network unreachable\". Root cause on app1: eth1 carried 10.10.50.10/32 (a /32 kernel route blocks all off-link destinations) and there was no default route, unlike the healthy peer finance1 (/24 + default via its .1 gateway). Applied two narrow compensable changes to app1 only: added 10.10.50.10/24 on eth1 and added default via 10.10.50.1 dev eth1. Re-validated: lab_connectivity passed — all 10 endpoint pairs show 0% packet loss, including user1↔app1 and finance1↔app1, with no disruption to the previously-healthy paths.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -28.4062,
+      "log_p_yes": 0.0,
+      "method": "endpoint_wrong_prefix_length",
+      "operation": "set_interface_ipv4_address",
+      "reason": null,
+      "reference": "On app1, interface eth1 is configured with 10.10.50.10/32: the prefix length is wrong, it should be 10.10.50.10/24.",
+      "score": 28.4062,
+      "target": "app1"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 125.55859341799987,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Initial validation showed all paths healthy except those involving app1 (10.10.50.10): user1→app1 and finance1→app1 = 100% loss, and app1→user1 / app1→finance1 = \"Network unreachable\". Root cause on app1: eth1 carried 10.10.50.10/32 (a /32 kernel route blocks all off-link destinations) and there was no default route, unlike the healthy peer finance1 (/24 + default via its .1 gateway). Applied two narrow compensable changes to app1 only: added 10.10.50.10/24 on eth1 and added default via 10.10.50.1 dev eth1. Re-validated: lab_connectivity passed — all 10 endpoint pairs show 0% packet loss, including user1↔app1 and finance1↔app1, with no disruption to the previously-healthy paths.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -28.4062,
+      "log_p_yes": 0.0,
+      "method": "endpoint_wrong_prefix_length",
+      "operation": "set_interface_ipv4_address",
+      "reason": null,
+      "reference": "On app1, interface eth1 is configured with 10.10.50.10/32: the prefix length is wrong, it should be 10.10.50.10/24.",
+      "score": 28.4062,
+      "target": "app1"
+    },
+    "domain": "connectivity",
+    "environment_success": true,
+    "failed_operation_count": 2,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 3,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 1.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 5,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 2,
+    "successful_read_count": 5,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 11,
+    "containerlab_reads": 5,
+    "containerlab_mutations": 3,
+    "containerlab_mutations_ok": 2,
+    "sut_validations": 2,
+    "failed_operations": 2,
+    "unsafe_operations": 0,
+    "input_tokens": 91118,
+    "output_tokens": 1422,
+    "total_tokens": 92540,
+    "recorded": {
+      "ani_mutations": 3,
+      "ani_reads": 5,
+      "failed_operations": 2,
+      "input_tokens": 91118,
+      "llm_calls": 11,
+      "output_tokens": 1422,
+      "successful_mutations": 2,
+      "successful_reads": 5,
+      "total_tokens": 92540,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 63.053,
+    "action_seconds": 0.377,
+    "reading_seconds": 1.904,
+    "validation_seconds": 60.167,
+    "episode_seconds": 125.55859341799987,
+    "unaccounted_seconds": 0.058,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 91118,
+    "output_tokens": 1422,
+    "total_tokens": 92540,
+    "llm_calls": 11,
+    "output_tokens_per_call": 129.3,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 9,
+      "calls": 10
+    },
+    "repeat_action_rate": {
+      "repeated": 1,
+      "calls": 10
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 5,
+      "validate": 2,
+      "apply_config": 3
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 10
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "8 of 10 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 92540
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 63.053,
+        "action_seconds": 0.377,
+        "reading_seconds": 1.904,
+        "validation_seconds": 60.167,
+        "episode_seconds": 125.55859341799987,
+        "unaccounted_seconds": 0.058
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 10
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: app1"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 68.10710350000045,
+    "calculate_metrics": 0.00016957200023171026,
+    "deploy_reset_testbed": 19.334284365000713,
+    "evaluate_degradation": 6.777786325999841,
+    "evaluate_healthy": 22.529378092000115,
+    "evaluate_repair_preservation": 65.42678106899984,
+    "inject_fault": 0.31630327500170097,
+    "invoke_sut": 125.5821965569994,
+    "load_configuration": 0.00022149600044940598,
+    "load_oracles": 0.005591938001089147,
+    "load_validate_scenario": 0.03977929500069877,
+    "record_baseline": 5.361000148695894e-06,
+    "restore_destroy": 7.960491447000095,
+    "score_diagnosis": 0.9950489070015465,
+    "snapshot_after_sut": 8.592513843999768,
+    "snapshot_before_sut": 8.254014676000224,
+    "snapshot_healthy": 7.353773195998656,
+    "write_result": 0.008302129001094727
+  },
+  "files": {
+    "record": "../../../records/connectivity.remove_ip.m4.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.remove_ip.m4.judge.log",
+    "devices": "../../../logs/devices/connectivity.remove_ip.m4/",
+    "note": "relative to this folder"
+  }
+}

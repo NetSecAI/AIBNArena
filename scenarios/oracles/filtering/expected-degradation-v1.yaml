@@ -1,0 +1,25 @@
+schema_version: "1.0"
+oracle_id: filtering.policy.expected_degradation
+version: 1.0.0
+description: >-
+  The policy fault must cost at least one required path crossing an affected zone
+  pair -- a ruleset unbound from its pair, a deny placed ahead of the permits, or an
+  interface that left its zone.
+domain: filtering
+phase: expected_degradation
+probes:
+  - id: affected_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: affected_paths
+    protocol: icmp
+    scope: affected
+    affected_nodes: "${bindings.affected_nodes}"
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: gte, value: 1}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

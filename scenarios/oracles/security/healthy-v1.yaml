@@ -1,0 +1,20 @@
+schema_version: "1.0"
+oracle_id: security.control.healthy
+version: 1.0.0
+description: No controlled security violation is observable before injection.
+domain: security
+phase: healthy
+probes:
+  - id: security_control
+    type: security_event
+    source: testbed
+    destination: security_target
+    protocol: tcp
+    attempts: 3
+    timeout_seconds: 2
+    metrics: [event_count]
+    thresholds:
+      - {metric: event_count, operator: eq, value: 0}
+    aggregation: {method: maximum}
+    success: {mode: all}
+success: {mode: all}

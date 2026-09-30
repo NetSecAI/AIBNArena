@@ -1,0 +1,136 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.00011812799493782222,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-a89148adf8ae9d9fcdf13709a460367b6ee8b4463e0d7edc8ff74831ec3036fc.json",
+      "category": "validation",
+      "duration_seconds": 64.27562036798918,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2842636260029394,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "firewall"
+        ],
+        "paths": [
+          "service dhcp-server"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.13371022601495497,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "finance1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1298851509927772,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "dhcp_pool",
+        "name": "FINANCE1",
+        "node": "firewall",
+        "reason": "Validation shows only finance1 fails hostname-based reachability while IP connectivity and default gateway are correct; DHCP scope FINANCE1 lacks a name-server option unlike sibling scopes.",
+        "set": {
+          "name_server": "10.10.60.10"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 7.781098247505724e-05,
+      "error": "update_object: dhcp_pool needs subnet with any option",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "dhcp_pool",
+        "name": "FINANCE1",
+        "node": "firewall",
+        "reason": "Validation shows only finance1 fails hostname-based reachability while IP connectivity and default gateway are correct; DHCP scope FINANCE1 lacks a name-server option unlike sibling scopes.",
+        "set": {
+          "name_server": "10.10.60.10",
+          "subnet": "10.10.30.0/24"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.3132350750092883,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_d64c9787a61bf2e4"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-73b73becd4037c8f6fb77ee6adaa8f9047ce881a046add1ddae714c381961474.json",
+      "category": "validation",
+      "duration_seconds": 82.01639511800022,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

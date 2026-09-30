@@ -1,0 +1,127 @@
+name: sme01-qos
+
+# 172.20-172.24 are reserved by the other labs in this repository and 172.25 is
+# taken by an unrelated Docker network on the host, so this lab starts at .26.
+mgmt:
+  network: clab-sme01-qos
+  ipv4-subnet: 172.26.0.0/24
+
+topology:
+  kinds:
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:latest
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    spine1:
+      kind: nokia_srlinux
+    spine2:
+      kind: nokia_srlinux
+    leaf1:
+      kind: nokia_srlinux
+    leaf2:
+      kind: nokia_srlinux
+
+    # WAN edge, dual-homed to both spines like a border leaf. A Linux router
+    # rather than an SR Linux one: the bottleneck this lab is built around is a
+    # tc qdisc, which the container kernel actually enforces. Every endpoint
+    # interface is pinned to 1500 because containerlab brings veths up at 9500,
+    # and a jumbo endpoint behind a fabric that does not carry jumbo frames
+    # blackholes PMTU discovery -- TCP then collapses to a few hundred kbit/s and
+    # no throughput measurement means anything.
+    #
+    # eth1 and eth3 are the two spine uplinks; eth2 stays the shaped
+    # Internet-facing port, because the descriptor's qos_policy names it and
+    # every renderer, fault and oracle shares that single spelling.
+    wan1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 10.255.1.1/31 dev eth1
+        - ip link set eth3 up
+        - ip link set eth3 mtu 1500
+        - ip address add 10.255.1.3/31 dev eth3
+        - ip link set eth2 up
+        - ip link set eth2 mtu 1500
+        - ip address add 203.0.113.1/24 dev eth2
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip route replace 10.10.0.0/16 nexthop via 10.255.1.0 dev eth1 nexthop via 10.255.1.2 dev eth3
+
+    user1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 10.10.10.10/24 dev eth1
+        - ip route replace default via 10.10.10.1
+    guest1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 10.10.20.10/24 dev eth1
+        - ip route replace default via 10.10.20.1
+    finance1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 10.10.30.10/24 dev eth1
+        - ip route replace default via 10.10.30.1
+    web1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 10.10.40.10/24 dev eth1
+        - ip route replace default via 10.10.40.1
+    app1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 10.10.50.10/24 dev eth1
+        - ip route replace default via 10.10.50.1
+    admin1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 10.10.99.100/24 dev eth1
+        - ip route replace default via 10.10.99.1
+    external1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth1 mtu 1500
+        - ip address add 203.0.113.10/24 dev eth1
+        - ip route replace default via 203.0.113.1
+
+    attacker1:
+      kind: linux
+      exec:
+        - ip link set eth1 down
+
+  links:
+    - endpoints: ["leaf1:e1-1", "spine1:e1-1"]
+    - endpoints: ["leaf1:e1-2", "spine2:e1-1"]
+    - endpoints: ["leaf2:e1-1", "spine1:e1-2"]
+    - endpoints: ["leaf2:e1-2", "spine2:e1-2"]
+
+    - endpoints: ["user1:eth1", "leaf1:e1-10"]
+    - endpoints: ["guest1:eth1", "leaf1:e1-20"]
+    - endpoints: ["admin1:eth1", "leaf1:e1-57"]
+    - endpoints: ["attacker1:eth1", "leaf1:e1-30"]
+
+    - endpoints: ["finance1:eth1", "leaf2:e1-30"]
+    - endpoints: ["web1:eth1", "leaf2:e1-40"]
+    - endpoints: ["app1:eth1", "leaf2:e1-50"]
+
+    # The WAN edge hangs off both spines, so either leaf reaches the Internet
+    # over equal-cost paths and no single leaf failure takes the uplink with it.
+    # Every flow toward external1 still crosses the shaped interface wan1:eth2.
+    - endpoints: ["spine1:e1-3", "wan1:eth1"]
+    - endpoints: ["spine2:e1-3", "wan1:eth3"]
+    - endpoints: ["wan1:eth2", "external1:eth1"]

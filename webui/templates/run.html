@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ run.id }} — AIBNArena{% endblock %}
+
+{% block content %}
+<section class="run-header">
+  <h2>{{ run.id }}</h2>
+  <span class="state" id="state">{{ run.state }}</span>
+  <dl>
+    <dt>Subject</dt><dd>{{ run.request.architecture }}</dd>
+    <dt>Model</dt><dd>{{ run.request.model }}</dd>
+    {% if preset %}
+    <dt>Topology</dt><dd>{{ preset.topology }}</dd>
+    <dt>Reference state</dt>
+    <dd title="experiment file {{ preset.key }} · testbed {{ preset.testbed_id }}">
+      {{- preset.reference_state -}}
+      {% if run.request.no_fault or not preset.fault_applicable %} · no fault injected (false-positive episode){% endif -%}
+    </dd>
+    {% else %}
+    <dt>Experiment</dt><dd>{{ run.request.experiment }}</dd>
+    {% endif %}
+    <dt>Scenario</dt><dd>{{ run.request.scenario_id }}</dd>
+    <dt>Seed</dt><dd>{{ run.request.seed }}</dd>
+    <dt>Budget</dt><dd>{{ run.request.execution_budget_seconds }}s</dd>
+    <dt>Experiment id</dt><dd>{{ run.experiment_id }}</dd>
+  </dl>
+</section>
+
+<section id="verdict" hidden>
+  <h2>Verdict</h2>
+  <table id="verdict-table"></table>
+  <p id="artifacts"></p>
+</section>
+
+<section>
+  <h2>Launcher <span class="stream-note">what this tool did between the two</span></h2>
+  <pre id="log-launcher" class="launcher-log"></pre>
+</section>
+
+<div class="streams">
+  <section>
+    <h2>Judge <span class="stream-note">benchmarks/run.py</span></h2>
+    <pre id="log-benchmark"></pre>
+  </section>
+  <section>
+    <h2>Subject <span class="stream-note">{{ run.request.architecture }}</span></h2>
+    <pre id="log-sut"></pre>
+  </section>
+</div>
+
+<p><a href="/">Back to the form</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script>window.RUN = {{ run | tojson }};</script>
+<script src="/static/run.js"></script>
+{% endblock %}

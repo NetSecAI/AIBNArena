@@ -1,0 +1,20 @@
+schema_version: "1.0"
+oracle_id: security.control.preservation
+version: 1.0.0
+description: Unrelated security policy remains present after repair.
+domain: security
+phase: preservation
+probes:
+  - id: unrelated_policy
+    type: configuration
+    source: testbed
+    destination: security_control
+    protocol: config
+    attempts: 1
+    timeout_seconds: 2
+    metrics: [configuration_match]
+    thresholds:
+      - {metric: configuration_match, operator: eq, value: true}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

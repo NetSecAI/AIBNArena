@@ -1,0 +1,353 @@
+/* One light palette, whatever the system asks for: the page is read next to a
+   terminal running the lab, and a stylesheet that flipped to dark made the two
+   hard to tell apart. The blocks are white and the page behind them is not, so
+   each one reads as its own card rather than as a rule drawn across one sheet;
+   --sunken is the grey a field or a log block sits on inside a white card. */
+:root {
+  color-scheme: light;
+  --bg: #eef0f4;
+  --panel: #ffffff;
+  --sunken: #f5f6f8;
+  --ink: #1f2937;
+  --muted: #6b7280;
+  --line: #d8dbe2;
+  --accent: #2563eb;
+  --ok: #15803d;
+  --bad: #b91c1c;
+  --busy: #b45309;
+  --lift: 0 1px 2px rgba(16, 24, 40, 0.06), 0 2px 6px rgba(16, 24, 40, 0.05);
+  /* The top band is the one dark surface, so it carries its own three inks:
+     --band-ink and --band-muted are read on --band, not on a white card. */
+  --band: #12305c;
+  --band-ink: #f8fafc;
+  --band-muted: #b6c6dd;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--band);
+  background: var(--band);
+  box-shadow: var(--lift);
+}
+
+.brand { font-weight: 600; color: var(--band-ink); text-decoration: none; }
+.subtitle { color: var(--band-muted); font-size: 0.85rem; }
+header nav { margin-left: auto; display: flex; gap: 1rem; }
+header nav a { color: var(--band-ink); text-decoration: none; font-size: 0.85rem; }
+header nav a:hover { text-decoration: underline; }
+
+.note { color: var(--muted); font-size: 0.85rem; margin: 0 0 1rem; }
+.note code { font-size: 0.8rem; }
+
+main { max-width: 68rem; margin: 0 auto; padding: 1.5rem; }
+
+section, details {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--lift);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+h2 { font-size: 1rem; margin: 0 0 0.75rem; }
+
+summary { cursor: pointer; font-weight: 600; }
+details > .grid { margin-top: 1rem; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
+label.checkbox, label .checkbox { flex-direction: row; align-items: center; gap: 0.5rem; display: flex; }
+/* An input and the button that acts on it, on one line inside a stacked label. */
+.row { display: flex; gap: 0.4rem; align-items: center; }
+.row input[type="number"] { flex: 1; min-width: 0; }
+label small { color: var(--muted); font-size: 0.75rem; }
+/* The rule above is an author `display`, which outranks the user agent's
+   `[hidden] { display: none }` whatever the specificity. Without this, a label
+   the form hides -- the free-text model id, a flag the chosen subject has no
+   argument for -- stays on screen and is read as a second field to fill. */
+label[hidden] { display: none; }
+
+input, select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+}
+
+input[type="checkbox"] { width: auto; }
+
+.actions { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--sunken);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button#launch { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.warning { color: var(--busy); }
+
+pre {
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem;
+  overflow: auto;
+  max-height: 32rem;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+pre.error { border-color: var(--bad); color: var(--bad); }
+
+/* The judge and the subject run at the same time, so they are read at the same
+   time: one column each, and neither waits for the other to be scrolled. */
+.streams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Grid items default to min-width:auto, which a long unbroken log line would
+   widen past its column and push the other one off the page. */
+.streams > section { margin-bottom: 1rem; min-width: 0; }
+.streams pre { max-height: 60vh; margin: 0; }
+
+.launcher-log { max-height: 9rem; }
+.stream-note { color: var(--muted); font-weight: 400; font-size: 0.8rem; margin-left: 0.5rem; }
+
+/* Under two readable columns' worth of width, side by side is two unreadable
+   ones: the panes stack, the judge first. */
+@media (max-width: 62rem) {
+  .streams { grid-template-columns: 1fr; }
+  .streams pre { max-height: 32rem; }
+}
+
+/* A campaign row: the Episode page's scenario fields on two lines -- what runs
+   (scenario, task, method), then where and how (topology, reference state, the
+   false-positive box and the seed) -- so a row stays inside its section. A
+   field shrinks with its column rather than growing to its longest option. */
+.selection {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.selection > label { min-width: 0; }
+.selection select { width: 100%; min-width: 0; }
+.selection-run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  min-width: 0;
+  align-self: end;
+  min-height: 2.3rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.selection-run button { margin-left: auto; padding: 0.2rem 0.6rem; font-size: 0.8rem; }
+#selections + .actions { margin-top: 0.75rem; }
+@media (max-width: 48rem) {
+  .selection { grid-template-columns: minmax(0, 1fr); }
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--line); }
+td button { padding: 0.2rem 0.6rem; font-size: 0.8rem; margin-right: 0.35rem; }
+
+.state {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid var(--line);
+  color: var(--busy);
+}
+
+.state.done { color: var(--ok); }
+.state.failed { color: var(--bad); }
+/* A cell nobody reached has measured nothing, so it is not coloured like one
+   that ran: neither an outcome nor a warning, just not attempted. */
+.state.pending, .state.skipped { color: var(--muted); }
+
+/* A matrix is read by scanning one column: PASS or FAIL first, what failed after it. */
+#cells td strong { font-size: 0.8rem; white-space: nowrap; }
+.verdict-why { color: var(--muted); font-size: 0.8rem; }
+#cells td:first-child { color: var(--muted); text-align: right; }
+
+.run-header dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.2rem 1rem;
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
+.run-header dt { color: var(--muted); }
+.run-header dd { margin: 0; font-family: ui-monospace, SFMono-Regular, monospace; }
+
+.value-true { color: var(--ok); }
+.value-false { color: var(--bad); }
+/* A seed that does not exist yet: shown, but not as a value. */
+.value-muted { color: var(--muted); }
+
+/* A campaign's results. The categorical slots in their fixed order, validated on
+   the white card (CVD and normal-vision separation pass for adjacent bars); the
+   aqua, yellow and pink slots sit under 3:1 against it, so every bar carries its
+   value beside it and the chart has a table view. Hairline grid, thin bars. */
+.charts {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+  --chart-grid: #eceef2;
+}
+
+.chart { margin: 1.5rem 0 0; }
+.chart h3 { font-size: 0.95rem; margin: 0; }
+.chart-subtitle { color: var(--muted); font-size: 0.8rem; margin: 0.15rem 0 0.75rem; }
+
+.chart-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; font-size: 0.85rem; }
+.chart-legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+.chart-swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+
+/* Label | bars | value. The tracks of one parameter touch, so its gridlines run
+   unbroken; the 2px above and below each bar is the gap between neighbours. */
+.chart-body {
+  display: grid;
+  grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr) 6.5rem;
+  column-gap: 0.75rem;
+}
+.chart-spacer { grid-column: 1 / -1; height: 0.75rem; }
+.chart-label {
+  grid-column: 1;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+.chart-hint { color: var(--muted); font-size: 0.75rem; }
+.chart-track {
+  grid-column: 2;
+  position: relative;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--chart-grid);
+  background: linear-gradient(to right, var(--chart-grid) 1px, transparent 1px) 0 0 / 25% 100%;
+}
+.chart-track:focus { outline: none; }
+.chart-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.chart-bar {
+  position: absolute;
+  left: 0;
+  top: calc(50% - 8px);
+  height: 16px;
+  border-radius: 0 4px 4px 0;
+}
+.chart-track:hover .chart-bar, .chart-track:focus-visible .chart-bar { filter: brightness(1.12); }
+.chart-ci {
+  position: absolute;
+  top: 50%;
+  border-top: 1px solid rgba(31, 41, 55, 0.75);
+}
+.chart-ci::before, .chart-ci::after {
+  content: "";
+  position: absolute;
+  top: -4.5px;
+  height: 8px;
+  border-left: 1px solid rgba(31, 41, 55, 0.75);
+}
+.chart-ci::before { left: 0; }
+.chart-ci::after { right: 0; }
+.chart-missing { color: var(--muted); font-size: 0.75rem; line-height: 1.3; padding: 2px 0.5rem; }
+.chart-value {
+  grid-column: 3;
+  align-self: center;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.chart-axis {
+  grid-column: 2;
+  position: relative;
+  height: 1.2rem;
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.chart-axis span { position: absolute; top: 0; transform: translateX(-50%); }
+.chart-axis span:first-child { transform: none; }
+.chart-axis span:last-child { transform: translateX(-100%); }
+
+details.chart-table {
+  border: 0;
+  box-shadow: none;
+  background: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+details.chart-table summary { font-weight: 400; font-size: 0.8rem; color: var(--accent); }
+details.chart-table table { margin-top: 0.5rem; font-size: 0.8rem; }
+
+.chart-tip {
+  position: absolute;
+  z-index: 10;
+  max-width: 24rem;
+  padding: 0.45rem 0.65rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: var(--lift);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+.chart-tip strong { display: block; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.chart-tip-muted { color: var(--muted); }
+.chart-tip-series { display: flex; align-items: center; gap: 0.4rem; }
+.chart-tip-key { width: 12px; height: 2px; border-radius: 1px; flex: none; }
+
+/* A phone's width: the parameter's name above its bars, the value beside them. */
+@media (max-width: 40rem) {
+  .chart-body { grid-template-columns: minmax(0, 1fr) 6rem; }
+  .chart-label { grid-column: 1 / -1; grid-row: auto !important; margin-bottom: 0.2rem; }
+  .chart-track, .chart-axis { grid-column: 1; }
+  .chart-value { grid-column: 2; }
+}

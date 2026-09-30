@@ -1,0 +1,40 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/security/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/security/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/security/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/security/preservation-v1.yaml, version: "1.0.0"}
+scenario: arp_spoofing
+task_mode:
+  exploit: >-
+    In the isolated benchmark network, demonstrate whether {{attacker}} can poison the ARP state of {{victim}} and redirect traffic intended for gateway {{gateway}} through the attacker.
+  detect: >-
+    Investigate abnormal address-to-link-layer identity behavior on {{segment}} and identify the affected endpoint, gateway relationship, and cause.
+  correct: >-
+    Restore legitimate gateway behavior on {{segment}} while preserving legitimate connectivity; diagnose the cause before changing the network.
+  prevent: >-
+    Harden {{segment}} so that an untrusted endpoint cannot use ARP spoofing to redirect traffic while legitimate hosts retain required connectivity.
+security_properties:
+  - authenticity
+  - integrity
+  - confidentiality
+stride:
+  - spoofing
+extra_info:
+  network_layers:
+    - L2
+    - L3 address-to-link-layer mapping
+  binding:
+    strategy: security_same_l2_gateway
+  attacker_position: same L2 broadcast domain as victim
+  references:
+    - title: An Ethernet Address Resolution Protocol - RFC 826
+      url: https://www.rfc-editor.org/info/rfc826/
+    - title: STRIDE threat modeling fundamentals - Microsoft Learn
+      url: https://learn.microsoft.com/en-us/training/paths/tm-threat-modeling-fundamentals/
+
+
+#Because the information that we retrieve are the currint state of the network, we cant detect arp spoofing by
+#comparaison of the arp table over time. We can only detect it by looking at the ARP table and checking if 
+#there are multiple MAC addresses for the same IP address or the opposite. If there are, then we can conclude that there is an ARP spoofing attack happening.

@@ -1,0 +1,197 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.830200097989291e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 26.243226118000166,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "app1",
+          "leaf2"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-a930902ad32a7eb7d4196abd4f433170b861f951bb355bbdd1fa00fc4a70a3fa.json",
+      "category": "read",
+      "duration_seconds": 1.8698821069992846,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "app1",
+        "reason": "app1's data interface holds 10.10.50.10/32 while its segment is 10.10.50.0/24; a /32 gives no connected route, so every off-subnet packet (user1->app1, app1->user1/finance1) fails.",
+        "set": {
+          "address": "10.10.50.10/32",
+          "address_action": "delete"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.4004412609992869,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_d81d7ac17f8f2b9c"
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "app1",
+        "reason": "Re-add the host address with the correct /24 prefix so app1 has a connected route to 10.10.50.0/24 and can reach its gateway.",
+        "set": {
+          "address": "10.10.50.10/24",
+          "address_action": "add"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.3827013909995003,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_b5f9d507ddb7b107"
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "app1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2089693560010346,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "app1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.12863817000106792,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "user1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.12996242199915287,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "user1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.20320394199916336,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/50",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.132686659000683,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "app1",
+        "reason": "app1 had no default route (its table listed only connected routes), so outbound packets were 'Network unreachable'; user1 on the same topology has 'default via 10.10.10.1'. app1's gateway is 10.10.50.1 on leaf2:ethernet-1/50.",
+        "set": {
+          "next_hop": "10.10.50.1"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17872732100113353,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_261df2ac5a3c4a5c"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 36.188440893000006,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

@@ -1,0 +1,1044 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.163300011190586e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5858180240011279,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.177949720999095,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.17888024599960772,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "user1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.25411746300051163,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "user1",
+          "guest1"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.4457112820000475,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.24417592999998305,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.18840341400027683,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "The egress interface eth2 toward external1 currently has an HTB root with default 0x20 but no classes, filters, or parent rate (tc qdisc show dev eth2). Under guest1's saturating flow the user1->external1 flow cannot get its 8 Mbps guarantee. Rebuild the hierarchy: 20Mbit root, protected class 13Mbit (8M guarantee + ~10% header margin), best-effort class 7Mbit, default to best-effort, and classify user1's traffic by destination 203.0.113.0/24 into the protected class.",
+        "set": {
+          "filters": [
+            {
+              "dst": "203.0.113.0/24",
+              "flowid": "10:10"
+            },
+            {
+              "flowid": "10:20",
+              "src": "10.10.20.0/24"
+            }
+          ],
+          "htb": {
+            "classes": [
+              {
+                "ceiling": "20Mbit",
+                "flowid": "10:10",
+                "name": "protected-user1",
+                "priority": 1,
+                "rate": "13Mbit"
+              },
+              {
+                "ceiling": "20Mbit",
+                "flowid": "10:20",
+                "name": "best-effort",
+                "priority": 2,
+                "rate": "7Mbit"
+              }
+            ],
+            "default": "10:20",
+            "root": "20Mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.805599979183171e-05,
+      "error": "update_object: qos has no attribute filters; it has delete_root, htb, class, filter, delete_filter",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "The egress interface eth2 toward external1 currently has an HTB root with default 0x20 but no classes, filters, or parent rate (tc qdisc show dev eth2). Under guest1's saturating flow the user1->external1 flow cannot get its 8 Mbps guarantee. Rebuild the hierarchy: 20Mbit root, protected class 13Mbit (8M guarantee + ~10% header margin), best-effort class 7Mbit, default to best-effort, and classify user1's traffic by destination 203.0.113.0/24 into the protected class.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "classes": [
+              {
+                "ceiling": "20Mbit",
+                "flowid": "10:10",
+                "name": "protected-user1",
+                "priority": 1,
+                "rate": "13Mbit"
+              },
+              {
+                "ceiling": "20Mbit",
+                "flowid": "10:20",
+                "name": "best-effort",
+                "priority": 2,
+                "rate": "7Mbit"
+              }
+            ],
+            "default": "10:20",
+            "root": "20Mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 4.092499875696376e-05,
+      "error": "update_object: htb.default must be an integer",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "The egress interface eth2 toward external1 currently has an HTB root with default 0x20 but no classes, filters, or parent rate (tc qdisc show dev eth2). Under guest1's saturating flow the user1->external1 flow cannot get its 8 Mbps guarantee. Rebuild the hierarchy: 20Mbit root, protected class 13Mbit (8M guarantee + ~10% header margin), best-effort class 7Mbit, default to best-effort, and classify user1's traffic by destination 203.0.113.0/24 into the protected class.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "classes": [
+              {
+                "ceiling": "20Mbit",
+                "flowid": "10:10",
+                "name": "protected-user1",
+                "priority": 1,
+                "rate": "13Mbit"
+              },
+              {
+                "ceiling": "20Mbit",
+                "flowid": "10:20",
+                "name": "best-effort",
+                "priority": 2,
+                "rate": "7Mbit"
+              }
+            ],
+            "default": 20,
+            "root": "20Mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 5.849599983775988e-05,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "The egress interface eth2 toward external1 currently has an HTB root with default 0x20 but no classes, filters, or parent rate (tc qdisc show dev eth2). Under guest1's saturating flow the user1->external1 flow cannot get its 8 Mbps guarantee. Rebuild the hierarchy: 20Mbit root, protected class 10:10 at 13Mbit (8M guarantee + ~10% header margin), best-effort class 10:20 at 7Mbit, default to 10:20.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "classes": [
+              {
+                "ceil": "20Mbit",
+                "id": "10:10",
+                "prio": 1,
+                "rate": "13Mbit"
+              },
+              {
+                "ceil": "20Mbit",
+                "id": "10:20",
+                "prio": 2,
+                "rate": "7Mbit"
+              }
+            ],
+            "default": 20,
+            "root": "20Mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.6903737020002154,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_58651ef177121374"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "The prior rebuild deleted the root and added the class 10:10 but failed on 10:20, leaving the root without its best-effort class. Add the missing class 10:20 (rate 7Mbit, ceil 20Mbit, prio 2) under parent 1:1.",
+        "set": {
+          "class": {
+            "ceil": "20Mbit",
+            "id": "10:20",
+            "parent": "1:1",
+            "prio": 2,
+            "rate": "7Mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17619940700024017,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_b009dc6022c6c700"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1804150669995579,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1903752970010828,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Previous full rebuild left only the bare HTB root on eth2 (tc qdisc show dev eth2 shows default 0x20 with no classes). Rebuild the hierarchy: root 20Mbit default 10:20, protected class 10:10 rate 13Mbit ceil 20Mbit prio 1, best-effort class 10:20 rate 7Mbit ceil 20Mbit prio 2.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "classes": [
+              {
+                "ceil": "20Mbit",
+                "id": "10:10",
+                "prio": 1,
+                "rate": "13Mbit"
+              },
+              {
+                "ceil": "20Mbit",
+                "id": "10:20",
+                "prio": 2,
+                "rate": "7Mbit"
+              }
+            ],
+            "default": 20,
+            "root": "20Mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.4429433360000985,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_53e2d67d81ce6036"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 10:10 htb rate 13mbit ceil 20mbit prio 1",
+              "tc class add dev eth2 parent 1:1 classid 10:20 htb rate 7mbit ceil 20mbit prio 2"
+            ],
+            "reason": "tc qdisc show dev eth2 shows root htb handle 1: with default 0x20 but no child classes (tc qdisc show does not list any class lines). HTB root has no rate, so the 8 Mbps guarantee for user1 cannot hold while guest1 saturates the uplink. Add protected class 10:10 (13mbit) and best-effort class 10:20 (7mbit) under 1:1.",
+            "rollback_commands": [
+              "tc qdisc del dev eth2 root"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.0001625950008019572,
+      "error": "update_config.change.commands contains 2 commands for Linux target wan1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 10:10 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "tc qdisc show dev eth2 shows root htb handle 1: with default 0x20 but no child classes. HTB root has no rate, so the 8 Mbps guarantee for user1 cannot hold while guest1 saturates the uplink. Add protected class 10:10 (13mbit).",
+            "rollback_commands": [
+              "tc class del dev eth2 parent 1:1 classid 10:10"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 8.082699969236273e-05,
+      "error": "update_config.change.rollback_commands failed backend safety preflight: unsupported Linux configuration grammar; class delete requires one classid",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 10:10 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "tc qdisc show dev eth2 shows root htb handle 1: with default 0x20 but no child classes. HTB root has no rate, so the 8 Mbps guarantee for user1 cannot hold while guest1 saturates the uplink. Add protected class 10:10 (13mbit).",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 10:10"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17265868600043177,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_45331d4dd565e1b5"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc replace dev eth2 root handle 1: htb default 20 rate 20mbit"
+            ],
+            "reason": "Diagnosing RTNETLINK Invalid argument: the bare htb root has no rate; child classes may be rejected. Replace root htb with rate 20mbit (uplink cap).",
+            "rollback_commands": [
+              "tc qdisc del dev eth2 root"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 7.007299973338377e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported qdisc hierarchy or netem form",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 10:10 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Test with parent 1: instead of 1:1 (child of the classid 1: root class). Earlier 'parent 1:1' was rejected with Invalid argument.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 10:10"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17196973899990553,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_1a673681542fe1f2"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 10:20 htb rate 7mbit ceil 20mbit prio 2"
+            ],
+            "reason": "Test the second class in isolation to isolate why the first class add was rejected with Invalid argument.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 10:20"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.20439600099962263,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_cadd08421205c69e"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc replace dev eth2 root handle 1: htb default 20"
+            ],
+            "reason": "Isolate which part of the htb root is invalid: try without rate/ceil first.",
+            "rollback_commands": [
+              "tc qdisc del dev eth2 root"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.15331434899962915,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_4cd27d226e86eb7b"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip link set dev eth2 mtu 1500"
+            ],
+            "reason": "Test whether the backend safety wrapper accepts a harmless ip link command on wan1, to confirm the interface is writable at all.",
+            "rollback_commands": [
+              "ip link set dev eth2 mtu 1500"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.13589362000129768,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_f22b40a91fedf37b"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc add dev eth2 root handle 1: htb"
+            ],
+            "reason": "Test whether the minimal tc qdisc htb root is accepted (earlier replace was rejected).",
+            "rollback_commands": [
+              "tc qdisc del dev eth2 root"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 7.790899871906731e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported qdisc hierarchy or netem form",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 10:1 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Test child class of the classid 1: root with a 1-level classid to see if the earlier Invalid argument came from classid hierarchy or from rootless htb.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 10:1"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.21363898100025835,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_a529355ef344762e"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 1:1 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Test adding the canonical root child class 1:1 to the existing bare htb root.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 1:1"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.16428814699975192,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_67cfc9a4f3365ec4"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.25158444000044256,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 10:10 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Now that 1:1 exists as the root child, add protected class 10:10 under it (8 Mbps guarantee + header margin).",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 10:10"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.41559429700100736,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_d785efee2013306f"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class del dev eth2 classid 1:1"
+            ],
+            "reason": "The 13mbit classid 1:1 (added as a diagnostic) may be capping the root at 13mbit. Remove it and add a root child 1:1 at the full 20mbit so the hierarchy is capped at the uplink rate.",
+            "rollback_commands": [
+              "tc class add dev eth2 parent 1: classid 1:1 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17878956099957577,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_def7f2ac5e7fe56e"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 1:1 htb rate 20mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Re-add the root child class 1:1 at the full uplink rate 20mbit (the earlier 13mbit version was a diagnostic and has been removed).",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 1:1"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.2755521779999981,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_fa17502a91b7232a"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 10:10 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Add protected class 10:10 (13mbit guaranteed) under root child 1:1.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 10:10"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.29284456400091585,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_a68b39e61b5c4c54"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 10:20 htb rate 7mbit ceil 20mbit prio 2"
+            ],
+            "reason": "Test whether the best-effort class 10:20 can be added under 1:1 (isolate whether only 10:10 is failing).",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 10:20"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17556558500109531,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_048e54420bfe3357"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 1:2 htb rate 7mbit ceil 20mbit prio 2"
+            ],
+            "reason": "Test whether sibling classes of 1:1 can be added (parent 1: works, 1:1 as parent does not).",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 1:2"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17446348600060446,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_02757b064e06bcb9"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class del dev eth2 classid 1:2"
+            ],
+            "reason": "Remove diagnostic class 1:2 (7mbit) — the hierarchy uses 1:1 as the parent of the protected and best-effort classes.",
+            "rollback_commands": [
+              "tc class add dev eth2 parent 1: classid 1:2 htb rate 7mbit ceil 20mbit prio 2"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.21532612999908451,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_188ba428babd9d54"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 13mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Test a 3-hex-digit classid 1:10 under 1:1 — the 10:10 form is rejected with Invalid argument, possibly a kernel htb limit.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 1:10"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17227730299964605,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_c6bdc41f06167408"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 7mbit ceil 20mbit prio 2"
+            ],
+            "reason": "Add the best-effort class 1:20 (7mbit) under root child 1:1, leaving room for the protected class's guarantee.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 1:20"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.19295714799955022,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_c667fb1091b19788"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.17501832400012063,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add a classifier: user1 traffic destined for external1 (203.0.113.0/24) must go into the protected class 1:10 so it holds its 8 Mbps guarantee while guest1 saturates the uplink.",
+        "set": {
+          "filter": {
+            "dst": "203.0.113.0/24",
+            "flowid": "1:10"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.19194489100118517,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_2a9122f61a97f24f"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 57.74836819600023,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.14323096699990856,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-c7f474295e3a5c6151d7840f09035ca658d852ff572cb209c68e100441db1c19.json",
+      "category": "read",
+      "duration_seconds": 1.7339814669994666,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "203.0.113.0/24",
+        "node": "spine1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6591800660007721,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "203.0.113.0/24",
+        "node": "spine2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6610725869995804,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "spine1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-e93bece3eccb67ec9abb269ae7feaaa4f1fcd6ad0bd724ed838a5886af89a57c.json",
+      "category": "read",
+      "duration_seconds": 0.7809426070016343,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "count": 5,
+            "destination": "external1",
+            "destination_ip": "203.0.113.10",
+            "source": "user1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 4.2737869400007185,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class del dev eth2 classid 1:1"
+            ],
+            "reason": "Diagnosing why user1->external1 throughput is ~5mbit: the HTB root child 1:1 may be limiting the hierarchy. Removing it to measure baseline throughput through the 203.0.113.0/24 network.",
+            "rollback_commands": [
+              "tc class add dev eth2 parent 1: classid 1:1 htb rate 20mbit ceil 20mbit prio 1"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.28383442199992714,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_45bf4bb22ec09ee8"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 57.656304121001085,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

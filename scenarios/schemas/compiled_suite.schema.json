@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/ibn/compiled_suite.schema.json",
+  "title": "Evaluator-private topology-aware IBN benchmark suite",
+  "type": "object",
+  "required": ["schema_version", "generator", "topology", "tasks"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "generator": {"type": "object"},
+    "topology": {"type": "object", "required": ["id"]},
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "version", "domain", "oracles", "public", "private"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "domain": {"enum": ["connectivity", "dhcp_dns", "filtering", "qos", "security"]},
+          "version": {"type": "string", "minLength": 1},
+          "oracles": {"type": "object", "required": ["healthy", "expected_degradation", "repair", "preservation"], "additionalProperties": {"type": "object", "required": ["path", "version"]}},
+          "public": {
+            "type": "object",
+            "required": ["intent"],
+            "properties": {
+              "intent": {"type": "string", "minLength": 1},
+              "success_criteria": {"type": "object", "minProperties": 1}
+            },
+            "additionalProperties": false
+          },
+          "private": {
+            "type": "object",
+            "required": ["scenario_definition", "bindings", "evaluator"],
+            "properties": {
+              "scenario_definition": {"type": "string", "minLength": 1},
+              "bindings": {"type": "object"},
+              "evaluator": {"type": "object"},
+              "topology_patch": {"type": "array"},
+              "metadata": {"type": "object"}
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

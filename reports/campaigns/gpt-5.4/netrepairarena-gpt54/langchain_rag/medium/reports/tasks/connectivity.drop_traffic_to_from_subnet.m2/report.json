@@ -1,0 +1,1541 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/langchain_rag_agent-gpt-5-4-connectivity-drop_traffic_to_from_subnet-m2-fault-seed919492398-24b4014e9004.json",
+    "sha256": "e5f957222dcf5b8f4ba4edea2059b4b8c71e6aa3c9d6e7b343b79617e64a1e42",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_rag_agent-gpt-5-4-connectivity-drop_traffic_to_from_subnet-m2-fault-seed919492398-24b4014e9004",
+    "created_at": "2026-09-29T05:43:51.476114+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_rag_agent-gpt-5-4-connectivity-drop_traffic_to_from_subnet-m2-fault-seed919492398",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.drop_traffic_to_from_subnet.m2",
+      "sut_task_id": "sut-9c62c0a111e12dc4ccc35f360197646e",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "Observed only finance1<->app1 connectivity failing while all other tested paths were healthy. On leaf2, both subnets were locally connected and interfaces/addressing were present, but ACL config showed output filter ibn-subnet-guard attached only to ethernet-1/30.0, with a rule dropping destination 10.10.30.0/24. Removed that specific ACL attachment from leaf2 ethernet-1/30.0. Public success criteria then passed: finance1->app1 and app1->finance1 both succeeded, and previously healthy paths remained successful.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed only finance1<->app1 connectivity failing while all other tested paths were healthy. On leaf2, both subnets were locally connected and interfaces/addressing were present, but ACL config showed output filter ibn-subnet-guard attached only to ethernet-1/30.0, with a rule dropping destination 10.10.30.0/24. Removed that specific ACL attachment from leaf2 ethernet-1/30.0. Public success criteria then passed: finance1->app1 and app1->finance1 both succeeded, and previously healthy paths remained successful.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.4023,
+      "log_p_yes": 0.0,
+      "method": "router_drops_traffic_to_subnet",
+      "operation": "set_subnet_traffic_policy",
+      "reason": null,
+      "reference": "On leaf2, a traffic filter drops all traffic to subnet 10.10.30.0/24 (finance_vlan segment), applied on interface ethernet-1/30.",
+      "score": 31.4023,
+      "target": "leaf2"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 197.0840927810059,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed only finance1<->app1 connectivity failing while all other tested paths were healthy. On leaf2, both subnets were locally connected and interfaces/addressing were present, but ACL config showed output filter ibn-subnet-guard attached only to ethernet-1/30.0, with a rule dropping destination 10.10.30.0/24. Removed that specific ACL attachment from leaf2 ethernet-1/30.0. Public success criteria then passed: finance1->app1 and app1->finance1 both succeeded, and previously healthy paths remained successful.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.4023,
+      "log_p_yes": 0.0,
+      "method": "router_drops_traffic_to_subnet",
+      "operation": "set_subnet_traffic_policy",
+      "reason": null,
+      "reference": "On leaf2, a traffic filter drops all traffic to subnet 10.10.30.0/24 (finance_vlan segment), applied on interface ethernet-1/30.",
+      "score": 31.4023,
+      "target": "leaf2"
+    },
+    "domain": "connectivity",
+    "environment_success": true,
+    "failed_operation_count": 5,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 3,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 1.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 18,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 2,
+    "successful_read_count": 16,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 7
+  },
+  "operation_counts": {
+    "llm_calls": 26,
+    "containerlab_reads": 18,
+    "containerlab_mutations": 3,
+    "containerlab_mutations_ok": 2,
+    "sut_validations": 3,
+    "failed_operations": 5,
+    "unsafe_operations": 0,
+    "input_tokens": 518633,
+    "output_tokens": 1659,
+    "total_tokens": 520292,
+    "recorded": {
+      "ani_mutations": 3,
+      "ani_reads": 18,
+      "failed_operations": 5,
+      "input_tokens": 518633,
+      "llm_calls": 26,
+      "output_tokens": 1659,
+      "successful_mutations": 2,
+      "successful_reads": 16,
+      "total_tokens": 520292,
+      "unsafe_operations": 0,
+      "validations": 7
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 51.94,
+    "action_seconds": 1.013,
+    "reading_seconds": 13.583,
+    "validation_seconds": 130.426,
+    "episode_seconds": 197.0840927810059,
+    "unaccounted_seconds": 0.122,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 518633,
+    "output_tokens": 1659,
+    "total_tokens": 520292,
+    "llm_calls": 26,
+    "output_tokens_per_call": 63.8,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 3,
+    "public_validations_failed": 2,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 21,
+      "calls": 24
+    },
+    "repeat_action_rate": {
+      "repeated": 4,
+      "calls": 24
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 3,
+      "check_config": 18,
+      "apply_config": 3
+    }
+  },
+  "device_configurations": {
+    "available": true,
+    "directory": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/devices/connectivity.drop_traffic_to_from_subnet.m2-20260929T053620-0197646e",
+    "snapshots_taken": [
+      "after_sut",
+      "before_sut",
+      "healthy"
+    ],
+    "snapshots_failed": [],
+    "changed_by_sut": [
+      "leaf2"
+    ],
+    "devices": [
+      {
+        "device": "admin1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "app1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "attacker1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "external1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "finance1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "guest1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "leaf1",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "leaf2",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": true,
+        "changed_by_sut": true,
+        "fault_change": {
+          "file": "leaf2/healthy_to_before_sut.diff",
+          "lines_added": 25,
+          "lines_removed": 0
+        },
+        "sut_change": {
+          "file": "leaf2/before_sut_to_after_sut.diff",
+          "lines_added": 10,
+          "lines_removed": 4
+        }
+      },
+      {
+        "device": "spine1",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "spine2",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "user1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "web1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      }
+    ],
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes"
+  },
+  "phase_durations": {
+    "apply_reference_state": 65.53409654396819,
+    "calculate_metrics": 3.211101284250617e-05,
+    "deploy_reset_testbed": 19.00260672502918,
+    "evaluate_degradation": 6.390351440990344,
+    "evaluate_healthy": 21.893367650045548,
+    "evaluate_repair_preservation": 66.2208821909735,
+    "inject_fault": 0.5125137959839776,
+    "invoke_sut": 197.10679807298584,
+    "load_configuration": 0.0002798369969241321,
+    "load_oracles": 0.004690475994721055,
+    "load_validate_scenario": 0.035702241002582014,
+    "record_baseline": 4.32401429861784e-06,
+    "restore_destroy": 6.298000725975726,
+    "score_diagnosis": 0.8767166420002468,
+    "snapshot_after_sut": 7.268695820996072,
+    "snapshot_before_sut": 6.323212465038523,
+    "snapshot_healthy": 6.769485886965413,
+    "write_result": 0.0077179730287753046
+  },
+  "timeline": {
+    "trace": {
+      "path": null,
+      "available": false,
+      "reason": "the result records no trace file"
+    },
+    "budget": {
+      "granted_seconds": 400.0,
+      "used_seconds": 197.0840927810059,
+      "remaining_seconds": 202.916,
+      "used_ratio": 0.4927,
+      "exhausted": false,
+      "exceeded": false,
+      "overrun_seconds": 0.0,
+      "sut_status": "completed",
+      "invoke_sut_seconds": 197.10679807298584
+    },
+    "turns": 26,
+    "turns_source": "record (execution.model_turns)",
+    "seconds": {
+      "thinking": 51.94,
+      "tools": 145.022,
+      "episode": 197.0840927810059,
+      "unaccounted": 0.122
+    },
+    "final_response": {
+      "status": "completed",
+      "summary": "Observed only finance1<->app1 connectivity failing while all other tested paths were healthy. On leaf2, both subnets were locally connected and interfaces/addressing were present, but ACL config showed output filter ibn-subnet-guard attached only to ethernet-1/30.0, with a rule dropping destination 10.10.30.0/24. Removed that specific ACL attachment from leaf2 ethernet-1/30.0. Public success criteria then passed: finance1->app1 and app1->finance1 both succeeded, and previously healthy paths remained successful."
+    },
+    "steps": [
+      {
+        "type": "thinking",
+        "turn": 1,
+        "seconds": 1.58,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "execute_validation"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 1
+      },
+      {
+        "type": "call",
+        "position": 1,
+        "tool": "execute_validation",
+        "category": "validation",
+        "ok": false,
+        "seconds": 28.783223999023903,
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "error": null,
+        "step": 2
+      },
+      {
+        "type": "thinking",
+        "turn": 2,
+        "seconds": 1.389,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_topology"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 3
+      },
+      {
+        "type": "call",
+        "position": 2,
+        "tool": "get_topology",
+        "category": "read",
+        "ok": true,
+        "seconds": 7.93090439401567e-05,
+        "arguments": {
+          "nodes": null
+        },
+        "error": null,
+        "step": 4
+      },
+      {
+        "type": "thinking",
+        "turn": 3,
+        "seconds": 2.35,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_state"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 5
+      },
+      {
+        "type": "call",
+        "position": 3,
+        "tool": "get_state",
+        "category": "read",
+        "ok": true,
+        "seconds": 1.7758900540065952,
+        "arguments": {
+          "nodes": [
+            "finance1",
+            "app1",
+            "leaf2"
+          ],
+          "views": [
+            "interfaces",
+            "routes"
+          ]
+        },
+        "error": null,
+        "step": 6
+      },
+      {
+        "type": "thinking",
+        "turn": 4,
+        "seconds": 2.31,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 7
+      },
+      {
+        "type": "call",
+        "position": 4,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 1.402132616029121,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/interface ethernet-1/30",
+            "/interface ethernet-1/50",
+            "/network-instance default"
+          ]
+        },
+        "error": null,
+        "step": 8
+      },
+      {
+        "type": "thinking",
+        "turn": 5,
+        "seconds": 1.721,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_state"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 9
+      },
+      {
+        "type": "call",
+        "position": 5,
+        "tool": "get_state",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.5494996719644405,
+        "arguments": {
+          "nodes": [
+            "leaf2"
+          ],
+          "views": [
+            "routes"
+          ]
+        },
+        "error": null,
+        "step": 10
+      },
+      {
+        "type": "thinking",
+        "turn": 6,
+        "seconds": 1.608,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 11
+      },
+      {
+        "type": "call",
+        "position": 6,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.4990469919866882,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/interface ethernet-1/40"
+          ]
+        },
+        "error": null,
+        "step": 12
+      },
+      {
+        "type": "thinking",
+        "turn": 7,
+        "seconds": 2.324,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 13
+      },
+      {
+        "type": "call",
+        "position": 7,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": false,
+        "seconds": 1.4587160329683684,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/acl",
+            "/interface ethernet-1/30.0",
+            "/interface ethernet-1/50.0"
+          ]
+        },
+        "error": null,
+        "step": 14
+      },
+      {
+        "type": "thinking",
+        "turn": 8,
+        "seconds": 1.476,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 15
+      },
+      {
+        "type": "call",
+        "position": 8,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.9080837250221521,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/network-instance default interface ethernet-1/30.0",
+            "/network-instance default interface ethernet-1/50.0"
+          ]
+        },
+        "error": null,
+        "step": 16
+      },
+      {
+        "type": "thinking",
+        "turn": 9,
+        "seconds": 1.531,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_state"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 17
+      },
+      {
+        "type": "call",
+        "position": 9,
+        "tool": "get_state",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.5679042090196162,
+        "arguments": {
+          "nodes": [
+            "leaf1"
+          ],
+          "views": [
+            "routes"
+          ]
+        },
+        "error": null,
+        "step": 18
+      },
+      {
+        "type": "thinking",
+        "turn": 10,
+        "seconds": 1.287,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 19
+      },
+      {
+        "type": "call",
+        "position": 10,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.47134668100625277,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "/network-instance default"
+          ]
+        },
+        "error": null,
+        "step": 20
+      },
+      {
+        "type": "thinking",
+        "turn": 11,
+        "seconds": 1.716,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 21
+      },
+      {
+        "type": "call",
+        "position": 11,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.9610758379567415,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/interface ethernet-1/58",
+            "/network-instance default static-routes"
+          ]
+        },
+        "error": null,
+        "step": 22
+      },
+      {
+        "type": "thinking",
+        "turn": 12,
+        "seconds": 2.889,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_state"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 23
+      },
+      {
+        "type": "call",
+        "position": 12,
+        "tool": "get_state",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.562154010985978,
+        "arguments": {
+          "nodes": [
+            "leaf2"
+          ],
+          "views": [
+            "routes"
+          ]
+        },
+        "error": null,
+        "step": 24
+      },
+      {
+        "type": "thinking",
+        "turn": 13,
+        "seconds": 1.713,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_state"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 25
+      },
+      {
+        "type": "call",
+        "position": 13,
+        "tool": "get_state",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.5688124200096354,
+        "arguments": {
+          "nodes": [
+            "leaf1"
+          ],
+          "views": [
+            "routes"
+          ]
+        },
+        "error": null,
+        "step": 26
+      },
+      {
+        "type": "thinking",
+        "turn": 14,
+        "seconds": 2.107,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 27
+      },
+      {
+        "type": "call",
+        "position": 14,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.9395293559646234,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/interface ethernet-1/1",
+            "/interface ethernet-1/2"
+          ]
+        },
+        "error": null,
+        "step": 28
+      },
+      {
+        "type": "thinking",
+        "turn": 15,
+        "seconds": 3.35,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "update_object"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 29
+      },
+      {
+        "type": "call",
+        "position": 15,
+        "tool": "update_object",
+        "category": "mutation",
+        "ok": true,
+        "seconds": 0.5108365199994296,
+        "arguments": {
+          "kind": "route",
+          "name": "default",
+          "node": "leaf2",
+          "reason": "Finance1 and app1 can reach only locally connected subnets on leaf2 while all other inter-subnet paths work; leaf2 has connected routes for 10.10.30.0/24 and 10.10.50.0/24 plus static routes to leaf1, but no default route despite hosting the internet-facing subnet 203.0.113.0/24. A missing default route on leaf2 explains the isolated failure between finance1 and app1 if return traffic toward non-local sources is not forwarded correctly.",
+          "set": {
+            "next_hop": "203.0.113.10"
+          }
+        },
+        "error": null,
+        "step": 30
+      },
+      {
+        "type": "thinking",
+        "turn": 16,
+        "seconds": 1.376,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "execute_validation"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 31
+      },
+      {
+        "type": "call",
+        "position": 16,
+        "tool": "execute_validation",
+        "category": "validation",
+        "ok": false,
+        "seconds": 67.47901193896541,
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "error": null,
+        "step": 32
+      },
+      {
+        "type": "thinking",
+        "turn": 17,
+        "seconds": 1.776,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_state"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 33
+      },
+      {
+        "type": "call",
+        "position": 17,
+        "tool": "get_state",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.8525769599946216,
+        "arguments": {
+          "nodes": [
+            "leaf2"
+          ],
+          "views": [
+            "interfaces"
+          ]
+        },
+        "error": null,
+        "step": 34
+      },
+      {
+        "type": "thinking",
+        "turn": 18,
+        "seconds": 1.443,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 35
+      },
+      {
+        "type": "call",
+        "position": 18,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.5596398880006745,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/system"
+          ]
+        },
+        "error": null,
+        "step": 36
+      },
+      {
+        "type": "thinking",
+        "turn": 19,
+        "seconds": 1.808,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "search_documents"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 37
+      },
+      {
+        "type": "thinking",
+        "turn": 20,
+        "seconds": 1.436,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 38
+      },
+      {
+        "type": "call",
+        "position": 19,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.9822775619686581,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/acl interface ethernet-1/30.0",
+            "/acl interface ethernet-1/50.0"
+          ]
+        },
+        "error": null,
+        "step": 39
+      },
+      {
+        "type": "thinking",
+        "turn": 21,
+        "seconds": 1.433,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_object"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 40
+      },
+      {
+        "type": "call",
+        "position": 20,
+        "tool": "get_object",
+        "category": "read",
+        "ok": false,
+        "seconds": 1.3298005796968937e-05,
+        "arguments": {
+          "kind": "firewall_rule",
+          "name": "ibn-subnet-guard",
+          "node": "leaf2"
+        },
+        "error": "a nokia_srlinux node has no firewall_rule objects to read",
+        "step": 41
+      },
+      {
+        "type": "thinking",
+        "turn": 22,
+        "seconds": 1.524,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 42
+      },
+      {
+        "type": "call",
+        "position": 21,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.5244424149859697,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/acl acl-filter ibn-subnet-guard type ipv4"
+          ]
+        },
+        "error": null,
+        "step": 43
+      },
+      {
+        "type": "thinking",
+        "turn": 23,
+        "seconds": 3.756,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "update_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 44
+      },
+      {
+        "type": "call",
+        "position": 22,
+        "tool": "update_config",
+        "category": "mutation",
+        "ok": false,
+        "seconds": 5.66910021007061e-05,
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "delete acl interface ethernet-1/30.0 output acl-filter ibn-subnet-guard type ipv4"
+              ],
+              "reason": "Only finance1<->app1 fails. leaf2 hosts both subnets locally, so routing is not needed between them. Read evidence shows an output IPv4 ACL 'ibn-subnet-guard' attached only to ethernet-1/30.0, and that ACL drops destination 10.10.30.0/24. That explains app1->finance1 failure directly and finance1->app1 likely due to ICMP reply drops. Removing only this attachment should restore the isolated path without affecting other healthy links.",
+              "rollback_commands": [
+                "set acl interface ethernet-1/30.0 interface-ref interface ethernet-1/30 subinterface 0",
+                "set acl interface ethernet-1/30.0 output acl-filter ibn-subnet-guard type ipv4"
+              ],
+              "target": "leaf2"
+            }
+          ]
+        },
+        "error": "update_config.change.commands failed backend safety preflight: SR Linux configuration commands must be 'set / <path>' or 'delete / <path>'",
+        "step": 45
+      },
+      {
+        "type": "thinking",
+        "turn": 24,
+        "seconds": 2.569,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "update_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 46
+      },
+      {
+        "type": "call",
+        "position": 23,
+        "tool": "update_config",
+        "category": "mutation",
+        "ok": true,
+        "seconds": 0.5022970870486461,
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "delete / acl interface ethernet-1/30.0 output acl-filter ibn-subnet-guard type ipv4"
+              ],
+              "reason": "Only finance1<->app1 fails. leaf2 hosts both subnets locally, so routing is not needed between them. Read evidence shows an output IPv4 ACL 'ibn-subnet-guard' attached only to ethernet-1/30.0, and that ACL drops destination 10.10.30.0/24. That explains app1->finance1 failure directly and finance1->app1 likely due to ICMP reply drops. Removing only this attachment should restore the isolated path without affecting other healthy links.",
+              "rollback_commands": [
+                "set / acl interface ethernet-1/30.0 interface-ref interface ethernet-1/30 subinterface 0",
+                "set / acl interface ethernet-1/30.0 output acl-filter ibn-subnet-guard type ipv4"
+              ],
+              "target": "leaf2"
+            }
+          ]
+        },
+        "error": null,
+        "step": 47
+      },
+      {
+        "type": "thinking",
+        "turn": 25,
+        "seconds": 2.604,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "execute_validation"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 48
+      },
+      {
+        "type": "call",
+        "position": 24,
+        "tool": "execute_validation",
+        "category": "validation",
+        "ok": true,
+        "seconds": 34.16326832398772,
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "error": null,
+        "step": 49
+      },
+      {
+        "type": "thinking",
+        "turn": 26,
+        "seconds": 2.864,
+        "kind": "text",
+        "tool_calls": [],
+        "content_chars": 551,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 50
+      }
+    ]
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "gpt-5.4",
+    "git": {
+      "commit": "731901c1947298ad4dfed2283f9e20eb776bd3ff",
+      "dirty": true,
+      "modified_files": 1,
+      "untracked_files": 11269
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 400,
+      "min_retry_tokens": null,
+      "model": "gpt-5.4",
+      "prompt_variant": "default",
+      "rag_chunk_chars": 1500,
+      "rag_chunk_overlap": 200,
+      "rag_context_corpus": {
+        "chunks": 105,
+        "files": [
+          {
+            "chunks": 105,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+          }
+        ],
+        "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+      },
+      "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+      "rag_corpus": {
+        "chunks": 1940,
+        "files": [
+          {
+            "chunks": 164,
+            "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+            "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+          },
+          {
+            "chunks": 1191,
+            "path": "Advanced_Configuration_Guide_26.7.md",
+            "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+          },
+          {
+            "chunks": 294,
+            "path": "Interfaces_Guide_26.7.md",
+            "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+          },
+          {
+            "chunks": 4,
+            "path": "arp.md",
+            "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+          },
+          {
+            "chunks": 16,
+            "path": "bridge.md",
+            "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+          },
+          {
+            "chunks": 4,
+            "path": "default-route.md",
+            "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+          },
+          {
+            "chunks": 40,
+            "path": "dhcp-server.md",
+            "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+          },
+          {
+            "chunks": 21,
+            "path": "dns.md",
+            "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+          },
+          {
+            "chunks": 21,
+            "path": "ethernet.md",
+            "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+          },
+          {
+            "chunks": 14,
+            "path": "flowtables.md",
+            "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+          },
+          {
+            "chunks": 22,
+            "path": "groups.md",
+            "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+          },
+          {
+            "chunks": 5,
+            "path": "ip.md",
+            "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+          },
+          {
+            "chunks": 47,
+            "path": "ipv4.md",
+            "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+          },
+          {
+            "chunks": 82,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+          },
+          {
+            "chunks": 6,
+            "path": "qos.md",
+            "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+          },
+          {
+            "chunks": 9,
+            "path": "zone.md",
+            "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+          }
+        ],
+        "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+      },
+      "rag_directory": "sut/langchain_rag_agent/rag_document",
+      "rag_embedding_model": null,
+      "rag_mode": "both",
+      "rag_retriever": "bm25",
+      "rag_top_k": 4,
+      "recursion_limit": 1000,
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.0.0",
+      "healthy": "1.0.0",
+      "preservation": "1.0.0",
+      "repair": "1.0.0"
+    },
+    "provider_reported_model": "gpt-5.4",
+    "reference_state_sha256": "af895a79f9941a6100b044dfc68d4b570d5885e767bce1a7d650aea01095a17b",
+    "scenario_seed": 919492398,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {},
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_reported_model": "gpt-5.4",
+    "sut_version": "1.0.0",
+    "topology_sha256": "bc80cdc0d5daadbf16faa94fe2c66229b378aaf910f6c617af3a2460ef95006d"
+  },
+  "sut_result": {
+    "see": "../../../records/connectivity.drop_traffic_to_from_subnet.m2.json",
+    "key": "sut_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "convergence_result": {
+    "see": "../../../records/connectivity.drop_traffic_to_from_subnet.m2.json",
+    "key": "convergence_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "cleanup_result": {
+    "see": "../../../records/connectivity.drop_traffic_to_from_subnet.m2.json",
+    "key": "cleanup_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 24
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "19 of 24 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 520292
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 51.94,
+        "action_seconds": 1.013,
+        "reading_seconds": 13.583,
+        "validation_seconds": 130.426,
+        "episode_seconds": 197.0840927810059,
+        "unaccounted_seconds": 0.122
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 24
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 2
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: leaf2"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "files": {
+    "record": "../../../records/connectivity.drop_traffic_to_from_subnet.m2.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.drop_traffic_to_from_subnet.m2.judge.log",
+    "devices": "../../../logs/devices/connectivity.drop_traffic_to_from_subnet.m2/",
+    "note": "relative to this folder"
+  }
+}

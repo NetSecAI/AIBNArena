@@ -1,0 +1,226 @@
+{
+  "id": "clos01_static_routing_healthy",
+  "description": "Healthy reference state for the clos01 MVP lab. It configures routed links and static routes so client1 can reach client2 through leaf1-spine-leaf2.",
+  "commands": [
+    {
+      "target": "client1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "client1",
+      "mode": "shell",
+      "command": "ip route flush table main scope global"
+    },
+    {
+      "target": "client2",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "client2",
+      "mode": "shell",
+      "command": "ip route flush table main scope global"
+    },
+    {
+      "target": "client1",
+      "mode": "shell",
+      "command": "ip route replace default via 192.168.10.1"
+    },
+    {
+      "target": "client2",
+      "mode": "shell",
+      "command": "ip route replace default via 192.168.20.1"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 address 10.0.0.1/31"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 ipv4 address 192.168.10.1/24"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/1.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/2.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default next-hop-groups group to-client2 nexthop 1 ip-address 10.0.0.0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 192.168.20.0/24 next-hop-group to-client2 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 address 10.0.0.3/31"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 ipv4 address 192.168.20.1/24"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/1.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/2.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default next-hop-groups group to-client1 nexthop 1 ip-address 10.0.0.2 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 192.168.10.0/24 next-hop-group to-client1 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 address 10.0.0.0/31"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 0 ipv4 address 10.0.0.2/31"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/1.0"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/2.0"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / network-instance default next-hop-groups group to-client1 nexthop 1 ip-address 10.0.0.1 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 192.168.10.0/24 next-hop-group to-client1 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / network-instance default next-hop-groups group to-client2 nexthop 1 ip-address 10.0.0.3 admin-state enable"
+    },
+    {
+      "target": "spine",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 192.168.20.0/24 next-hop-group to-client2 admin-state enable"
+    }
+  ]
+}

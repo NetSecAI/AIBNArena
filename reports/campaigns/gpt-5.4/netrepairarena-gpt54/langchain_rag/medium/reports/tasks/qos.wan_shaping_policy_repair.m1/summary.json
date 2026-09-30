@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/langchain_rag_agent-gpt-5-4-qos-wan_shaping_policy_repair-m1-fault-seed401943731-0f8fecdfc9bc.json",
+    "sha256": "5b1ab89b293dcebc8dd325e6414329694414b055327ab3313b6f71fe46ac8bb8",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_rag_agent-gpt-5-4-qos-wan_shaping_policy_repair-m1-fault-seed401943731-0f8fecdfc9bc",
+    "created_at": "2026-09-29T07:16:42.502888+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_rag_agent-gpt-5-4-qos-wan_shaping_policy_repair-m1-fault-seed401943731",
+    "scenario": {
+      "domain": "qos",
+      "id": "qos.wan_shaping_policy_repair.m1",
+      "sut_task_id": "sut-a64ef937b7ea31e78a384481363f3e4d",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "failed",
+    "sut_verified": false,
+    "final_summary": "Validated the task and observed all lab connectivity passing, but the public throughput criterion failed under contention. On wan1, the bottleneck uplink is eth2 and it does have an HTB root qdisc, confirming shaping is involved. However, the available read interfaces only exposed the root qdisc and not the live HTB class/filter hierarchy needed to safely identify whether the broken element is the business class rate, the default class, or the classifier. A direct attempt to inspect tc classes/filters via guarded native commands was blocked by ANI safety preflight, so no safe, evidence-based repair could be applied without risking unrelated connectivity.",
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Validated the task and observed all lab connectivity passing, but the public throughput criterion failed under contention. On wan1, the bottleneck uplink is eth2 and it does have an HTB root qdisc, confirming shaping is involved. However, the available read interfaces only exposed the root qdisc and not the live HTB class/filter hierarchy needed to safely identify whether the broken element is the business class rate, the default class, or the classifier. A direct attempt to inspect tc classes/filters via guarded native commands was blocked by ANI safety preflight, so no safe, evidence-based repair could be applied without risking unrelated connectivity.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -0.0,
+      "log_p_yes": -13.8438,
+      "method": "shaping_policy_removed",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the traffic shaping policy was removed, so the assured class 10 (8 Mbit/s for user1 to external1) is no longer protected from the background traffic.",
+      "score": -13.8437,
+      "target": "wan1"
+    },
+    "success": false,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 113.72343818400986,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "qos.shaping_repair.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "qos.shaping_repair.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "qos.shaping_repair.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "qos.shaping_repair.repair",
+      "version": "1.0.0",
+      "passed": false,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Validated the task and observed all lab connectivity passing, but the public throughput criterion failed under contention. On wan1, the bottleneck uplink is eth2 and it does have an HTB root qdisc, confirming shaping is involved. However, the available read interfaces only exposed the root qdisc and not the live HTB class/filter hierarchy needed to safely identify whether the broken element is the business class rate, the default class, or the classifier. A direct attempt to inspect tc classes/filters via guarded native commands was blocked by ANI safety preflight, so no safe, evidence-based repair could be applied without risking unrelated connectivity.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -0.0,
+      "log_p_yes": -13.8438,
+      "method": "shaping_policy_removed",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the traffic shaping policy was removed, so the assured class 10 (8 Mbit/s for user1 to external1) is no longer protected from the background traffic.",
+      "score": -13.8437,
+      "target": "wan1"
+    },
+    "domain": "qos",
+    "environment_success": false,
+    "failed_operation_count": 2,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 1,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "quality_repair_pass_rate": 0.0,
+    "read_count": 10,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 0,
+    "successful_read_count": 10,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 5
+  },
+  "operation_counts": {
+    "llm_calls": 15,
+    "containerlab_reads": 10,
+    "containerlab_mutations": 1,
+    "containerlab_mutations_ok": 0,
+    "sut_validations": 1,
+    "failed_operations": 2,
+    "unsafe_operations": 0,
+    "input_tokens": 176366,
+    "output_tokens": 737,
+    "total_tokens": 177103,
+    "recorded": {
+      "ani_mutations": 1,
+      "ani_reads": 10,
+      "failed_operations": 2,
+      "input_tokens": 176366,
+      "llm_calls": 15,
+      "output_tokens": 737,
+      "successful_mutations": 0,
+      "successful_reads": 10,
+      "total_tokens": 177103,
+      "unsafe_operations": 0,
+      "validations": 5
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 34.481,
+    "action_seconds": 0.0,
+    "reading_seconds": 3.928,
+    "validation_seconds": 75.22,
+    "episode_seconds": 113.72343818400986,
+    "unaccounted_seconds": 0.094,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 176366,
+    "output_tokens": 737,
+    "total_tokens": 177103,
+    "llm_calls": 15,
+    "output_tokens_per_call": 49.1,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 1,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": false
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": false,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 11,
+      "calls": 12
+    },
+    "repeat_action_rate": {
+      "repeated": 1,
+      "calls": 12
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": false
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": true
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 10,
+      "validate": 1,
+      "apply_config": 1
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 12
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "10 of 12 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 177103
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 34.481,
+        "action_seconds": 0.0,
+        "reading_seconds": 3.928,
+        "validation_seconds": 75.22,
+        "episode_seconds": 113.72343818400986,
+        "unaccounted_seconds": 0.094
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 12
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": false
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "0 device(s) changed by the subject: none"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 89.27700934803579,
+    "calculate_metrics": 4.065298708155751e-05,
+    "deploy_reset_testbed": 16.714952106005512,
+    "evaluate_degradation": 40.52134847600246,
+    "evaluate_healthy": 17.10389316099463,
+    "evaluate_repair_preservation": 89.37497504398925,
+    "inject_fault": 0.759898506978061,
+    "invoke_sut": 113.75232130096992,
+    "load_configuration": 0.0002572879893705249,
+    "load_oracles": 0.006509186991024762,
+    "load_validate_scenario": 0.036160452000331134,
+    "record_baseline": 4.868023097515106e-06,
+    "restore_destroy": 11.632990075973794,
+    "score_diagnosis": 1.5434037850354798,
+    "snapshot_after_sut": 7.554535550007131,
+    "snapshot_before_sut": 7.526158152031712,
+    "snapshot_healthy": 8.19462631305214,
+    "write_result": 0.008254418964497745
+  },
+  "files": {
+    "record": "../../../records/qos.wan_shaping_policy_repair.m1.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/qos.wan_shaping_policy_repair.m1.judge.log",
+    "devices": "../../../logs/devices/qos.wan_shaping_policy_repair.m1/",
+    "note": "relative to this folder"
+  }
+}

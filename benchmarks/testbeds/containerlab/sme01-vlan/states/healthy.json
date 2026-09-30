@@ -1,0 +1,1696 @@
+{
+  "id": "sme01_vlan_l2_routed_spine_healthy",
+  "description": "Healthy reference state for SME01-vlan. Leaves are pure layer-2 switches with one mac-vrf bridge domain per VLAN, untagged access ports, and 802.1Q trunks to both spines. Spines are the layer-3 inter-VLAN gateways: each spine holds one IRB subinterface per VLAN in the default ip-vrf, so every VLAN prefix is directly connected and no static route is needed. spine1 owns the .1 address used by the endpoints as default gateway; spine2 holds .2 in every VLAN and is a fully configured standby inter-VLAN router.",
+  "commands": [
+    {
+      "target": "user1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "user1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.10.10/24 dev eth1"
+    },
+    {
+      "target": "user1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.10.1"
+    },
+    {
+      "target": "guest1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "guest1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.20.10/24 dev eth1"
+    },
+    {
+      "target": "guest1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.20.1"
+    },
+    {
+      "target": "finance1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "finance1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.30.10/24 dev eth1"
+    },
+    {
+      "target": "finance1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.30.1"
+    },
+    {
+      "target": "web1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "web1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.40.10/24 dev eth1"
+    },
+    {
+      "target": "web1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.40.1"
+    },
+    {
+      "target": "app1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "app1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.50.10/24 dev eth1"
+    },
+    {
+      "target": "app1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.50.1"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip address replace 203.0.113.10/24 dev eth1"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip route replace default via 203.0.113.1"
+    },
+    {
+      "target": "admin1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "admin1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.99.100/24 dev eth1"
+    },
+    {
+      "target": "admin1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.99.1"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 vlan-tagging true"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 vlan encap single-tagged vlan-id 10"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 vlan encap single-tagged vlan-id 20"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 vlan encap single-tagged vlan-id 99"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 vlan-tagging true"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 10 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 10 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 10 vlan encap single-tagged vlan-id 10"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 20 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 20 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 20 vlan encap single-tagged vlan-id 20"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 99 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 99 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 99 vlan encap single-tagged vlan-id 99"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 vlan-tagging false"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 vlan-tagging false"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 vlan-tagging false"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 vlan-tagging false"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 type mac-vrf"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 description users-vlan10"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 interface ethernet-1/10.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 interface ethernet-1/1.10"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 interface ethernet-1/2.10"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 type mac-vrf"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 description guest-vlan20"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface ethernet-1/20.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface ethernet-1/30.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface ethernet-1/1.20"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface ethernet-1/2.20"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 type mac-vrf"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 description mgmt-vlan99"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 interface ethernet-1/57.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 interface ethernet-1/1.99"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 interface ethernet-1/2.99"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 vlan-tagging true"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 30 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 30 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 30 vlan encap single-tagged vlan-id 30"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 40 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 40 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 40 vlan encap single-tagged vlan-id 40"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 50 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 50 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 50 vlan encap single-tagged vlan-id 50"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 60 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 60 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 60 vlan encap single-tagged vlan-id 60"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 vlan-tagging true"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 vlan encap single-tagged vlan-id 30"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 vlan encap single-tagged vlan-id 40"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 vlan encap single-tagged vlan-id 50"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 vlan encap single-tagged vlan-id 60"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 vlan-tagging false"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/40 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/40 vlan-tagging false"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/40 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/40 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/50 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/50 vlan-tagging false"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/50 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/50 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/58 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/58 vlan-tagging false"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/58 subinterface 0 type bridged"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/58 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 type mac-vrf"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 description finance-vlan30"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 interface ethernet-1/30.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 interface ethernet-1/1.30"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 interface ethernet-1/2.30"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 type mac-vrf"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 description dmz-vlan40"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 interface ethernet-1/40.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 interface ethernet-1/1.40"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 interface ethernet-1/2.40"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 type mac-vrf"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 description servers-vlan50"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 interface ethernet-1/50.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 interface ethernet-1/1.50"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 interface ethernet-1/2.50"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 type mac-vrf"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 description external-vlan60"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 interface ethernet-1/58.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 interface ethernet-1/1.60"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 interface ethernet-1/2.60"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 vlan-tagging true"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 vlan-tagging true"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 type bridged"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 vlan encap single-tagged vlan-id 10"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 description users-gateway"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 ipv4 address 10.10.10.1/24"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 type mac-vrf"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 description users-vlan10"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 interface ethernet-1/1.10"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 interface irb0.10"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.10"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 type bridged"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 vlan encap single-tagged vlan-id 20"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 description guest-gateway"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 ipv4 address 10.10.20.1/24"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 type mac-vrf"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 description guest-vlan20"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface ethernet-1/1.20"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface irb0.20"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.20"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 type bridged"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 vlan encap single-tagged vlan-id 30"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 description finance-gateway"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 ipv4 address 10.10.30.1/24"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 type mac-vrf"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 description finance-vlan30"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 interface ethernet-1/2.30"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 interface irb0.30"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.30"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 type bridged"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 vlan encap single-tagged vlan-id 40"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 description dmz-gateway"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 ipv4 address 10.10.40.1/24"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 type mac-vrf"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 description dmz-vlan40"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 interface ethernet-1/2.40"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 interface irb0.40"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.40"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 type bridged"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 vlan encap single-tagged vlan-id 50"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 description servers-gateway"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 ipv4 address 10.10.50.1/24"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 type mac-vrf"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 description servers-vlan50"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 interface ethernet-1/2.50"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 interface irb0.50"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.50"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 type bridged"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 vlan encap single-tagged vlan-id 60"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 description external-gateway"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 ipv4 address 203.0.113.1/24"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 type mac-vrf"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 description external-vlan60"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 interface ethernet-1/2.60"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 interface irb0.60"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.60"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 type bridged"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 vlan encap single-tagged vlan-id 99"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 description mgmt-gateway"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 ipv4 address 10.10.99.1/24"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 type mac-vrf"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 admin-state enable"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 description mgmt-vlan99"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 interface ethernet-1/1.99"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 interface irb0.99"
+    },
+    {
+      "target": "spine1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.99"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 vlan-tagging true"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 vlan-tagging true"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 type bridged"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 10 vlan encap single-tagged vlan-id 10"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 description users-gateway"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 10 ipv4 address 10.10.10.2/24"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 type mac-vrf"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 description users-vlan10"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 interface ethernet-1/1.10"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan10 interface irb0.10"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.10"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 type bridged"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 20 vlan encap single-tagged vlan-id 20"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 description guest-gateway"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 20 ipv4 address 10.10.20.2/24"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 type mac-vrf"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 description guest-vlan20"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface ethernet-1/1.20"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan20 interface irb0.20"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.20"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 type bridged"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 30 vlan encap single-tagged vlan-id 30"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 description finance-gateway"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 30 ipv4 address 10.10.30.2/24"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 type mac-vrf"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 description finance-vlan30"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 interface ethernet-1/2.30"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan30 interface irb0.30"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.30"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 type bridged"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 40 vlan encap single-tagged vlan-id 40"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 description dmz-gateway"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 40 ipv4 address 10.10.40.2/24"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 type mac-vrf"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 description dmz-vlan40"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 interface ethernet-1/2.40"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan40 interface irb0.40"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.40"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 type bridged"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 50 vlan encap single-tagged vlan-id 50"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 description servers-gateway"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 50 ipv4 address 10.10.50.2/24"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 type mac-vrf"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 description servers-vlan50"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 interface ethernet-1/2.50"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan50 interface irb0.50"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.50"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 type bridged"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/2 subinterface 60 vlan encap single-tagged vlan-id 60"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 description external-gateway"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 60 ipv4 address 203.0.113.2/24"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 type mac-vrf"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 description external-vlan60"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 interface ethernet-1/2.60"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan60 interface irb0.60"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.60"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 type bridged"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 99 vlan encap single-tagged vlan-id 99"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 description mgmt-gateway"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 ipv4 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / interface irb0 subinterface 99 ipv4 address 10.10.99.2/24"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 type mac-vrf"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 admin-state enable"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 description mgmt-vlan99"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 interface ethernet-1/1.99"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance vlan99 interface irb0.99"
+    },
+    {
+      "target": "spine2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface irb0.99"
+    }
+  ]
+}

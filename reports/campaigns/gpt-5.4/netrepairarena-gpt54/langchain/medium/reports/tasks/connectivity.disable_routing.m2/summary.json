@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-v2-20260927T135117Z/langchain_agent-gpt-5-4-connectivity-disable_routing-m2-fault-seed568447271-bc04a4d4f66a.json",
+    "sha256": "a8000cbb2cb672bf327fcbcf600c048a9f5de9cd1087bfe43b6baab84d8f7749",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-gpt-5-4-connectivity-disable_routing-m2-fault-seed568447271-bc04a4d4f66a",
+    "created_at": "2026-09-27T15:18:53.204866+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-gpt-5-4-connectivity-disable_routing-m2-fault-seed568447271",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.disable_routing.m2",
+      "sut_task_id": "sut-7a8ca91209d18e6f190519355fad4954",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "failed",
+    "sut_verified": false,
+    "final_summary": "Observed complete lab connectivity failure at start. Read topology and scoped configs/states: all endpoints had correct IPv4 addresses and default gateways, inter-leaf and spine routes were present, and leaf2 had the DMZ gateway 10.10.40.1 configured on ethernet-1/40. Hypothesis testing showed user1 could reach its gateway 10.10.10.1, but web1 could not reach its local gateway 10.10.40.1 even though leaf2 had a dynamic ARP entry for 10.10.40.10. I made one narrow change on leaf2 to enable IPv4 admin-state on ethernet-1/40.0, but validation still showed 100% loss from web1 to 10.10.40.1, so public success criteria remained failing and no further safe repair was confirmed from the available evidence.",
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Observed complete lab connectivity failure at start. Read topology and scoped configs/states: all endpoints had correct IPv4 addresses and default gateways, inter-leaf and spine routes were present, and leaf2 had the DMZ gateway 10.10.40.1 configured on ethernet-1/40. Hypothesis testing showed user1 could reach its gateway 10.10.10.1, but web1 could not reach its local gateway 10.10.40.1 even though leaf2 had a dynamic ARP entry for 10.10.40.10. I made one narrow change on leaf2 to enable IPv4 admin-state on ethernet-1/40.0, but validation still showed 100% loss from web1 to 10.10.40.1, so public success criteria remained failing and no further safe repair was confirmed from the available evidence.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -28.7969,
+      "method": "router_forwarded_traffic_dropped",
+      "operation": "set_forwarded_traffic_policy",
+      "reason": null,
+      "reference": "On leaf2, the forwarded-traffic policy drops all transit traffic between its interfaces ethernet-1/1, ethernet-1/2, ethernet-1/30, ethernet-1/40, ethernet-1/50, ethernet-1/58 (fabric_l2_s1, fabric_l2_s2, finance_vlan, dmz_vlan, server_vlan, internet).",
+      "score": -28.7969,
+      "target": "leaf2"
+    },
+    "success": false,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 123.79370518701035,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": false,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": false,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Observed complete lab connectivity failure at start. Read topology and scoped configs/states: all endpoints had correct IPv4 addresses and default gateways, inter-leaf and spine routes were present, and leaf2 had the DMZ gateway 10.10.40.1 configured on ethernet-1/40. Hypothesis testing showed user1 could reach its gateway 10.10.10.1, but web1 could not reach its local gateway 10.10.40.1 even though leaf2 had a dynamic ARP entry for 10.10.40.10. I made one narrow change on leaf2 to enable IPv4 admin-state on ethernet-1/40.0, but validation still showed 100% loss from web1 to 10.10.40.1, so public success criteria remained failing and no further safe repair was confirmed from the available evidence.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -28.7969,
+      "method": "router_forwarded_traffic_dropped",
+      "operation": "set_forwarded_traffic_policy",
+      "reason": null,
+      "reference": "On leaf2, the forwarded-traffic policy drops all transit traffic between its interfaces ethernet-1/1, ethernet-1/2, ethernet-1/30, ethernet-1/40, ethernet-1/50, ethernet-1/58 (fabric_l2_s1, fabric_l2_s2, finance_vlan, dmz_vlan, server_vlan, internet).",
+      "score": -28.7969,
+      "target": "leaf2"
+    },
+    "domain": "connectivity",
+    "environment_success": false,
+    "failed_operation_count": 6,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 2,
+    "non_regression_passed": true,
+    "non_regression_vacuous": true,
+    "path_repair_pass_rate": 0.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": true,
+    "read_count": 23,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 2,
+    "successful_read_count": 21,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 9
+  },
+  "operation_counts": {
+    "llm_calls": 31,
+    "containerlab_reads": 23,
+    "containerlab_mutations": 2,
+    "containerlab_mutations_ok": 2,
+    "sut_validations": 5,
+    "failed_operations": 6,
+    "unsafe_operations": 0,
+    "input_tokens": 435158,
+    "output_tokens": 1520,
+    "total_tokens": 436678,
+    "recorded": {
+      "ani_mutations": 2,
+      "ani_reads": 23,
+      "failed_operations": 6,
+      "input_tokens": 435158,
+      "llm_calls": 31,
+      "output_tokens": 1520,
+      "successful_mutations": 2,
+      "successful_reads": 21,
+      "total_tokens": 436678,
+      "unsafe_operations": 0,
+      "validations": 9
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 49.746,
+    "action_seconds": 1.235,
+    "reading_seconds": 23.215,
+    "validation_seconds": 49.466,
+    "episode_seconds": 123.79370518701035,
+    "unaccounted_seconds": 0.132,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 435158,
+    "output_tokens": 1520,
+    "total_tokens": 436678,
+    "llm_calls": 31,
+    "output_tokens_per_call": 49.0,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 5,
+    "public_validations_failed": 4,
+    "last_public_validation_passed": false
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": false,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 28,
+      "calls": 30
+    },
+    "repeat_action_rate": {
+      "repeated": 2,
+      "calls": 30
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": false
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": true
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 5,
+      "check_config": 23,
+      "apply_config": 2
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 30
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "24 of 30 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 436678
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 49.746,
+        "action_seconds": 1.235,
+        "reading_seconds": 23.215,
+        "validation_seconds": 49.466,
+        "episode_seconds": 123.79370518701035,
+        "unaccounted_seconds": 0.132
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 30
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 4
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": false
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "0 device(s) changed by the subject: none"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 65.0165081860032,
+    "calculate_metrics": 3.2804004149511456e-05,
+    "deploy_reset_testbed": 17.655513606005115,
+    "evaluate_degradation": 32.43555136298528,
+    "evaluate_healthy": 22.617842610983644,
+    "evaluate_repair_preservation": 68.1248195709777,
+    "inject_fault": 0.49172502299188636,
+    "invoke_sut": 123.81359171302756,
+    "load_configuration": 0.0002047260059043765,
+    "load_oracles": 0.00485371399554424,
+    "load_validate_scenario": 0.03449652000563219,
+    "record_baseline": 5.057983798906207e-06,
+    "restore_destroy": 5.93281000200659,
+    "score_diagnosis": 0.6862797650101129,
+    "snapshot_after_sut": 6.830105208995519,
+    "snapshot_before_sut": 6.669463539001299,
+    "snapshot_healthy": 6.597925731999567,
+    "write_result": 0.00754701197729446
+  },
+  "files": {
+    "record": "../../../records/connectivity.disable_routing.m2.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.disable_routing.m2.judge.log",
+    "devices": "../../../logs/devices/connectivity.disable_routing.m2/",
+    "note": "relative to this folder"
+  }
+}

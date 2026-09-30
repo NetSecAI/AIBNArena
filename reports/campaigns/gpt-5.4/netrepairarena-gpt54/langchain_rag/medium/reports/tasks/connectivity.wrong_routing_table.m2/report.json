@@ -1,0 +1,994 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/langchain_rag_agent-gpt-5-4-connectivity-wrong_routing_table-m2-fault-seed713030911-1dde22d44477.json",
+    "sha256": "aabada351640fc71d185a9ed2444d68f9c1df7b52bab8a325a782e15ed6b5ecc",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_rag_agent-gpt-5-4-connectivity-wrong_routing_table-m2-fault-seed713030911-1dde22d44477",
+    "created_at": "2026-09-29T06:40:52.959570+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_rag_agent-gpt-5-4-connectivity-wrong_routing_table-m2-fault-seed713030911",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.wrong_routing_table.m2",
+      "sut_task_id": "sut-4d39ca16f77dab470efe3d8156161e29",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "Initial validation showed only guest1<->web1 failed while other paths were healthy. Reads confirmed guest1 had the correct 10.10.20.10/24 address and default route via leaf1, and leaf1 guest gateway 10.10.20.1/24 was present and enabled. On leaf2, I found an active static host route 10.10.20.10/32 pointing to a blackhole next-hop-group, which specifically broke traffic toward guest1. I deleted that route on leaf2. Final public success validation passed, with all lab connectivity checks succeeding including guest1<->web1.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Initial validation showed only guest1<->web1 failed while other paths were healthy. Reads confirmed guest1 had the correct 10.10.20.10/24 address and default route via leaf1, and leaf1 guest gateway 10.10.20.1/24 was present and enabled. On leaf2, I found an active static host route 10.10.20.10/32 pointing to a blackhole next-hop-group, which specifically broke traffic toward guest1. I deleted that route on leaf2. Final public success validation passed, with all lab connectivity checks succeeding including guest1<->web1.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.7578,
+      "log_p_yes": 0.0,
+      "method": "router_more_specific_blackhole",
+      "operation": "set_static_route_disposition",
+      "reason": null,
+      "reference": "On leaf2, a more specific static route to 10.10.20.10/32 (guest1) is configured as a blackhole (discard), so traffic to guest1 is dropped.",
+      "score": 31.7578,
+      "target": "leaf2"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 91.267778258014,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Initial validation showed only guest1<->web1 failed while other paths were healthy. Reads confirmed guest1 had the correct 10.10.20.10/24 address and default route via leaf1, and leaf1 guest gateway 10.10.20.1/24 was present and enabled. On leaf2, I found an active static host route 10.10.20.10/32 pointing to a blackhole next-hop-group, which specifically broke traffic toward guest1. I deleted that route on leaf2. Final public success validation passed, with all lab connectivity checks succeeding including guest1<->web1.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.7578,
+      "log_p_yes": 0.0,
+      "method": "router_more_specific_blackhole",
+      "operation": "set_static_route_disposition",
+      "reason": null,
+      "reference": "On leaf2, a more specific static route to 10.10.20.10/32 (guest1) is configured as a blackhole (discard), so traffic to guest1 is dropped.",
+      "score": 31.7578,
+      "target": "leaf2"
+    },
+    "domain": "connectivity",
+    "environment_success": true,
+    "failed_operation_count": 3,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 1,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 1.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 5,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 1,
+    "successful_read_count": 3,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 9,
+    "containerlab_reads": 5,
+    "containerlab_mutations": 1,
+    "containerlab_mutations_ok": 1,
+    "sut_validations": 2,
+    "failed_operations": 3,
+    "unsafe_operations": 0,
+    "input_tokens": 91487,
+    "output_tokens": 548,
+    "total_tokens": 92035,
+    "recorded": {
+      "ani_mutations": 1,
+      "ani_reads": 5,
+      "failed_operations": 3,
+      "input_tokens": 91487,
+      "llm_calls": 9,
+      "output_tokens": 548,
+      "successful_mutations": 1,
+      "successful_reads": 3,
+      "total_tokens": 92035,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 17.818,
+    "action_seconds": 0.508,
+    "reading_seconds": 8.658,
+    "validation_seconds": 64.236,
+    "episode_seconds": 91.267778258014,
+    "unaccounted_seconds": 0.048,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 91487,
+    "output_tokens": 548,
+    "total_tokens": 92035,
+    "llm_calls": 9,
+    "output_tokens_per_call": 60.9,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 6,
+      "calls": 8
+    },
+    "repeat_action_rate": {
+      "repeated": 1,
+      "calls": 8
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 2,
+      "check_config": 5,
+      "apply_config": 1
+    }
+  },
+  "device_configurations": {
+    "available": true,
+    "directory": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/devices/connectivity.wrong_routing_table.m2-20260929T063524-56161e29",
+    "snapshots_taken": [
+      "after_sut",
+      "before_sut",
+      "healthy"
+    ],
+    "snapshots_failed": [],
+    "changed_by_sut": [
+      "leaf2"
+    ],
+    "devices": [
+      {
+        "device": "admin1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "app1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "attacker1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "external1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "finance1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "guest1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "leaf1",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "leaf2",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": true,
+        "changed_by_sut": true,
+        "fault_change": {
+          "file": "leaf2/healthy_to_before_sut.diff",
+          "lines_added": 8,
+          "lines_removed": 0
+        },
+        "sut_change": {
+          "file": "leaf2/before_sut_to_after_sut.diff",
+          "lines_added": 0,
+          "lines_removed": 4
+        }
+      },
+      {
+        "device": "spine1",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "spine2",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "user1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "web1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      }
+    ],
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes"
+  },
+  "phase_durations": {
+    "apply_reference_state": 64.1804476060206,
+    "calculate_metrics": 3.642600495368242e-05,
+    "deploy_reset_testbed": 17.792179687006865,
+    "evaluate_degradation": 6.414464972971473,
+    "evaluate_healthy": 22.0994828659459,
+    "evaluate_repair_preservation": 67.15987234801287,
+    "inject_fault": 0.509076256013941,
+    "invoke_sut": 91.28977645898703,
+    "load_configuration": 0.00027395004872232676,
+    "load_oracles": 0.004875166981946677,
+    "load_validate_scenario": 0.03433854697505012,
+    "record_baseline": 5.267036613076925e-06,
+    "restore_destroy": 6.05116429599002,
+    "score_diagnosis": 0.8694030650076456,
+    "snapshot_after_sut": 7.273229369020555,
+    "snapshot_before_sut": 6.557768605998717,
+    "snapshot_healthy": 6.4902869000216015,
+    "write_result": 0.0076668140245601535
+  },
+  "timeline": {
+    "trace": {
+      "path": null,
+      "available": false,
+      "reason": "the result records no trace file"
+    },
+    "budget": {
+      "granted_seconds": 400.0,
+      "used_seconds": 91.267778258014,
+      "remaining_seconds": 308.732,
+      "used_ratio": 0.2282,
+      "exhausted": false,
+      "exceeded": false,
+      "overrun_seconds": 0.0,
+      "sut_status": "completed",
+      "invoke_sut_seconds": 91.28977645898703
+    },
+    "turns": 9,
+    "turns_source": "record (execution.model_turns)",
+    "seconds": {
+      "thinking": 17.818,
+      "tools": 73.402,
+      "episode": 91.267778258014,
+      "unaccounted": 0.048
+    },
+    "final_response": {
+      "status": "completed",
+      "summary": "Initial validation showed only guest1<->web1 failed while other paths were healthy. Reads confirmed guest1 had the correct 10.10.20.10/24 address and default route via leaf1, and leaf1 guest gateway 10.10.20.1/24 was present and enabled. On leaf2, I found an active static host route 10.10.20.10/32 pointing to a blackhole next-hop-group, which specifically broke traffic toward guest1. I deleted that route on leaf2. Final public success validation passed, with all lab connectivity checks succeeding including guest1<->web1."
+    },
+    "steps": [
+      {
+        "type": "thinking",
+        "turn": 1,
+        "seconds": 1.554,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "execute_validation"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 1
+      },
+      {
+        "type": "call",
+        "position": 1,
+        "tool": "execute_validation",
+        "category": "validation",
+        "ok": false,
+        "seconds": 28.553875232988503,
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "error": null,
+        "step": 2
+      },
+      {
+        "type": "thinking",
+        "turn": 2,
+        "seconds": 2.542,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_topology"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 3
+      },
+      {
+        "type": "call",
+        "position": 2,
+        "tool": "get_topology",
+        "category": "read",
+        "ok": true,
+        "seconds": 4.2121042497456074e-05,
+        "arguments": {
+          "nodes": null
+        },
+        "error": null,
+        "step": 4
+      },
+      {
+        "type": "thinking",
+        "turn": 3,
+        "seconds": 1.652,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_state"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 5
+      },
+      {
+        "type": "call",
+        "position": 3,
+        "tool": "get_state",
+        "category": "read",
+        "ok": true,
+        "seconds": 3.510479166987352,
+        "arguments": {
+          "nodes": [
+            "guest1",
+            "web1",
+            "leaf1",
+            "leaf2"
+          ],
+          "views": [
+            "interfaces",
+            "routes"
+          ]
+        },
+        "error": null,
+        "step": 6
+      },
+      {
+        "type": "thinking",
+        "turn": 4,
+        "seconds": 2.381,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 7
+      },
+      {
+        "type": "call",
+        "position": 4,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": false,
+        "seconds": 1.9028643270139582,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "/interface ethernet-1/20",
+            "/interface ethernet-1/20.0",
+            "/network-instance default interface ethernet-1/20.0",
+            "/network-instance default"
+          ]
+        },
+        "error": null,
+        "step": 8
+      },
+      {
+        "type": "thinking",
+        "turn": 5,
+        "seconds": 2.048,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 9
+      },
+      {
+        "type": "call",
+        "position": 5,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": false,
+        "seconds": 2.6798708889982663,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/interface ethernet-1/40",
+            "/network-instance default interface ethernet-1/40.0",
+            "/system acl",
+            "/interface ethernet-1/58",
+            "/network-instance default"
+          ]
+        },
+        "error": null,
+        "step": 10
+      },
+      {
+        "type": "thinking",
+        "turn": 6,
+        "seconds": 1.229,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_object"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 11
+      },
+      {
+        "type": "call",
+        "position": 6,
+        "tool": "get_object",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.5648453700123355,
+        "arguments": {
+          "kind": "route",
+          "name": "10.10.20.10/32",
+          "node": "leaf2"
+        },
+        "error": null,
+        "step": 12
+      },
+      {
+        "type": "thinking",
+        "turn": 7,
+        "seconds": 2.499,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "update_object"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 13
+      },
+      {
+        "type": "call",
+        "position": 7,
+        "tool": "update_object",
+        "category": "mutation",
+        "ok": true,
+        "seconds": 0.5077150829602033,
+        "arguments": {
+          "kind": "route",
+          "name": "10.10.20.10/32",
+          "node": "leaf2",
+          "reason": "Public validation shows only guest1<->web1 fails, while guest1 has correct address/default route and leaf1 guest gateway is up. Leaf2 has an active static host route 10.10.20.10/32 to blackhole, which specifically breaks return traffic from web1 toward guest1 without affecting other paths.",
+          "set": {
+            "delete": true
+          }
+        },
+        "error": null,
+        "step": 14
+      },
+      {
+        "type": "thinking",
+        "turn": 8,
+        "seconds": 1.209,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "execute_validation"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 15
+      },
+      {
+        "type": "call",
+        "position": 8,
+        "tool": "execute_validation",
+        "category": "validation",
+        "ok": true,
+        "seconds": 35.68214398098644,
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "error": null,
+        "step": 16
+      },
+      {
+        "type": "thinking",
+        "turn": 9,
+        "seconds": 2.704,
+        "kind": "text",
+        "tool_calls": [],
+        "content_chars": 561,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 17
+      }
+    ]
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "gpt-5.4",
+    "git": {
+      "commit": "731901c1947298ad4dfed2283f9e20eb776bd3ff",
+      "dirty": true,
+      "modified_files": 1,
+      "untracked_files": 11269
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 400,
+      "min_retry_tokens": null,
+      "model": "gpt-5.4",
+      "prompt_variant": "default",
+      "rag_chunk_chars": 1500,
+      "rag_chunk_overlap": 200,
+      "rag_context_corpus": {
+        "chunks": 105,
+        "files": [
+          {
+            "chunks": 105,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+          }
+        ],
+        "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+      },
+      "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+      "rag_corpus": {
+        "chunks": 1940,
+        "files": [
+          {
+            "chunks": 164,
+            "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+            "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+          },
+          {
+            "chunks": 1191,
+            "path": "Advanced_Configuration_Guide_26.7.md",
+            "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+          },
+          {
+            "chunks": 294,
+            "path": "Interfaces_Guide_26.7.md",
+            "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+          },
+          {
+            "chunks": 4,
+            "path": "arp.md",
+            "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+          },
+          {
+            "chunks": 16,
+            "path": "bridge.md",
+            "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+          },
+          {
+            "chunks": 4,
+            "path": "default-route.md",
+            "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+          },
+          {
+            "chunks": 40,
+            "path": "dhcp-server.md",
+            "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+          },
+          {
+            "chunks": 21,
+            "path": "dns.md",
+            "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+          },
+          {
+            "chunks": 21,
+            "path": "ethernet.md",
+            "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+          },
+          {
+            "chunks": 14,
+            "path": "flowtables.md",
+            "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+          },
+          {
+            "chunks": 22,
+            "path": "groups.md",
+            "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+          },
+          {
+            "chunks": 5,
+            "path": "ip.md",
+            "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+          },
+          {
+            "chunks": 47,
+            "path": "ipv4.md",
+            "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+          },
+          {
+            "chunks": 82,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+          },
+          {
+            "chunks": 6,
+            "path": "qos.md",
+            "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+          },
+          {
+            "chunks": 9,
+            "path": "zone.md",
+            "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+          }
+        ],
+        "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+      },
+      "rag_directory": "sut/langchain_rag_agent/rag_document",
+      "rag_embedding_model": null,
+      "rag_mode": "both",
+      "rag_retriever": "bm25",
+      "rag_top_k": 4,
+      "recursion_limit": 1000,
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.0.0",
+      "healthy": "1.0.0",
+      "preservation": "1.0.0",
+      "repair": "1.0.0"
+    },
+    "provider_reported_model": "gpt-5.4",
+    "reference_state_sha256": "af895a79f9941a6100b044dfc68d4b570d5885e767bce1a7d650aea01095a17b",
+    "scenario_seed": 713030911,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {},
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_reported_model": "gpt-5.4",
+    "sut_version": "1.0.0",
+    "topology_sha256": "bc80cdc0d5daadbf16faa94fe2c66229b378aaf910f6c617af3a2460ef95006d"
+  },
+  "sut_result": {
+    "see": "../../../records/connectivity.wrong_routing_table.m2.json",
+    "key": "sut_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "convergence_result": {
+    "see": "../../../records/connectivity.wrong_routing_table.m2.json",
+    "key": "convergence_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "cleanup_result": {
+    "see": "../../../records/connectivity.wrong_routing_table.m2.json",
+    "key": "cleanup_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 8
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "5 of 8 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 92035
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 17.818,
+        "action_seconds": 0.508,
+        "reading_seconds": 8.658,
+        "validation_seconds": 64.236,
+        "episode_seconds": 91.267778258014,
+        "unaccounted_seconds": 0.048
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 8
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: leaf2"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "files": {
+    "record": "../../../records/connectivity.wrong_routing_table.m2.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.wrong_routing_table.m2.judge.log",
+    "devices": "../../../logs/devices/connectivity.wrong_routing_table.m2/",
+    "note": "relative to this folder"
+  }
+}

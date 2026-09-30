@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form id="episode">
+  <section>
+    <h2>Subject</h2>
+    <div class="grid">
+      <label title="Which agent is put under test. It decides the server that is started, the flags this form offers, and the sut_identity the result is attributed to.">
+        Architecture
+        <select id="architecture" name="architecture"></select>
+      </label>
+      <label title="The model id the subject calls. Picking a registered one also hands the subject that endpoint's base URL and key through its environment, never on the command line.">
+        Model
+        <select id="model-choice"></select>
+        <small id="model-note"></small>
+      </label>
+      <label id="model-custom" title="A model id no registered endpoint serves. It runs on whatever base URL and key .env already defines.">
+        Model id
+        <input id="model" name="model" type="text" />
+        <small>No registered endpoint: the environment decides the key.</small>
+      </label>
+      <label title="The model that judges the subject's stated diagnosis against the injected fault (evaluation parameter 13, the ParaPLUIE score). A model a registered endpoint serves: its base URL is named to the judge, its key travels in the environment. None keeps the diagnosis in the record, unjudged.">
+        Diagnosis judge
+        <select id="diagnosis-judge"></select>
+      </label>
+      <label id="diagnosis-judge-custom" title="A judge model id no registered endpoint serves. It runs on the subject's endpoint with the subject's key.">
+        Judge model id
+        <input id="diagnosis_judge_model" type="text" />
+      </label>
+      <label title="How the judge reads the Yes/No log-probabilities. prompt_logprobs is the exact reading a vLLM endpoint gives; top_logprobs reads them from the candidates the OpenAI API lists for the generated token (gpt-4.1, gpt-4o).">
+        Judge reading
+        <select id="diagnosis_judge_reading">
+          <option value="">prompt_logprobs (vLLM, exact)</option>
+          <option value="top_logprobs">top_logprobs (OpenAI API)</option>
+        </select>
+      </label>
+      <label title="Address the subject's A2A server binds to, and the one the judge is pointed at. 127.0.0.1 keeps the subject on this machine.">
+        Host
+        <input id="host" name="host" type="text" value="127.0.0.1" />
+      </label>
+      <label title="Port the subject listens on. Empty uses the subject's own default. Whichever port is chosen is freed before the subject starts.">
+        Port
+        <input id="port" name="port" type="number" />
+      </label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Episode</h2>
+    <div class="grid">
+      <label title="The fault family to inject. Every scenario an experiment file can run is offered; the topologies below are narrowed to the ones it declares itself applicable to.">
+        Scenario
+        <select id="scenario" name="scenario"></select>
+      </label>
+      <label id="task-field" title="The wording the fault is put to the subject in, among the ones the scenario declares: the more precise the intent, the easier the task. The scenario's default wording is chosen first; another one is its own instance, named in the scenario id the judge is given (….low.m1).">
+        Task
+        <select id="task" name="task"></select>
+        <small id="task-note"></small>
+      </label>
+      <label title="Which fault of that scenario is injected: one selector and one operation. Scenario and method together make the scenario id the judge is given.">
+        Method
+        <select id="method" name="method"></select>
+      </label>
+      <label title="The topology the chosen scenario runs on: the one its experiment file was written for.">
+        Topology
+        <select id="topology" name="topology"></select>
+      </label>
+      <label title="The healthy state the lab is put in before the fault is injected, which the subject's ANI is also wired to (--healthy-state). Only the states the scenario was written for on this topology are offered, each an experiment file named in the note below. The false-positive files are not offered: the No fault box runs any of these on a healthy lab.">
+        Reference state
+        <select id="experiment" name="experiment"></select>
+        <small id="experiment-note"></small>
+      </label>
+      <label title="Either a seed already in reports/seed-registry.json — picking one fills in the scenario, the method and the experiment it was recorded with, and the episode is refused at launch if it no longer resolves to the fault it was written down as — or a new seed, drawn at launch and recorded with whatever it resolves to.">
+        Seed
+        <select id="seed-choice"></select>
+        <small id="seed-note"></small>
+      </label>
+      <label title="Wall-clock seconds the subject gets for one episode. Sent to the judge as --execution-budget-seconds and to the subject as --max-execution-seconds, so the two cannot disagree about when the episode is over.">
+        SUT time budget (seconds)
+        <input id="execution_budget_seconds" name="execution_budget_seconds"
+               type="number" step="1" min="1" value="400" />
+        <small>Given to the judge and to the subject's own cap.</small>
+      </label>
+      <label title="What happens to the lab once the episode is judged. restore replays the fault's restore commands and re-applies the reference state, leaving the lab up; destroy tears the topology down. Empty keeps the experiment's own choice.">
+        Cleanup
+        <select id="cleanup" name="cleanup">
+          <option value="">experiment default</option>
+          <option value="restore">restore</option>
+          <option value="destroy">destroy</option>
+        </select>
+      </label>
+      <label class="checkbox" title="Run the chosen instance on a healthy lab without injecting its fault: the false-positive episode, where any attempted mutation is the failure.">
+        <input id="no_fault" name="no_fault" type="checkbox" />
+        No fault (false-positive episode on a healthy lab)
+      </label>
+      <label class="checkbox" title="The subject returns a placeholder report without calling a provider or its tools: the plumbing is exercised and no tokens are spent.">
+        <input id="dry_run" name="dry_run" type="checkbox" />
+        Dry run (subject answers without calling a provider)
+      </label>
+    </div>
+  </section>
+
+  <details>
+    <summary>Advanced</summary>
+    <div class="grid">
+      <label title="Ceiling on output tokens per model call.">Max tokens<input id="max_tokens" type="number" /></label>
+      <label title="Sampling temperature. Empty leaves the model's own supported default.">Temperature<input id="temperature" type="number" step="0.1" /></label>
+      <label title="The system prompt the subject runs under: 'default' is the one it ships, any other name is a file in its prompts/ directory.">Prompt variant<select id="prompt_variant"></select></label>
+      <label title="Whether the subject asks the model to reason. How that is asked depends on the model family, and a family with no reasoning switch is refused at startup rather than run as if the setting had held.">
+        Thinking
+        <select id="enable_thinking">
+          <option value="">model default</option>
+          <option value="true">on</option>
+          <option value="false">off</option>
+        </select>
+      </label>
+      <label title="The mechanism used to ask for it: auto reads it from the model family, chat_template sends the vLLM/Qwen chat-template flag, system_prompt puts a directive in front of the prompt. Reaches the subject through the environment.">
+        Thinking style
+        <select id="thinking_style">
+          <option value="">unset</option>
+          <option value="auto">auto</option>
+          <option value="chat_template">chat_template</option>
+          <option value="system_prompt">system_prompt</option>
+        </select>
+      </label>
+      <label title="Effort level, for the families that take one instead of a flag. Only meaningful with thinking on, and refused for the chat-template mechanism.">
+        Thinking effort
+        <select id="thinking_effort">
+          <option value="">unset</option>
+          <option value="minimal">minimal</option>
+          <option value="low">low</option>
+          <option value="medium">medium</option>
+          <option value="high">high</option>
+        </select>
+      </label>
+      <label title="How much of the subject's audit trace is printed to its own server log. Never returned over A2A and never saved in the benchmark JSON.">
+        Debug trace
+        <select id="debug_trace">
+          <option value="">unset</option>
+          <option value="off">off</option>
+          <option value="summary">summary</option>
+          <option value="full">full</option>
+        </select>
+      </label>
+      <label title="How many ANI calls the subject may make in one episode. A call past the cap is refused, never dispatched.">ANI call limit<input id="ani_call_limit" type="number" /></label>
+      <label title="Smallest output reservation a provider context rejection may be retried with. Empty keeps halving down to one token.">Min retry tokens<input id="min_retry_tokens" type="number" /></label>
+      <label title="Cut one tool result to this many characters before the model sees it, spilling the whole result to the artifact directory. Empty sends results whole.">Tool result chars<input id="tool_result_chars" type="number" /></label>
+      <label title="Most the serialized transcript may be when the model is called. Superseded reads are elided first, and the episode ends by name if that is not enough. Empty for no bound.">Context budget chars<input id="context_budget_chars" type="number" /></label>
+      <label data-flag="max_context_chars" title="LangChain baseline only: how much of one ANI reply reaches the model. A longer reply is truncated and written whole to the artifact directory.">Max context chars<input id="max_context_chars" type="number" /></label>
+      <label title="End the episode after this many completion claims in a row the gate refused. Empty keeps refusing until the budget runs out.">Max consecutive rejections<input id="max_consecutive_rejections" type="number" /></label>
+      <label title="The LangChain agent's recursion limit: how many steps its LangGraph run may take in one episode.">Recursion limit<input id="recursion_limit" type="number" /></label>
+      <label title="Where a truncated tool result is written whole.">Artifact directory<input id="artifact_directory" type="text" /></label>
+    </div>
+  </details>
+
+  <div class="actions">
+    <button type="button" id="validate" title="Compile the configuration, the scenario and its oracles and report what would run. Nothing is started and the lab is not touched.">Validate</button>
+    <button type="submit" id="launch" title="Start the subject, prove the right one is answering, run the judge against it, then stop it. One episode at a time.">Launch episode</button>
+    {% if busy %}<span class="warning">An episode is already running.</span>{% endif %}
+  </div>
+  <pre id="feedback" hidden></pre>
+</form>
+
+{% if runs %}
+<section>
+  <h2>Recent runs</h2>
+  <table>
+    <thead><tr><th>Run</th><th>State</th><th>Scenario</th><th>Model</th><th>Started</th></tr></thead>
+    <tbody>
+      {% for run in runs %}
+      <tr>
+        <td><a href="/run/{{ run.id }}">{{ run.id }}</a></td>
+        <td><span class="state {{ run.state }}">{{ run.state }}</span></td>
+        <td>{{ run.request.scenario_id }}</td>
+        <td>{{ run.request.model }}</td>
+        <td><time datetime="{{ run.started_at }}">{{ run.started_at }}</time></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>window.CATALOG = {{ catalog | safe }};
+window.SEEDS = {{ seeds | safe }};</script>
+<script src="/static/endpoint_sync.js"></script>
+<script src="/static/scenario_picker.js"></script>
+<script src="/static/app.js"></script>
+{% endblock %}

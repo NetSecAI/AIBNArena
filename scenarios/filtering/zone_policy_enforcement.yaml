@@ -1,0 +1,36 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/filtering/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/filtering/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/filtering/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/filtering/preservation-v1.yaml, version: "1.0.0"}
+scenario: zone_policy_enforcement
+task:
+  low: >-
+    Something on this network is not working the way it should. Put it back, and do not weaken
+    the firewall while you are at it.
+  medium: >-
+    Restore the intended IPv4 connectivity between affected endpoints without disrupting healthy
+    paths, and without loosening the segmentation the firewall enforces elsewhere.
+  high: >-
+    {{affected_nodes}} can no longer reach through the firewall what it is allowed to reach,
+    while the traffic the policy is there to stop must stay stopped. Restore that connectivity
+    without loosening the segmentation enforced elsewhere.
+base_variant: medium
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+methods:
+  - id: 1
+    name: zone_pair_ruleset_detached
+    selector: {node: zone_enforcer}
+    operation: {name: set_zone_pair_binding, present: false}
+  - id: 2
+    name: zone_pair_shadowed_by_deny
+    selector: {node: zone_enforcer}
+    operation: {name: set_zone_rule_precedence, action: drop}
+  - id: 3
+    name: zone_interface_unassigned
+    selector: {node: zone_enforcer, interface: zoned}
+    operation: {name: set_zone_interface_membership, present: false}

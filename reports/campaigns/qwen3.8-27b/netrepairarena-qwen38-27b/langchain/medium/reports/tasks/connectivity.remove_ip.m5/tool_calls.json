@@ -1,0 +1,274 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.3159001254243776e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 26.606774857000346,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-2f611bb87a554d593d9f418306677960a102a6e09f76e2dd7f8852a5048009ee.json",
+      "category": "read",
+      "duration_seconds": 1.4841224709998642,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "spine1",
+          "spine2"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-269ca44a35122e76d64285e58780fd2d98fbc8111f41a03a57f1d86ff215f0f2.json",
+      "category": "read",
+      "duration_seconds": 3.2806558120009868,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "app1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.09812203500041505,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "finance1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.10063798200098972,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "finance1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.10245523800040246,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "app1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.12840917200082913,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/30.0",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7449502890012809,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-5ab45ebb4c1ad6d1539902674423e0f85c304f3f17c35e309d02840b0f910580.json",
+      "category": "read",
+      "duration_seconds": 0.9219329640000069,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "user1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.19529634399987117,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "guest1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.19574449799983995,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "finance1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.4081306339994626,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip addr add 10.10.30.10/24 dev eth1",
+              "ip route add default via 10.10.30.1 dev eth1"
+            ],
+            "reason": "finance1 sits on finance_vlan whose gateway is leaf2's 10.10.30.1/24, but eth1 was assigned 203.0.113.10/24 (the internet segment) and had no default route, causing 'Network unreachable' toward app1; peer pattern (app1, guest1, user1) uses <subnet>.10 with default via <subnet>.1",
+            "rollback_commands": [
+              "ip route del default via 10.10.30.1 dev eth1",
+              "ip addr del 10.10.30.10/24 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.0002534340001147939,
+      "error": "update_config.change.commands contains 2 commands for Linux target finance1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip addr add 10.10.30.10/24 dev eth1"
+            ],
+            "reason": "finance1 sits on finance_vlan whose gateway is leaf2's 10.10.30.1/24; eth1 was wrongly assigned 203.0.113.10/24; peer pattern (app1, guest1, user1) is <subnet>.10",
+            "rollback_commands": [
+              "ip addr del 10.10.30.10/24 dev eth1"
+            ],
+            "target": "finance1"
+          },
+          {
+            "commands": [
+              "ip route add default via 10.10.30.1 dev eth1"
+            ],
+            "reason": "finance1 has no default route (peer hosts all use default via their VLAN gateway 10.10.x.1)",
+            "rollback_commands": [
+              "ip route del default via 10.10.30.1 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.7556542420006735,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_3e0e9fdeea630307"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 36.36864226599937,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

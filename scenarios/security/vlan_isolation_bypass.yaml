@@ -1,0 +1,39 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/security/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/security/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/security/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/security/preservation-v1.yaml, version: "1.0.0"}
+scenario: vlan_isolation_bypass
+task_mode:
+  exploit: >-
+    In the isolated benchmark network, determine whether {{attacker}} in {{source_zone}} can bypass VLAN isolation and reach the unauthorized target {{target}} in {{target_zone}}.
+  detect: >-
+    Determine whether unauthorized cross-zone access is possible from {{source_zone}} to {{target_zone}} and identify the responsible forwarding state.
+  correct: >-
+    Restore the intended isolation from {{source_zone}} to {{target_zone}} while required legitimate traffic remains available.
+  prevent: >-
+    Harden the L2/VLAN boundary between {{source_zone}} and {{target_zone}} so an endpoint cannot obtain forwarding privileges for an unauthorized VLAN.
+security_properties:
+  - authorization
+  - confidentiality
+  - integrity
+stride:
+  - elevation_of_privilege
+extra_info:
+  network_layers:
+    - L2 VLAN / IEEE 802.1Q forwarding context
+  binding:
+    strategy: security_cross_zone_vlan
+    source_zones: [guest]
+    target_zones: [finance, management, servers]
+  note: elevation_of_privilege is used when the bypass grants forwarding/access capabilities outside the endpoint's authorized VLAN; resulting impact can additionally be disclosure or tampering
+  references:
+    - title: Cisco VLAN configuration security guidance
+      url: https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/vlan/vlan-configuration-guide/configure-vlan.html
+    - title: NIST SP 800-215 - Guide to a Secure Enterprise Network Landscape
+      url: https://csrc.nist.gov/pubs/sp/800/215/final
+
+
+#Teoretically, we can detect this security issue by looking at the configuration of the network and checking if there is a VLAN isolation bypass. If there is, then we can conclude that there is a VLAN isolation bypass issue.

@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ibn-eval.example/schemas/benchmark-result.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version", "run_id", "created_at", "status", "experiment_id",
+    "scenario", "provenance", "operation_counts", "phase_durations",
+    "evaluations", "metrics", "sut_result", "cleanup_result",
+    "convergence_result", "error"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["completed", "failed"]},
+    "experiment_id": {"type": "string", "minLength": 1},
+    "scenario": {
+      "type": "object",
+      "required": ["id", "version", "domain", "sut_task_id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "domain": {"enum": ["connectivity", "dhcp_dns", "filtering", "qos", "security"]},
+        "sut_task_id": {"type": "string", "pattern": "^sut-[0-9a-f]{32}$"}
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "configured_model", "sut_reported_model", "provider_reported_model",
+        "a2a_sdk_version", "sut_identity", "sut_version", "model_parameters",
+        "git", "scenario_version", "oracle_versions", "topology_sha256",
+        "reference_state_sha256", "scenario_seed"
+      ],
+      "properties": {
+        "configured_model": {"type": ["string", "null"]},
+        "sut_reported_model": {"type": ["string", "null"]},
+        "provider_reported_model": {"type": ["string", "null"]},
+        "a2a_sdk_version": {"type": ["string", "null"]},
+        "sut_identity": {"type": "string", "minLength": 1},
+        "sut_version": {"type": "string", "minLength": 1},
+        "model_parameters": {"type": "object"},
+        "serving": {"type": "object"},
+        "git": {
+          "type": "object",
+          "required": ["commit", "dirty"],
+          "properties": {
+            "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "dirty": {"type": "boolean"},
+            "modified_files": {"type": "integer", "minimum": 0},
+            "untracked_files": {"type": "integer", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "scenario_version": {"type": "string", "minLength": 1},
+        "seed_campaign": {
+          "type": ["integer", "null"],
+          "description": "The campaign this episode was a cell of; the same value in every record of one campaign. Null for a standalone episode."
+        },
+        "scenario_seed": {"type": "integer"},
+        "intent_variant": {"type": ["string", "null"]},
+        "oracle_versions": {
+          "type": "object",
+          "minProperties": 3,
+          "additionalProperties": {"type": "string", "minLength": 1}
+        },
+        "topology_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "reference_state_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "operation_counts": {
+      "type": "object",
+      "required": [
+        "llm_calls", "ani_reads", "ani_mutations", "validations", "successful_mutations",
+        "failed_operations", "unsafe_operations", "input_tokens",
+        "output_tokens", "total_tokens"
+      ],
+      "properties": {
+        "llm_calls": {"type": "integer", "minimum": 0},
+        "ani_reads": {"type": "integer", "minimum": 0},
+        "ani_mutations": {"type": "integer", "minimum": 0},
+        "validations": {"type": "integer", "minimum": 0},
+        "successful_mutations": {"type": "integer", "minimum": 0},
+        "successful_reads": {"type": "integer", "minimum": 0},
+        "failed_operations": {"type": "integer", "minimum": 0},
+        "unsafe_operations": {"type": "integer", "minimum": 0},
+        "input_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "output_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "total_tokens": {"type": ["integer", "null"], "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "phase_durations": {
+      "type": "object",
+      "required": [
+        "load_configuration", "load_validate_scenario", "load_oracles",
+        "deploy_reset_testbed", "apply_reference_state", "evaluate_healthy",
+        "record_baseline", "inject_fault", "evaluate_degradation", "invoke_sut",
+        "evaluate_repair_preservation", "calculate_metrics", "write_result", "restore_destroy"
+      ],
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "evaluations": {"type": "object", "additionalProperties": {"type": "object"}},
+    "metrics": {"type": "object"},
+    "sut_result": {"type": "object"},
+    "cleanup_result": {"type": "object"},
+    "convergence_result": {"type": "object"},
+    "device_configurations": {"type": ["object", "null"]},
+    "error": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["phase", "type", "message"],
+          "properties": {
+            "phase": {"type": "string", "minLength": 1},
+            "type": {"type": "string", "minLength": 1},
+            "message": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "completed"}}},
+      "then": {
+        "properties": {
+          "evaluations": {"required": ["healthy", "repair"]},
+          "error": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "metrics": {"not": {"properties": {"fault_applicable": {"const": false}}, "required": ["fault_applicable"]}}
+        }
+      },
+      "then": {"properties": {"evaluations": {"required": ["expected_degradation"]}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}},
+      "then": {"properties": {"error": {"type": "object"}}}
+    }
+  ],
+  "additionalProperties": false
+}

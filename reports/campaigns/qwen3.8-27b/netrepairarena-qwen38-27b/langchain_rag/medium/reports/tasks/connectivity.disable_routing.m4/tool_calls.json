@@ -1,0 +1,248 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 6.0567999753402546e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 24.403678894000222,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/40",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8408865090004838,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "web1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.21943714700046257,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "web1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.16939820700008568,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "arp",
+        "name": "10.10.40.10",
+        "node": "user1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1251967150001292,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "user1"
+        ],
+        "views": [
+          "routes",
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2588550730006318,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-57daf7701f93fc05e5a8c716ed3662061faa2b3d212f5394e55939d78a53c760.json",
+      "category": "read",
+      "duration_seconds": 0.6807319810004628,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-09f0bb409e012e39e4419b2d7c7f6f9a1125cd82151e1bdf5f325bbd7e35944a.json",
+      "category": "read",
+      "duration_seconds": 0.7762391599999319,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-09f0bb409e012e39e4419b2d7c7f6f9a1125cd82151e1bdf5f325bbd7e35944a.json",
+      "category": "read",
+      "duration_seconds": 0.7787302160004401,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-976de8c52fcdbc935ff6b3e7da7d5f7ad46d8a8209ac24b6b2f223b71d896a23.json",
+      "category": "read",
+      "duration_seconds": 0.6441916409994519,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "web1"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1284653390002859,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "web1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2719730790004178,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route add default via 10.10.40.1 dev eth1"
+            ],
+            "reason": "web1 route table shows only the connected 10.10.40.0/24 and 172.20.0.0/24 routes, no default route; web1 pings fail with 'Network unreachable' for all off-subnet destinations, matching PB-14 symptom of a host missing its default route. Its gateway 10.10.40.1 on leaf2 is up and present.",
+            "rollback_commands": [
+              "ip route del default via 10.10.40.1 dev eth1"
+            ],
+            "target": "web1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17600129100082995,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_b6a9ef690d1876c3"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 33.87350198399963,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

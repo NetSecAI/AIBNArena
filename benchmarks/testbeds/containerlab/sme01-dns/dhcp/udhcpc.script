@@ -1,0 +1,56 @@
+#!/bin/sh
+# udhcpc hook for the sme01-dns client endpoints.
+#
+# Deliberately narrower than the BusyBox default script, which gets two things
+# wrong inside a containerlab node:
+#
+#   * its routes() adds the lease's gateway with metric 200+ifindex and only
+#     deletes defaults that already point out of $interface, so containerlab's
+#     management default via eth0 (metric 0) keeps winning and the data plane
+#     is never used. The static addressing this replaces used `ip route
+#     replace default`, which took the management default out; so does this.
+#
+#   * its resolvconf() writes a temp file and renames it over /etc/resolv.conf.
+#     That file is a bind mount in a container, so the rename fails with EBUSY
+#     and the lease's option 6 is silently dropped. It has to be truncated in
+#     place instead.
+#
+# Everything the lease carries is applied here and nowhere else: address,
+# gateway (option 3), resolver (option 6) and domain (option 15).
+
+RESOLV_CONF=/etc/resolv.conf
+
+case "$1" in
+    deconfig)
+        ip -4 addr flush dev "$interface"
+        ;;
+
+    bound|renew)
+        ip -4 addr replace "$ip/$mask" dev "$interface"
+        ip -4 link set dev "$interface" up
+
+        # One default route, out of the data interface. `replace` overwrites
+        # the management default rather than competing with it on metric.
+        if [ -n "$router" ]; then
+            for gw in $router; do
+                ip -4 route replace default via "$gw" dev "$interface"
+                break
+            done
+        fi
+
+        # Truncate in place -- see the note above about the bind mount.
+        if [ -n "$dns" ]; then
+            : > "$RESOLV_CONF"
+            if [ -n "$search" ]; then
+                echo "search $search" >> "$RESOLV_CONF"
+            elif [ -n "$domain" ]; then
+                echo "search $domain" >> "$RESOLV_CONF"
+            fi
+            for server in $dns; do
+                echo "nameserver $server" >> "$RESOLV_CONF"
+            done
+        fi
+        ;;
+esac
+
+exit 0

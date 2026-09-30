@@ -1,0 +1,188 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.6750999899813905e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 25.508371855001315,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/50",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8172340319997602,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "app1"
+        ],
+        "views": [
+          "interfaces",
+          "routes",
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5017427610000595,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.4036025309997058,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip addr add 10.10.50.10/24 dev eth1",
+              "ip route add default via 10.10.50.1 dev eth1"
+            ],
+            "reason": "app1 eth1 is 10.10.50.10/32 with no default route; finance1 on the same fabric uses /24 + default via its .1 gateway. /32 kernel route causes 'Network unreachable' to all off-link destinations and prevents gateway ARP. Add /24 address and default route to match the working pattern.",
+            "rollback_commands": [
+              "ip route del default via 10.10.50.1 dev eth1",
+              "ip addr del 10.10.50.10/24 dev eth1"
+            ],
+            "target": "app1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00013380800010054372,
+      "error": "update_config.change.commands contains 2 commands for Linux target app1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip addr add 10.10.50.10/24 dev eth1"
+            ],
+            "reason": "app1 eth1 is /32; /32 kernel route causes 'Network unreachable' to all off-link destinations. finance1 uses /24 + default via .1. Add /24 to match.",
+            "rollback_commands": [
+              "ip addr del 10.10.50.10/24 dev eth1"
+            ],
+            "target": "app1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.13929860100142832,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_b98f7c1956c48d7f"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route add default via 10.10.50.1 dev eth1"
+            ],
+            "reason": "app1 has no default route (only 172.21.0.0/24 mgmt). Add default via 10.10.50.1 to match finance1.",
+            "rollback_commands": [
+              "ip route del default via 10.10.50.1 dev eth1"
+            ],
+            "target": "app1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.23788103699916974,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_33feee24302ea8df"
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "app1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.18177174999982526,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 34.658444289001636,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

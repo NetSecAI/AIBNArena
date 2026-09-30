@@ -1,0 +1,196 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 23.323848797008395,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.775500226765871e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2",
+          "web1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-f13b7536dc8998abf97d190d6144fa9ff6eed4b0d767db049cbc7e70188b5918.json",
+      "category": "read",
+      "duration_seconds": 1.6131980410136748,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/interface ethernet-1/40",
+          "/interface ethernet-1/50",
+          "/network-instance default interface",
+          "/network-instance default static-routes",
+          "/routing-policy",
+          "/acl"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-126279f72238d941df8ac2e42558eaf7e29f1005b90fa78b77b6df82742d403f.json",
+      "category": "read",
+      "duration_seconds": 2.975790709024295,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.40.0/24",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5361806220025755,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "0.0.0.0/0",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7044090959825553,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/network-instance default next-hop-group",
+          "/network-instance default"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.0701162600016687,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "web1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.30270927198580466,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "app1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1501202410145197,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route add default via 10.10.40.1 dev eth1"
+            ],
+            "reason": "web1 has 10.10.40.10/24 on eth1 but no default route, causing Network unreachable to remote subnets while same leaf2 routing works for app1 and DMZ gateway 10.10.40.1 is configured/up.",
+            "rollback_commands": [
+              "ip route del default via 10.10.40.1 dev eth1"
+            ],
+            "target": "web1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.15876636499888264,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_af29afe5affc631b"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 36.763348331005545,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

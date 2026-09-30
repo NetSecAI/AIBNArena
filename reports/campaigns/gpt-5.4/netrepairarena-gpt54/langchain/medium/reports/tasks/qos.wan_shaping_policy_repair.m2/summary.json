@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-v2-20260927T135117Z/langchain_agent-gpt-5-4-qos-wan_shaping_policy_repair-m2-fault-seed338921343-7a11743dddf5.json",
+    "sha256": "4b0abd458833b964f67eb3b05f7cb35c5403aa0f993125b6e9e17a5307c1f9f6",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-gpt-5-4-qos-wan_shaping_policy_repair-m2-fault-seed338921343-7a11743dddf5",
+    "created_at": "2026-09-27T17:30:43.437405+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-gpt-5-4-qos-wan_shaping_policy_repair-m2-fault-seed338921343",
+    "scenario": {
+      "domain": "qos",
+      "id": "qos.wan_shaping_policy_repair.m2",
+      "sut_task_id": "sut-d510d84368414f579776b440a766def7",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "failed",
+    "sut_verified": false,
+    "final_summary": "Observed connectivity from user1 to external1 and broader lab connectivity were intact, but public validation still failed the throughput criterion: user1->external1 under contention measured 0.432 Mbps versus an enforced floor of 6.8 Mbps for the 8 Mbps objective. On wan1 I confirmed only an HTB root qdisc on eth2, implicating WAN QoS, but safe ANI reads did not expose class/filter details and attempted scoped QoS repair via update_object was rejected by backend tc grammar validation before any change was applied. No device configuration was changed; no safe repair could be completed with the available ANI operations.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed connectivity from user1 to external1 and broader lab connectivity were intact, but public validation still failed the throughput criterion: user1->external1 under contention measured 0.432 Mbps versus an enforced floor of 6.8 Mbps for the 8 Mbps objective. On wan1 I confirmed only an HTB root qdisc on eth2, implicating WAN QoS, but safe ANI reads did not expose class/filter details and attempted scoped QoS repair via update_object was rejected by backend tc grammar validation before any change was applied. No device configuration was changed; no safe repair could be completed with the available ANI operations.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -15.375,
+      "log_p_yes": -0.0,
+      "method": "assured_class_starved",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the assured class 10 (8 Mbit/s for user1 to external1) is starved: its rate was cut to 452 kbit/s instead of 8 Mbit/s.",
+      "score": 15.375,
+      "target": "wan1"
+    },
+    "success": false,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 90.74831358599477,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "qos.shaping_repair.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "qos.shaping_repair.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "qos.shaping_repair.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "qos.shaping_repair.repair",
+      "version": "1.0.0",
+      "passed": false,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed connectivity from user1 to external1 and broader lab connectivity were intact, but public validation still failed the throughput criterion: user1->external1 under contention measured 0.432 Mbps versus an enforced floor of 6.8 Mbps for the 8 Mbps objective. On wan1 I confirmed only an HTB root qdisc on eth2, implicating WAN QoS, but safe ANI reads did not expose class/filter details and attempted scoped QoS repair via update_object was rejected by backend tc grammar validation before any change was applied. No device configuration was changed; no safe repair could be completed with the available ANI operations.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -15.375,
+      "log_p_yes": -0.0,
+      "method": "assured_class_starved",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the assured class 10 (8 Mbit/s for user1 to external1) is starved: its rate was cut to 452 kbit/s instead of 8 Mbit/s.",
+      "score": 15.375,
+      "target": "wan1"
+    },
+    "domain": "qos",
+    "environment_success": false,
+    "failed_operation_count": 5,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 4,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "quality_repair_pass_rate": 0.0,
+    "read_count": 5,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 0,
+    "successful_read_count": 5,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 12,
+    "containerlab_reads": 5,
+    "containerlab_mutations": 4,
+    "containerlab_mutations_ok": 0,
+    "sut_validations": 2,
+    "failed_operations": 5,
+    "unsafe_operations": 0,
+    "input_tokens": 70475,
+    "output_tokens": 1021,
+    "total_tokens": 71496,
+    "recorded": {
+      "ani_mutations": 4,
+      "ani_reads": 5,
+      "failed_operations": 5,
+      "input_tokens": 70475,
+      "llm_calls": 12,
+      "output_tokens": 1021,
+      "successful_mutations": 0,
+      "successful_reads": 5,
+      "total_tokens": 71496,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 22.596,
+    "action_seconds": 0.0,
+    "reading_seconds": 1.655,
+    "validation_seconds": 66.447,
+    "episode_seconds": 90.74831358599477,
+    "unaccounted_seconds": 0.05,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 70475,
+    "output_tokens": 1021,
+    "total_tokens": 71496,
+    "llm_calls": 12,
+    "output_tokens_per_call": 85.1,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": false
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": false,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 7,
+      "calls": 11
+    },
+    "repeat_action_rate": {
+      "repeated": 0,
+      "calls": 11
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": false
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": true
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 5,
+      "validate": 2,
+      "apply_config": 4
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 11
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "6 of 11 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 71496
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 22.596,
+        "action_seconds": 0.0,
+        "reading_seconds": 1.655,
+        "validation_seconds": 66.447,
+        "episode_seconds": 90.74831358599477,
+        "unaccounted_seconds": 0.05
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 11
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": false
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "0 device(s) changed by the subject: none"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 89.30472137298784,
+    "calculate_metrics": 3.105899668298662e-05,
+    "deploy_reset_testbed": 17.714338887977647,
+    "evaluate_degradation": 27.650652463984443,
+    "evaluate_healthy": 17.43267018100596,
+    "evaluate_repair_preservation": 74.09860844499781,
+    "inject_fault": 0.14630066699464805,
+    "invoke_sut": 90.7680781459785,
+    "load_configuration": 0.0001761089952196926,
+    "load_oracles": 0.007145971991121769,
+    "load_validate_scenario": 0.03761845201370306,
+    "record_baseline": 4.749017534777522e-06,
+    "restore_destroy": 13.843962732993532,
+    "score_diagnosis": 0.7791020380100235,
+    "snapshot_after_sut": 8.788074559997767,
+    "snapshot_before_sut": 8.437815938988933,
+    "snapshot_healthy": 10.782719632989028,
+    "write_result": 0.010046331997727975
+  },
+  "files": {
+    "record": "../../../records/qos.wan_shaping_policy_repair.m2.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/qos.wan_shaping_policy_repair.m2.judge.log",
+    "devices": "../../../logs/devices/qos.wan_shaping_policy_repair.m2/",
+    "note": "relative to this folder"
+  }
+}

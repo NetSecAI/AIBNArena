@@ -1,0 +1,250 @@
+schema_version: "0.1"
+topology:
+  id: sme_leaf_spine_dmz_dns
+  name: Small SME topology with routed leaves behind a zoned VyOS firewall, an internal resolver and a DMZ nameserver
+  size: small
+  profile: enterprise_sme
+  defaults:
+    endpoint_interface_mtu: 1500
+    static_next_hop_group_template: "to-{gateway}"
+    # How the zone rulesets are named on the enforcers. The healthy state renders
+    # this spelling and every filtering fault addresses a ruleset by it, so the
+    # two can never drift apart.
+    zone_ruleset_template: "{from_zone}-TO-{to_zone}"
+  environment:
+    type: containerlab
+    lab_name: sme01-dns
+    topology_path: benchmarks/testbeds/containerlab/sme01-dns/topology.clab.yml
+  nodes:
+    # Single firewall replacing both spines: fabric transit, the DHCP server
+    # the leaves relay to, and the INTERNAL/DMZ/OUTSIDE enforcement point.
+    firewall:
+      kind: vyos
+      roles: [firewall, gateway, router, transit, dhcp_server]
+      capabilities: [ipv4_forwarding, static_routing, security_zones, zone_policy, acl, nat, dhcp_server]
+      interfaces:
+        "eth1": {segment: fabric_l1_fw, ipv4: 10.255.0.0/31, zone: INTERNAL}
+        "eth2": {segment: fabric_l2_fw, ipv4: 10.255.0.2/31, zone: INTERNAL}
+        "eth3": {segment: dmz_vlan, ipv4: 10.10.40.1/24, zone: DMZ}
+        "eth4": {segment: dns_dmz, ipv4: 10.10.41.1/24, zone: DMZ}
+        "eth5": {segment: server_vlan, ipv4: 10.10.50.1/24, zone: DMZ}
+        "eth6": {segment: internet, ipv4: 203.0.113.1/24, zone: OUTSIDE}
+    leaf1:
+      kind: nokia_srlinux
+      roles: [leaf, router, access_switch, gateway, dhcp_relay]
+      capabilities: [ipv4_forwarding, static_routing, ospf, acl, qos, vlan, trunk, dhcp_relay]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l1_fw, ipv4: 10.255.0.1/31}
+        "ethernet-1/10": {segment: users_vlan, ipv4: 10.10.10.1/24}
+        "ethernet-1/11": {segment: dns_internal, ipv4: 10.10.60.1/24}
+        "ethernet-1/20": {segment: guest_vlan, ipv4: 10.10.20.1/24}
+        "ethernet-1/57": {segment: mgmt_vlan, ipv4: 10.10.99.1/24}
+    leaf2:
+      kind: nokia_srlinux
+      roles: [leaf, router, access_switch, gateway, dhcp_relay]
+      capabilities: [ipv4_forwarding, static_routing, ospf, acl, qos, vlan, trunk, dhcp_relay]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l2_fw, ipv4: 10.255.0.3/31}
+        "ethernet-1/30": {segment: finance_vlan, ipv4: 10.10.30.1/24}
+    user1:
+      kind: linux
+      # Nothing here is configured on the host: the resolver and the address
+      # below are what the DHCP reservation hands out. The MAC is the key the
+      # reservation is looked up by, so it is pinned in topology.clab.yml.
+      resolver: 10.10.60.10
+      address_assignment: dhcp
+      mac: 02:c1:ab:0a:0a:0a
+      roles: [client, employee]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: users_vlan, ipv4: 10.10.10.10/24}
+    guest1:
+      kind: linux
+      # Nothing here is configured on the host: the resolver and the address
+      # below are what the DHCP reservation hands out. The MAC is the key the
+      # reservation is looked up by, so it is pinned in topology.clab.yml.
+      resolver: 10.10.60.10
+      address_assignment: dhcp
+      mac: 02:c1:ab:0a:14:0a
+      roles: [client, guest]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: guest_vlan, ipv4: 10.10.20.10/24}
+    finance1:
+      kind: linux
+      # Nothing here is configured on the host: the resolver and the address
+      # below are what the DHCP reservation hands out. The MAC is the key the
+      # reservation is looked up by, so it is pinned in topology.clab.yml.
+      resolver: 10.10.60.10
+      address_assignment: dhcp
+      mac: 02:c1:ab:0a:1e:0a
+      roles: [client, restricted_endpoint]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: finance_vlan, ipv4: 10.10.30.10/24}
+    web1:
+      kind: linux
+      resolver: 10.10.60.10
+      roles: [server, dmz_server]
+      capabilities: [ipv4, http_server]
+      interfaces:
+        eth1: {segment: dmz_vlan, ipv4: 10.10.40.10/24}
+    app1:
+      kind: linux
+      resolver: 10.10.60.10
+      roles: [server, application_server]
+      capabilities: [ipv4, traffic_sink]
+      interfaces:
+        eth1: {segment: server_vlan, ipv4: 10.10.50.10/24}
+    external1:
+      kind: linux
+      resolver: 10.10.41.10
+      roles: [client, external_client]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: internet, ipv4: 203.0.113.10/24}
+    dns-int:
+      kind: linux
+      # A nameserver is infrastructure that endpoints consume, not an endpoint
+      # of its own: the `service` role keeps it out of endpoint_nodes().
+      roles: [service, server, dns_resolver, infrastructure]
+      capabilities: [ipv4, dns_server, dns_recursion, dns_authoritative]
+      interfaces:
+        eth1: {segment: dns_internal, ipv4: 10.10.60.10/24}
+    dns-dmz:
+      kind: linux
+      roles: [service, server, dns_authoritative, dmz_server]
+      capabilities: [ipv4, dns_server, dns_authoritative]
+      interfaces:
+        eth1: {segment: dns_dmz, ipv4: 10.10.41.10/24}
+    admin1:
+      kind: linux
+      # Nothing here is configured on the host: the resolver and the address
+      # below are what the DHCP reservation hands out. The MAC is the key the
+      # reservation is looked up by, so it is pinned in topology.clab.yml.
+      resolver: 10.10.60.10
+      address_assignment: dhcp
+      mac: 02:c1:ab:0a:63:64
+      roles: [admin_client, management_actor]
+      capabilities: [ipv4, network_management]
+      interfaces:
+        eth1: {segment: mgmt_vlan, ipv4: 10.10.99.100/24}
+  connectivity_requirements:
+    - {source: user1, destination: web1, bidirectional: true}
+    - {source: user1, destination: app1, bidirectional: true}
+    - {source: guest1, destination: web1, bidirectional: true}
+    - {source: finance1, destination: app1, bidirectional: true}
+    - {source: external1, destination: web1, bidirectional: true}
+    # The ubuntu/bind9 image ships no ping, so a nameserver can be probed but
+    # cannot probe. These flows are therefore declared one-way, which also
+    # matches what a DNS server does: it is queried, it does not initiate.
+    # dns-int -> dns-dmz forwarding is real but not ICMP-testable; it is
+    # verified by resolving a sme01.example name through the internal resolver.
+    - {source: user1, destination: dns-int, bidirectional: false}
+    - {source: app1, destination: dns-int, bidirectional: false}
+    - {source: external1, destination: dns-dmz, bidirectional: false}
+  optional_nodes:
+    attacker1:
+      kind: linux
+      roles: [attacker]
+      capabilities: [ipv4, raw_packets, packet_capture, traffic_generation, vlan_tagging]
+      attachable_segments: [users_vlan, guest_vlan, mgmt_vlan]
+  segments:
+    fabric_l1_fw: {type: p2p, cidr: 10.255.0.0/31, members: [leaf1, firewall], zone: INTERNAL, capacity_mbps: 1000}
+    fabric_l2_fw: {type: p2p, cidr: 10.255.0.2/31, members: [leaf2, firewall], zone: INTERNAL, capacity_mbps: 1000}
+    users_vlan: {type: vlan, vlan_id: 10, cidr: 10.10.10.0/24, members: [leaf1, user1], security_zone: users, zone: INTERNAL, capacity_mbps: 1000}
+    guest_vlan: {type: vlan, vlan_id: 20, cidr: 10.10.20.0/24, members: [leaf1, guest1], security_zone: guest, zone: INTERNAL, capacity_mbps: 1000}
+    finance_vlan: {type: vlan, vlan_id: 30, cidr: 10.10.30.0/24, members: [leaf2, finance1], security_zone: finance, zone: INTERNAL, capacity_mbps: 1000}
+    dns_internal: {type: vlan, vlan_id: 60, cidr: 10.10.60.0/24, members: [leaf1, dns-int], security_zone: infrastructure, zone: INTERNAL, capacity_mbps: 1000}
+    mgmt_vlan: {type: management, vlan_id: 99, cidr: 10.10.99.0/24, members: [leaf1, admin1], security_zone: management, zone: INTERNAL, capacity_mbps: 1000}
+    # Cabled straight to the firewall: no leaf in between, so every packet
+    # inland crosses the zone policy.
+    dmz_vlan: {type: lan, cidr: 10.10.40.0/24, members: [firewall, web1], security_zone: dmz, zone: DMZ, capacity_mbps: 1000}
+    dns_dmz: {type: lan, cidr: 10.10.41.0/24, members: [firewall, dns-dmz], security_zone: dmz, zone: DMZ, capacity_mbps: 1000}
+    server_vlan: {type: lan, cidr: 10.10.50.0/24, members: [firewall, app1], security_zone: servers, zone: DMZ, capacity_mbps: 1000}
+    internet: {type: external, cidr: 203.0.113.0/24, members: [firewall, external1], security_zone: external, zone: OUTSIDE, capacity_mbps: 1000}
+  zone_policies:
+    # Enumerated flows only; a zone pair with no ruleset is denied by the zone
+    # model itself. The rulesets themselves filter on source address,
+    # destination address and port -- see states/generate_healthy_state.py.
+    - {from: INTERNAL, to: DMZ, action: accept}
+    - {from: DMZ, to: INTERNAL, action: accept}
+    - {from: OUTSIDE, to: DMZ, action: accept}
+    - {from: DMZ, to: OUTSIDE, action: accept}
+    - {from: INTERNAL, to: OUTSIDE, action: accept}
+    - {from: OUTSIDE, to: INTERNAL, action: drop}
+  services:
+    # The firewall took the DHCP service over from the spine pair. Every client
+    # subnet is remote -- one endpoint per /24 behind a leaf -- so the leaves
+    # relay, and the firewall listens on its own end of each fabric link.
+    # Allocation is by reservation, not from a pool: the oracle pings fixed
+    # addresses and the internal zone holds fixed A records.
+    dhcp_primary:
+      node: firewall
+      transport: udp
+      port: 67
+      application: dhcp
+      dns_servers: [10.10.60.10]
+      domain_name: sme01.internal
+      lease_seconds: 3600
+      # Option 119 carries both namespaces: the DMZ names live in the public
+      # zone and are reached by forwarding, so an internal client resolving
+      # `web1` has to try sme01.example too.
+      search_domains: [sme01.internal, sme01.example]
+      listen_addresses: [10.255.0.0, 10.255.0.2]
+      relays: [leaf1, leaf2]
+      # One reservation pool per client subnet, named and numbered as the
+      # running configuration has them. A fault addresses a pool by name, and
+      # the reference restore rebuilds it from these fields plus the client's
+      # own address, MAC and gateway -- so what a DHCP fault repairs is a pool
+      # the topology describes, not a string the compiler invented.
+      pools:
+        user1: {name: USER1, subnet_id: 10}
+        guest1: {name: GUEST1, subnet_id: 20}
+        finance1: {name: FINANCE1, subnet_id: 30}
+        admin1: {name: ADMIN1, subnet_id: 99}
+    web_http:
+      node: web1
+      transport: tcp
+      port: 80
+      application: http
+      security: cleartext
+    app_test:
+      node: app1
+      transport: tcp
+      port: 5201
+      application: iperf3
+    # Authoritative for the internal endpoints only. The DMZ applications are
+    # deliberately not in this zone: they are reached by forwarding
+    # sme01.example to dns-dmz, so the DMZ owns its own names and there is one
+    # authoritative copy rather than two. probe_record must therefore name a
+    # record this zone actually holds.
+    dns_internal_resolver:
+      node: dns-int
+      transport: udp
+      port: 53
+      application: dns
+      zone: sme01.internal
+      zone_file: db.sme01.internal
+      probe_record: user1
+      forwarders: [10.10.41.10]
+      # The nodes this zone answers for, under their own name, as db.sme01.internal
+      # spells them. The oracle turns each into a `<node>.sme01.internal` ping from
+      # every endpoint that resolves, which is what makes a name resolution fault
+      # observable at all -- the address ping of the same pair keeps passing.
+      hosts: [dns-int, user1, guest1, finance1, admin1]
+    # Authoritative for the public namespace and for the DMZ application names
+    # (web1, app1): internal clients reach them through the resolver's forward,
+    # outside clients query this server directly, and both are answered from
+    # this one copy.
+    dns_public_authoritative:
+      node: dns-dmz
+      transport: udp
+      port: 53
+      application: dns
+      zone: sme01.example
+      zone_file: db.sme01.example
+      probe_record: www
+      # The DMZ applications only: `ns`, `www` and `mail` are aliases of nodes
+      # already named here, and a name check has to name the node it reaches.
+      hosts: [web1, app1]

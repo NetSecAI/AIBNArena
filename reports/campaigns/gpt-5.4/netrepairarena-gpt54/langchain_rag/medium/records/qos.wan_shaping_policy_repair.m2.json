@@ -1,0 +1,3417 @@
+{
+  "cleanup_result": {
+    "ok": true,
+    "results": [
+      {
+        "command": "sh -c 'tc qdisc del dev eth2 root 2>/dev/null || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc qdisc add dev eth2 root handle 1: htb default 20",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip address replace 10.10.10.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip route replace default via 10.10.10.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip address replace 10.10.20.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip route replace default via 10.10.20.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip address replace 10.10.30.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip route replace default via 10.10.30.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip address replace 10.10.40.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip route replace default via 10.10.40.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip address replace 10.10.50.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip route replace default via 10.10.50.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip address replace 10.10.99.100/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip route replace default via 10.10.99.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip address replace 203.0.113.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip route replace default via 203.0.113.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'pkill -x iperf3 || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'pkill -x iperf3 || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5201 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5201 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5202 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 10.255.1.1/31 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth3 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth3 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 10.255.1.3/31 dev eth3",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth2 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth2 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 203.0.113.1/24 dev eth2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "sysctl -w net.ipv4.ip_forward=1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "net.ipv4.ip_forward = 1\n",
+        "target": "wan1"
+      },
+      {
+        "command": "ip route replace 10.10.0.0/16 nexthop via 10.255.1.0 dev eth1 nexthop via 10.255.1.2 dev eth3",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "sh -c 'tc qdisc del dev eth2 root 2>/dev/null || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc qdisc add dev eth2 root handle 1: htb default 20",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.0/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.4/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/3 admin-state enable\nset / interface ethernet-1/3 subinterface 0 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 address 10.255.1.0/31\nset / network-instance default interface ethernet-1/3.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.1 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.5 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.1.1 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "spine1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.2/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.6/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/3 admin-state enable\nset / interface ethernet-1/3 subinterface 0 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 address 10.255.1.2/31\nset / network-instance default interface ethernet-1/3.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.3 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.7 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.1.3 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "spine2"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.1/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.3/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/10 admin-state enable\nset / interface ethernet-1/10 subinterface 0 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 address 10.10.10.1/24\nset / network-instance default interface ethernet-1/10.0\nset / interface ethernet-1/20 admin-state enable\nset / interface ethernet-1/20 subinterface 0 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 address 10.10.20.1/24\nset / network-instance default interface ethernet-1/20.0\nset / interface ethernet-1/57 admin-state enable\nset / interface ethernet-1/57 subinterface 0 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 address 10.10.99.1/24\nset / network-instance default interface ethernet-1/57.0\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 2 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.5/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.7/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/30 admin-state enable\nset / interface ethernet-1/30 subinterface 0 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 address 10.10.30.1/24\nset / network-instance default interface ethernet-1/30.0\nset / interface ethernet-1/40 admin-state enable\nset / interface ethernet-1/40 subinterface 0 admin-state enable\nset / interface ethernet-1/40 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/40 subinterface 0 ipv4 address 10.10.40.1/24\nset / network-instance default interface ethernet-1/40.0\nset / interface ethernet-1/50 admin-state enable\nset / interface ethernet-1/50 subinterface 0 admin-state enable\nset / interface ethernet-1/50 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/50 subinterface 0 ipv4 address 10.10.50.1/24\nset / network-instance default interface ethernet-1/50.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.4 admin-state enable\nset / network-instance default next-hop-groups group to-leaf1 nexthop 2 ip-address 10.255.0.6 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.4 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.6 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf2"
+      }
+    ]
+  },
+  "convergence_result": {
+    "converged": true,
+    "interval_seconds": 2.0,
+    "lease_renewal": {
+      "clients": []
+    },
+    "observation": {
+      "connectivity": [
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.703 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.714 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.611 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2051ms\nrtt min/avg/max/mdev = 0.611/0.676/0.714/0.046 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.776 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.720 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.803 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.720/0.766/0.803/0.034 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=0.764 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.742 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.603 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.603/0.703/0.764/0.071 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=1.08 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.667 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.660 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2016ms\nrtt min/avg/max/mdev = 0.660/0.801/1.077/0.194 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.740 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.724 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.702 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.702/0.722/0.740/0.015 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.730 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.597 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.649 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.597/0.658/0.730/0.054 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=0.287 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.250 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.303 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.250/0.280/0.303/0.022 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "finance1",
+          "success": true
+        },
+        {
+          "destination": "finance1",
+          "destination_ip": "10.10.30.10",
+          "hostname": null,
+          "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.550 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.406 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.252 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.252/0.402/0.550/0.121 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.677 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.596 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.464 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.464/0.579/0.677/0.087 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.565 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.675 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.511 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2051ms\nrtt min/avg/max/mdev = 0.511/0.583/0.675/0.068 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.576 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.549 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.520 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.520/0.548/0.576/0.022 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.587 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.577 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.667 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.577/0.610/0.667/0.040 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.609 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.601 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.611 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.601/0.607/0.611/0.004 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.521 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.578 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.675 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.521/0.591/0.675/0.063 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        }
+      ],
+      "lab_name": "sme01-qos",
+      "nodes": [
+        {
+          "container_name": "clab-sme01-qos-spine1",
+          "kind": "nokia_srlinux",
+          "name": "spine1"
+        },
+        {
+          "container_name": "clab-sme01-qos-spine2",
+          "kind": "nokia_srlinux",
+          "name": "spine2"
+        },
+        {
+          "container_name": "clab-sme01-qos-leaf1",
+          "kind": "nokia_srlinux",
+          "name": "leaf1"
+        },
+        {
+          "container_name": "clab-sme01-qos-leaf2",
+          "kind": "nokia_srlinux",
+          "name": "leaf2"
+        },
+        {
+          "container_name": "clab-sme01-qos-wan1",
+          "kind": "linux",
+          "name": "wan1"
+        },
+        {
+          "container_name": "clab-sme01-qos-user1",
+          "kind": "linux",
+          "name": "user1"
+        },
+        {
+          "container_name": "clab-sme01-qos-guest1",
+          "kind": "linux",
+          "name": "guest1"
+        },
+        {
+          "container_name": "clab-sme01-qos-finance1",
+          "kind": "linux",
+          "name": "finance1"
+        },
+        {
+          "container_name": "clab-sme01-qos-web1",
+          "kind": "linux",
+          "name": "web1"
+        },
+        {
+          "container_name": "clab-sme01-qos-app1",
+          "kind": "linux",
+          "name": "app1"
+        },
+        {
+          "container_name": "clab-sme01-qos-external1",
+          "kind": "linux",
+          "name": "external1"
+        },
+        {
+          "container_name": "clab-sme01-qos-admin1",
+          "kind": "linux",
+          "name": "admin1"
+        },
+        {
+          "container_name": "clab-sme01-qos-attacker1",
+          "kind": "linux",
+          "name": "attacker1"
+        }
+      ],
+      "raw": {
+        "admin1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7341      UP             172.26.0.12/24 \neth1@if7352      UP             10.10.99.100/24 fe80::a8c1:abff:fe35:f7e7/64 \n",
+        "app1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7337      UP             172.26.0.10/24 \neth1@if7345      UP             10.10.50.10/24 fe80::a8c1:abff:fe14:cbbb/64 \n",
+        "attacker1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7321      UP             172.26.0.6/24 \neth1@if7333      DOWN           \n",
+        "external1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7315      UP             172.26.0.2/24 \neth1@if7319      UP             203.0.113.10/24 fe80::a8c1:abff:fe0f:b1ea/64 \n",
+        "finance1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7317      UP             172.26.0.4/24 \neth1@if7327      UP             10.10.30.10/24 fe80::a8c1:abff:feb2:cc26/64 \n",
+        "guest1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7324      UP             172.26.0.7/24 \neth1@if7335      UP             10.10.20.10/24 fe80::a8c1:abff:fe50:40be/64 \n",
+        "leaf1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:4F:06:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T07:16:51.439Z\nTotal Memory         : 32559032 kB\nFree Memory          : 16619560 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "leaf2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:29:07:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T07:16:51.443Z\nTotal Memory         : 32559032 kB\nFree Memory          : 16619560 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "spine1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : spine1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:B9:08:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T07:16:51.436Z\nTotal Memory         : 32559032 kB\nFree Memory          : 16668104 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "spine2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : spine2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:66:09:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T07:16:51.439Z\nTotal Memory         : 32559032 kB\nFree Memory          : 16618048 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "user1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7318      UP             172.26.0.5/24 \neth1@if7329      UP             10.10.10.10/24 fe80::a8c1:abff:feb1:87a9/64 \n",
+        "wan1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7316      UP             172.26.0.3/24 \neth2@if7320      UP             203.0.113.1/24 fe80::a8c1:abff:fe74:cbe3/64 \neth1@if7322      UP             10.255.1.1/31 fe80::a8c1:abff:fe84:db56/64 \neth3@if7325      UP             10.255.1.3/31 fe80::a8c1:abff:fef6:3b39/64 \n",
+        "web1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7331      UP             172.26.0.8/24 \neth1@if7339      UP             10.10.40.10/24 fe80::a8c1:abff:fefe:5482/64 \n"
+      }
+    },
+    "ok": true,
+    "timeout_seconds": 30.0
+  },
+  "created_at": "2026-09-29T07:24:03.310512+00:00",
+  "device_configurations": {
+    "changed_by_sut": [
+      "wan1"
+    ],
+    "changes": {
+      "before_sut_to_after_sut": {
+        "wan1": {
+          "file": "wan1/before_sut_to_after_sut.diff",
+          "lines_added": 4,
+          "lines_removed": 2
+        }
+      },
+      "healthy_to_before_sut": {
+        "wan1": {
+          "file": "wan1/healthy_to_before_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 1
+        }
+      }
+    },
+    "directory": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/devices/qos.wan_shaping_policy_repair.m2-20260929T071642-dca495cf",
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes",
+    "snapshots": {
+      "after_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77529,
+            "command": "info from running /",
+            "file": "leaf1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77466,
+            "command": "info from running /",
+            "file": "leaf2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 3004,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "before_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77529,
+            "command": "info from running /",
+            "file": "leaf1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77466,
+            "command": "info from running /",
+            "file": "leaf2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2863,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "healthy": {
+        "devices": {
+          "admin1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77529,
+            "command": "info from running /",
+            "file": "leaf1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77466,
+            "command": "info from running /",
+            "file": "leaf2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2860,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      }
+    }
+  },
+  "error": null,
+  "evaluations": {
+    "expected_degradation": {
+      "injection": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "degraded": true,
+            "reinjected": null,
+            "restored": null,
+            "voided": false
+          }
+        ],
+        "attempts_allowed": 1
+      },
+      "oracle_id": "qos.shaping_repair.expected_degradation",
+      "passed": true,
+      "phase": "expected_degradation",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 0.432,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "baseline": {
+                "factor": 0.85,
+                "metric": "throughput_mbps"
+              },
+              "combine": "min",
+              "factor": 0.85,
+              "metric": "throughput_mbps",
+              "operator": "lt",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "healthy": {
+      "oracle_id": "qos.shaping_repair.healthy",
+      "passed": true,
+      "phase": "healthy",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 7.65,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "factor": 0.5,
+              "metric": "throughput_mbps",
+              "operator": "gte",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "preservation": {
+      "oracle_id": "qos.shaping_repair.preservation",
+      "passed": true,
+      "phase": "preservation",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.701,
+                "rtt_max_ms": 0.801,
+                "rtt_min_ms": 0.6,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.692,
+                "rtt_max_ms": 0.71,
+                "rtt_min_ms": 0.675,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.277,
+                "rtt_max_ms": 0.305,
+                "rtt_min_ms": 0.252,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.272,
+                "rtt_max_ms": 0.296,
+                "rtt_min_ms": 0.245,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.547,
+                "rtt_max_ms": 0.698,
+                "rtt_min_ms": 0.456,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.641,
+                "rtt_max_ms": 0.76,
+                "rtt_min_ms": 0.441,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.611,
+                "rtt_max_ms": 0.666,
+                "rtt_min_ms": 0.572,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.499,
+                "rtt_max_ms": 0.586,
+                "rtt_min_ms": 0.445,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 8,
+            "success": true,
+            "total_checks": 8
+          },
+          "passed": true,
+          "probe_id": "unaffected_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "repair": {
+      "oracle_id": "qos.shaping_repair.repair",
+      "passed": true,
+      "phase": "repair",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 7.644,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "baseline": {
+                "factor": 0.85,
+                "metric": "throughput_mbps"
+              },
+              "combine": "min",
+              "factor": 0.85,
+              "metric": "throughput_mbps",
+              "operator": "gte",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    }
+  },
+  "experiment_id": "langchain_rag_agent-gpt-5-4-qos-wan_shaping_policy_repair-m2-fault-seed338921343",
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Validated that lab connectivity was intact but user1 to external1 throughput under contention was only 0.432 Mbps. Repaired QoS on wan1 eth2 by updating the HTB classes to 1:10 rate 8mbit ceil 20mbit prio 0 and 1:20 rate 12mbit ceil 20mbit prio 7, and added a classifier matching source 10.10.10.10/32 to flowid 1:10. Re-validation passed: lab connectivity remained good and contended throughput measured 7.649 Mbps, which passed the enforced success threshold.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -25.2422,
+      "log_p_yes": 0.0,
+      "method": "assured_class_starved",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the assured class 10 (8 Mbit/s for user1 to external1) is starved: its rate was cut to 452 kbit/s instead of 8 Mbit/s.",
+      "score": 25.2422,
+      "target": "wan1"
+    },
+    "domain": "qos",
+    "environment_success": true,
+    "failed_operation_count": 7,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 7,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "quality_repair_pass_rate": 1.0,
+    "read_count": 7,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 3,
+    "successful_read_count": 5,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "ani_mutations": 7,
+    "ani_reads": 7,
+    "failed_operations": 7,
+    "input_tokens": 322655,
+    "llm_calls": 20,
+    "output_tokens": 1325,
+    "successful_mutations": 3,
+    "successful_reads": 5,
+    "total_tokens": 323980,
+    "unsafe_operations": 0,
+    "validations": 6
+  },
+  "phase_durations": {
+    "apply_reference_state": 87.66429848602274,
+    "calculate_metrics": 4.487100522965193e-05,
+    "deploy_reset_testbed": 18.6530837600003,
+    "evaluate_degradation": 27.05968645797111,
+    "evaluate_healthy": 17.071344213036355,
+    "evaluate_repair_preservation": 70.59559186699335,
+    "inject_fault": 0.15620422799838707,
+    "invoke_sut": 184.51593030698132,
+    "load_configuration": 0.00018625898519530892,
+    "load_oracles": 0.009555271011777222,
+    "load_validate_scenario": 0.04337482003029436,
+    "record_baseline": 4.792003892362118e-06,
+    "restore_destroy": 12.036369815992657,
+    "score_diagnosis": 1.05031742999563,
+    "snapshot_after_sut": 7.519869334006216,
+    "snapshot_before_sut": 6.722613840014674,
+    "snapshot_healthy": 7.268624150950927,
+    "write_result": 0.009212078992277384
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "gpt-5.4",
+    "git": {
+      "commit": "731901c1947298ad4dfed2283f9e20eb776bd3ff",
+      "dirty": true,
+      "modified_files": 1,
+      "untracked_files": 11269
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 400,
+      "min_retry_tokens": null,
+      "model": "gpt-5.4",
+      "prompt_variant": "default",
+      "rag_chunk_chars": 1500,
+      "rag_chunk_overlap": 200,
+      "rag_context_corpus": {
+        "chunks": 105,
+        "files": [
+          {
+            "chunks": 105,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+          }
+        ],
+        "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+      },
+      "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+      "rag_corpus": {
+        "chunks": 1940,
+        "files": [
+          {
+            "chunks": 164,
+            "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+            "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+          },
+          {
+            "chunks": 1191,
+            "path": "Advanced_Configuration_Guide_26.7.md",
+            "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+          },
+          {
+            "chunks": 294,
+            "path": "Interfaces_Guide_26.7.md",
+            "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+          },
+          {
+            "chunks": 4,
+            "path": "arp.md",
+            "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+          },
+          {
+            "chunks": 16,
+            "path": "bridge.md",
+            "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+          },
+          {
+            "chunks": 4,
+            "path": "default-route.md",
+            "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+          },
+          {
+            "chunks": 40,
+            "path": "dhcp-server.md",
+            "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+          },
+          {
+            "chunks": 21,
+            "path": "dns.md",
+            "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+          },
+          {
+            "chunks": 21,
+            "path": "ethernet.md",
+            "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+          },
+          {
+            "chunks": 14,
+            "path": "flowtables.md",
+            "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+          },
+          {
+            "chunks": 22,
+            "path": "groups.md",
+            "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+          },
+          {
+            "chunks": 5,
+            "path": "ip.md",
+            "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+          },
+          {
+            "chunks": 47,
+            "path": "ipv4.md",
+            "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+          },
+          {
+            "chunks": 82,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+          },
+          {
+            "chunks": 6,
+            "path": "qos.md",
+            "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+          },
+          {
+            "chunks": 9,
+            "path": "zone.md",
+            "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+          }
+        ],
+        "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+      },
+      "rag_directory": "sut/langchain_rag_agent/rag_document",
+      "rag_embedding_model": null,
+      "rag_mode": "both",
+      "rag_retriever": "bm25",
+      "rag_top_k": 4,
+      "recursion_limit": 1000,
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.0.0",
+      "healthy": "1.0.0",
+      "preservation": "1.0.0",
+      "repair": "1.0.0"
+    },
+    "provider_reported_model": "gpt-5.4",
+    "reference_state_sha256": "f60fd0f4b36c6d0b42be8c9cc4664d19524d831cfb792a062c926a6edb54f53d",
+    "scenario_seed": 338921343,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {},
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_reported_model": "gpt-5.4",
+    "sut_version": "1.0.0",
+    "topology_sha256": "153a9b261ef54e3862630e42c8ab5f9ed71603991e96d98472297fed545e7a9d"
+  },
+  "run_id": "langchain_rag_agent-gpt-5-4-qos-wan_shaping_policy_repair-m2-fault-seed338921343-806f321fee25",
+  "scenario": {
+    "domain": "qos",
+    "id": "qos.wan_shaping_policy_repair.m2",
+    "sut_task_id": "sut-702340c943e1b247db4cec3adca495cf",
+    "version": "1.0.0"
+  },
+  "schema_version": "1.0",
+  "status": "completed",
+  "sut_result": {
+    "ani_operations": [
+      {
+        "arguments": {
+          "nodes": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 5.234300624579191e-05,
+        "error": null,
+        "ok": true,
+        "operation": "get_topology",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 63.54804475000128,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc",
+            "interfaces"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.3223621799843386,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.16962821601191536,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": [
+            "/qos",
+            "/interfaces"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.8939048469765112,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class show dev eth2",
+                "tc filter show dev eth2"
+              ],
+              "reason": "Read full shaping hierarchy on WAN egress to confirm whether class rates or classifier for business traffic are wrong before changing anything.",
+              "rollback_commands": [],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 6.61049853079021e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Probe structured QoS object support on WAN egress to reveal current hierarchy attributes without changing configuration.",
+          "set": {
+            "delete_root": false
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 9.101000614464283e-05,
+        "error": "update_object: set names no change for qos eth2",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "/qos",
+            "/interfaces"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 1.1149266649736091,
+        "error": null,
+        "ok": false,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf2"
+          ],
+          "paths": [
+            "/qos",
+            "/interface"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.9936646760324948,
+        "error": null,
+        "ok": false,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.3095422780024819,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "set traffic-policy shaper WAN class 10 bandwidth 8mbit",
+                "set traffic-policy shaper WAN class 10 ceiling 20mbit",
+                "set traffic-policy shaper WAN class 10 priority 0",
+                "set traffic-policy shaper WAN class 10 match BUSINESS ip source address 10.10.10.10/32",
+                "set traffic-policy shaper WAN default bandwidth 12mbit",
+                "set traffic-policy shaper WAN default ceiling 20mbit",
+                "set traffic-policy shaper WAN default priority 7",
+                "set interfaces ethernet eth2 traffic-policy out WAN"
+              ],
+              "reason": "Business flow from user1 to external1 is far below guarantee under contention on WAN egress; wan1 eth2 has a root shaper but current readable state does not expose class hierarchy, so restore a minimal non-disruptive two-class shaper on the bottleneck egress matching user1 source to guarantee at least 8 Mbps while preserving best-effort connectivity.",
+              "rollback_commands": [
+                "delete interfaces ethernet eth2 traffic-policy out WAN",
+                "delete traffic-policy shaper WAN"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 6.706599378958344e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; expected ip or tc",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Restore protected class guarantee on WAN egress with HTB root and business class after validation showed protected throughput far below target under contention.",
+          "set": {
+            "class": {
+              "ceil": "20mbit",
+              "classid": "1:10",
+              "prio": "0",
+              "rate": "8mbit"
+            },
+            "htb": {
+              "default": "20",
+              "rate": "20mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 7.686199387535453e-05,
+        "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Add or repair the protected HTB class on WAN egress; protected flow is below guarantee under contention and root qdisc already exists on eth2.",
+          "set": {
+            "class": {
+              "ceil": "20mbit",
+              "id": "1:10",
+              "parent": "1:",
+              "prio": "0",
+              "rate": "8mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.4351340760476887,
+        "error": null,
+        "ok": true,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_eb6c88ad6000701f"
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Ensure default/best-effort class on WAN egress has the remaining bandwidth so protected business traffic can keep 8 Mbps without disrupting other traffic.",
+          "set": {
+            "class": {
+              "ceil": "20mbit",
+              "id": "1:20",
+              "parent": "1:",
+              "prio": "7",
+              "rate": "12mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.17177215102128685,
+        "error": null,
+        "ok": true,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_906c533f592e79e6"
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Classify business traffic from user1 into the protected WAN class because throughput under contention suggests it may be falling into the default class.",
+          "set": {
+            "filter": {
+              "flowid": "1:10",
+              "prio": "1",
+              "src": "10.10.10.10/32"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.1649321519653313,
+        "error": null,
+        "ok": true,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_190d2cb1f0d72070"
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 60.910707042959984,
+        "error": null,
+        "ok": true,
+        "operation": "execute_validation",
+        "transaction_id": null
+      }
+    ],
+    "device_changes": [
+      {
+        "action": {
+          "command": "tc class change dev eth2 parent 1: classid 1:10 htb rate 8mbit ceil 20mbit prio 0",
+          "machine": "wan1",
+          "reason": "Add or repair the protected HTB class on WAN egress; protected flow is below guarantee under contention and root qdisc already exists on eth2."
+        },
+        "objective_verification": {
+          "checks": [
+            {
+              "connectivity": [
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.746 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.674 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.696 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.674/0.705/0.746/0.030 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.792 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.702 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.656 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.656/0.716/0.792/0.056 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=0.759 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.771 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.830 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2055ms\nrtt min/avg/max/mdev = 0.759/0.786/0.830/0.031 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.686 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.949 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.820 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.686/0.818/0.949/0.107 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.747 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.608 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.807 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.608/0.720/0.807/0.083 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.841 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.736 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.650 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.650/0.742/0.841/0.078 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=0.391 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.243 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.294 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.243/0.309/0.391/0.061 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "finance1",
+                  "success": true
+                },
+                {
+                  "destination": "finance1",
+                  "destination_ip": "10.10.30.10",
+                  "hostname": null,
+                  "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.434 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.288 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.249 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.249/0.323/0.434/0.079 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.622 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.676 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.429 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.429/0.575/0.676/0.106 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=1.12 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.415 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.467 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.415/0.666/1.117/0.319 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.522 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.502 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.538 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.502/0.520/0.538/0.014 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.744 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.466 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.764 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.466/0.658/0.764/0.136 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.663 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.601 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.617 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.601/0.627/0.663/0.026 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.645 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.618 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.537 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.537/0.600/0.645/0.045 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                }
+              ],
+              "passed": true,
+              "type": "lab_connectivity"
+            },
+            {
+              "limits": {
+                "enforced_floor_mbps": 6.8,
+                "min_mbps": 8.0,
+                "tolerance": 0.85
+              },
+              "measurement": {
+                "contended": true,
+                "contention_attempts": 1,
+                "contention_checks": {
+                  "after_measurement": 1,
+                  "after_start": 1
+                },
+                "contention_observed": true,
+                "destination": "external1",
+                "destination_ip": "203.0.113.10",
+                "error": null,
+                "passed": true,
+                "seconds": 10,
+                "source": "user1",
+                "throughput_mbps": 7.649,
+                "timed_out": false,
+                "unverified_throughput_mbps": null
+              },
+              "passed": true,
+              "type": "observed_throughput"
+            }
+          ],
+          "passed": true,
+          "type": "public_success_criteria"
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc class change dev eth2 parent 1: classid 1:10 htb rate 8mbit ceil 20mbit prio 0",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_eb6c88ad6000701f",
+        "verified_after_action": true
+      },
+      {
+        "action": {
+          "command": "tc class change dev eth2 parent 1: classid 1:20 htb rate 12mbit ceil 20mbit prio 7",
+          "machine": "wan1",
+          "reason": "Ensure default/best-effort class on WAN egress has the remaining bandwidth so protected business traffic can keep 8 Mbps without disrupting other traffic."
+        },
+        "objective_verification": {
+          "checks": [
+            {
+              "connectivity": [
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.746 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.674 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.696 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.674/0.705/0.746/0.030 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.792 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.702 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.656 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.656/0.716/0.792/0.056 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=0.759 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.771 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.830 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2055ms\nrtt min/avg/max/mdev = 0.759/0.786/0.830/0.031 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.686 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.949 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.820 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.686/0.818/0.949/0.107 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.747 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.608 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.807 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.608/0.720/0.807/0.083 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.841 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.736 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.650 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.650/0.742/0.841/0.078 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=0.391 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.243 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.294 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.243/0.309/0.391/0.061 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "finance1",
+                  "success": true
+                },
+                {
+                  "destination": "finance1",
+                  "destination_ip": "10.10.30.10",
+                  "hostname": null,
+                  "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.434 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.288 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.249 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.249/0.323/0.434/0.079 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.622 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.676 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.429 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.429/0.575/0.676/0.106 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=1.12 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.415 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.467 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.415/0.666/1.117/0.319 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.522 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.502 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.538 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.502/0.520/0.538/0.014 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.744 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.466 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.764 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.466/0.658/0.764/0.136 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.663 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.601 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.617 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.601/0.627/0.663/0.026 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.645 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.618 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.537 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.537/0.600/0.645/0.045 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                }
+              ],
+              "passed": true,
+              "type": "lab_connectivity"
+            },
+            {
+              "limits": {
+                "enforced_floor_mbps": 6.8,
+                "min_mbps": 8.0,
+                "tolerance": 0.85
+              },
+              "measurement": {
+                "contended": true,
+                "contention_attempts": 1,
+                "contention_checks": {
+                  "after_measurement": 1,
+                  "after_start": 1
+                },
+                "contention_observed": true,
+                "destination": "external1",
+                "destination_ip": "203.0.113.10",
+                "error": null,
+                "passed": true,
+                "seconds": 10,
+                "source": "user1",
+                "throughput_mbps": 7.649,
+                "timed_out": false,
+                "unverified_throughput_mbps": null
+              },
+              "passed": true,
+              "type": "observed_throughput"
+            }
+          ],
+          "passed": true,
+          "type": "public_success_criteria"
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc class change dev eth2 parent 1: classid 1:20 htb rate 12mbit ceil 20mbit prio 7",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_906c533f592e79e6",
+        "verified_after_action": true
+      },
+      {
+        "action": {
+          "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.10/32 flowid 1:10",
+          "machine": "wan1",
+          "reason": "Classify business traffic from user1 into the protected WAN class because throughput under contention suggests it may be falling into the default class."
+        },
+        "objective_verification": {
+          "checks": [
+            {
+              "connectivity": [
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.746 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.674 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.696 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.674/0.705/0.746/0.030 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.792 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.702 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.656 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.656/0.716/0.792/0.056 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=0.759 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.771 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.830 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2055ms\nrtt min/avg/max/mdev = 0.759/0.786/0.830/0.031 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.686 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.949 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.820 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.686/0.818/0.949/0.107 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.747 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.608 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.807 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.608/0.720/0.807/0.083 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.841 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.736 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.650 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.650/0.742/0.841/0.078 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=0.391 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.243 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.294 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.243/0.309/0.391/0.061 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "finance1",
+                  "success": true
+                },
+                {
+                  "destination": "finance1",
+                  "destination_ip": "10.10.30.10",
+                  "hostname": null,
+                  "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.434 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.288 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.249 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.249/0.323/0.434/0.079 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.622 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.676 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.429 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.429/0.575/0.676/0.106 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=1.12 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.415 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.467 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.415/0.666/1.117/0.319 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.522 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.502 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.538 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.502/0.520/0.538/0.014 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.744 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.466 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.764 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.466/0.658/0.764/0.136 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.663 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.601 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.617 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.601/0.627/0.663/0.026 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.645 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.618 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.537 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.537/0.600/0.645/0.045 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                }
+              ],
+              "passed": true,
+              "type": "lab_connectivity"
+            },
+            {
+              "limits": {
+                "enforced_floor_mbps": 6.8,
+                "min_mbps": 8.0,
+                "tolerance": 0.85
+              },
+              "measurement": {
+                "contended": true,
+                "contention_attempts": 1,
+                "contention_checks": {
+                  "after_measurement": 1,
+                  "after_start": 1
+                },
+                "contention_observed": true,
+                "destination": "external1",
+                "destination_ip": "203.0.113.10",
+                "error": null,
+                "passed": true,
+                "seconds": 10,
+                "source": "user1",
+                "throughput_mbps": 7.649,
+                "timed_out": false,
+                "unverified_throughput_mbps": null
+              },
+              "passed": true,
+              "type": "observed_throughput"
+            }
+          ],
+          "passed": true,
+          "type": "public_success_criteria"
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.10/32 flowid 1:10",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_190d2cb1f0d72070",
+        "verified_after_action": true
+      }
+    ],
+    "error": null,
+    "execution": {
+      "ani_version": "ibn_eval.ani.v0.2",
+      "budget_seconds": 400.0,
+      "conclusion_source": "final_message",
+      "configured_model": "gpt-5.4",
+      "elapsed_seconds": 184.49194971099496,
+      "failed_operations": 7,
+      "interaction_limits": {
+        "ani": {
+          "limit": null,
+          "reached": false,
+          "refused": 0,
+          "used": 16
+        }
+      },
+      "llm_calls": 20,
+      "model_parameters": {
+        "ani_call_limit": null,
+        "context_budget_chars": null,
+        "enable_thinking": null,
+        "max_consecutive_rejections": null,
+        "max_context_chars": 12000,
+        "max_execution_seconds": 400.0,
+        "max_tokens": 400,
+        "min_retry_tokens": null,
+        "model": "gpt-5.4",
+        "prompt_variant": "default",
+        "rag_chunk_chars": 1500,
+        "rag_chunk_overlap": 200,
+        "rag_context_corpus": {
+          "chunks": 105,
+          "files": [
+            {
+              "chunks": 105,
+              "path": "network_troubleshooting_guide_rag.md",
+              "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+            }
+          ],
+          "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+        },
+        "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+        "rag_corpus": {
+          "chunks": 1940,
+          "files": [
+            {
+              "chunks": 164,
+              "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+              "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+            },
+            {
+              "chunks": 1191,
+              "path": "Advanced_Configuration_Guide_26.7.md",
+              "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+            },
+            {
+              "chunks": 294,
+              "path": "Interfaces_Guide_26.7.md",
+              "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+            },
+            {
+              "chunks": 4,
+              "path": "arp.md",
+              "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+            },
+            {
+              "chunks": 16,
+              "path": "bridge.md",
+              "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+            },
+            {
+              "chunks": 4,
+              "path": "default-route.md",
+              "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+            },
+            {
+              "chunks": 40,
+              "path": "dhcp-server.md",
+              "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+            },
+            {
+              "chunks": 21,
+              "path": "dns.md",
+              "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+            },
+            {
+              "chunks": 21,
+              "path": "ethernet.md",
+              "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+            },
+            {
+              "chunks": 14,
+              "path": "flowtables.md",
+              "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+            },
+            {
+              "chunks": 22,
+              "path": "groups.md",
+              "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+            },
+            {
+              "chunks": 5,
+              "path": "ip.md",
+              "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+            },
+            {
+              "chunks": 47,
+              "path": "ipv4.md",
+              "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+            },
+            {
+              "chunks": 82,
+              "path": "network_troubleshooting_guide_rag.md",
+              "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+            },
+            {
+              "chunks": 6,
+              "path": "qos.md",
+              "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+            },
+            {
+              "chunks": 9,
+              "path": "zone.md",
+              "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+            }
+          ],
+          "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+        },
+        "rag_directory": "sut/langchain_rag_agent/rag_document",
+        "rag_embedding_model": null,
+        "rag_mode": "both",
+        "rag_retriever": "bm25",
+        "rag_top_k": 4,
+        "recursion_limit": 1000,
+        "temperature": null,
+        "thinking_directive_applied": false,
+        "thinking_effort": null,
+        "thinking_mechanism": "unset",
+        "thinking_request": {},
+        "thinking_style": "auto",
+        "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+        "tool_choice": "auto",
+        "tool_result_chars": null
+      },
+      "model_seconds": 55.352,
+      "model_turns": [
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            1
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.104,
+          "tool_calls": [
+            "get_topology"
+          ],
+          "turn": 1
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            2
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.228,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 2
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            3
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.841,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 3
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            4
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.6,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 4
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            5
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.952,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 5
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 3.441,
+          "tool_calls": [
+            "search_documents"
+          ],
+          "turn": 6
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            6
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.011,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 7
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 2.295,
+          "tool_calls": [
+            "search_documents"
+          ],
+          "turn": 8
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            7
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.701,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 9
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            8
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.952,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 10
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            9
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.639,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 11
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 1.872,
+          "tool_calls": [
+            "search_documents"
+          ],
+          "turn": 12
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            10
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.019,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 13
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            11
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.981,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 14
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            12
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.07,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 15
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            13
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.602,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 16
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            14
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.572,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 17
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            15
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.264,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 18
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            16
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.501,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 19
+        },
+        {
+          "content_chars": 496,
+          "error": null,
+          "kind": "text",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 3.707,
+          "tool_calls": [],
+          "turn": 20
+        }
+      ],
+      "mutations": 7,
+      "provider_model": "gpt-5.4",
+      "rag": {
+        "context_excerpts": 4,
+        "searches": [
+          {
+            "error": null,
+            "origin": "context",
+            "query": "The business traffic class on the shaped WAN uplink no longer receives its contractual guarantee of at least 8 Mbps under contention. Restore that guarantee without disrupting any other connectivity. lab_connectivity observed_throughput 8 user1 external1 203.0.113.10",
+            "results": [
+              {
+                "chunk": 94,
+                "id": "network_troubleshooting_guide_rag.md#94",
+                "score": 72.0067,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 93,
+                "id": "network_troubleshooting_guide_rag.md#93",
+                "score": 65.239,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 97,
+                "id": "network_troubleshooting_guide_rag.md#97",
+                "score": 41.5814,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 96,
+                "id": "network_troubleshooting_guide_rag.md#96",
+                "score": 39.4938,
+                "source": "network_troubleshooting_guide_rag.md"
+              }
+            ],
+            "seconds": 0.0,
+            "top_k": 4
+          },
+          {
+            "error": null,
+            "origin": "tool",
+            "query": "tc class show filter show interface qos running configuration linux lab hierarchical shaper htb default class classifier commands",
+            "results": [
+              {
+                "chunk": 43,
+                "id": "network_troubleshooting_guide_rag.md#43",
+                "score": 50.3697,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 3,
+                "id": "qos.md#3",
+                "score": 45.6585,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 2,
+                "id": "qos.md#2",
+                "score": 44.0337,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 4,
+                "id": "qos.md#4",
+                "score": 43.0728,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 44,
+                "id": "network_troubleshooting_guide_rag.md#44",
+                "score": 35.4829,
+                "source": "network_troubleshooting_guide_rag.md"
+              }
+            ],
+            "seconds": 0.006,
+            "top_k": 5
+          },
+          {
+            "error": null,
+            "origin": "tool",
+            "query": "update_object qos htb class filter examples root delete_root class filter prio flowid src dst linux tc",
+            "results": [
+              {
+                "chunk": 63,
+                "id": "ACL_and_Traffic_Steering_Guide_26.7.md#63",
+                "score": 25.9897,
+                "source": "ACL_and_Traffic_Steering_Guide_26.7.md"
+              },
+              {
+                "chunk": 11,
+                "id": "flowtables.md#11",
+                "score": 23.1126,
+                "source": "flowtables.md"
+              },
+              {
+                "chunk": 56,
+                "id": "ACL_and_Traffic_Steering_Guide_26.7.md#56",
+                "score": 21.8635,
+                "source": "ACL_and_Traffic_Steering_Guide_26.7.md"
+              },
+              {
+                "chunk": 59,
+                "id": "ACL_and_Traffic_Steering_Guide_26.7.md#59",
+                "score": 20.3672,
+                "source": "ACL_and_Traffic_Steering_Guide_26.7.md"
+              },
+              {
+                "chunk": 13,
+                "id": "flowtables.md#13",
+                "score": 20.1504,
+                "source": "flowtables.md"
+              },
+              {
+                "chunk": 44,
+                "id": "network_troubleshooting_guide_rag.md#44",
+                "score": 19.5617,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 149,
+                "id": "ACL_and_Traffic_Steering_Guide_26.7.md#149",
+                "score": 19.2808,
+                "source": "ACL_and_Traffic_Steering_Guide_26.7.md"
+              },
+              {
+                "chunk": 12,
+                "id": "flowtables.md#12",
+                "score": 18.0059,
+                "source": "flowtables.md"
+              },
+              {
+                "chunk": 0,
+                "id": "qos.md#0",
+                "score": 17.9372,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 3,
+                "id": "qos.md#3",
+                "score": 17.793,
+                "source": "qos.md"
+              }
+            ],
+            "seconds": 0.002,
+            "top_k": 10
+          },
+          {
+            "error": null,
+            "origin": "tool",
+            "query": "VyOS qos policy shaper interface egress show configuration bandwidth ceiling priority default class match source address",
+            "results": [
+              {
+                "chunk": 2,
+                "id": "qos.md#2",
+                "score": 92.4965,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 3,
+                "id": "qos.md#3",
+                "score": 89.1531,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 4,
+                "id": "qos.md#4",
+                "score": 85.4277,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 5,
+                "id": "qos.md#5",
+                "score": 69.2964,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 43,
+                "id": "network_troubleshooting_guide_rag.md#43",
+                "score": 65.9161,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 44,
+                "id": "network_troubleshooting_guide_rag.md#44",
+                "score": 65.3472,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 81,
+                "id": "network_troubleshooting_guide_rag.md#81",
+                "score": 57.9325,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 80,
+                "id": "network_troubleshooting_guide_rag.md#80",
+                "score": 48.4065,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 1,
+                "id": "qos.md#1",
+                "score": 36.6109,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 454,
+                "id": "Advanced_Configuration_Guide_26.7.md#454",
+                "score": 26.2059,
+                "source": "Advanced_Configuration_Guide_26.7.md"
+              }
+            ],
+            "seconds": 0.006,
+            "top_k": 10
+          }
+        ],
+        "tool_searches": 3
+      },
+      "reads": 7,
+      "serving": {},
+      "successful_mutations": 3,
+      "termination": {
+        "cause": "own_conclusion",
+        "detail": "completed",
+        "turn": 20
+      },
+      "token_usage": {
+        "input_tokens": 322655,
+        "output_tokens": 1325,
+        "total_tokens": 323980
+      },
+      "tool_call_count": 16,
+      "trace_ref": null,
+      "unsafe_operations": 0,
+      "validations": 2
+    },
+    "final_observation": {
+      "checks": [
+        {
+          "connectivity": [
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.746 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.674 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.696 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.674/0.705/0.746/0.030 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.792 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.702 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.656 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.656/0.716/0.792/0.056 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=0.759 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.771 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.830 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2055ms\nrtt min/avg/max/mdev = 0.759/0.786/0.830/0.031 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.686 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.949 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.820 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.686/0.818/0.949/0.107 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.747 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.608 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.807 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.608/0.720/0.807/0.083 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.841 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.736 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.650 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.650/0.742/0.841/0.078 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=0.391 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.243 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.294 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.243/0.309/0.391/0.061 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "finance1",
+              "success": true
+            },
+            {
+              "destination": "finance1",
+              "destination_ip": "10.10.30.10",
+              "hostname": null,
+              "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.434 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.288 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.249 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.249/0.323/0.434/0.079 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.622 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.676 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.429 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.429/0.575/0.676/0.106 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=1.12 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.415 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.467 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.415/0.666/1.117/0.319 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.522 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.502 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.538 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.502/0.520/0.538/0.014 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.744 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.466 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.764 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.466/0.658/0.764/0.136 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.663 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.601 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.617 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.601/0.627/0.663/0.026 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.645 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.618 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.537 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.537/0.600/0.645/0.045 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            }
+          ],
+          "passed": true,
+          "type": "lab_connectivity"
+        },
+        {
+          "limits": {
+            "enforced_floor_mbps": 6.8,
+            "min_mbps": 8.0,
+            "tolerance": 0.85
+          },
+          "measurement": {
+            "contended": true,
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_observed": true,
+            "destination": "external1",
+            "destination_ip": "203.0.113.10",
+            "error": null,
+            "passed": true,
+            "seconds": 10,
+            "source": "user1",
+            "throughput_mbps": 7.649,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "type": "observed_throughput"
+        }
+      ],
+      "passed": true,
+      "type": "public_success_criteria"
+    },
+    "final_response": {
+      "status": "completed",
+      "summary": "Validated that lab connectivity was intact but user1 to external1 throughput under contention was only 0.432 Mbps. Repaired QoS on wan1 eth2 by updating the HTB classes to 1:10 rate 8mbit ceil 20mbit prio 0 and 1:20 rate 12mbit ceil 20mbit prio 7, and added a classifier matching source 10.10.10.10/32 to flowid 1:10. Re-validation passed: lab connectivity remained good and contended throughput measured 7.649 Mbps, which passed the enforced success threshold."
+    },
+    "mode": "self_execute",
+    "model_reported_by_sut": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "status": "completed",
+    "summary": "Validated that lab connectivity was intact but user1 to external1 throughput under contention was only 0.432 Mbps. Repaired QoS on wan1 eth2 by updating the HTB classes to 1:10 rate 8mbit ceil 20mbit prio 0 and 1:20 rate 12mbit ceil 20mbit prio 7, and added a classifier matching source 10.10.10.10/32 to flowid 1:10. Re-validation passed: lab connectivity remained good and contended throughput measured 7.649 Mbps, which passed the enforced success threshold.",
+    "sut_identity": "langchain_rag_agent",
+    "sut_version": "1.0.0",
+    "verified": true
+  }
+}

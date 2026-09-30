@@ -1,0 +1,271 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.2418998418725096e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 27.97818571699827,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-91fa79036a007ddf42181ef3e56d2db47eac504a2176cfe087d279e1a711fae7.json",
+      "category": "read",
+      "duration_seconds": 0.6311128420002206,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "network-instance default route-table ipv4-unicast static-route"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6720150590008416,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "network-instance default route-table ipv4-unicast static-route"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6736095539999951,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "network-instance default static-routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5752803039995342,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "network-instance default static-routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5787749670016638,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "network-instance default next-hop-groups"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6128301559983811,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "network-instance default next-hop-groups"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6259252359996026,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/2",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.033863607000967,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/2",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.0431452200009517,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/1",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.0432785730008618,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/1",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.0526710679987445,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "network-instance default route-table ipv4-unicast route 10.10.10.0/24 { admin-state enable next-hop-group to-leaf1 }"
+            ],
+            "reason": "leaf2's route to users_vlan 10.10.10.0/24 uses next-hop-group ibn-wrt-m1 (10.10.50.10, the app1 host), so leaf2 sends user-bound traffic to app1, which issues ICMP redirects and the user1 path fails. It should use the to-leaf1 group (10.255.0.4/10.255.0.6 fabric p2p) to reach leaf1, as the sibling routes to-leaf1 already do for 10.10.20/99.",
+            "rollback_commands": [
+              "network-instance default route-table ipv4-unicast route 10.10.10.0/24 { admin-state enable next-hop-group ibn-wrt-m1 }"
+            ],
+            "target": "leaf2"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.081600076868199e-05,
+      "error": "update_config.change.commands failed backend safety preflight: SR Linux configuration commands must be 'set / <path>' or 'delete / <path>'",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.10.0/24",
+        "node": "leaf2",
+        "reason": "leaf2's 10.10.10.0/24 route currently uses next-hop-group ibn-wrt-m1 (10.10.50.10 = app1 host), which explains user1→web1/app1 100% loss and the ICMP redirects toward 10.50.10.10 seen from web1/app1. Repoint to to-leaf1 (fabric p2p 10.255.0.4/10.255.0.6) so users_vlan traffic returns to leaf1.",
+        "set": {
+          "next_hop_group": "to-leaf1"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5918613300000288,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_e22089a26da2e1fe"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 32.19842163599969,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

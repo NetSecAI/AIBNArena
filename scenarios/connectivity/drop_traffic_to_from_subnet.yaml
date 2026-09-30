@@ -1,0 +1,38 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/connectivity/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/connectivity/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/connectivity/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/connectivity/preservation-v1.yaml, version: "1.0.0"}
+scenario: drop_traffic_to_from_subnet
+task:
+  low: >-
+    Something on this network is not working the way it should. Put it back.
+  medium: >-
+    Restore the intended IPv4 connectivity between affected endpoints without disrupting healthy
+    paths.
+  high: >-
+    {{affected_nodes}} lost IPv4 connectivity that the rest of the network still has. Restore the
+    intended connectivity for those endpoints without disrupting the paths that still work.
+base_variant: medium
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+methods:
+  - id: 1
+    name: router_drops_traffic_from_subnet
+    selector: {node: gateway, subnet: required_endpoint_segment}
+    operation: {name: set_subnet_traffic_policy, direction: from, policy: drop}
+  - id: 2
+    name: router_drops_traffic_to_subnet
+    selector: {node: gateway, subnet: required_endpoint_segment}
+    operation: {name: set_subnet_traffic_policy, direction: to, policy: drop}
+  - id: 3
+    name: router_drops_traffic_to_from_subnet
+    selector: {node: gateway, subnet: required_endpoint_segment}
+    operation: {name: set_subnet_traffic_policy, direction: bidirectional, policy: drop}
+  - id: 4
+    name: router_drops_icmp_to_from_subnet
+    selector: {node: gateway, subnet: required_endpoint_segment}
+    operation: {name: set_subnet_traffic_policy, direction: bidirectional, protocol: icmp, policy: drop}

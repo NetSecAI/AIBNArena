@@ -1,0 +1,211 @@
+schema_version: "0.1"
+topology:
+  id: sme_leaf_spine_dmz_vlan
+  name: Small SME leaf-spine topology with layer-2 leaves and VLAN-routing spines
+  size: small
+  profile: enterprise_sme
+  defaults:
+    endpoint_interface_mtu: 1500
+  environment:
+    type: containerlab
+    lab_name: sme01-vlan
+    topology_path: benchmarks/testbeds/containerlab/sme01-vlan/topology.clab.yml
+  nodes:
+    spine1:
+      kind: nokia_srlinux
+      roles: [spine, router, gateway, transit, inter_vlan_router]
+      capabilities: [ipv4_forwarding, inter_vlan_routing, irb, vlan, trunk, acl, qos]
+      interfaces:
+        "irb0.10": {segment: users_vlan, ipv4: 10.10.10.1/24}
+        "irb0.20": {segment: guest_vlan, ipv4: 10.10.20.1/24}
+        "irb0.30": {segment: finance_vlan, ipv4: 10.10.30.1/24}
+        "irb0.40": {segment: dmz_vlan, ipv4: 10.10.40.1/24}
+        "irb0.50": {segment: server_vlan, ipv4: 10.10.50.1/24}
+        "irb0.60": {segment: internet, ipv4: 203.0.113.1/24}
+        "irb0.99": {segment: mgmt_vlan, ipv4: 10.10.99.1/24}
+        "ethernet-1/1": {segment: trunk_l1_s1}
+        "ethernet-1/2": {segment: trunk_l2_s1}
+    spine2:
+      kind: nokia_srlinux
+      roles: [spine, router, standby_gateway, transit, inter_vlan_router]
+      capabilities: [ipv4_forwarding, inter_vlan_routing, irb, vlan, trunk, acl, qos]
+      interfaces:
+        "irb0.10": {segment: users_vlan, ipv4: 10.10.10.2/24}
+        "irb0.20": {segment: guest_vlan, ipv4: 10.10.20.2/24}
+        "irb0.30": {segment: finance_vlan, ipv4: 10.10.30.2/24}
+        "irb0.40": {segment: dmz_vlan, ipv4: 10.10.40.2/24}
+        "irb0.50": {segment: server_vlan, ipv4: 10.10.50.2/24}
+        "irb0.60": {segment: internet, ipv4: 203.0.113.2/24}
+        "irb0.99": {segment: mgmt_vlan, ipv4: 10.10.99.2/24}
+        "ethernet-1/1": {segment: trunk_l1_s2}
+        "ethernet-1/2": {segment: trunk_l2_s2}
+    leaf1:
+      kind: nokia_srlinux
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, mac_vrf, vlan, trunk, acl, qos]
+      interfaces:
+        "ethernet-1/1": {segment: trunk_l1_s1}
+        "ethernet-1/2": {segment: trunk_l1_s2}
+        "ethernet-1/10": {segment: users_vlan, attached_endpoint: user1}
+        "ethernet-1/20": {segment: guest_vlan, attached_endpoint: guest1}
+        "ethernet-1/30": {segment: guest_vlan, attached_endpoint: attacker1}
+        "ethernet-1/57": {segment: mgmt_vlan, attached_endpoint: admin1}
+    leaf2:
+      kind: nokia_srlinux
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, mac_vrf, vlan, trunk, acl, qos]
+      interfaces:
+        "ethernet-1/1": {segment: trunk_l2_s1}
+        "ethernet-1/2": {segment: trunk_l2_s2}
+        "ethernet-1/30": {segment: finance_vlan, attached_endpoint: finance1}
+        "ethernet-1/40": {segment: dmz_vlan, attached_endpoint: web1}
+        "ethernet-1/50": {segment: server_vlan, attached_endpoint: app1}
+        "ethernet-1/58": {segment: internet, attached_endpoint: external1}
+    user1:
+      kind: linux
+      roles: [client, employee]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: users_vlan, ipv4: 10.10.10.10/24}
+    guest1:
+      kind: linux
+      roles: [client, guest]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: guest_vlan, ipv4: 10.10.20.10/24}
+    finance1:
+      kind: linux
+      roles: [client, restricted_endpoint]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: finance_vlan, ipv4: 10.10.30.10/24}
+    web1:
+      kind: linux
+      roles: [server, dmz_server]
+      capabilities: [ipv4, http_server]
+      interfaces:
+        eth1: {segment: dmz_vlan, ipv4: 10.10.40.10/24}
+    app1:
+      kind: linux
+      roles: [server, application_server]
+      capabilities: [ipv4, traffic_sink]
+      interfaces:
+        eth1: {segment: server_vlan, ipv4: 10.10.50.10/24}
+    external1:
+      kind: linux
+      roles: [client, external_client]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: internet, ipv4: 203.0.113.10/24}
+    admin1:
+      kind: linux
+      roles: [admin_client, management_actor]
+      capabilities: [ipv4, network_management]
+      interfaces:
+        eth1: {segment: mgmt_vlan, ipv4: 10.10.99.100/24}
+  connectivity_requirements:
+    - {source: user1, destination: web1, bidirectional: true}
+    - {source: user1, destination: app1, bidirectional: true}
+    - {source: guest1, destination: web1, bidirectional: true}
+    - {source: finance1, destination: app1, bidirectional: true}
+    - {source: external1, destination: web1, bidirectional: true}
+  optional_nodes:
+    attacker1:
+      kind: linux
+      roles: [attacker]
+      capabilities: [ipv4, raw_packets, packet_capture, traffic_generation, vlan_tagging, arp_spoofing]
+      attachable_segments: [users_vlan, guest_vlan, mgmt_vlan]
+  segments:
+    trunk_l1_s1: {type: trunk, members: [leaf1, spine1], tagged_vlans: [10, 20, 99], capacity_mbps: 1000}
+    trunk_l1_s2: {type: trunk, members: [leaf1, spine2], tagged_vlans: [10, 20, 99], capacity_mbps: 1000}
+    trunk_l2_s1: {type: trunk, members: [leaf2, spine1], tagged_vlans: [30, 40, 50, 60], capacity_mbps: 1000}
+    trunk_l2_s2: {type: trunk, members: [leaf2, spine2], tagged_vlans: [30, 40, 50, 60], capacity_mbps: 1000}
+    users_vlan:
+      type: vlan
+      vlan_id: 10
+      cidr: 10.10.10.0/24
+      gateway_ipv4: 10.10.10.1
+      gateway_node: spine1
+      standby_gateway_node: spine2
+      bridge_domain: vlan10
+      members: [leaf1, spine1, spine2, user1]
+      security_zone: users
+      capacity_mbps: 1000
+    guest_vlan:
+      type: vlan
+      vlan_id: 20
+      cidr: 10.10.20.0/24
+      gateway_ipv4: 10.10.20.1
+      gateway_node: spine1
+      standby_gateway_node: spine2
+      bridge_domain: vlan20
+      members: [leaf1, spine1, spine2, guest1, attacker1]
+      security_zone: guest
+      capacity_mbps: 1000
+    finance_vlan:
+      type: vlan
+      vlan_id: 30
+      cidr: 10.10.30.0/24
+      gateway_ipv4: 10.10.30.1
+      gateway_node: spine1
+      standby_gateway_node: spine2
+      bridge_domain: vlan30
+      members: [leaf2, spine1, spine2, finance1]
+      security_zone: finance
+      capacity_mbps: 1000
+    dmz_vlan:
+      type: vlan
+      vlan_id: 40
+      cidr: 10.10.40.0/24
+      gateway_ipv4: 10.10.40.1
+      gateway_node: spine1
+      standby_gateway_node: spine2
+      bridge_domain: vlan40
+      members: [leaf2, spine1, spine2, web1]
+      security_zone: dmz
+      capacity_mbps: 1000
+    server_vlan:
+      type: vlan
+      vlan_id: 50
+      cidr: 10.10.50.0/24
+      gateway_ipv4: 10.10.50.1
+      gateway_node: spine1
+      standby_gateway_node: spine2
+      bridge_domain: vlan50
+      members: [leaf2, spine1, spine2, app1]
+      security_zone: servers
+      capacity_mbps: 1000
+    internet:
+      type: external
+      vlan_id: 60
+      cidr: 203.0.113.0/24
+      gateway_ipv4: 203.0.113.1
+      gateway_node: spine1
+      standby_gateway_node: spine2
+      bridge_domain: vlan60
+      members: [leaf2, spine1, spine2, external1]
+      security_zone: external
+      capacity_mbps: 1000
+    mgmt_vlan:
+      type: management
+      vlan_id: 99
+      cidr: 10.10.99.0/24
+      gateway_ipv4: 10.10.99.1
+      gateway_node: spine1
+      standby_gateway_node: spine2
+      bridge_domain: vlan99
+      members: [leaf1, spine1, spine2, admin1]
+      security_zone: management
+      capacity_mbps: 1000
+  services:
+    web_http:
+      node: web1
+      transport: tcp
+      port: 80
+      application: http
+      security: cleartext
+    app_test:
+      node: app1
+      transport: tcp
+      port: 5201
+      application: iperf3

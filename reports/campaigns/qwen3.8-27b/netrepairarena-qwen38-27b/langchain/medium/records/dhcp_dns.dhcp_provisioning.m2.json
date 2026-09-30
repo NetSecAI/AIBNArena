@@ -1,0 +1,4222 @@
+{
+  "cleanup_result": {
+    "ok": true,
+    "results": [
+      {
+        "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option default-router 10.10.20.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "firewall"
+      },
+      {
+        "command": "sh -c 'P=$(cat /var/run/udhcpc.eth1.pid 2>/dev/null); : > /etc/resolv.conf; if [ -n \"$P\" ]; then kill -USR2 $P; sleep 2; kill -USR1 $P; fi; i=0; while [ $i -lt 15 ]; do ip -4 addr show eth1 2>/dev/null | grep -q \" inet \" && break; i=$((i+1)); sleep 1; done; exit 0'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:user1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.10.10\nudhcpc: lease of 10.10.10.10 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "ip address replace 10.10.60.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "ip route replace default via 10.10.60.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:guest1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.20.10\nudhcpc: lease of 10.10.20.10 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:admin1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.99.100\nudhcpc: lease of 10.10.99.100 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:finance1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.30.10\nudhcpc: lease of 10.10.30.10 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip address replace 10.10.40.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip route replace default via 10.10.40.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "sh -c 'printf \"search sme01.internal sme01.example\\nnameserver 10.10.60.10\\n\" > /etc/resolv.conf'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "ip address replace 10.10.41.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "ip route replace default via 10.10.41.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip address replace 10.10.50.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip route replace default via 10.10.50.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'printf \"search sme01.internal sme01.example\\nnameserver 10.10.60.10\\n\" > /etc/resolv.conf'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip address replace 203.0.113.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip route replace default via 203.0.113.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'printf \"search sme01.example\\nnameserver 10.10.41.10\\n\" > /etc/resolv.conf'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "cp /opt/dns-src/db.sme01.internal /etc/bind/db.sme01.internal",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "rndc reload",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "server reload successful\n",
+        "target": "dns-int"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "cp /opt/dns-src/db.sme01.example /etc/bind/db.sme01.example",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "rndc reload",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "server reload successful\n",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.1/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/10 admin-state enable\nset / interface ethernet-1/10 subinterface 0 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 address 10.10.10.1/24\nset / network-instance default interface ethernet-1/10.0\nset / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay gi-address 10.10.10.1\nset / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]\nset / interface ethernet-1/11 admin-state enable\nset / interface ethernet-1/11 subinterface 0 admin-state enable\nset / interface ethernet-1/11 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/11 subinterface 0 ipv4 address 10.10.60.1/24\nset / network-instance default interface ethernet-1/11.0\nset / interface ethernet-1/20 admin-state enable\nset / interface ethernet-1/20 subinterface 0 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 address 10.10.20.1/24\nset / network-instance default interface ethernet-1/20.0\nset / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay gi-address 10.10.20.1\nset / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]\nset / interface ethernet-1/57 admin-state enable\nset / interface ethernet-1/57 subinterface 0 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 address 10.10.99.1/24\nset / network-instance default interface ethernet-1/57.0\nset / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay gi-address 10.10.99.1\nset / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]\nset / network-instance default next-hop-groups group to-firewall nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.41.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-firewall admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.3/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/30 admin-state enable\nset / interface ethernet-1/30 subinterface 0 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 address 10.10.30.1/24\nset / network-instance default interface ethernet-1/30.0\nset / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay gi-address 10.10.30.1\nset / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.2 ]\nset / network-instance default next-hop-groups group to-firewall nexthop 1 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.60.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.41.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-firewall admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf2"
+      },
+      {
+        "command": "set interfaces ethernet eth1 address 10.255.0.0/31\nset interfaces ethernet eth1 description fabric-to-leaf1\nset interfaces ethernet eth2 address 10.255.0.2/31\nset interfaces ethernet eth2 description fabric-to-leaf2\nset interfaces ethernet eth3 address 10.10.40.1/24\nset interfaces ethernet eth3 description web1-gateway\nset interfaces ethernet eth4 address 10.10.41.1/24\nset interfaces ethernet eth4 description dns-dmz-gateway\nset interfaces ethernet eth5 address 10.10.50.1/24\nset interfaces ethernet eth5 description app1-gateway\nset interfaces ethernet eth6 address 203.0.113.1/24\nset interfaces ethernet eth6 description external1-gateway\nset protocols static route 10.10.10.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.20.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.60.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.99.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.30.0/24 next-hop 10.255.0.3\nset service dhcp-server listen-address 10.255.0.0\nset service dhcp-server listen-address 10.255.0.2\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 subnet-id 10\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option default-router 10.10.10.1\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 lease 3600\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 static-mapping user1 mac 02:c1:ab:0a:0a:0a\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 static-mapping user1 ip-address 10.10.10.10\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 subnet-id 20\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option default-router 10.10.20.1\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 lease 3600\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 mac 02:c1:ab:0a:14:0a\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 ip-address 10.10.20.10\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 subnet-id 30\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option default-router 10.10.30.1\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 lease 3600\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 static-mapping finance1 mac 02:c1:ab:0a:1e:0a\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 static-mapping finance1 ip-address 10.10.30.10\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 subnet-id 99\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option default-router 10.10.99.1\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 lease 3600\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 static-mapping admin1 mac 02:c1:ab:0a:63:64\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 static-mapping admin1 ip-address 10.10.99.100\nset firewall zone INTERNAL description internal-zone\nset firewall zone INTERNAL interface eth1\nset firewall zone INTERNAL interface eth2\nset firewall zone DMZ description dmz-zone\nset firewall zone DMZ interface eth3\nset firewall zone DMZ interface eth4\nset firewall zone DMZ interface eth5\nset firewall zone OUTSIDE description outside-zone\nset firewall zone OUTSIDE interface eth6\nset firewall ipv4 name INTERNAL-TO-DMZ default-action drop\nset firewall ipv4 name INTERNAL-TO-DMZ description internal-to-dmz\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 description return-traffic\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 state established\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 state related\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 description user1-to-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 destination port 80\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 description user1-ping-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 description user1-to-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 destination port 5201\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 description user1-ping-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 description guest1-to-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 source address 10.10.20.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 destination port 80\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 description guest1-ping-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 source address 10.10.20.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 description finance1-to-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 source address 10.10.30.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 destination port 5201\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 description finance1-ping-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 source address 10.10.30.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 description resolver-forward-udp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 protocol udp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 source address 10.10.60.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 destination address 10.10.41.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 destination port 53\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 description resolver-forward-tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 source address 10.10.60.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 destination address 10.10.41.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 destination port 53\nset firewall ipv4 name INTERNAL-TO-DMZ rule 120 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 120 description admin-to-dmz\nset firewall ipv4 name INTERNAL-TO-DMZ rule 120 source address 10.10.99.100\nset firewall zone DMZ from INTERNAL firewall name INTERNAL-TO-DMZ\nset firewall ipv4 name DMZ-TO-INTERNAL default-action drop\nset firewall ipv4 name DMZ-TO-INTERNAL description dmz-to-internal\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 description return-traffic\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 state established\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 state related\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 description web1-resolve-udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 protocol udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 description web1-resolve-tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 protocol tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 description app1-resolve-udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 protocol udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 description app1-resolve-tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 protocol tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 description app1-ping-resolver\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 description web1-ping-user1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 destination address 10.10.10.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 description app1-ping-user1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 destination address 10.10.10.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 description web1-ping-guest1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 destination address 10.10.20.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 description app1-ping-finance1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 destination address 10.10.30.10\nset firewall zone INTERNAL from DMZ firewall name DMZ-TO-INTERNAL\nset firewall ipv4 name OUTSIDE-TO-DMZ default-action drop\nset firewall ipv4 name OUTSIDE-TO-DMZ description outside-to-dmz\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 description return-traffic\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 state established\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 state related\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 description internet-to-web\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 protocol tcp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 destination address 10.10.40.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 destination port 80\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 description internet-ping-web\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 protocol icmp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 icmp type-name echo-request\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 destination address 10.10.40.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 description internet-resolve-udp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 protocol udp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 destination address 10.10.41.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 destination port 53\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 description internet-resolve-tcp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 protocol tcp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 destination address 10.10.41.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 destination port 53\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 description internet-ping-dns\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 protocol icmp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 icmp type-name echo-request\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 destination address 10.10.41.10\nset firewall zone DMZ from OUTSIDE firewall name OUTSIDE-TO-DMZ\nset firewall ipv4 name DMZ-TO-OUTSIDE default-action drop\nset firewall ipv4 name DMZ-TO-OUTSIDE description dmz-to-outside\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 action accept\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 description return-traffic\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 state established\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 state related\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 action accept\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 description web1-ping-outside\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 protocol icmp\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 destination address 203.0.113.10\nset firewall zone OUTSIDE from DMZ firewall name DMZ-TO-OUTSIDE\nset firewall ipv4 name INTERNAL-TO-OUTSIDE default-action drop\nset firewall ipv4 name INTERNAL-TO-OUTSIDE description internal-to-outside\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 description return-traffic\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 state established\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 state related\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 description internal-web-out\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 protocol tcp\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 destination port 80\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 description internal-tls-out\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 protocol tcp\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 destination port 443\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 description internal-ping-out\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 protocol icmp\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 description admin-to-outside\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 source address 10.10.99.100\nset firewall zone OUTSIDE from INTERNAL firewall name INTERNAL-TO-OUTSIDE\nset firewall ipv4 name OUTSIDE-TO-INTERNAL default-action drop\nset firewall ipv4 name OUTSIDE-TO-INTERNAL description outside-to-internal\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 action accept\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 description return-traffic\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 state established\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 state related\nset firewall zone INTERNAL from OUTSIDE firewall name OUTSIDE-TO-INTERNAL\nset nat source rule 101 description masquerade-10.10.10.0\nset nat source rule 101 outbound-interface name eth6\nset nat source rule 101 source address 10.10.10.0/24\nset nat source rule 101 translation address masquerade\nset nat source rule 102 description masquerade-10.10.20.0\nset nat source rule 102 outbound-interface name eth6\nset nat source rule 102 source address 10.10.20.0/24\nset nat source rule 102 translation address masquerade\nset nat source rule 103 description masquerade-10.10.30.0\nset nat source rule 103 outbound-interface name eth6\nset nat source rule 103 source address 10.10.30.0/24\nset nat source rule 103 translation address masquerade\nset nat source rule 104 description masquerade-10.10.60.0\nset nat source rule 104 outbound-interface name eth6\nset nat source rule 104 source address 10.10.60.0/24\nset nat source rule 104 translation address masquerade\nset nat source rule 105 description masquerade-10.10.99.0\nset nat source rule 105 outbound-interface name eth6\nset nat source rule 105 source address 10.10.99.0/24\nset nat source rule 105 translation address masquerade\nset nat destination rule 10 description publish-web\nset nat destination rule 10 inbound-interface name eth6\nset nat destination rule 10 protocol tcp\nset nat destination rule 10 destination port 80\nset nat destination rule 10 translation address 10.10.40.10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "firewall"
+      }
+    ]
+  },
+  "convergence_result": {
+    "converged": false,
+    "error": "repair did not converge before independent verification",
+    "interval_seconds": 2.0,
+    "lease_renewal": {
+      "clients": [
+        {
+          "client": "admin1",
+          "ok": true,
+          "returncode": 0
+        },
+        {
+          "client": "finance1",
+          "ok": true,
+          "returncode": 0
+        },
+        {
+          "client": "guest1",
+          "ok": true,
+          "returncode": 0
+        },
+        {
+          "client": "user1",
+          "ok": true,
+          "returncode": 0
+        }
+      ]
+    },
+    "observation": {
+      "connectivity": [
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=1.94 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.376 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.342 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.342/0.885/1.939/0.744 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": "web1.sme01.example",
+          "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.160 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.287 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.263 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.160/0.236/0.287/0.055 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.40.10",
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.361 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.272 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.294 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.272/0.309/0.361/0.037 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": "user1.sme01.internal",
+          "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.274 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.305 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.372 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2055ms\nrtt min/avg/max/mdev = 0.274/0.317/0.372/0.040 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.10.10",
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=0.414 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.382 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.281 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.281/0.359/0.414/0.056 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": "app1.sme01.example",
+          "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.225 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.258 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.299 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2054ms\nrtt min/avg/max/mdev = 0.225/0.260/0.299/0.030 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.50.10",
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.382 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.375 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.472 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2024ms\nrtt min/avg/max/mdev = 0.375/0.409/0.472/0.044 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": "user1.sme01.internal",
+          "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.199 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.254 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.268 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2047ms\nrtt min/avg/max/mdev = 0.199/0.240/0.268/0.029 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.10.10",
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 0 received, 100% packet loss, time 2040ms",
+          "packet_loss_percent": 100.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": false
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": "web1.sme01.example",
+          "output": "ping: web1.sme01.example: Try again",
+          "packet_loss_percent": 100.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": false
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 0 received, 100% packet loss, time 2025ms",
+          "packet_loss_percent": 100.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": false
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": "guest1.sme01.internal",
+          "output": "PING guest1.sme01.internal (10.10.20.10) 56(84) bytes of data.\n\n--- guest1.sme01.internal ping statistics ---\n3 packets transmitted, 0 received, 100% packet loss, time 2036ms",
+          "packet_loss_percent": 100.0,
+          "resolved_ip": "10.10.20.10",
+          "source": "web1",
+          "success": false
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=1.17 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.338 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.492 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2017ms\nrtt min/avg/max/mdev = 0.338/0.667/1.171/0.361 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "finance1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": "app1.sme01.example",
+          "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.175 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.293 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.339 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.175/0.269/0.339/0.069 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.50.10",
+          "source": "finance1",
+          "success": true
+        },
+        {
+          "destination": "finance1",
+          "destination_ip": "10.10.30.10",
+          "hostname": null,
+          "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=62 time=0.599 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=62 time=0.264 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=62 time=0.484 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.264/0.449/0.599/0.138 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "finance1",
+          "destination_ip": "10.10.30.10",
+          "hostname": "finance1.sme01.internal",
+          "output": "PING finance1.sme01.internal (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=1 ttl=62 time=0.291 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=2 ttl=62 time=0.338 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=3 ttl=62 time=0.357 ms\n\n--- finance1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.291/0.328/0.357/0.027 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.30.10",
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=63 time=0.063 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=63 time=0.084 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=63 time=0.075 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.063/0.074/0.084/0.008 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": "web1.sme01.example",
+          "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=63 time=0.041 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=63 time=0.062 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=63 time=0.058 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 6004ms\nrtt min/avg/max/mdev = 0.041/0.053/0.062/0.009 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.40.10",
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=63 time=0.087 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=63 time=0.054 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=63 time=0.050 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.050/0.063/0.087/0.016 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": null,
+          "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=63 time=0.257 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=63 time=0.220 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=63 time=0.310 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.220/0.262/0.310/0.036 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": "dns-int.sme01.internal",
+          "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=63 time=0.144 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=63 time=0.256 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=63 time=0.267 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.144/0.222/0.267/0.055 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.60.10",
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": null,
+          "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=62 time=0.321 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=62 time=0.299 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=62 time=0.276 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.276/0.298/0.321/0.018 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": "dns-int.sme01.internal",
+          "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=62 time=0.189 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=62 time=0.307 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=62 time=0.338 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.189/0.278/0.338/0.064 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.60.10",
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "dns-dmz",
+          "destination_ip": "10.10.41.10",
+          "hostname": null,
+          "output": "PING 10.10.41.10 (10.10.41.10) 56(84) bytes of data.\n64 bytes from 10.10.41.10: icmp_seq=1 ttl=63 time=0.063 ms\n64 bytes from 10.10.41.10: icmp_seq=2 ttl=63 time=0.055 ms\n64 bytes from 10.10.41.10: icmp_seq=3 ttl=63 time=0.086 ms\n\n--- 10.10.41.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.055/0.068/0.086/0.013 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        }
+      ],
+      "lab_name": "sme01-dns",
+      "nodes": [
+        {
+          "container_name": "clab-sme01-dns-firewall",
+          "kind": "vyos",
+          "name": "firewall"
+        },
+        {
+          "container_name": "clab-sme01-dns-leaf1",
+          "kind": "nokia_srlinux",
+          "name": "leaf1"
+        },
+        {
+          "container_name": "clab-sme01-dns-leaf2",
+          "kind": "nokia_srlinux",
+          "name": "leaf2"
+        },
+        {
+          "container_name": "clab-sme01-dns-user1",
+          "kind": "linux",
+          "name": "user1"
+        },
+        {
+          "container_name": "clab-sme01-dns-guest1",
+          "kind": "linux",
+          "name": "guest1"
+        },
+        {
+          "container_name": "clab-sme01-dns-finance1",
+          "kind": "linux",
+          "name": "finance1"
+        },
+        {
+          "container_name": "clab-sme01-dns-web1",
+          "kind": "linux",
+          "name": "web1"
+        },
+        {
+          "container_name": "clab-sme01-dns-app1",
+          "kind": "linux",
+          "name": "app1"
+        },
+        {
+          "container_name": "clab-sme01-dns-external1",
+          "kind": "linux",
+          "name": "external1"
+        },
+        {
+          "container_name": "clab-sme01-dns-dns-int",
+          "kind": "linux",
+          "name": "dns-int"
+        },
+        {
+          "container_name": "clab-sme01-dns-dns-dmz",
+          "kind": "linux",
+          "name": "dns-dmz"
+        },
+        {
+          "container_name": "clab-sme01-dns-admin1",
+          "kind": "linux",
+          "name": "admin1"
+        },
+        {
+          "container_name": "clab-sme01-dns-attacker1",
+          "kind": "linux",
+          "name": "attacker1"
+        }
+      ],
+      "raw": {
+        "admin1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7810      UP             172.24.0.4/24 \neth1@if7818      UP             10.10.99.100/24 fe80::c1:abff:fe0a:6364/64 \n",
+        "app1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7808      UP             172.24.0.2/24 \neth1@if7812      UP             10.10.50.10/24 fe80::a8c1:abff:fed0:9215/64 \n",
+        "attacker1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7827      UP             172.24.0.11/24 \neth1@if7839      DOWN           \n",
+        "dns-dmz:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7835      UP             172.24.0.13/24 \neth1@if7843      UP             10.10.41.10/24 fe80::a8c1:abff:feb8:a42d/64 \n",
+        "dns-int:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7832      UP             172.24.0.12/24 \neth1@if7841      UP             10.10.60.10/24 fe80::a8c1:abff:fe59:db2f/64 \n",
+        "external1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7817      UP             172.24.0.7/24 \neth1@if7830      UP             203.0.113.10/24 fe80::a8c1:abff:fe0f:456/64 \n",
+        "finance1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7814      UP             172.24.0.6/24 \neth1@if7824      UP             10.10.30.10/24 fe80::c1:abff:fe0a:1e0a/64 \n",
+        "firewall:show_interfaces": "Codes: S - State, L - Link, u - Up, D - Down, A - Admin Down\nInterface    IP Address      MAC                VRF        MTU  S/L    Description\n-----------  --------------  -----------------  -------  -----  -----  -----------------\neth0         172.24.0.9/24   1a:4b:a5:44:5b:c9  default   1500  u/u\neth1         10.255.0.0/31   aa:c1:ab:47:4b:27  default   1500  u/u    fabric-to-leaf1\neth2         10.255.0.2/31   aa:c1:ab:07:c6:8b  default   1500  u/u    fabric-to-leaf2\neth3         10.10.40.1/24   aa:c1:ab:ad:23:7a  default   1500  u/u    web1-gateway\neth4         10.10.41.1/24   aa:c1:ab:21:2c:7f  default   1500  u/u    dns-dmz-gateway\neth5         10.10.50.1/24   aa:c1:ab:e7:3a:3f  default   1500  u/u    app1-gateway\neth6         203.0.113.1/24  aa:c1:ab:73:06:5a  default   1500  u/u    external1-gateway\nlo           127.0.0.1/8     00:00:00:00:00:00  default  65536  u/u\n             ::1/128\n",
+        "guest1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7809      UP             172.24.0.3/24 \neth1@if7815      UP             10.10.20.10/24 fe80::c1:abff:fe0a:140a/64 \n",
+        "leaf1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:39:09:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T08:49:52.294Z\nTotal Memory         : 32559032 kB\nFree Memory          : 20269212 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "leaf2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:A2:0A:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T08:49:52.294Z\nTotal Memory         : 32559032 kB\nFree Memory          : 20269212 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "user1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7811      UP             172.24.0.5/24 \neth1@if7821      UP             10.10.10.10/24 fe80::c1:abff:fe0a:a0a/64 \n",
+        "web1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if7820      UP             172.24.0.8/24 \neth1@if7828      UP             10.10.40.10/24 fe80::a8c1:abff:fe07:f7cc/64 \n"
+      }
+    },
+    "ok": false,
+    "timeout_seconds": 30.0
+  },
+  "created_at": "2026-09-29T09:03:55.736401+00:00",
+  "device_configurations": {
+    "changed_by_sut": [],
+    "changes": {
+      "before_sut_to_after_sut": {},
+      "healthy_to_before_sut": {
+        "firewall": {
+          "file": "firewall/healthy_to_before_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 1
+        },
+        "guest1": {
+          "file": "guest1/healthy_to_before_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 1
+        }
+      }
+    },
+    "directory": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b-20260929T081552Z/devices/dhcp_dns.dhcp_provisioning.m2-20260929T084943-d8bd2356",
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes",
+    "snapshots": {
+      "after_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 971,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-dmz": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-dmz/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-int": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-int/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1233,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "firewall": {
+            "bytes": 24047,
+            "command": "show",
+            "file": "firewall/after_sut.txt",
+            "kind": "vyos",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77892,
+            "command": "info from running /",
+            "file": "leaf1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 76876,
+            "command": "info from running /",
+            "file": "leaf2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1227,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "before_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 971,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-dmz": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-dmz/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-int": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-int/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1233,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "firewall": {
+            "bytes": 24047,
+            "command": "show",
+            "file": "firewall/before_sut.txt",
+            "kind": "vyos",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77892,
+            "command": "info from running /",
+            "file": "leaf1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 76876,
+            "command": "info from running /",
+            "file": "leaf2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1227,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "healthy": {
+        "devices": {
+          "admin1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 971,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-dmz": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-dmz/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-int": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-int/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1233,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "firewall": {
+            "bytes": 24047,
+            "command": "show",
+            "file": "firewall/healthy.txt",
+            "kind": "vyos",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77892,
+            "command": "info from running /",
+            "file": "leaf1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 76876,
+            "command": "info from running /",
+            "file": "leaf2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1227,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      }
+    }
+  },
+  "error": null,
+  "evaluations": {
+    "expected_degradation": {
+      "injection": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "degraded": true,
+            "reinjected": null,
+            "restored": null,
+            "voided": false
+          }
+        ],
+        "attempts_allowed": 1
+      },
+      "oracle_id": "dhcp_dns.provisioning.expected_degradation",
+      "passed": true,
+      "phase": "expected_degradation",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 100.0,
+                "rtt_avg_ms": null,
+                "rtt_max_ms": null,
+                "rtt_min_ms": null,
+                "source": "guest1",
+                "success": false
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 100.0,
+                "rtt_avg_ms": null,
+                "rtt_max_ms": null,
+                "rtt_min_ms": null,
+                "source": "web1",
+                "success": false
+              }
+            ],
+            "failed_checks": 2,
+            "passed_checks": 0,
+            "success": false,
+            "total_checks": 2
+          },
+          "passed": true,
+          "probe_id": "affected_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "gte",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "metrics": {
+            "answer_count": 0,
+            "http_status": 0,
+            "success": false
+          },
+          "passed": true,
+          "probe_id": "name_resolution",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "answer_count",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "version": "1.1.0"
+    },
+    "healthy": {
+      "oracle_id": "dhcp_dns.provisioning.healthy",
+      "passed": true,
+      "phase": "healthy",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.334,
+                "rtt_max_ms": 0.419,
+                "rtt_min_ms": 0.268,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.377,
+                "rtt_max_ms": 0.517,
+                "rtt_min_ms": 0.286,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.361,
+                "rtt_max_ms": 0.466,
+                "rtt_min_ms": 0.298,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.373,
+                "rtt_max_ms": 0.456,
+                "rtt_min_ms": 0.307,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.327,
+                "rtt_max_ms": 0.365,
+                "rtt_min_ms": 0.26,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.681,
+                "rtt_max_ms": 1.506,
+                "rtt_min_ms": 0.266,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.297,
+                "rtt_max_ms": 0.339,
+                "rtt_min_ms": 0.276,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.399,
+                "rtt_max_ms": 0.446,
+                "rtt_min_ms": 0.317,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.06,
+                "rtt_max_ms": 0.067,
+                "rtt_min_ms": 0.054,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.064,
+                "rtt_max_ms": 0.067,
+                "rtt_min_ms": 0.062,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.399,
+                "rtt_max_ms": 0.71,
+                "rtt_min_ms": 0.21,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.392,
+                "rtt_max_ms": 0.465,
+                "rtt_min_ms": 0.317,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "dns-dmz",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.062,
+                "rtt_max_ms": 0.065,
+                "rtt_min_ms": 0.059,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 13,
+            "success": true,
+            "total_checks": 13
+          },
+          "passed": true,
+          "probe_id": "required_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "metrics": {
+            "answer_count": 2,
+            "http_status": 200,
+            "success": true
+          },
+          "passed": true,
+          "probe_id": "name_resolution",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "answer_count",
+              "operator": "eq",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "version": "1.1.0"
+    },
+    "preservation": {
+      "oracle_id": "dhcp_dns.unrelated_paths.preservation",
+      "passed": true,
+      "phase": "preservation",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.412,
+                "rtt_max_ms": 0.452,
+                "rtt_min_ms": 0.366,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.289,
+                "rtt_max_ms": 0.318,
+                "rtt_min_ms": 0.274,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.346,
+                "rtt_max_ms": 0.423,
+                "rtt_min_ms": 0.292,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.887,
+                "rtt_max_ms": 1.878,
+                "rtt_min_ms": 0.375,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.383,
+                "rtt_max_ms": 0.618,
+                "rtt_min_ms": 0.245,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.368,
+                "rtt_max_ms": 0.514,
+                "rtt_min_ms": 0.256,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.072,
+                "rtt_max_ms": 0.088,
+                "rtt_min_ms": 0.062,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.059,
+                "rtt_max_ms": 0.065,
+                "rtt_min_ms": 0.053,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.394,
+                "rtt_max_ms": 0.579,
+                "rtt_min_ms": 0.296,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.386,
+                "rtt_max_ms": 0.469,
+                "rtt_min_ms": 0.327,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "dns-dmz",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.063,
+                "rtt_max_ms": 0.073,
+                "rtt_min_ms": 0.058,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 11,
+            "success": true,
+            "total_checks": 11
+          },
+          "passed": true,
+          "probe_id": "unaffected_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "repair": {
+      "oracle_id": "dhcp_dns.provisioning.repair",
+      "passed": false,
+      "phase": "repair",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.394,
+                "rtt_max_ms": 0.521,
+                "rtt_min_ms": 0.328,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.431,
+                "rtt_max_ms": 0.498,
+                "rtt_min_ms": 0.381,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.293,
+                "rtt_max_ms": 0.31,
+                "rtt_min_ms": 0.28,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.382,
+                "rtt_max_ms": 0.543,
+                "rtt_min_ms": 0.282,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 100.0,
+                "rtt_avg_ms": null,
+                "rtt_max_ms": null,
+                "rtt_min_ms": null,
+                "source": "guest1",
+                "success": false
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 100.0,
+                "rtt_avg_ms": null,
+                "rtt_max_ms": null,
+                "rtt_min_ms": null,
+                "source": "web1",
+                "success": false
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.336,
+                "rtt_max_ms": 0.366,
+                "rtt_min_ms": 0.304,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.333,
+                "rtt_max_ms": 0.38,
+                "rtt_min_ms": 0.294,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.07,
+                "rtt_max_ms": 0.076,
+                "rtt_min_ms": 0.066,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.075,
+                "rtt_max_ms": 0.091,
+                "rtt_min_ms": 0.063,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.375,
+                "rtt_max_ms": 0.421,
+                "rtt_min_ms": 0.285,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.375,
+                "rtt_max_ms": 0.473,
+                "rtt_min_ms": 0.305,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "dns-dmz",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.061,
+                "rtt_max_ms": 0.067,
+                "rtt_min_ms": 0.056,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 2,
+            "passed_checks": 11,
+            "success": false,
+            "total_checks": 13
+          },
+          "passed": false,
+          "probe_id": "required_paths",
+          "threshold_results": [
+            false
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "metrics": {
+            "answer_count": 0,
+            "http_status": 0,
+            "success": false
+          },
+          "passed": false,
+          "probe_id": "name_resolution",
+          "threshold_results": [
+            false
+          ],
+          "thresholds": [
+            {
+              "metric": "answer_count",
+              "operator": "eq",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "version": "1.1.0"
+    }
+  },
+  "experiment_id": "langchain_agent-openai-qwen-qwen3-8-27b-dhcp_dns-dhcp_provisioning-m2-fault-seed450331920",
+  "metrics": {
+    "converged": false,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": null,
+      "hypothesis_source": null,
+      "judge": null,
+      "log_p_no": null,
+      "log_p_yes": null,
+      "method": "pool_gateway_misassigned",
+      "operation": "set_dhcp_default_router",
+      "reason": "the subject stated no diagnosis",
+      "reference": "On the DHCP server firewall, pool GUEST1 (10.10.20.0/24) hands out 10.10.20.2 as the default router instead of 10.10.20.1.",
+      "score": null,
+      "target": "firewall"
+    },
+    "domain": "dhcp_dns",
+    "environment_success": false,
+    "failed_operation_count": 8,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 0,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "provisioning_repair_pass_rate": 0.0,
+    "read_count": 35,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 0,
+    "successful_read_count": 31,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 8
+  },
+  "operation_counts": {
+    "ani_mutations": 0,
+    "ani_reads": 35,
+    "failed_operations": 8,
+    "input_tokens": 1120204,
+    "llm_calls": 39,
+    "output_tokens": 2442,
+    "successful_mutations": 0,
+    "successful_reads": 31,
+    "total_tokens": 1122646,
+    "unsafe_operations": 0,
+    "validations": 8
+  },
+  "phase_durations": {
+    "apply_reference_state": 177.73879799002316,
+    "calculate_metrics": 3.3310032449662685e-05,
+    "deploy_reset_testbed": 17.460082067991607,
+    "evaluate_degradation": 26.992975296045188,
+    "evaluate_healthy": 28.83265138103161,
+    "evaluate_repair_preservation": 154.76467147900257,
+    "inject_fault": 6.592244552972261,
+    "invoke_sut": 400.0281969180214,
+    "load_configuration": 0.00023500202223658562,
+    "load_oracles": 0.008725789957679808,
+    "load_validate_scenario": 0.04941334604518488,
+    "record_baseline": 5.530018825083971e-06,
+    "restore_destroy": 20.42642616102239,
+    "score_diagnosis": 3.281299723312259e-05,
+    "snapshot_after_sut": 7.051441585004795,
+    "snapshot_before_sut": 6.460881702019833,
+    "snapshot_healthy": 6.0775312360492535,
+    "write_result": 0.008832757011987269
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "git": {
+      "commit": "0a19e7fd927278448014f992a5765dc718ff6430",
+      "dirty": true,
+      "modified_files": 1,
+      "untracked_files": 13031
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 8000,
+      "min_retry_tokens": null,
+      "model": "openai/qwen/qwen3.8-27b",
+      "prompt_variant": "default",
+      "recursion_limit": 1000,
+      "request_extra_body": {
+        "provider": {
+          "allow_fallbacks": false,
+          "order": [
+            "deepinfra"
+          ],
+          "quantizations": [
+            "bf16"
+          ]
+        },
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.1.0",
+      "healthy": "1.1.0",
+      "preservation": "1.0.0",
+      "repair": "1.1.0"
+    },
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "reference_state_sha256": "aabccb4fa22361db9111d4f97ba3100348f4cacba3230e9c29987c1b9e8113b5",
+    "scenario_seed": 450331920,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {
+      "served_model_names": [
+        "anthropic/claude-sonnet-5.5",
+        "anthropic/claude-sonnet-5.5:batch",
+        "typesafe/jev-router",
+        "perceptron/perceptron-mk1.5",
+        "fireworks/ember-1",
+        "z-ai/glm-5.3-prime",
+        "qwen/qwen3.8-max-prime",
+        "stealth/space-bunny-alpha",
+        "aion-labs/aion-3.5-mini",
+        "aion-labs/aion-3.5",
+        "upstage/solar-mini4",
+        "cohere/command-a-plus",
+        "openai/gpt-6-luna-pro",
+        "openai/gpt-6-luna-pro:batch",
+        "openai/gpt-6-luna",
+        "openai/gpt-6-luna:batch",
+        "openai/gpt-6-sol-pro",
+        "openai/gpt-6-sol-pro:batch",
+        "openai/gpt-6-sol",
+        "openai/gpt-6-sol:batch",
+        "anthropic/claude-opus-5.5",
+        "anthropic/claude-opus-5.5:batch",
+        "xiaomi/mimo-v2.6-pro-ultraspeed",
+        "xiaomi/mimo-v2.6-flash",
+        "xiaomi/mimo-v2.6-pro",
+        "x-ai/grok-4.7",
+        "qwen/qwen3.8-omni-flash",
+        "prism-ml/ternary-bonsai-2-27b",
+        "z-ai/glm-5.3-flashx",
+        "unbiased/pareto",
+        "~deepseek/deepseek-pro-latest",
+        "~deepseek/deepseek-flash-latest",
+        "inference-net/schematron-v2-turbo",
+        "inference-net/schematron-v2-small",
+        "~openai/gpt-astra-latest",
+        "~openai/gpt-sol-latest",
+        "~openai/gpt-terra-latest",
+        "~openai/gpt-luna-latest",
+        "sakana/fugu-ultra-v2",
+        "sakana/fugu-max",
+        "inclusionai/ling-3.0-flash-vl",
+        "deepseek/deepseek-v4.1-flash",
+        "deepseek/deepseek-v4.1-flash:batch",
+        "inception/mercury-2.5",
+        "nex-agi/nex-n2.5-mini",
+        "nex-agi/nex-n2.5-pro",
+        "openai/gpt-6-astra",
+        "openai/gpt-6-astra:batch",
+        "openai/gpt-6-astra-pro",
+        "openai/gpt-6-astra-pro:batch",
+        "inclusionai/ling-3.0-flash-sante:free",
+        "qwen/qwen3.8-max-0902",
+        "meta/muse-spark-1.3-contributor",
+        "meta/muse-spark-1.3",
+        "google/gemini-3.8-flash",
+        "google/gemini-3.8-flash:batch",
+        "anthropic/claude-fable-5.1",
+        "anthropic/claude-fable-5.1:batch",
+        "ibm-granite/granite-4.2-8b",
+        "tencent/hy4-preview",
+        "inclusionai/ling-3.0-flash-fin",
+        "~z-ai/glm-flash-latest",
+        "qwen/qwen3.8-flash",
+        "z-ai/glm-5.3-flash",
+        "z-ai/glm-5.3-flash:batch",
+        "meta/muse-spark-1.2-contributor",
+        "deepseek/deepseek-v4-flash-vision-exp",
+        "tencent/hy-mt2-1.8b",
+        "tencent/hy-mt2-30b-a3b",
+        "~z-ai/glm-latest",
+        "tencent/hy-mt2-7b",
+        "z-ai/glm-5.3",
+        "z-ai/glm-5.3:batch",
+        "qwen/qwen3.8-27b",
+        "qwen/qwen3.8-27b:free",
+        "dots-studio/dots-3-note-preview:free",
+        "google/gemini-3.7-flash",
+        "google/gemini-3.7-flash:batch",
+        "bytedance-seed/seed-2-1-turbo",
+        "qwen/qwen3.8-2.4t-a95b",
+        "bytedance-seed/seed-2.0-code",
+        "deepseek/deepseek-v4-pro-0813",
+        "x-ai/grok-4.6",
+        "liquid/lfm-2.5-2.6b:free",
+        "nvidia/nemotron-3.5-lightning",
+        "nvidia/nemotron-3.5-lightning:free",
+        "sakana/sakana-namazu",
+        "upstage/solar-pro4",
+        "meta/muse-glimmer-30b",
+        "meta/muse-spark-1.2",
+        "~deepseek/deepseek-v4-flash-latest",
+        "deepseek/deepseek-v4-flash-0731",
+        "thinkingmachines/inkling-small",
+        "thinkingmachines/inkling-small:free",
+        "qwen/qwen3.7-flash",
+        "anthropic/claude-opus-5",
+        "anthropic/claude-opus-5:batch",
+        "inclusionai/ling-3.0-flash",
+        "poolside/laguna-s-2.1",
+        "poolside/laguna-s-2.1:free",
+        "google/gemini-3.6-flash",
+        "google/gemini-3.6-flash:batch",
+        "google/gemini-3.5-flash-lite",
+        "google/gemini-3.5-flash-lite:batch",
+        "meituan/longcat-2.0",
+        "thinkingmachines/inkling",
+        "thinkingmachines/inkling:free",
+        "openrouter/auto-beta",
+        "moonshotai/kimi-k3",
+        "moonshotai/kimi-k3:batch",
+        "meta/muse-spark-1.1",
+        "kwaipilot/kat-coder-pro-v2.5",
+        "openai/gpt-5.6-luna-pro",
+        "openai/gpt-5.6-luna-pro:batch",
+        "openai/gpt-5.6-luna",
+        "openai/gpt-5.6-luna:batch",
+        "openai/gpt-5.6-terra-pro",
+        "openai/gpt-5.6-terra-pro:batch",
+        "openai/gpt-5.6-terra",
+        "openai/gpt-5.6-terra:batch",
+        "openai/gpt-5.6-sol-pro",
+        "openai/gpt-5.6-sol-pro:batch",
+        "openai/gpt-5.6-sol",
+        "openai/gpt-5.6-sol:batch",
+        "x-ai/grok-4.5",
+        "~x-ai/grok-latest",
+        "aion-labs/aion-3.0-mini",
+        "aion-labs/aion-3.0",
+        "tencent/hy3",
+        "poolside/laguna-xs-2.1",
+        "poolside/laguna-xs-2.1:free",
+        "anthropic/claude-sonnet-5",
+        "anthropic/claude-sonnet-5:batch",
+        "google/gemini-3.1-flash-lite-image",
+        "sakana/fugu-ultra",
+        "google/gemini-3.1-flash-image",
+        "google/gemini-3-pro-image",
+        "cohere/north-mini-code:free",
+        "z-ai/glm-5.2",
+        "openrouter/fusion",
+        "moonshotai/kimi-k2.7-code",
+        "~anthropic/claude-fable-latest",
+        "anthropic/claude-fable-5",
+        "anthropic/claude-fable-5:batch",
+        "nvidia/nemotron-3.5-content-safety",
+        "nvidia/nemotron-3.5-content-safety:free",
+        "nvidia/nemotron-3-ultra-550b-a55b",
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "qwen/qwen3.7-plus",
+        "minimax/minimax-m3",
+        "stepfun/step-3.7-flash",
+        "anthropic/claude-opus-4.8",
+        "anthropic/claude-opus-4.8:batch",
+        "qwen/qwen3.7-max",
+        "x-ai/grok-build-0.1",
+        "google/gemini-3.5-flash",
+        "google/gemini-3.5-flash:batch",
+        "perceptron/perceptron-mk1",
+        "google/gemini-3.1-flash-lite",
+        "google/gemini-3.1-flash-lite:batch",
+        "openai/gpt-chat-latest",
+        "x-ai/grok-4.3",
+        "x-ai/grok-4.3:batch",
+        "mistralai/mistral-medium-3-5",
+        "mistralai/mistral-medium-3-5:batch",
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "~anthropic/claude-haiku-latest",
+        "~openai/gpt-mini-latest",
+        "~google/gemini-pro-latest",
+        "~moonshotai/kimi-latest",
+        "~google/gemini-flash-latest",
+        "~anthropic/claude-sonnet-latest",
+        "qwen/qwen3.5-plus-20260420",
+        "qwen/qwen3.6-flash",
+        "qwen/qwen3.6-35b-a3b",
+        "qwen/qwen3.6-max-preview",
+        "qwen/qwen3.6-27b",
+        "openai/gpt-5.5-pro",
+        "openai/gpt-5.5-pro:batch",
+        "openai/gpt-5.5",
+        "openai/gpt-5.5:batch",
+        "deepseek/deepseek-v4-pro",
+        "deepseek/deepseek-v4-flash",
+        "tencent/hy3-preview",
+        "xiaomi/mimo-v2.5-pro",
+        "xiaomi/mimo-v2.5",
+        "openai/gpt-5.4-image-2",
+        "~anthropic/claude-opus-latest",
+        "openrouter/pareto-code",
+        "moonshotai/kimi-k2.6",
+        "anthropic/claude-opus-4.7",
+        "anthropic/claude-opus-4.7:batch",
+        "z-ai/glm-5.1",
+        "google/gemma-4-26b-a4b-it",
+        "google/gemma-4-26b-a4b-it:free",
+        "google/gemma-4-31b-it",
+        "google/gemma-4-31b-it:free",
+        "qwen/qwen3.6-plus",
+        "z-ai/glm-5v-turbo",
+        "arcee-ai/trinity-large-thinking",
+        "x-ai/grok-4.20-multi-agent",
+        "x-ai/grok-4.20",
+        "google/lyria-3-pro-preview",
+        "google/lyria-3-clip-preview",
+        "rekaai/reka-edge",
+        "minimax/minimax-m2.7",
+        "openai/gpt-5.4-nano",
+        "openai/gpt-5.4-nano:batch",
+        "openai/gpt-5.4-mini",
+        "openai/gpt-5.4-mini:batch",
+        "mistralai/mistral-small-2603",
+        "mistralai/mistral-small-2603:batch",
+        "z-ai/glm-5-turbo",
+        "nvidia/nemotron-3-super-120b-a12b",
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "bytedance-seed/seed-2.0-lite",
+        "qwen/qwen3.5-9b",
+        "openai/gpt-5.4-pro",
+        "openai/gpt-5.4-pro:batch",
+        "openai/gpt-5.4",
+        "openai/gpt-5.4:batch",
+        "inception/mercury-2",
+        "google/gemini-3.1-flash-lite-preview",
+        "bytedance-seed/seed-2.0-mini",
+        "google/gemini-3.1-flash-image-preview",
+        "qwen/qwen3.5-35b-a3b",
+        "qwen/qwen3.5-27b",
+        "qwen/qwen3.5-122b-a10b",
+        "qwen/qwen3.5-flash-02-23",
+        "google/gemini-3.1-pro-preview-customtools",
+        "openai/gpt-5.3-codex",
+        "aion-labs/aion-2.0",
+        "google/gemini-3.1-pro-preview",
+        "google/gemini-3.1-pro-preview:batch",
+        "anthropic/claude-sonnet-4.6",
+        "anthropic/claude-sonnet-4.6:batch",
+        "qwen/qwen3.5-plus-02-15",
+        "qwen/qwen3.5-397b-a17b",
+        "minimax/minimax-m2.5",
+        "z-ai/glm-5",
+        "qwen/qwen3-max-thinking",
+        "anthropic/claude-opus-4.6",
+        "anthropic/claude-opus-4.6:batch",
+        "qwen/qwen3-coder-next",
+        "openrouter/free",
+        "stepfun/step-3.5-flash",
+        "moonshotai/kimi-k2.5",
+        "upstage/solar-pro-3",
+        "minimax/minimax-m2-her",
+        "writer/palmyra-x5",
+        "openai/gpt-audio",
+        "openai/gpt-audio-mini",
+        "z-ai/glm-4.7-flash",
+        "openai/gpt-5.2-codex",
+        "bytedance-seed/seed-1.6-flash",
+        "bytedance-seed/seed-1.6",
+        "minimax/minimax-m2.1",
+        "z-ai/glm-4.7",
+        "google/gemini-3-flash-preview",
+        "google/gemini-3-flash-preview:batch",
+        "nvidia/nemotron-3-nano-30b-a3b",
+        "openai/gpt-5.2-chat",
+        "openai/gpt-5.2-pro",
+        "openai/gpt-5.2-pro:batch",
+        "openai/gpt-5.2",
+        "openai/gpt-5.2:batch",
+        "mistralai/devstral-2512",
+        "relace/relace-search",
+        "z-ai/glm-4.6v",
+        "openrouter/bodybuilder",
+        "openai/gpt-5.1-codex-max",
+        "amazon/nova-2-lite-v1",
+        "mistralai/ministral-14b-2512",
+        "mistralai/ministral-8b-2512",
+        "mistralai/ministral-8b-2512:batch",
+        "mistralai/ministral-3b-2512",
+        "mistralai/mistral-large-2512",
+        "mistralai/mistral-large-2512:batch",
+        "deepseek/deepseek-v3.2",
+        "anthropic/claude-opus-4.5",
+        "anthropic/claude-opus-4.5:batch",
+        "google/gemini-3-pro-image-preview",
+        "openai/gpt-5.1",
+        "openai/gpt-5.1:batch",
+        "openai/gpt-5.1-codex",
+        "openai/gpt-5.1-codex-mini",
+        "moonshotai/kimi-k2-thinking",
+        "amazon/nova-premier-v1",
+        "perplexity/sonar-pro-search",
+        "mistralai/voxtral-small-24b-2507",
+        "openai/gpt-oss-safeguard-20b",
+        "minimax/minimax-m2",
+        "qwen/qwen3-vl-32b-instruct",
+        "ibm-granite/granite-4.0-h-micro",
+        "openai/gpt-5-image-mini",
+        "anthropic/claude-haiku-4.5",
+        "anthropic/claude-haiku-4.5:batch",
+        "qwen/qwen3-vl-8b-thinking",
+        "qwen/qwen3-vl-8b-instruct",
+        "openai/gpt-5-image",
+        "google/gemini-2.5-flash-image",
+        "qwen/qwen3-vl-30b-a3b-thinking",
+        "qwen/qwen3-vl-30b-a3b-instruct",
+        "openai/gpt-5-pro",
+        "openai/gpt-5-pro:batch",
+        "z-ai/glm-4.6",
+        "anthropic/claude-sonnet-4.5",
+        "anthropic/claude-sonnet-4.5:batch",
+        "deepseek/deepseek-v3.2-exp",
+        "thedrummer/cydonia-24b-v4.1",
+        "relace/relace-apply-3",
+        "qwen/qwen3-vl-235b-a22b-thinking",
+        "qwen/qwen3-vl-235b-a22b-instruct",
+        "qwen/qwen3-max",
+        "qwen/qwen3-coder-plus",
+        "deepseek/deepseek-v3.1-terminus",
+        "qwen/qwen3-coder-flash",
+        "qwen/qwen3-next-80b-a3b-thinking",
+        "qwen/qwen3-next-80b-a3b-instruct",
+        "qwen/qwen-plus-2025-07-28",
+        "moonshotai/kimi-k2-0905",
+        "qwen/qwen3-30b-a3b-thinking-2507",
+        "nousresearch/hermes-4-405b",
+        "deepseek/deepseek-chat-v3.1",
+        "mistralai/mistral-medium-3.1",
+        "mistralai/mistral-medium-3.1:batch",
+        "z-ai/glm-4.5v",
+        "openai/gpt-5",
+        "openai/gpt-5:batch",
+        "openai/gpt-5-mini",
+        "openai/gpt-5-mini:batch",
+        "openai/gpt-5-nano",
+        "openai/gpt-5-nano:batch",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-120b:batch",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-20b:batch",
+        "anthropic/claude-opus-4.1",
+        "anthropic/claude-opus-4.1:batch",
+        "mistralai/codestral-2508",
+        "mistralai/codestral-2508:batch",
+        "qwen/qwen3-coder-30b-a3b-instruct",
+        "qwen/qwen3-30b-a3b-instruct-2507",
+        "z-ai/glm-4.5",
+        "z-ai/glm-4.5-air",
+        "qwen/qwen3-235b-a22b-thinking-2507",
+        "qwen/qwen3-coder",
+        "bytedance/ui-tars-1.5-7b",
+        "google/gemini-2.5-flash-lite",
+        "google/gemini-2.5-flash-lite:batch",
+        "qwen/qwen3-235b-a22b-2507",
+        "moonshotai/kimi-k2",
+        "cognitivecomputations/dolphin-mistral-24b-venice-edition",
+        "tencent/hunyuan-a13b-instruct",
+        "morph/morph-v3-large",
+        "morph/morph-v3-fast",
+        "baidu/ernie-4.5-vl-424b-a47b",
+        "mistralai/mistral-small-3.2-24b-instruct",
+        "minimax/minimax-m1",
+        "google/gemini-2.5-flash",
+        "google/gemini-2.5-flash:batch",
+        "google/gemini-2.5-pro",
+        "google/gemini-2.5-pro:batch",
+        "openai/o3-pro",
+        "google/gemini-2.5-pro-preview",
+        "deepseek/deepseek-r1-0528",
+        "anthropic/claude-sonnet-4",
+        "mistralai/mistral-medium-3",
+        "meta-llama/llama-guard-4-12b",
+        "qwen/qwen3-30b-a3b",
+        "qwen/qwen3-8b",
+        "qwen/qwen3-14b",
+        "qwen/qwen3-32b",
+        "qwen/qwen3-235b-a22b",
+        "openai/o4-mini-high",
+        "openai/o3",
+        "openai/o3:batch",
+        "openai/o4-mini",
+        "openai/o4-mini:batch",
+        "openai/gpt-4.1",
+        "openai/gpt-4.1:batch",
+        "openai/gpt-4.1-mini",
+        "openai/gpt-4.1-mini:batch",
+        "openai/gpt-4.1-nano",
+        "openai/gpt-4.1-nano:batch",
+        "meta-llama/llama-4-maverick",
+        "meta-llama/llama-4-scout",
+        "deepseek/deepseek-chat-v3-0324",
+        "openai/o1-pro",
+        "mistralai/mistral-small-3.1-24b-instruct",
+        "google/gemma-3-4b-it",
+        "google/gemma-3-12b-it",
+        "cohere/command-a",
+        "rekaai/reka-flash-3",
+        "google/gemma-3-27b-it",
+        "thedrummer/skyfall-36b-v2",
+        "perplexity/sonar-reasoning-pro",
+        "perplexity/sonar-pro",
+        "perplexity/sonar-deep-research",
+        "mistralai/mistral-saba",
+        "openai/o3-mini-high",
+        "aion-labs/aion-rp-llama-3.1-8b",
+        "qwen/qwen2.5-vl-72b-instruct",
+        "qwen/qwen-plus",
+        "openai/o3-mini",
+        "openai/o3-mini:batch",
+        "mistralai/mistral-small-24b-instruct-2501",
+        "perplexity/sonar",
+        "deepseek/deepseek-r1",
+        "minimax/minimax-01",
+        "microsoft/phi-4",
+        "deepseek/deepseek-chat",
+        "sao10k/l3.3-euryale-70b",
+        "openai/o1",
+        "cohere/command-r7b-12-2024",
+        "meta-llama/llama-3.3-70b-instruct",
+        "amazon/nova-lite-v1",
+        "amazon/nova-micro-v1",
+        "amazon/nova-pro-v1",
+        "openai/gpt-4o-2024-11-20",
+        "mistralai/mistral-large-2407",
+        "qwen/qwen-2.5-coder-32b-instruct",
+        "thedrummer/unslopnemo-12b",
+        "anthracite-org/magnum-v4-72b",
+        "qwen/qwen-2.5-7b-instruct",
+        "meta-llama/llama-3.2-1b-instruct",
+        "meta-llama/llama-3.2-3b-instruct",
+        "qwen/qwen-2.5-72b-instruct",
+        "cohere/command-r-08-2024",
+        "cohere/command-r-plus-08-2024",
+        "sao10k/l3.1-euryale-70b",
+        "nousresearch/hermes-3-llama-3.1-70b",
+        "nousresearch/hermes-3-llama-3.1-405b",
+        "sao10k/l3-lunaris-8b",
+        "openai/gpt-4o-2024-08-06",
+        "meta-llama/llama-3.1-70b-instruct",
+        "meta-llama/llama-3.1-8b-instruct",
+        "mistralai/mistral-nemo",
+        "openai/gpt-4o-mini",
+        "openai/gpt-4o-mini-2024-07-18",
+        "openai/gpt-4o-mini:batch",
+        "google/gemma-2-27b-it",
+        "openai/gpt-4o",
+        "openai/gpt-4o-2024-05-13",
+        "openai/gpt-4o:batch",
+        "mistralai/mixtral-8x22b-instruct",
+        "microsoft/wizardlm-2-8x22b",
+        "openai/gpt-4-turbo",
+        "openai/gpt-4-turbo:batch",
+        "mistralai/mistral-large",
+        "openai/gpt-3.5-turbo-0613",
+        "openrouter/auto",
+        "openai/gpt-3.5-turbo-instruct",
+        "openai/gpt-3.5-turbo-16k",
+        "mancer/weaver",
+        "undi95/remm-slerp-l2-13b",
+        "gryphe/mythomax-l2-13b",
+        "openai/gpt-3.5-turbo",
+        "openai/gpt-3.5-turbo:batch",
+        "openai/gpt-4"
+      ]
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "sut_version": "1.0.0",
+    "topology_sha256": "44581d20915f3187d6afc416dca4faafc7c1cb83dff57ed3720dbefec34d66a8"
+  },
+  "run_id": "langchain_agent-openai-qwen-qwen3-8-27b-dhcp_dns-dhcp_provisioning-m2-fault-seed450331920-ccb97f72692d",
+  "scenario": {
+    "domain": "dhcp_dns",
+    "id": "dhcp_dns.dhcp_provisioning.m2",
+    "sut_task_id": "sut-3774ef148e674fc967cb47a0d8bd2356",
+    "version": "1.0.0"
+  },
+  "schema_version": "1.0",
+  "status": "completed",
+  "sut_result": {
+    "ani_operations": [
+      {
+        "arguments": {
+          "nodes": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 5.120300920680165e-05,
+        "error": null,
+        "ok": true,
+        "operation": "get_topology",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": null
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-781b638e7677cbceb5074e46603267eb53a8ae4dc7e1bc8e01bc4630a88ceaf8.json",
+        "category": "read",
+        "duration_seconds": 0.17232988897012547,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": [
+            "system/dhcp-server"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.15549500897759572,
+        "error": null,
+        "ok": false,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "json",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": [
+            "service/dhcp-server"
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-d9a8533853f9a1e94b07769dc140a16fe49d1fe037603f900e3e7de49666cd7f.json",
+        "category": "read",
+        "duration_seconds": 1.1576928470167331,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.18484151602024212,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "dhcp_pool",
+          "name": "default",
+          "node": "firewall"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.25888825999572873,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": [
+            "service"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.17021048901369795,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1",
+            "leaf2"
+          ],
+          "paths": [
+            "protocols/static"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.9508206380414777,
+        "error": null,
+        "ok": false,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "leaf1",
+            "leaf2"
+          ],
+          "views": [
+            "routes"
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-31981f28ad48e6c1723fed1e0ae80c16ca375b89add60608eff0ecf68fba7cbb.json",
+        "category": "read",
+        "duration_seconds": 1.1221842889790423,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "leaf1"
+          ],
+          "views": [
+            "interfaces"
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-c3bc5324981862d5fc5e2632b7c219fb8c6abcaf8f25f94cdf60edacb2188443.json",
+        "category": "read",
+        "duration_seconds": 0.769139954005368,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "interface"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.4675252190208994,
+        "error": null,
+        "ok": false,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "ethernet-1/10",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.6899133510305546,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "leaf1"
+          ],
+          "views": [
+            "system"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.7923064529895782,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "route",
+          "name": "10.10.30.0/24",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.5594374779611826,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "user1",
+            "guest1",
+            "finance1",
+            "admin1",
+            "dns-int"
+          ],
+          "views": [
+            "interfaces"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.7265190039761364,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-b3338063d79dc00504ba205d11adba970e8b4de31465a687cf26014e21394fbb.json",
+        "category": "validation",
+        "duration_seconds": 66.55135941400658,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "ethernet-1/20",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.8636473489459604,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "guest1",
+            "user1"
+          ],
+          "views": [
+            "routes"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.2721127169788815,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "eth1",
+          "node": "firewall"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.32355825701961294,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "route",
+          "name": "10.10.10.0/24",
+          "node": "firewall"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.2382103410200216,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "destination_ip": "10.10.20.1",
+              "source": "guest1",
+              "type": "icmp"
+            },
+            {
+              "destination_ip": "10.10.10.10",
+              "source": "guest1",
+              "type": "icmp"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 5.350733387982473,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "destination_ip": "10.10.20.10",
+              "source": "web1",
+              "type": "icmp"
+            },
+            {
+              "destination_ip": "10.10.20.10",
+              "source": "user1",
+              "type": "icmp"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 10.395107413001824,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "arp",
+          "name": "10.10.20.10",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.5257285799598321,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "arp",
+          "name": "10.10.20.10",
+          "node": "firewall"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.3144181679817848,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "route",
+          "name": "10.10.20.0/24",
+          "node": "firewall"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.24810411198996007,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "acl"
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-4c7c59c8703fb89d6eea8e303f052e1dadf54480b97c0a5fac2dadf1f3839ffb.json",
+        "category": "read",
+        "duration_seconds": 0.6006864020018838,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "acl"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.5857979180291295,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": [
+            "firewall"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.16126648499630392,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "arp",
+          "name": "10.10.40.10",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.5312656059977598,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "ethernet-1/1",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.6953777180169709,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "arp",
+          "name": "10.10.40.10",
+          "node": "firewall"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.3734704100061208,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "route",
+          "name": "10.10.20.10/32",
+          "node": "firewall"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.23431379802059382,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "ethernet-1/2",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.896977940981742,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "leaf1",
+            "leaf2"
+          ],
+          "views": [
+            "interfaces"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 1.5264574809698388,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "arp",
+          "name": "10.255.0.0",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.512063700996805,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": [
+            "service/dhcp-server"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.1529829409555532,
+        "error": null,
+        "ok": false,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "interface ethernet-1/20"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.5982814909657463,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "interface ethernet-1/10",
+            "interface ethernet-1/11",
+            "interface ethernet-1/57"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 1.3991985190077685,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "destination_ip": "10.10.60.10",
+              "source": "guest1",
+              "type": "icmp"
+            },
+            {
+              "destination_ip": "10.10.40.10",
+              "source": "guest1",
+              "type": "icmp"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 6.4848140340182,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      }
+    ],
+    "device_changes": [],
+    "error": "execution budget exceeded",
+    "execution": {
+      "ani_version": "ibn_eval.ani.v0.2",
+      "budget_seconds": 400.0,
+      "conclusion_source": null,
+      "configured_model": "openai/qwen/qwen3.8-27b",
+      "elapsed_seconds": 400.0031443120097,
+      "failed_operations": 8,
+      "interaction_limits": {
+        "ani": {
+          "limit": null,
+          "reached": false,
+          "refused": 0,
+          "used": 39
+        }
+      },
+      "llm_calls": 39,
+      "model_parameters": {
+        "ani_call_limit": null,
+        "context_budget_chars": null,
+        "enable_thinking": null,
+        "max_consecutive_rejections": null,
+        "max_context_chars": 12000,
+        "max_execution_seconds": 400.0,
+        "max_tokens": 8000,
+        "min_retry_tokens": null,
+        "model": "openai/qwen/qwen3.8-27b",
+        "prompt_variant": "default",
+        "recursion_limit": 1000,
+        "request_extra_body": {
+          "provider": {
+            "allow_fallbacks": false,
+            "order": [
+              "deepinfra"
+            ],
+            "quantizations": [
+              "bf16"
+            ]
+          },
+          "reasoning": {
+            "enabled": false
+          }
+        },
+        "temperature": null,
+        "thinking_directive_applied": false,
+        "thinking_effort": null,
+        "thinking_mechanism": "unset",
+        "thinking_request": {},
+        "thinking_style": "auto",
+        "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+        "tool_choice": "auto",
+        "tool_result_chars": null
+      },
+      "model_seconds": 160.323,
+      "model_turns": [
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            1
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.915,
+          "tool_calls": [
+            "get_topology"
+          ],
+          "turn": 1
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            2
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.902,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 2
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            3
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.008,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 3
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            4
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.239,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 4
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            5
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.169,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 5
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            6
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.536,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 6
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            7
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.884,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 7
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            8
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.816,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 8
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            9
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.251,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 9
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            10
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.121,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 10
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            11
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.118,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 11
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            12
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.009,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 12
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            13
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.12,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 13
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            14
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.477,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 14
+        },
+        {
+          "content_chars": 61,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            15
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.765,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 15
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            16
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.981,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 16
+        },
+        {
+          "content_chars": 103,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            17
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.157,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 17
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            18
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.914,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 18
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            19
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.442,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 19
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            20
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.558,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 20
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            21
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.305,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 21
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            22
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.477,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 22
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            23
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.548,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 23
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            24
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.561,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 24
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            25
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.49,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 25
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            26
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.188,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 26
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            27
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.887,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 27
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            28
+          ],
+          "reasoning_chars": 0,
+          "seconds": 31.222,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 28
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            29
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.248,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 29
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            30
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.556,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 30
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            31
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.848,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 31
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            32
+          ],
+          "reasoning_chars": 0,
+          "seconds": 10.608,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 32
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            33
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.612,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 33
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            34
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.186,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 34
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            35
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.866,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 35
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            36
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.569,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 36
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            37
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.699,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 37
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            38
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.655,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 38
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            39
+          ],
+          "reasoning_chars": 0,
+          "seconds": 6.416,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 39
+        }
+      ],
+      "mutations": 0,
+      "provider_model": "openai/qwen/qwen3.8-27b",
+      "reads": 35,
+      "serving": {
+        "served_model_names": [
+          "anthropic/claude-sonnet-5.5",
+          "anthropic/claude-sonnet-5.5:batch",
+          "typesafe/jev-router",
+          "perceptron/perceptron-mk1.5",
+          "fireworks/ember-1",
+          "z-ai/glm-5.3-prime",
+          "qwen/qwen3.8-max-prime",
+          "stealth/space-bunny-alpha",
+          "aion-labs/aion-3.5-mini",
+          "aion-labs/aion-3.5",
+          "upstage/solar-mini4",
+          "cohere/command-a-plus",
+          "openai/gpt-6-luna-pro",
+          "openai/gpt-6-luna-pro:batch",
+          "openai/gpt-6-luna",
+          "openai/gpt-6-luna:batch",
+          "openai/gpt-6-sol-pro",
+          "openai/gpt-6-sol-pro:batch",
+          "openai/gpt-6-sol",
+          "openai/gpt-6-sol:batch",
+          "anthropic/claude-opus-5.5",
+          "anthropic/claude-opus-5.5:batch",
+          "xiaomi/mimo-v2.6-pro-ultraspeed",
+          "xiaomi/mimo-v2.6-flash",
+          "xiaomi/mimo-v2.6-pro",
+          "x-ai/grok-4.7",
+          "qwen/qwen3.8-omni-flash",
+          "prism-ml/ternary-bonsai-2-27b",
+          "z-ai/glm-5.3-flashx",
+          "unbiased/pareto",
+          "~deepseek/deepseek-pro-latest",
+          "~deepseek/deepseek-flash-latest",
+          "inference-net/schematron-v2-turbo",
+          "inference-net/schematron-v2-small",
+          "~openai/gpt-astra-latest",
+          "~openai/gpt-sol-latest",
+          "~openai/gpt-terra-latest",
+          "~openai/gpt-luna-latest",
+          "sakana/fugu-ultra-v2",
+          "sakana/fugu-max",
+          "inclusionai/ling-3.0-flash-vl",
+          "deepseek/deepseek-v4.1-flash",
+          "deepseek/deepseek-v4.1-flash:batch",
+          "inception/mercury-2.5",
+          "nex-agi/nex-n2.5-mini",
+          "nex-agi/nex-n2.5-pro",
+          "openai/gpt-6-astra",
+          "openai/gpt-6-astra:batch",
+          "openai/gpt-6-astra-pro",
+          "openai/gpt-6-astra-pro:batch",
+          "inclusionai/ling-3.0-flash-sante:free",
+          "qwen/qwen3.8-max-0902",
+          "meta/muse-spark-1.3-contributor",
+          "meta/muse-spark-1.3",
+          "google/gemini-3.8-flash",
+          "google/gemini-3.8-flash:batch",
+          "anthropic/claude-fable-5.1",
+          "anthropic/claude-fable-5.1:batch",
+          "ibm-granite/granite-4.2-8b",
+          "tencent/hy4-preview",
+          "inclusionai/ling-3.0-flash-fin",
+          "~z-ai/glm-flash-latest",
+          "qwen/qwen3.8-flash",
+          "z-ai/glm-5.3-flash",
+          "z-ai/glm-5.3-flash:batch",
+          "meta/muse-spark-1.2-contributor",
+          "deepseek/deepseek-v4-flash-vision-exp",
+          "tencent/hy-mt2-1.8b",
+          "tencent/hy-mt2-30b-a3b",
+          "~z-ai/glm-latest",
+          "tencent/hy-mt2-7b",
+          "z-ai/glm-5.3",
+          "z-ai/glm-5.3:batch",
+          "qwen/qwen3.8-27b",
+          "qwen/qwen3.8-27b:free",
+          "dots-studio/dots-3-note-preview:free",
+          "google/gemini-3.7-flash",
+          "google/gemini-3.7-flash:batch",
+          "bytedance-seed/seed-2-1-turbo",
+          "qwen/qwen3.8-2.4t-a95b",
+          "bytedance-seed/seed-2.0-code",
+          "deepseek/deepseek-v4-pro-0813",
+          "x-ai/grok-4.6",
+          "liquid/lfm-2.5-2.6b:free",
+          "nvidia/nemotron-3.5-lightning",
+          "nvidia/nemotron-3.5-lightning:free",
+          "sakana/sakana-namazu",
+          "upstage/solar-pro4",
+          "meta/muse-glimmer-30b",
+          "meta/muse-spark-1.2",
+          "~deepseek/deepseek-v4-flash-latest",
+          "deepseek/deepseek-v4-flash-0731",
+          "thinkingmachines/inkling-small",
+          "thinkingmachines/inkling-small:free",
+          "qwen/qwen3.7-flash",
+          "anthropic/claude-opus-5",
+          "anthropic/claude-opus-5:batch",
+          "inclusionai/ling-3.0-flash",
+          "poolside/laguna-s-2.1",
+          "poolside/laguna-s-2.1:free",
+          "google/gemini-3.6-flash",
+          "google/gemini-3.6-flash:batch",
+          "google/gemini-3.5-flash-lite",
+          "google/gemini-3.5-flash-lite:batch",
+          "meituan/longcat-2.0",
+          "thinkingmachines/inkling",
+          "thinkingmachines/inkling:free",
+          "openrouter/auto-beta",
+          "moonshotai/kimi-k3",
+          "moonshotai/kimi-k3:batch",
+          "meta/muse-spark-1.1",
+          "kwaipilot/kat-coder-pro-v2.5",
+          "openai/gpt-5.6-luna-pro",
+          "openai/gpt-5.6-luna-pro:batch",
+          "openai/gpt-5.6-luna",
+          "openai/gpt-5.6-luna:batch",
+          "openai/gpt-5.6-terra-pro",
+          "openai/gpt-5.6-terra-pro:batch",
+          "openai/gpt-5.6-terra",
+          "openai/gpt-5.6-terra:batch",
+          "openai/gpt-5.6-sol-pro",
+          "openai/gpt-5.6-sol-pro:batch",
+          "openai/gpt-5.6-sol",
+          "openai/gpt-5.6-sol:batch",
+          "x-ai/grok-4.5",
+          "~x-ai/grok-latest",
+          "aion-labs/aion-3.0-mini",
+          "aion-labs/aion-3.0",
+          "tencent/hy3",
+          "poolside/laguna-xs-2.1",
+          "poolside/laguna-xs-2.1:free",
+          "anthropic/claude-sonnet-5",
+          "anthropic/claude-sonnet-5:batch",
+          "google/gemini-3.1-flash-lite-image",
+          "sakana/fugu-ultra",
+          "google/gemini-3.1-flash-image",
+          "google/gemini-3-pro-image",
+          "cohere/north-mini-code:free",
+          "z-ai/glm-5.2",
+          "openrouter/fusion",
+          "moonshotai/kimi-k2.7-code",
+          "~anthropic/claude-fable-latest",
+          "anthropic/claude-fable-5",
+          "anthropic/claude-fable-5:batch",
+          "nvidia/nemotron-3.5-content-safety",
+          "nvidia/nemotron-3.5-content-safety:free",
+          "nvidia/nemotron-3-ultra-550b-a55b",
+          "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "qwen/qwen3.7-plus",
+          "minimax/minimax-m3",
+          "stepfun/step-3.7-flash",
+          "anthropic/claude-opus-4.8",
+          "anthropic/claude-opus-4.8:batch",
+          "qwen/qwen3.7-max",
+          "x-ai/grok-build-0.1",
+          "google/gemini-3.5-flash",
+          "google/gemini-3.5-flash:batch",
+          "perceptron/perceptron-mk1",
+          "google/gemini-3.1-flash-lite",
+          "google/gemini-3.1-flash-lite:batch",
+          "openai/gpt-chat-latest",
+          "x-ai/grok-4.3",
+          "x-ai/grok-4.3:batch",
+          "mistralai/mistral-medium-3-5",
+          "mistralai/mistral-medium-3-5:batch",
+          "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+          "~anthropic/claude-haiku-latest",
+          "~openai/gpt-mini-latest",
+          "~google/gemini-pro-latest",
+          "~moonshotai/kimi-latest",
+          "~google/gemini-flash-latest",
+          "~anthropic/claude-sonnet-latest",
+          "qwen/qwen3.5-plus-20260420",
+          "qwen/qwen3.6-flash",
+          "qwen/qwen3.6-35b-a3b",
+          "qwen/qwen3.6-max-preview",
+          "qwen/qwen3.6-27b",
+          "openai/gpt-5.5-pro",
+          "openai/gpt-5.5-pro:batch",
+          "openai/gpt-5.5",
+          "openai/gpt-5.5:batch",
+          "deepseek/deepseek-v4-pro",
+          "deepseek/deepseek-v4-flash",
+          "tencent/hy3-preview",
+          "xiaomi/mimo-v2.5-pro",
+          "xiaomi/mimo-v2.5",
+          "openai/gpt-5.4-image-2",
+          "~anthropic/claude-opus-latest",
+          "openrouter/pareto-code",
+          "moonshotai/kimi-k2.6",
+          "anthropic/claude-opus-4.7",
+          "anthropic/claude-opus-4.7:batch",
+          "z-ai/glm-5.1",
+          "google/gemma-4-26b-a4b-it",
+          "google/gemma-4-26b-a4b-it:free",
+          "google/gemma-4-31b-it",
+          "google/gemma-4-31b-it:free",
+          "qwen/qwen3.6-plus",
+          "z-ai/glm-5v-turbo",
+          "arcee-ai/trinity-large-thinking",
+          "x-ai/grok-4.20-multi-agent",
+          "x-ai/grok-4.20",
+          "google/lyria-3-pro-preview",
+          "google/lyria-3-clip-preview",
+          "rekaai/reka-edge",
+          "minimax/minimax-m2.7",
+          "openai/gpt-5.4-nano",
+          "openai/gpt-5.4-nano:batch",
+          "openai/gpt-5.4-mini",
+          "openai/gpt-5.4-mini:batch",
+          "mistralai/mistral-small-2603",
+          "mistralai/mistral-small-2603:batch",
+          "z-ai/glm-5-turbo",
+          "nvidia/nemotron-3-super-120b-a12b",
+          "nvidia/nemotron-3-super-120b-a12b:free",
+          "bytedance-seed/seed-2.0-lite",
+          "qwen/qwen3.5-9b",
+          "openai/gpt-5.4-pro",
+          "openai/gpt-5.4-pro:batch",
+          "openai/gpt-5.4",
+          "openai/gpt-5.4:batch",
+          "inception/mercury-2",
+          "google/gemini-3.1-flash-lite-preview",
+          "bytedance-seed/seed-2.0-mini",
+          "google/gemini-3.1-flash-image-preview",
+          "qwen/qwen3.5-35b-a3b",
+          "qwen/qwen3.5-27b",
+          "qwen/qwen3.5-122b-a10b",
+          "qwen/qwen3.5-flash-02-23",
+          "google/gemini-3.1-pro-preview-customtools",
+          "openai/gpt-5.3-codex",
+          "aion-labs/aion-2.0",
+          "google/gemini-3.1-pro-preview",
+          "google/gemini-3.1-pro-preview:batch",
+          "anthropic/claude-sonnet-4.6",
+          "anthropic/claude-sonnet-4.6:batch",
+          "qwen/qwen3.5-plus-02-15",
+          "qwen/qwen3.5-397b-a17b",
+          "minimax/minimax-m2.5",
+          "z-ai/glm-5",
+          "qwen/qwen3-max-thinking",
+          "anthropic/claude-opus-4.6",
+          "anthropic/claude-opus-4.6:batch",
+          "qwen/qwen3-coder-next",
+          "openrouter/free",
+          "stepfun/step-3.5-flash",
+          "moonshotai/kimi-k2.5",
+          "upstage/solar-pro-3",
+          "minimax/minimax-m2-her",
+          "writer/palmyra-x5",
+          "openai/gpt-audio",
+          "openai/gpt-audio-mini",
+          "z-ai/glm-4.7-flash",
+          "openai/gpt-5.2-codex",
+          "bytedance-seed/seed-1.6-flash",
+          "bytedance-seed/seed-1.6",
+          "minimax/minimax-m2.1",
+          "z-ai/glm-4.7",
+          "google/gemini-3-flash-preview",
+          "google/gemini-3-flash-preview:batch",
+          "nvidia/nemotron-3-nano-30b-a3b",
+          "openai/gpt-5.2-chat",
+          "openai/gpt-5.2-pro",
+          "openai/gpt-5.2-pro:batch",
+          "openai/gpt-5.2",
+          "openai/gpt-5.2:batch",
+          "mistralai/devstral-2512",
+          "relace/relace-search",
+          "z-ai/glm-4.6v",
+          "openrouter/bodybuilder",
+          "openai/gpt-5.1-codex-max",
+          "amazon/nova-2-lite-v1",
+          "mistralai/ministral-14b-2512",
+          "mistralai/ministral-8b-2512",
+          "mistralai/ministral-8b-2512:batch",
+          "mistralai/ministral-3b-2512",
+          "mistralai/mistral-large-2512",
+          "mistralai/mistral-large-2512:batch",
+          "deepseek/deepseek-v3.2",
+          "anthropic/claude-opus-4.5",
+          "anthropic/claude-opus-4.5:batch",
+          "google/gemini-3-pro-image-preview",
+          "openai/gpt-5.1",
+          "openai/gpt-5.1:batch",
+          "openai/gpt-5.1-codex",
+          "openai/gpt-5.1-codex-mini",
+          "moonshotai/kimi-k2-thinking",
+          "amazon/nova-premier-v1",
+          "perplexity/sonar-pro-search",
+          "mistralai/voxtral-small-24b-2507",
+          "openai/gpt-oss-safeguard-20b",
+          "minimax/minimax-m2",
+          "qwen/qwen3-vl-32b-instruct",
+          "ibm-granite/granite-4.0-h-micro",
+          "openai/gpt-5-image-mini",
+          "anthropic/claude-haiku-4.5",
+          "anthropic/claude-haiku-4.5:batch",
+          "qwen/qwen3-vl-8b-thinking",
+          "qwen/qwen3-vl-8b-instruct",
+          "openai/gpt-5-image",
+          "google/gemini-2.5-flash-image",
+          "qwen/qwen3-vl-30b-a3b-thinking",
+          "qwen/qwen3-vl-30b-a3b-instruct",
+          "openai/gpt-5-pro",
+          "openai/gpt-5-pro:batch",
+          "z-ai/glm-4.6",
+          "anthropic/claude-sonnet-4.5",
+          "anthropic/claude-sonnet-4.5:batch",
+          "deepseek/deepseek-v3.2-exp",
+          "thedrummer/cydonia-24b-v4.1",
+          "relace/relace-apply-3",
+          "qwen/qwen3-vl-235b-a22b-thinking",
+          "qwen/qwen3-vl-235b-a22b-instruct",
+          "qwen/qwen3-max",
+          "qwen/qwen3-coder-plus",
+          "deepseek/deepseek-v3.1-terminus",
+          "qwen/qwen3-coder-flash",
+          "qwen/qwen3-next-80b-a3b-thinking",
+          "qwen/qwen3-next-80b-a3b-instruct",
+          "qwen/qwen-plus-2025-07-28",
+          "moonshotai/kimi-k2-0905",
+          "qwen/qwen3-30b-a3b-thinking-2507",
+          "nousresearch/hermes-4-405b",
+          "deepseek/deepseek-chat-v3.1",
+          "mistralai/mistral-medium-3.1",
+          "mistralai/mistral-medium-3.1:batch",
+          "z-ai/glm-4.5v",
+          "openai/gpt-5",
+          "openai/gpt-5:batch",
+          "openai/gpt-5-mini",
+          "openai/gpt-5-mini:batch",
+          "openai/gpt-5-nano",
+          "openai/gpt-5-nano:batch",
+          "openai/gpt-oss-120b",
+          "openai/gpt-oss-120b:batch",
+          "openai/gpt-oss-20b",
+          "openai/gpt-oss-20b:batch",
+          "anthropic/claude-opus-4.1",
+          "anthropic/claude-opus-4.1:batch",
+          "mistralai/codestral-2508",
+          "mistralai/codestral-2508:batch",
+          "qwen/qwen3-coder-30b-a3b-instruct",
+          "qwen/qwen3-30b-a3b-instruct-2507",
+          "z-ai/glm-4.5",
+          "z-ai/glm-4.5-air",
+          "qwen/qwen3-235b-a22b-thinking-2507",
+          "qwen/qwen3-coder",
+          "bytedance/ui-tars-1.5-7b",
+          "google/gemini-2.5-flash-lite",
+          "google/gemini-2.5-flash-lite:batch",
+          "qwen/qwen3-235b-a22b-2507",
+          "moonshotai/kimi-k2",
+          "cognitivecomputations/dolphin-mistral-24b-venice-edition",
+          "tencent/hunyuan-a13b-instruct",
+          "morph/morph-v3-large",
+          "morph/morph-v3-fast",
+          "baidu/ernie-4.5-vl-424b-a47b",
+          "mistralai/mistral-small-3.2-24b-instruct",
+          "minimax/minimax-m1",
+          "google/gemini-2.5-flash",
+          "google/gemini-2.5-flash:batch",
+          "google/gemini-2.5-pro",
+          "google/gemini-2.5-pro:batch",
+          "openai/o3-pro",
+          "google/gemini-2.5-pro-preview",
+          "deepseek/deepseek-r1-0528",
+          "anthropic/claude-sonnet-4",
+          "mistralai/mistral-medium-3",
+          "meta-llama/llama-guard-4-12b",
+          "qwen/qwen3-30b-a3b",
+          "qwen/qwen3-8b",
+          "qwen/qwen3-14b",
+          "qwen/qwen3-32b",
+          "qwen/qwen3-235b-a22b",
+          "openai/o4-mini-high",
+          "openai/o3",
+          "openai/o3:batch",
+          "openai/o4-mini",
+          "openai/o4-mini:batch",
+          "openai/gpt-4.1",
+          "openai/gpt-4.1:batch",
+          "openai/gpt-4.1-mini",
+          "openai/gpt-4.1-mini:batch",
+          "openai/gpt-4.1-nano",
+          "openai/gpt-4.1-nano:batch",
+          "meta-llama/llama-4-maverick",
+          "meta-llama/llama-4-scout",
+          "deepseek/deepseek-chat-v3-0324",
+          "openai/o1-pro",
+          "mistralai/mistral-small-3.1-24b-instruct",
+          "google/gemma-3-4b-it",
+          "google/gemma-3-12b-it",
+          "cohere/command-a",
+          "rekaai/reka-flash-3",
+          "google/gemma-3-27b-it",
+          "thedrummer/skyfall-36b-v2",
+          "perplexity/sonar-reasoning-pro",
+          "perplexity/sonar-pro",
+          "perplexity/sonar-deep-research",
+          "mistralai/mistral-saba",
+          "openai/o3-mini-high",
+          "aion-labs/aion-rp-llama-3.1-8b",
+          "qwen/qwen2.5-vl-72b-instruct",
+          "qwen/qwen-plus",
+          "openai/o3-mini",
+          "openai/o3-mini:batch",
+          "mistralai/mistral-small-24b-instruct-2501",
+          "perplexity/sonar",
+          "deepseek/deepseek-r1",
+          "minimax/minimax-01",
+          "microsoft/phi-4",
+          "deepseek/deepseek-chat",
+          "sao10k/l3.3-euryale-70b",
+          "openai/o1",
+          "cohere/command-r7b-12-2024",
+          "meta-llama/llama-3.3-70b-instruct",
+          "amazon/nova-lite-v1",
+          "amazon/nova-micro-v1",
+          "amazon/nova-pro-v1",
+          "openai/gpt-4o-2024-11-20",
+          "mistralai/mistral-large-2407",
+          "qwen/qwen-2.5-coder-32b-instruct",
+          "thedrummer/unslopnemo-12b",
+          "anthracite-org/magnum-v4-72b",
+          "qwen/qwen-2.5-7b-instruct",
+          "meta-llama/llama-3.2-1b-instruct",
+          "meta-llama/llama-3.2-3b-instruct",
+          "qwen/qwen-2.5-72b-instruct",
+          "cohere/command-r-08-2024",
+          "cohere/command-r-plus-08-2024",
+          "sao10k/l3.1-euryale-70b",
+          "nousresearch/hermes-3-llama-3.1-70b",
+          "nousresearch/hermes-3-llama-3.1-405b",
+          "sao10k/l3-lunaris-8b",
+          "openai/gpt-4o-2024-08-06",
+          "meta-llama/llama-3.1-70b-instruct",
+          "meta-llama/llama-3.1-8b-instruct",
+          "mistralai/mistral-nemo",
+          "openai/gpt-4o-mini",
+          "openai/gpt-4o-mini-2024-07-18",
+          "openai/gpt-4o-mini:batch",
+          "google/gemma-2-27b-it",
+          "openai/gpt-4o",
+          "openai/gpt-4o-2024-05-13",
+          "openai/gpt-4o:batch",
+          "mistralai/mixtral-8x22b-instruct",
+          "microsoft/wizardlm-2-8x22b",
+          "openai/gpt-4-turbo",
+          "openai/gpt-4-turbo:batch",
+          "mistralai/mistral-large",
+          "openai/gpt-3.5-turbo-0613",
+          "openrouter/auto",
+          "openai/gpt-3.5-turbo-instruct",
+          "openai/gpt-3.5-turbo-16k",
+          "mancer/weaver",
+          "undi95/remm-slerp-l2-13b",
+          "gryphe/mythomax-l2-13b",
+          "openai/gpt-3.5-turbo",
+          "openai/gpt-3.5-turbo:batch",
+          "openai/gpt-4"
+        ]
+      },
+      "successful_mutations": 0,
+      "termination": {
+        "cause": "budget",
+        "detail": "execution budget exceeded",
+        "turn": 39
+      },
+      "token_usage": {
+        "input_tokens": 1120204,
+        "output_tokens": 2442,
+        "total_tokens": 1122646
+      },
+      "tool_call_count": 39,
+      "trace_ref": null,
+      "unsafe_operations": 0,
+      "validations": 4
+    },
+    "final_observation": {
+      "checks": [
+        {
+          "connectivity": [
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=0.499 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.314 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.241 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.241/0.351/0.499/0.108 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": "web1.sme01.example",
+              "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.202 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.381 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.260 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.202/0.281/0.381/0.074 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.40.10",
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.347 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.299 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.354 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.299/0.333/0.354/0.024 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": "user1.sme01.internal",
+              "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.184 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.367 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.282 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.184/0.277/0.367/0.074 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.10.10",
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=0.522 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.280 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.349 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.280/0.383/0.522/0.101 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": "app1.sme01.example",
+              "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.348 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.282 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.265 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.265/0.298/0.348/0.035 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.50.10",
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.347 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.359 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.355 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.347/0.353/0.359/0.005 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": "user1.sme01.internal",
+              "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.178 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.334 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.251 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.178/0.254/0.334/0.063 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.10.10",
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 0 received, 100% packet loss, time 2053ms",
+              "packet_loss_percent": 100.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": false
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": "web1.sme01.example",
+              "output": "ping: web1.sme01.example: Try again",
+              "packet_loss_percent": 100.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": false
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 0 received, 100% packet loss, time 2036ms",
+              "packet_loss_percent": 100.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": false
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": "guest1.sme01.internal",
+              "output": "PING guest1.sme01.internal (10.10.20.10) 56(84) bytes of data.\n\n--- guest1.sme01.internal ping statistics ---\n3 packets transmitted, 0 received, 100% packet loss, time 2052ms",
+              "packet_loss_percent": 100.0,
+              "resolved_ip": "10.10.20.10",
+              "source": "web1",
+              "success": false
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=0.313 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.253 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.244 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.244/0.270/0.313/0.030 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "finance1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": "app1.sme01.example",
+              "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.173 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.295 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.357 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.173/0.275/0.357/0.076 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.50.10",
+              "source": "finance1",
+              "success": true
+            },
+            {
+              "destination": "finance1",
+              "destination_ip": "10.10.30.10",
+              "hostname": null,
+              "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=62 time=0.420 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=62 time=0.245 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=62 time=0.422 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.245/0.362/0.422/0.082 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "finance1",
+              "destination_ip": "10.10.30.10",
+              "hostname": "finance1.sme01.internal",
+              "output": "PING finance1.sme01.internal (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=1 ttl=62 time=0.288 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=2 ttl=62 time=0.333 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=3 ttl=62 time=0.372 ms\n\n--- finance1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.288/0.331/0.372/0.034 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.30.10",
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=63 time=0.064 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=63 time=0.053 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=63 time=0.062 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.053/0.059/0.064/0.004 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": "web1.sme01.example",
+              "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=63 time=0.749 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=63 time=0.057 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=63 time=0.068 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 6032ms\nrtt min/avg/max/mdev = 0.057/0.291/0.749/0.323 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.40.10",
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=63 time=0.060 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=63 time=0.073 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=63 time=0.060 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.060/0.064/0.073/0.006 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": null,
+              "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=63 time=0.502 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=63 time=0.292 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=63 time=0.246 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.246/0.346/0.502/0.111 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": "dns-int.sme01.internal",
+              "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=63 time=0.405 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=63 time=0.415 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=63 time=0.352 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.352/0.390/0.415/0.027 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.60.10",
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": null,
+              "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=62 time=0.335 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=62 time=0.327 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=62 time=0.367 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.327/0.343/0.367/0.017 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": "dns-int.sme01.internal",
+              "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=62 time=0.260 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=62 time=0.334 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=62 time=0.333 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2057ms\nrtt min/avg/max/mdev = 0.260/0.309/0.334/0.034 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.60.10",
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "dns-dmz",
+              "destination_ip": "10.10.41.10",
+              "hostname": null,
+              "output": "PING 10.10.41.10 (10.10.41.10) 56(84) bytes of data.\n64 bytes from 10.10.41.10: icmp_seq=1 ttl=63 time=0.065 ms\n64 bytes from 10.10.41.10: icmp_seq=2 ttl=63 time=0.060 ms\n64 bytes from 10.10.41.10: icmp_seq=3 ttl=63 time=0.060 ms\n\n--- 10.10.41.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.060/0.061/0.065/0.002 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            }
+          ],
+          "passed": false,
+          "type": "lab_connectivity"
+        }
+      ],
+      "passed": false,
+      "type": "public_success_criteria"
+    },
+    "final_response": null,
+    "mode": "self_execute",
+    "model_reported_by_sut": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "status": "failed",
+    "summary": null,
+    "sut_identity": "langchain_agent",
+    "sut_version": "1.0.0",
+    "verified": false
+  }
+}

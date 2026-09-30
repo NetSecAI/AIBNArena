@@ -1,0 +1,322 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.234300624579191e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 63.54804475000128,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3223621799843386,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.16962821601191536,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "/qos",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8939048469765112,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class show dev eth2",
+              "tc filter show dev eth2"
+            ],
+            "reason": "Read full shaping hierarchy on WAN egress to confirm whether class rates or classifier for business traffic are wrong before changing anything.",
+            "rollback_commands": [],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.61049853079021e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe structured QoS object support on WAN egress to reveal current hierarchy attributes without changing configuration.",
+        "set": {
+          "delete_root": false
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 9.101000614464283e-05,
+      "error": "update_object: set names no change for qos eth2",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "/qos",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.1149266649736091,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/qos",
+          "/interface"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.9936646760324948,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3095422780024819,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set traffic-policy shaper WAN class 10 bandwidth 8mbit",
+              "set traffic-policy shaper WAN class 10 ceiling 20mbit",
+              "set traffic-policy shaper WAN class 10 priority 0",
+              "set traffic-policy shaper WAN class 10 match BUSINESS ip source address 10.10.10.10/32",
+              "set traffic-policy shaper WAN default bandwidth 12mbit",
+              "set traffic-policy shaper WAN default ceiling 20mbit",
+              "set traffic-policy shaper WAN default priority 7",
+              "set interfaces ethernet eth2 traffic-policy out WAN"
+            ],
+            "reason": "Business flow from user1 to external1 is far below guarantee under contention on WAN egress; wan1 eth2 has a root shaper but current readable state does not expose class hierarchy, so restore a minimal non-disruptive two-class shaper on the bottleneck egress matching user1 source to guarantee at least 8 Mbps while preserving best-effort connectivity.",
+            "rollback_commands": [
+              "delete interfaces ethernet eth2 traffic-policy out WAN",
+              "delete traffic-policy shaper WAN"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.706599378958344e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; expected ip or tc",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Restore protected class guarantee on WAN egress with HTB root and business class after validation showed protected throughput far below target under contention.",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "classid": "1:10",
+            "prio": "0",
+            "rate": "8mbit"
+          },
+          "htb": {
+            "default": "20",
+            "rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 7.686199387535453e-05,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add or repair the protected HTB class on WAN egress; protected flow is below guarantee under contention and root qdisc already exists on eth2.",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:10",
+            "parent": "1:",
+            "prio": "0",
+            "rate": "8mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.4351340760476887,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_eb6c88ad6000701f"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Ensure default/best-effort class on WAN egress has the remaining bandwidth so protected business traffic can keep 8 Mbps without disrupting other traffic.",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:20",
+            "parent": "1:",
+            "prio": "7",
+            "rate": "12mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17177215102128685,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_906c533f592e79e6"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Classify business traffic from user1 into the protected WAN class because throughput under contention suggests it may be falling into the default class.",
+        "set": {
+          "filter": {
+            "flowid": "1:10",
+            "prio": "1",
+            "src": "10.10.10.10/32"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.1649321519653313,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_190d2cb1f0d72070"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 60.910707042959984,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

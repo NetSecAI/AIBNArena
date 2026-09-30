@@ -1,0 +1,253 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 25.690768035012297,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.5201973989605904e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.37626111996360123,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "app1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3281658799969591,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-1724835abe297dcbac95d6eb7287cf46c0e9965794a599544230ef54a58c091d.json",
+      "category": "read",
+      "duration_seconds": 1.3567457350436598,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/interface ethernet-1/30",
+          "/network-instance default interface",
+          "/network-instance default static-routes",
+          "/routing"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 2.016670850047376,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5884531579795294,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-9075e6b0c38d22cc297f5b27b72a4f084c2d8c6b3f8b295c173ee6116630607d.json",
+      "category": "read",
+      "duration_seconds": 0.6045698289526626,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "finance1",
+        "reason": "finance1 is misaddressed on finance_vlan with 203.0.113.10/24 and has no default route; all failures are isolated to finance1<->app1 while leaf2 has healthy 10.10.30.1/24 gateway on that segment.",
+        "set": {
+          "address": "10.10.30.10/24",
+          "address_action": "add"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5366637039696798,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_76875ff36657c4f9"
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.32170960801886395,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip address del 203.0.113.10/24 dev eth1",
+              "ip route add default via 10.10.30.1 dev eth1"
+            ],
+            "reason": "finance1 still retains the incorrect 203.0.113.10/24 address and lacks a default route after correcting its intended finance VLAN address, leaving off-subnet connectivity broken.",
+            "rollback_commands": [
+              "ip address add 203.0.113.10/24 dev eth1",
+              "ip route del default via 10.10.30.1 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00014340894995257258,
+      "error": "update_config.change.commands contains 2 commands for Linux target finance1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip address del 203.0.113.10/24 dev eth1"
+            ],
+            "reason": "finance1 still retains the incorrect external-subnet address on finance VLAN, conflicting with the intended 10.10.30.0/24 segment.",
+            "rollback_commands": [
+              "ip address add 203.0.113.10/24 dev eth1"
+            ],
+            "target": "finance1"
+          },
+          {
+            "commands": [
+              "ip route add default via 10.10.30.1 dev eth1"
+            ],
+            "reason": "finance1 has the correct 10.10.30.10/24 address now but still lacks a default route to leaf2 gateway 10.10.30.1, causing network unreachable to app1.",
+            "rollback_commands": [
+              "ip route del default via 10.10.30.1 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.32269001100212336,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_6c13f753b49f8c36"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 35.9027438860503,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

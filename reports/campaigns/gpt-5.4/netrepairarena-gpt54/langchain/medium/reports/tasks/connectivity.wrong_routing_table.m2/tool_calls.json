@@ -1,0 +1,321 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 29.139679854997667,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.495698911137879e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "guest1",
+          "web1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.686204697994981,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.2917719870165456,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/20",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7271153019974008,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/40",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7283776770054828,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "json",
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "paths": [
+          "/acl",
+          "/interface"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-a53b8f7741aa804e7c656a96c6403fb21e261007511eabaf4ae4563d21150a35.json",
+      "category": "read",
+      "duration_seconds": 8.126818054006435,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.3714808209915645,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.560331815999234,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "json",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "/network-instance[name=default]"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-66a1eb409b1dd826d6329303f4b7cc3175a2e2866faea5a991223332441dc31f.json",
+      "category": "read",
+      "duration_seconds": 4.073758603015449,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "json",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.4350310930167325,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.6430917410179973,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "enter candidate",
+              "delete acl cpm-filter ipv4-filter entry 1000",
+              "commit stay"
+            ],
+            "reason": "Guest-to-DMZ connectivity is the only failing path while gateway interfaces and host default routes are correct; leaf2 appears to have ACL/filter configuration and may be dropping guest-to-web traffic, so remove suspected terminal drop rule narrowly to test dataplane policy.",
+            "rollback_commands": [
+              "enter candidate",
+              "set acl cpm-filter ipv4-filter entry 1000 action drop",
+              "set acl cpm-filter ipv4-filter entry 1000 log true",
+              "set acl cpm-filter ipv4-filter entry 1000 description \"Drop all else\"",
+              "commit stay"
+            ],
+            "target": "leaf2"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 1.8705002730712295e-05,
+      "error": "ANI commands must not include session control ('enter'): the ANI opens the candidate session and commits it for you. Send only the configuration commands.",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.56641445501009,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "json",
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "paths": [
+          "/interface[name=ethernet-1/20]",
+          "/interface[name=ethernet-1/40]"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-ef49f6b9389c9920679cfe92b4270d055efbada6ba3d535a40479ea3018a1393.json",
+      "category": "read",
+      "duration_seconds": 7.613512954005273,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-f464df9b7ce7f43c60a8564d2fd6eac054e5158186e45dc3ce265672be9ae09e.json",
+      "category": "read",
+      "duration_seconds": 0.6272775150137022,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.20.10/32",
+        "node": "leaf2",
+        "reason": "Validation shows only guest1<->web1 fails; leaf2 running config contains a more-specific blackhole route 10.10.20.10/32 via next-hop-group ibn-wrt-m2, which would drop traffic from web1 to guest1 and replies from guest1 sourced to 10.10.20.10.",
+        "set": {
+          "delete": true
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5248030860093422,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_32ced504f8920856"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 35.44252927400521,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

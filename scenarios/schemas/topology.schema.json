@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/ibn/topology.schema.json",
+  "title": "Abstract IBN benchmark topology",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "topology"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "topology": {
+      "type": "object",
+      "required": [
+        "id",
+        "nodes",
+        "segments",
+        "environment"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "nodes": {
+          "type": "object"
+        },
+        "optional_nodes": {
+          "type": "object"
+        },
+        "segments": {
+          "type": "object"
+        },
+        "services": {
+          "type": "object"
+        },
+        "connectivity_requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "source",
+              "destination"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "destination": {
+                "type": "string",
+                "minLength": 1
+              },
+              "bidirectional": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "environment": {
+          "type": "object",
+          "required": [
+            "type",
+            "lab_name",
+            "topology_path"
+          ],
+          "properties": {
+            "type": {
+              "const": "containerlab"
+            },
+            "lab_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "topology_path": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

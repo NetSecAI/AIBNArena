@@ -1,0 +1,26 @@
+schema_version: "1.0"
+oracle_id: filtering.unrelated_paths.preservation
+version: 1.0.0
+description: >-
+  Every required path that does not cross the affected zone pair remains loss-free.
+  This is the closest this domain gets to catching an over-permissive repair: it will
+  not see a widened rule, but it does catch a repair that disturbed a pair it had no
+  business touching.
+domain: filtering
+phase: preservation
+probes:
+  - id: unaffected_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: unaffected_paths
+    protocol: icmp
+    scope: unaffected
+    affected_nodes: "${bindings.affected_nodes}"
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

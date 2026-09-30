@@ -1,0 +1,38 @@
+--- fw-ext/before_sut.txt
++++ fw-ext/after_sut.txt
+@@ -373,6 +373,16 @@
+                 address 10.10.40.10
+             }
+         }
++        rule 11 {
++            description publish-web-icmp
++            inbound-interface {
++                name eth4
++            }
++            protocol icmp
++            translation {
++                address 10.10.40.10
++            }
++        }
+     }
+     source {
+         rule 101 {
+@@ -418,6 +428,18 @@
+             }
+             source {
+                 address 10.10.99.0/24
++            }
++            translation {
++                address masquerade
++            }
++        }
++        rule 105 {
++            description dmz-web-masquerade
++            outbound-interface {
++                name eth4
++            }
++            source {
++                address 10.10.40.0/24
+             }
+             translation {
+                 address masquerade

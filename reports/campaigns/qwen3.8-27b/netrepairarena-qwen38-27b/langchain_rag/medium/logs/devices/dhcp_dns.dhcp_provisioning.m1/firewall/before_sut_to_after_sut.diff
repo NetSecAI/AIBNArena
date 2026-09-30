@@ -1,0 +1,26 @@
+--- firewall/before_sut.txt
++++ firewall/after_sut.txt
+@@ -649,6 +649,23 @@
+                 subnet-id 30
+             }
+         }
++        shared-network-name GUEST1 {
++            subnet 10.10.20.0/24 {
++                lease 3600
++                option {
++                    default-router 10.10.20.1
++                    domain-name sme01.internal
++                    domain-search sme01.internal
++                    domain-search sme01.example
++                    name-server 10.10.60.10
++                }
++                static-mapping guest1 {
++                    ip-address 10.10.20.10
++                    mac 02:c1:ab:0a:14:0a
++                }
++                subnet-id 20
++            }
++        }
+         shared-network-name USER1 {
+             subnet 10.10.10.0/24 {
+                 lease 3600

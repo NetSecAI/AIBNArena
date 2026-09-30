@@ -1,0 +1,120 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-36f2ed7ba5f0a26aeb1204ce4d1e0ad41f8b537a78eb15d5034cfe8d57fdb8b1.json",
+      "category": "validation",
+      "duration_seconds": 68.75604828400537,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 8.961200364865363e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "firewall"
+        ],
+        "paths": [
+          "service dhcp-server"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.15484843999729492,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "dhcp_pool",
+        "name": "USER1",
+        "node": "firewall",
+        "reason": "Public validation shows only user1 fails DNS-based connectivity while IP connectivity works; firewall DHCP pool USER1 advertises wrong name-server 10.10.60.2 whereas sibling pools use 10.10.60.10 and dns-int is 10.10.60.10.",
+        "set": {
+          "default_router": "10.10.10.1",
+          "delete_option": "name_server",
+          "domain_name": "sme01.internal",
+          "domain_search": [
+            "sme01.internal",
+            "sme01.example"
+          ],
+          "lease": 3600,
+          "name_server": "10.10.60.10",
+          "subnet": "10.10.10.0/24",
+          "subnet_id": 10
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.23698266100836918,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_a67364a32458cc9b"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "delete service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option name-server",
+              "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option name-server 10.10.60.10"
+            ],
+            "reason": "USER1 DHCP scope advertises wrong DNS server 10.10.60.2; only user1 fails name resolution while all IP connectivity and other subnets succeed.",
+            "rollback_commands": [
+              "delete service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option name-server",
+              "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option name-server 10.10.60.2"
+            ],
+            "target": "firewall"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.2671250530111138,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_b8e35d7375f81df5"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-ee01fc1ddacc58af3d0815fe508a1e1debe059e7d76e7f6b4ff010c7927d1b73.json",
+      "category": "validation",
+      "duration_seconds": 81.16691072200774,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

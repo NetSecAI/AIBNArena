@@ -1,0 +1,797 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 7.806900066498201e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth1",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.20183851500041783,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.17421393000040553,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2938697970002977,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "qos"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3548112049993506,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc -s qdisc show dev eth2",
+              "tc -s class show dev eth2",
+              "tc filter show dev eth2 parent 1:"
+            ],
+            "reason": "Read-only inspection of the HTB hierarchy and classifiers to find why the business class guarantee is broken.",
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 5.184499968891032e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.14522241600025154,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "qos"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3218389460016624,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 63.47829582600025,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "user1",
+          "guest1",
+          "app1",
+          "web1"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6507951250005135,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "1:1",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.26152387900037866,
+      "error": "Cannot find device \"1:1\"",
+      "ok": false,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class show dev eth2 parent 1:"
+            ],
+            "reason": "Read-only: list HTB class hierarchy on the WAN egress to identify class rates and the business class.",
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00010836100045708008,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "external1",
+            "destination_ip": "203.0.113.10",
+            "source": "user1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 2.2282174360007048,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Business flow user1(10.10.10.10) measured 0.432 Mbps under contention vs 8 Mbps guarantee. Rebuild HTB on eth2 so business class 1:1 gets 9Mbit guaranteed (8+10% header margin), best-effort 1:2 gets 10Mbit, both ceil 20m, root 20m, default to best-effort, classifier on user1 source.",
+        "set": {
+          "delete_root": true,
+          "filter": {
+            "flowid": "1:1",
+            "src": "10.10.10.10/32"
+          },
+          "htb": "root 20m class 1:1 rate 9m ceil 20m prio 1 class 1:2 rate 10m ceil 20m prio 2 default 1:2"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 7.215600089693908e-05,
+      "error": "update_object: htb must be an object",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe htb object schema.",
+        "set": {
+          "htb": {
+            "root": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.19182842199916195,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_dac51da279194bd1"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe htb class key names.",
+        "set": {
+          "htb": {
+            "class": {
+              "ceil": "20mbit",
+              "flowid": "1:1",
+              "prio": 1,
+              "rate": "9mbit"
+            },
+            "default": "1:2",
+            "root_rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.238200042687822e-05,
+      "error": "update_object: htb.default must be an integer",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe htb structure with integer default.",
+        "set": {
+          "htb": {
+            "class": {
+              "ceil": "20mbit",
+              "flowid": "1:1",
+              "prio": 1,
+              "rate": "9mbit"
+            },
+            "default": 2,
+            "root_rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.15119953000066744,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_cb1964194d261960"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe class spec key names.",
+        "set": {
+          "default": 2,
+          "htb": [
+            {
+              "ceil": "20mbit",
+              "classid": "1:1",
+              "prio": 1,
+              "rate": "9mbit"
+            },
+            {
+              "ceil": "20mbit",
+              "classid": "1:2",
+              "prio": 2,
+              "rate": "10mbit"
+            }
+          ]
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.5941999410861172e-05,
+      "error": "update_object: qos has no attribute default; it has delete_root, htb, class, filter, delete_filter",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe full htb hierarchy object shape.",
+        "set": {
+          "htb": {
+            "class": [
+              {
+                "ceil": "20mbit",
+                "classid": "1:1",
+                "prio": 1,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "classid": "1:2",
+                "prio": 2,
+                "rate": "10mbit"
+              }
+            ],
+            "default": 2,
+            "root": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.14534107500003302,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_daa459315c0916c7"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe whether root class 1:0 and default compile into proper htb qdisc+class commands.",
+        "set": {
+          "htb": {
+            "class": [
+              {
+                "ceil": "20mbit",
+                "classid": "1:0"
+              },
+              {
+                "ceil": "20mbit",
+                "classid": "1:1",
+                "prio": 1,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "classid": "1:2",
+                "prio": 2,
+                "rate": "10mbit"
+              }
+            ],
+            "default": 2
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.2039702980000584,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_cb9be6c06715a51e"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe full htb+filter command generation.",
+        "set": {
+          "delete_root": true,
+          "filter": {
+            "flowid": "1:1",
+            "src": "10.10.10.10/32"
+          },
+          "htb": {
+            "class": [
+              {
+                "ceil": "20mbit",
+                "classid": "1:1",
+                "prio": 1,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "classid": "1:2",
+                "prio": 2,
+                "rate": "10mbit"
+              }
+            ],
+            "default": 2
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.45387713899981463,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_adad79541ef6a5fd"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add HTB classes 1:1 (business, 9mbit/20mbit) and 1:2 (best-effort, 10mbit/20mbit) to the existing htb root.",
+        "set": {
+          "class": [
+            {
+              "ceil": "20mbit",
+              "classid": "1:1",
+              "prio": 1,
+              "rate": "9mbit"
+            },
+            {
+              "ceil": "20mbit",
+              "classid": "1:2",
+              "prio": 2,
+              "rate": "10mbit"
+            }
+          ]
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.7127998691867106e-05,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add HTB classes: 1:1 business 9mbit guaranteed/20mbit ceil prio1, 1:2 best-effort 10mbit/20mbit prio2.",
+        "set": {
+          "class": [
+            {
+              "ceil": "20mbit",
+              "id": "1:1",
+              "prio": 1,
+              "rate": "9mbit"
+            },
+            {
+              "ceil": "20mbit",
+              "id": "1:2",
+              "prio": 2,
+              "rate": "10mbit"
+            }
+          ]
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.6923999030259438e-05,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add business class 1:1 (9mbit/20mbit, prio1) to existing htb root.",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:1",
+            "prio": 1,
+            "rate": "9mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.14285766499961028,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_982934b49bdab333"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Rebuild htb hierarchy with rates: root default 2, business class 1:1 9mbit/20mbit prio1, best-effort 1:2 10mbit/20mbit prio2.",
+        "set": {
+          "delete_root": true,
+          "filter": {
+            "flowid": "1:1",
+            "src": "10.10.10.10/32"
+          },
+          "htb": {
+            "class": [
+              {
+                "ceil": "20mbit",
+                "id": "1:1",
+                "parent": "1:",
+                "prio": 1,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:2",
+                "parent": "1:",
+                "prio": 2,
+                "rate": "10mbit"
+              }
+            ],
+            "default": 2
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5304474389995448,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_c1945160f0b6d7af"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add business class 1:1 under parent 1: (9mbit guaranteed, 20mbit ceil, prio1).",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:1",
+            "parent": "1:",
+            "prio": 1,
+            "rate": "9mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.19378396300089662,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_7ba12efd11c586fc"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe htb object for where class specs with rates are placed.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "default": 2,
+            "rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5206875189996936,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_6898b632b96a599e"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe: does htb emit one class command per entry in a 'classes' list?",
+        "set": {
+          "delete_root": true,
+          "filter": {
+            "flowid": "1:1",
+            "src": "10.10.10.10/32"
+          },
+          "htb": {
+            "classes": [
+              {
+                "ceil": "20mbit",
+                "id": "1:1",
+                "prio": 1,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:2",
+                "prio": 2,
+                "rate": "10mbit"
+              }
+            ],
+            "default": 2
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.829376563000551,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_e90caced47549f19"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Rebuild with root class 1:0 first so children 1:1/1:2 hang off it; probe parent derivation.",
+        "set": {
+          "delete_root": true,
+          "filter": {
+            "flowid": "1:1",
+            "src": "10.10.10.10/32"
+          },
+          "htb": {
+            "classes": [
+              {
+                "ceil": "20mbit",
+                "id": "1:0"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:1",
+                "prio": 1,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:2",
+                "prio": 2,
+                "rate": "10mbit"
+              }
+            ],
+            "default": 2
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.495300006761681e-05,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.19375849700008985,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add business class 1:1 directly under root 1: (9mbit guaranteed, 20mbit ceil, prio1).",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:1",
+            "parent": "1:",
+            "prio": 1,
+            "rate": "9mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.3322901699993963,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_84b446b009d3419f"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add best-effort class 1:2 directly under root 1: (10mbit, 20mbit ceil, prio2).",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:2",
+            "parent": "1:",
+            "prio": 2,
+            "rate": "10mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.19738067999969644,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_99fbdd51330150e0"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 77.81249690500044,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

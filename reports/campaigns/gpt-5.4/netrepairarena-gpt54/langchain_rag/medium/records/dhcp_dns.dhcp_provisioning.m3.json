@@ -1,0 +1,2920 @@
+{
+  "cleanup_result": {
+    "ok": true,
+    "results": [
+      {
+        "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "firewall"
+      },
+      {
+        "command": "sh -c 'P=$(cat /var/run/udhcpc.eth1.pid 2>/dev/null); : > /etc/resolv.conf; if [ -n \"$P\" ]; then kill -USR2 $P; sleep 2; kill -USR1 $P; fi; i=0; while [ $i -lt 15 ]; do ip -4 addr show eth1 2>/dev/null | grep -q \" inet \" && break; i=$((i+1)); sleep 1; done; exit 0'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:user1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.10.10\nudhcpc: lease of 10.10.10.10 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "ip address replace 10.10.60.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "ip route replace default via 10.10.60.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:guest1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.20.10\nudhcpc: lease of 10.10.20.10 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:admin1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.99.100\nudhcpc: lease of 10.10.99.100 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:finance1'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "udhcpc: started, v1.31.1\nudhcpc: sending discover\nudhcpc: sending select for 10.10.30.10\nudhcpc: lease of 10.10.30.10 obtained, lease time 3600\n",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip address replace 10.10.40.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip route replace default via 10.10.40.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "sh -c 'printf \"search sme01.internal sme01.example\\nnameserver 10.10.60.10\\n\" > /etc/resolv.conf'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "ip address replace 10.10.41.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "ip route replace default via 10.10.41.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip address replace 10.10.50.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip route replace default via 10.10.50.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'printf \"search sme01.internal sme01.example\\nnameserver 10.10.60.10\\n\" > /etc/resolv.conf'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip address replace 203.0.113.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip route replace default via 203.0.113.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'printf \"search sme01.example\\nnameserver 10.10.41.10\\n\" > /etc/resolv.conf'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "cp /opt/dns-src/db.sme01.internal /etc/bind/db.sme01.internal",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-int"
+      },
+      {
+        "command": "rndc reload",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "server reload successful\n",
+        "target": "dns-int"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "cp /opt/dns-src/db.sme01.example /etc/bind/db.sme01.example",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "rndc reload",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "server reload successful\n",
+        "target": "dns-dmz"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.1/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/10 admin-state enable\nset / interface ethernet-1/10 subinterface 0 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 address 10.10.10.1/24\nset / network-instance default interface ethernet-1/10.0\nset / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay gi-address 10.10.10.1\nset / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]\nset / interface ethernet-1/11 admin-state enable\nset / interface ethernet-1/11 subinterface 0 admin-state enable\nset / interface ethernet-1/11 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/11 subinterface 0 ipv4 address 10.10.60.1/24\nset / network-instance default interface ethernet-1/11.0\nset / interface ethernet-1/20 admin-state enable\nset / interface ethernet-1/20 subinterface 0 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 address 10.10.20.1/24\nset / network-instance default interface ethernet-1/20.0\nset / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay gi-address 10.10.20.1\nset / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]\nset / interface ethernet-1/57 admin-state enable\nset / interface ethernet-1/57 subinterface 0 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 address 10.10.99.1/24\nset / network-instance default interface ethernet-1/57.0\nset / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay gi-address 10.10.99.1\nset / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]\nset / network-instance default next-hop-groups group to-firewall nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.41.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-firewall admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.3/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/30 admin-state enable\nset / interface ethernet-1/30 subinterface 0 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 address 10.10.30.1/24\nset / network-instance default interface ethernet-1/30.0\nset / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay gi-address 10.10.30.1\nset / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.2 ]\nset / network-instance default next-hop-groups group to-firewall nexthop 1 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.60.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.41.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-firewall admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-firewall admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf2"
+      },
+      {
+        "command": "set interfaces ethernet eth1 address 10.255.0.0/31\nset interfaces ethernet eth1 description fabric-to-leaf1\nset interfaces ethernet eth2 address 10.255.0.2/31\nset interfaces ethernet eth2 description fabric-to-leaf2\nset interfaces ethernet eth3 address 10.10.40.1/24\nset interfaces ethernet eth3 description web1-gateway\nset interfaces ethernet eth4 address 10.10.41.1/24\nset interfaces ethernet eth4 description dns-dmz-gateway\nset interfaces ethernet eth5 address 10.10.50.1/24\nset interfaces ethernet eth5 description app1-gateway\nset interfaces ethernet eth6 address 203.0.113.1/24\nset interfaces ethernet eth6 description external1-gateway\nset protocols static route 10.10.10.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.20.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.60.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.99.0/24 next-hop 10.255.0.1\nset protocols static route 10.10.30.0/24 next-hop 10.255.0.3\nset service dhcp-server listen-address 10.255.0.0\nset service dhcp-server listen-address 10.255.0.2\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 subnet-id 10\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option default-router 10.10.10.1\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 lease 3600\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 static-mapping user1 mac 02:c1:ab:0a:0a:0a\nset service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 static-mapping user1 ip-address 10.10.10.10\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 subnet-id 20\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option default-router 10.10.20.1\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 lease 3600\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 mac 02:c1:ab:0a:14:0a\nset service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 ip-address 10.10.20.10\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 subnet-id 30\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option default-router 10.10.30.1\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 lease 3600\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 static-mapping finance1 mac 02:c1:ab:0a:1e:0a\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 static-mapping finance1 ip-address 10.10.30.10\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 subnet-id 99\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option default-router 10.10.99.1\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option name-server 10.10.60.10\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-name sme01.internal\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-search sme01.internal\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-search sme01.example\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 lease 3600\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 static-mapping admin1 mac 02:c1:ab:0a:63:64\nset service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 static-mapping admin1 ip-address 10.10.99.100\nset firewall zone INTERNAL description internal-zone\nset firewall zone INTERNAL interface eth1\nset firewall zone INTERNAL interface eth2\nset firewall zone DMZ description dmz-zone\nset firewall zone DMZ interface eth3\nset firewall zone DMZ interface eth4\nset firewall zone DMZ interface eth5\nset firewall zone OUTSIDE description outside-zone\nset firewall zone OUTSIDE interface eth6\nset firewall ipv4 name INTERNAL-TO-DMZ default-action drop\nset firewall ipv4 name INTERNAL-TO-DMZ description internal-to-dmz\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 description return-traffic\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 state established\nset firewall ipv4 name INTERNAL-TO-DMZ rule 10 state related\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 description user1-to-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 20 destination port 80\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 description user1-ping-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 30 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 description user1-to-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 40 destination port 5201\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 description user1-ping-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 source address 10.10.10.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 50 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 description guest1-to-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 source address 10.10.20.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 60 destination port 80\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 description guest1-ping-web\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 source address 10.10.20.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 70 destination address 10.10.40.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 description finance1-to-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 source address 10.10.30.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 80 destination port 5201\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 description finance1-ping-app\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 protocol icmp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 source address 10.10.30.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 90 destination address 10.10.50.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 description resolver-forward-udp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 protocol udp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 source address 10.10.60.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 destination address 10.10.41.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 100 destination port 53\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 description resolver-forward-tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 protocol tcp\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 source address 10.10.60.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 destination address 10.10.41.10\nset firewall ipv4 name INTERNAL-TO-DMZ rule 110 destination port 53\nset firewall ipv4 name INTERNAL-TO-DMZ rule 120 action accept\nset firewall ipv4 name INTERNAL-TO-DMZ rule 120 description admin-to-dmz\nset firewall ipv4 name INTERNAL-TO-DMZ rule 120 source address 10.10.99.100\nset firewall zone DMZ from INTERNAL firewall name INTERNAL-TO-DMZ\nset firewall ipv4 name DMZ-TO-INTERNAL default-action drop\nset firewall ipv4 name DMZ-TO-INTERNAL description dmz-to-internal\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 description return-traffic\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 state established\nset firewall ipv4 name DMZ-TO-INTERNAL rule 10 state related\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 description web1-resolve-udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 protocol udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 20 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 description web1-resolve-tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 protocol tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 30 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 description app1-resolve-udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 protocol udp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 40 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 description app1-resolve-tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 protocol tcp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 50 destination port 53\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 description app1-ping-resolver\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 60 destination address 10.10.60.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 description web1-ping-user1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 70 destination address 10.10.10.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 description app1-ping-user1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 80 destination address 10.10.10.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 description web1-ping-guest1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 90 destination address 10.10.20.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 action accept\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 description app1-ping-finance1\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 protocol icmp\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 source address 10.10.50.10\nset firewall ipv4 name DMZ-TO-INTERNAL rule 100 destination address 10.10.30.10\nset firewall zone INTERNAL from DMZ firewall name DMZ-TO-INTERNAL\nset firewall ipv4 name OUTSIDE-TO-DMZ default-action drop\nset firewall ipv4 name OUTSIDE-TO-DMZ description outside-to-dmz\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 description return-traffic\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 state established\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 10 state related\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 description internet-to-web\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 protocol tcp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 destination address 10.10.40.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 20 destination port 80\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 description internet-ping-web\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 protocol icmp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 icmp type-name echo-request\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 30 destination address 10.10.40.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 description internet-resolve-udp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 protocol udp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 destination address 10.10.41.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 40 destination port 53\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 description internet-resolve-tcp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 protocol tcp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 destination address 10.10.41.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 50 destination port 53\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 action accept\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 description internet-ping-dns\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 protocol icmp\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 icmp type-name echo-request\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 source address 203.0.113.10\nset firewall ipv4 name OUTSIDE-TO-DMZ rule 60 destination address 10.10.41.10\nset firewall zone DMZ from OUTSIDE firewall name OUTSIDE-TO-DMZ\nset firewall ipv4 name DMZ-TO-OUTSIDE default-action drop\nset firewall ipv4 name DMZ-TO-OUTSIDE description dmz-to-outside\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 action accept\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 description return-traffic\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 state established\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 10 state related\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 action accept\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 description web1-ping-outside\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 protocol icmp\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 icmp type-name echo-request\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 source address 10.10.40.10\nset firewall ipv4 name DMZ-TO-OUTSIDE rule 20 destination address 203.0.113.10\nset firewall zone OUTSIDE from DMZ firewall name DMZ-TO-OUTSIDE\nset firewall ipv4 name INTERNAL-TO-OUTSIDE default-action drop\nset firewall ipv4 name INTERNAL-TO-OUTSIDE description internal-to-outside\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 description return-traffic\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 state established\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 state related\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 description internal-web-out\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 protocol tcp\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 destination port 80\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 description internal-tls-out\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 protocol tcp\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 destination port 443\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 description internal-ping-out\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 protocol icmp\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 icmp type-name echo-request\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 action accept\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 description admin-to-outside\nset firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 source address 10.10.99.100\nset firewall zone OUTSIDE from INTERNAL firewall name INTERNAL-TO-OUTSIDE\nset firewall ipv4 name OUTSIDE-TO-INTERNAL default-action drop\nset firewall ipv4 name OUTSIDE-TO-INTERNAL description outside-to-internal\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 action accept\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 description return-traffic\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 state established\nset firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 state related\nset firewall zone INTERNAL from OUTSIDE firewall name OUTSIDE-TO-INTERNAL\nset nat source rule 101 description masquerade-10.10.10.0\nset nat source rule 101 outbound-interface name eth6\nset nat source rule 101 source address 10.10.10.0/24\nset nat source rule 101 translation address masquerade\nset nat source rule 102 description masquerade-10.10.20.0\nset nat source rule 102 outbound-interface name eth6\nset nat source rule 102 source address 10.10.20.0/24\nset nat source rule 102 translation address masquerade\nset nat source rule 103 description masquerade-10.10.30.0\nset nat source rule 103 outbound-interface name eth6\nset nat source rule 103 source address 10.10.30.0/24\nset nat source rule 103 translation address masquerade\nset nat source rule 104 description masquerade-10.10.60.0\nset nat source rule 104 outbound-interface name eth6\nset nat source rule 104 source address 10.10.60.0/24\nset nat source rule 104 translation address masquerade\nset nat source rule 105 description masquerade-10.10.99.0\nset nat source rule 105 outbound-interface name eth6\nset nat source rule 105 source address 10.10.99.0/24\nset nat source rule 105 translation address masquerade\nset nat destination rule 10 description publish-web\nset nat destination rule 10 inbound-interface name eth6\nset nat destination rule 10 protocol tcp\nset nat destination rule 10 destination port 80\nset nat destination rule 10 translation address 10.10.40.10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "firewall"
+      }
+    ]
+  },
+  "convergence_result": {
+    "converged": true,
+    "interval_seconds": 2.0,
+    "lease_renewal": {
+      "clients": [
+        {
+          "client": "admin1",
+          "ok": true,
+          "returncode": 0
+        },
+        {
+          "client": "finance1",
+          "ok": true,
+          "returncode": 0
+        },
+        {
+          "client": "guest1",
+          "ok": true,
+          "returncode": 0
+        },
+        {
+          "client": "user1",
+          "ok": true,
+          "returncode": 0
+        }
+      ]
+    },
+    "observation": {
+      "connectivity": [
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=1.35 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.293 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.260 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2009ms\nrtt min/avg/max/mdev = 0.260/0.635/1.354/0.508 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": "web1.sme01.example",
+          "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.125 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.271 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.290 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2035ms\nrtt min/avg/max/mdev = 0.125/0.228/0.290/0.073 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.40.10",
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.528 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.366 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.264 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.264/0.386/0.528/0.108 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": "user1.sme01.internal",
+          "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.138 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.298 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.252 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.138/0.229/0.298/0.067 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.10.10",
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=0.399 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.395 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.314 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.314/0.369/0.399/0.039 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": "app1.sme01.example",
+          "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.207 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.236 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.223 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.207/0.222/0.236/0.011 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.50.10",
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.352 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.267 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.319 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.267/0.312/0.352/0.035 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": "user1.sme01.internal",
+          "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.163 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.348 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.696 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 5610ms\nrtt min/avg/max/mdev = 0.163/0.402/0.696/0.220 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.10.10",
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=0.940 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.309 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.264 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.264/0.504/0.940/0.308 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": "web1.sme01.example",
+          "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.246 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.237 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.293 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.237/0.258/0.293/0.024 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.40.10",
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=62 time=0.268 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=62 time=0.226 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=62 time=0.270 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.226/0.254/0.270/0.020 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": "guest1.sme01.internal",
+          "output": "PING guest1.sme01.internal (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=1 ttl=62 time=0.360 ms\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=2 ttl=62 time=0.255 ms\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=3 ttl=62 time=0.284 ms\n\n--- guest1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.255/0.299/0.360/0.044 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.20.10",
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=1.78 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.264 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.328 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.264/0.792/1.784/0.701 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "finance1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": "app1.sme01.example",
+          "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.149 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.261 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.267 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.149/0.225/0.267/0.054 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.50.10",
+          "source": "finance1",
+          "success": true
+        },
+        {
+          "destination": "finance1",
+          "destination_ip": "10.10.30.10",
+          "hostname": null,
+          "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=62 time=0.348 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=62 time=0.364 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=62 time=0.233 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.233/0.315/0.364/0.058 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "finance1",
+          "destination_ip": "10.10.30.10",
+          "hostname": "finance1.sme01.internal",
+          "output": "PING finance1.sme01.internal (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=1 ttl=62 time=0.232 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=2 ttl=62 time=0.405 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=3 ttl=62 time=0.333 ms\n\n--- finance1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.232/0.323/0.405/0.070 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.30.10",
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=63 time=0.363 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=63 time=0.044 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=63 time=0.043 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.043/0.150/0.363/0.150 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": "web1.sme01.example",
+          "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=63 time=0.038 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=63 time=0.043 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=63 time=0.057 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 6027ms\nrtt min/avg/max/mdev = 0.038/0.046/0.057/0.008 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.40.10",
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=63 time=0.057 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=63 time=0.102 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=63 time=0.049 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.049/0.069/0.102/0.023 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": null,
+          "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=63 time=0.444 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=63 time=0.255 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=63 time=0.208 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.208/0.302/0.444/0.101 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": "dns-int.sme01.internal",
+          "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=63 time=0.188 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=63 time=0.416 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=63 time=0.287 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 5611ms\nrtt min/avg/max/mdev = 0.188/0.297/0.416/0.093 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.60.10",
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": null,
+          "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=62 time=0.324 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=62 time=0.295 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=62 time=0.272 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.272/0.297/0.324/0.021 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "dns-int",
+          "destination_ip": "10.10.60.10",
+          "hostname": "dns-int.sme01.internal",
+          "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=62 time=0.166 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=62 time=0.266 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=62 time=0.267 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.166/0.233/0.267/0.047 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": "10.10.60.10",
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "dns-dmz",
+          "destination_ip": "10.10.41.10",
+          "hostname": null,
+          "output": "PING 10.10.41.10 (10.10.41.10) 56(84) bytes of data.\n64 bytes from 10.10.41.10: icmp_seq=1 ttl=63 time=0.058 ms\n64 bytes from 10.10.41.10: icmp_seq=2 ttl=63 time=0.069 ms\n64 bytes from 10.10.41.10: icmp_seq=3 ttl=63 time=0.078 ms\n\n--- 10.10.41.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.058/0.068/0.078/0.008 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        }
+      ],
+      "lab_name": "sme01-dns",
+      "nodes": [
+        {
+          "container_name": "clab-sme01-dns-firewall",
+          "kind": "vyos",
+          "name": "firewall"
+        },
+        {
+          "container_name": "clab-sme01-dns-leaf1",
+          "kind": "nokia_srlinux",
+          "name": "leaf1"
+        },
+        {
+          "container_name": "clab-sme01-dns-leaf2",
+          "kind": "nokia_srlinux",
+          "name": "leaf2"
+        },
+        {
+          "container_name": "clab-sme01-dns-user1",
+          "kind": "linux",
+          "name": "user1"
+        },
+        {
+          "container_name": "clab-sme01-dns-guest1",
+          "kind": "linux",
+          "name": "guest1"
+        },
+        {
+          "container_name": "clab-sme01-dns-finance1",
+          "kind": "linux",
+          "name": "finance1"
+        },
+        {
+          "container_name": "clab-sme01-dns-web1",
+          "kind": "linux",
+          "name": "web1"
+        },
+        {
+          "container_name": "clab-sme01-dns-app1",
+          "kind": "linux",
+          "name": "app1"
+        },
+        {
+          "container_name": "clab-sme01-dns-external1",
+          "kind": "linux",
+          "name": "external1"
+        },
+        {
+          "container_name": "clab-sme01-dns-dns-int",
+          "kind": "linux",
+          "name": "dns-int"
+        },
+        {
+          "container_name": "clab-sme01-dns-dns-dmz",
+          "kind": "linux",
+          "name": "dns-dmz"
+        },
+        {
+          "container_name": "clab-sme01-dns-admin1",
+          "kind": "linux",
+          "name": "admin1"
+        },
+        {
+          "container_name": "clab-sme01-dns-attacker1",
+          "kind": "linux",
+          "name": "attacker1"
+        }
+      ],
+      "raw": {
+        "admin1:ip_brief_address": "eth1@if6143      UP             10.10.99.100/24 fe80::c1:abff:fe0a:6364/64 \nlo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6134      UP             172.24.0.5/24 \n",
+        "app1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6131      UP             172.24.0.2/24 \neth1@if6135      UP             10.10.50.10/24 fe80::a8c1:abff:fe43:5d63/64 \n",
+        "attacker1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6132      UP             172.24.0.3/24 \neth1@if6138      DOWN           \n",
+        "dns-dmz:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6160      UP             172.24.0.13/24 \neth1@if6167      UP             10.10.41.10/24 fe80::a8c1:abff:fe40:e32c/64 \n",
+        "dns-int:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6140      UP             172.24.0.7/24 \neth1@if6150      UP             10.10.60.10/24 fe80::a8c1:abff:fedd:ad27/64 \n",
+        "external1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6146      UP             172.24.0.9/24 \neth1@if6155      UP             203.0.113.10/24 fe80::a8c1:abff:fee6:43b/64 \n",
+        "finance1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6137      UP             172.24.0.6/24 \neth1@if6148      UP             10.10.30.10/24 fe80::c1:abff:fe0a:1e0a/64 \n",
+        "firewall:show_interfaces": "Codes: S - State, L - Link, u - Up, D - Down, A - Admin Down\nInterface    IP Address      MAC                VRF        MTU  S/L    Description\n-----------  --------------  -----------------  -------  -----  -----  -----------------\neth0         172.24.0.8/24   42:21:fb:9b:85:dd  default   1500  u/u\neth1         10.255.0.0/31   aa:c1:ab:28:4e:64  default   1500  u/u    fabric-to-leaf1\neth2         10.255.0.2/31   86:06:00:76:6b:c2  default   1500  u/u    fabric-to-leaf2\neth3         10.10.40.1/24   aa:c1:ab:33:90:29  default   1500  u/u    web1-gateway\neth4         10.10.41.1/24   aa:c1:ab:f6:cc:af  default   1500  u/u    dns-dmz-gateway\neth5         10.10.50.1/24   aa:c1:ab:e7:42:ee  default   1500  u/u    app1-gateway\neth6         203.0.113.1/24  aa:c1:ab:b1:9b:a9  default   1500  u/u    external1-gateway\nlo           127.0.0.1/8     00:00:00:00:00:00  default  65536  u/u\n             ::1/128\n",
+        "guest1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6147      UP             172.24.0.10/24 \neth1@if6164      UP             10.10.20.10/24 fe80::c1:abff:fe0a:140a/64 \n",
+        "leaf1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:9D:09:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T04:17:02.618Z\nTotal Memory         : 32559032 kB\nFree Memory          : 20411740 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "leaf2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:4A:0A:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T04:17:02.619Z\nTotal Memory         : 32559032 kB\nFree Memory          : 20411740 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "user1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6133      UP             172.24.0.4/24 \neth1@if6141      UP             10.10.10.10/24 fe80::c1:abff:fe0a:a0a/64 \n",
+        "web1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if6152      UP             172.24.0.11/24 \neth1@if6162      UP             10.10.40.10/24 fe80::a8c1:abff:fe09:ec71/64 \n"
+      }
+    },
+    "ok": true,
+    "timeout_seconds": 30.0
+  },
+  "created_at": "2026-09-29T04:26:32.078986+00:00",
+  "device_configurations": {
+    "changed_by_sut": [
+      "firewall"
+    ],
+    "changes": {
+      "before_sut_to_after_sut": {
+        "firewall": {
+          "file": "firewall/before_sut_to_after_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 0
+        }
+      },
+      "healthy_to_before_sut": {
+        "firewall": {
+          "file": "firewall/healthy_to_before_sut.diff",
+          "lines_added": 0,
+          "lines_removed": 1
+        }
+      }
+    },
+    "directory": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/devices/dhcp_dns.dhcp_provisioning.m3-20260929T041654-1aff3740",
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes",
+    "snapshots": {
+      "after_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-dmz": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-dmz/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-int": {
+            "bytes": 1262,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-int/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1233,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "firewall": {
+            "bytes": 24047,
+            "command": "show",
+            "file": "firewall/after_sut.txt",
+            "kind": "vyos",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77892,
+            "command": "info from running /",
+            "file": "leaf1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 76876,
+            "command": "info from running /",
+            "file": "leaf2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1227,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "before_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-dmz": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-dmz/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-int": {
+            "bytes": 1262,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-int/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1233,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "firewall": {
+            "bytes": 24003,
+            "command": "show",
+            "file": "firewall/before_sut.txt",
+            "kind": "vyos",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77892,
+            "command": "info from running /",
+            "file": "leaf1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 76876,
+            "command": "info from running /",
+            "file": "leaf2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1227,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "healthy": {
+        "devices": {
+          "admin1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-dmz": {
+            "bytes": 1264,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-dmz/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "dns-int": {
+            "bytes": 1262,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "dns-int/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1233,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1228,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "firewall": {
+            "bytes": 24047,
+            "command": "show",
+            "file": "firewall/healthy.txt",
+            "kind": "vyos",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77892,
+            "command": "info from running /",
+            "file": "leaf1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 76876,
+            "command": "info from running /",
+            "file": "leaf2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1227,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      }
+    }
+  },
+  "error": null,
+  "evaluations": {
+    "expected_degradation": {
+      "injection": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "degraded": true,
+            "reinjected": null,
+            "restored": null,
+            "voided": false
+          }
+        ],
+        "attempts_allowed": 1
+      },
+      "oracle_id": "dhcp_dns.provisioning.expected_degradation",
+      "passed": true,
+      "phase": "expected_degradation",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.732,
+                "rtt_max_ms": 1.639,
+                "rtt_min_ms": 0.277,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.395,
+                "rtt_max_ms": 0.485,
+                "rtt_min_ms": 0.308,
+                "source": "app1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 2,
+            "success": true,
+            "total_checks": 2
+          },
+          "passed": false,
+          "probe_id": "affected_paths",
+          "threshold_results": [
+            false
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "gte",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "metrics": {
+            "answer_count": 0,
+            "http_status": 0,
+            "success": false
+          },
+          "passed": true,
+          "probe_id": "name_resolution",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "answer_count",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "version": "1.1.0"
+    },
+    "healthy": {
+      "oracle_id": "dhcp_dns.provisioning.healthy",
+      "passed": true,
+      "phase": "healthy",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.379,
+                "rtt_max_ms": 0.552,
+                "rtt_min_ms": 0.25,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.629,
+                "rtt_max_ms": 1.251,
+                "rtt_min_ms": 0.285,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.274,
+                "rtt_max_ms": 0.301,
+                "rtt_min_ms": 0.23,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.348,
+                "rtt_max_ms": 0.426,
+                "rtt_min_ms": 0.258,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.405,
+                "rtt_max_ms": 0.681,
+                "rtt_min_ms": 0.261,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.448,
+                "rtt_max_ms": 0.724,
+                "rtt_min_ms": 0.276,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.302,
+                "rtt_max_ms": 0.352,
+                "rtt_min_ms": 0.275,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.285,
+                "rtt_max_ms": 0.307,
+                "rtt_min_ms": 0.269,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.087,
+                "rtt_max_ms": 0.135,
+                "rtt_min_ms": 0.05,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.234,
+                "rtt_max_ms": 0.569,
+                "rtt_min_ms": 0.055,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.333,
+                "rtt_max_ms": 0.493,
+                "rtt_min_ms": 0.243,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.393,
+                "rtt_max_ms": 0.485,
+                "rtt_min_ms": 0.346,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "dns-dmz",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.057,
+                "rtt_max_ms": 0.057,
+                "rtt_min_ms": 0.057,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 13,
+            "success": true,
+            "total_checks": 13
+          },
+          "passed": true,
+          "probe_id": "required_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "metrics": {
+            "answer_count": 2,
+            "http_status": 200,
+            "success": true
+          },
+          "passed": true,
+          "probe_id": "name_resolution",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "answer_count",
+              "operator": "eq",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "version": "1.1.0"
+    },
+    "preservation": {
+      "oracle_id": "dhcp_dns.unrelated_paths.preservation",
+      "passed": true,
+      "phase": "preservation",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.309,
+                "rtt_max_ms": 0.315,
+                "rtt_min_ms": 0.305,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.357,
+                "rtt_max_ms": 0.365,
+                "rtt_min_ms": 0.353,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.337,
+                "rtt_max_ms": 0.374,
+                "rtt_min_ms": 0.267,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.31,
+                "rtt_max_ms": 0.356,
+                "rtt_min_ms": 0.287,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.381,
+                "rtt_max_ms": 0.505,
+                "rtt_min_ms": 0.288,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.352,
+                "rtt_max_ms": 0.389,
+                "rtt_min_ms": 0.311,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.055,
+                "rtt_max_ms": 0.057,
+                "rtt_min_ms": 0.054,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.054,
+                "rtt_max_ms": 0.058,
+                "rtt_min_ms": 0.05,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.307,
+                "rtt_max_ms": 0.461,
+                "rtt_min_ms": 0.217,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.347,
+                "rtt_max_ms": 0.373,
+                "rtt_min_ms": 0.312,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "dns-dmz",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.066,
+                "rtt_max_ms": 0.072,
+                "rtt_min_ms": 0.062,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 11,
+            "success": true,
+            "total_checks": 11
+          },
+          "passed": true,
+          "probe_id": "unaffected_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "repair": {
+      "oracle_id": "dhcp_dns.provisioning.repair",
+      "passed": true,
+      "phase": "repair",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.32,
+                "rtt_max_ms": 0.384,
+                "rtt_min_ms": 0.247,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.301,
+                "rtt_max_ms": 0.392,
+                "rtt_min_ms": 0.241,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.299,
+                "rtt_max_ms": 0.381,
+                "rtt_min_ms": 0.258,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "user1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.339,
+                "rtt_max_ms": 0.377,
+                "rtt_min_ms": 0.279,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.273,
+                "rtt_max_ms": 0.297,
+                "rtt_min_ms": 0.258,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.29,
+                "rtt_max_ms": 0.346,
+                "rtt_min_ms": 0.21,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.346,
+                "rtt_max_ms": 0.424,
+                "rtt_min_ms": 0.274,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.481,
+                "rtt_max_ms": 0.916,
+                "rtt_min_ms": 0.253,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.058,
+                "rtt_max_ms": 0.061,
+                "rtt_min_ms": 0.054,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.058,
+                "rtt_max_ms": 0.061,
+                "rtt_min_ms": 0.055,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.29,
+                "rtt_max_ms": 0.326,
+                "rtt_min_ms": 0.254,
+                "source": "user1",
+                "success": true
+              },
+              {
+                "destination": "dns-int",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.347,
+                "rtt_max_ms": 0.398,
+                "rtt_min_ms": 0.26,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "dns-dmz",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.06,
+                "rtt_max_ms": 0.064,
+                "rtt_min_ms": 0.058,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 13,
+            "success": true,
+            "total_checks": 13
+          },
+          "passed": true,
+          "probe_id": "required_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "metrics": {
+            "answer_count": 2,
+            "http_status": 200,
+            "success": true
+          },
+          "passed": true,
+          "probe_id": "name_resolution",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "answer_count",
+              "operator": "eq",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "version": "1.1.0"
+    }
+  },
+  "experiment_id": "langchain_rag_agent-gpt-5-4-dhcp_dns-dhcp_provisioning-m3-fault-seed7108852",
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed that only finance1 failed hostname-based connectivity while IP reachability, address 10.10.30.10/24, and default route via 10.10.30.1 were correct. Read firewall DHCP config and found FINANCE1 scope missing the name-server option present in sibling scopes. Added name-server 10.10.60.10 to DHCP scope FINANCE1 on firewall. Public success criteria validation then passed, including finance1 resolving and reaching app1.sme01.example.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.6426,
+      "log_p_yes": 0.0,
+      "method": "pool_resolver_unadvertised",
+      "operation": "set_dhcp_resolver_presence",
+      "reason": null,
+      "reference": "On the DHCP server firewall, pool FINANCE1 (10.10.30.0/24) no longer advertises a DNS resolver (10.10.60.10), so clients cannot resolve names.",
+      "score": 31.6426,
+      "target": "firewall"
+    },
+    "domain": "dhcp_dns",
+    "environment_success": true,
+    "failed_operation_count": 2,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 2,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "provisioning_repair_pass_rate": 1.0,
+    "read_count": 4,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 1,
+    "successful_read_count": 4,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "ani_mutations": 2,
+    "ani_reads": 4,
+    "failed_operations": 2,
+    "input_tokens": 95353,
+    "llm_calls": 9,
+    "output_tokens": 475,
+    "successful_mutations": 1,
+    "successful_reads": 4,
+    "total_tokens": 95828,
+    "unsafe_operations": 0,
+    "validations": 6
+  },
+  "phase_durations": {
+    "apply_reference_state": 114.40831249699113,
+    "calculate_metrics": 5.282397614791989e-05,
+    "deploy_reset_testbed": 17.635171294998145,
+    "evaluate_degradation": 22.18384565800079,
+    "evaluate_healthy": 29.158459634985775,
+    "evaluate_repair_preservation": 127.94771187900915,
+    "inject_fault": 6.49912344198674,
+    "invoke_sut": 166.49567915598163,
+    "load_configuration": 0.00025970599381253123,
+    "load_oracles": 0.00673221200122498,
+    "load_validate_scenario": 0.04071477599791251,
+    "record_baseline": 5.06499782204628e-06,
+    "restore_destroy": 16.448234713985585,
+    "score_diagnosis": 0.6492106300138403,
+    "snapshot_after_sut": 6.155247900023824,
+    "snapshot_before_sut": 6.7080569329846185,
+    "snapshot_healthy": 6.8854204380186275,
+    "write_result": 0.012689427006989717
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "gpt-5.4",
+    "git": {
+      "commit": "731901c1947298ad4dfed2283f9e20eb776bd3ff",
+      "dirty": true,
+      "modified_files": 1,
+      "untracked_files": 11269
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 400,
+      "min_retry_tokens": null,
+      "model": "gpt-5.4",
+      "prompt_variant": "default",
+      "rag_chunk_chars": 1500,
+      "rag_chunk_overlap": 200,
+      "rag_context_corpus": {
+        "chunks": 105,
+        "files": [
+          {
+            "chunks": 105,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+          }
+        ],
+        "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+      },
+      "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+      "rag_corpus": {
+        "chunks": 1940,
+        "files": [
+          {
+            "chunks": 164,
+            "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+            "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+          },
+          {
+            "chunks": 1191,
+            "path": "Advanced_Configuration_Guide_26.7.md",
+            "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+          },
+          {
+            "chunks": 294,
+            "path": "Interfaces_Guide_26.7.md",
+            "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+          },
+          {
+            "chunks": 4,
+            "path": "arp.md",
+            "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+          },
+          {
+            "chunks": 16,
+            "path": "bridge.md",
+            "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+          },
+          {
+            "chunks": 4,
+            "path": "default-route.md",
+            "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+          },
+          {
+            "chunks": 40,
+            "path": "dhcp-server.md",
+            "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+          },
+          {
+            "chunks": 21,
+            "path": "dns.md",
+            "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+          },
+          {
+            "chunks": 21,
+            "path": "ethernet.md",
+            "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+          },
+          {
+            "chunks": 14,
+            "path": "flowtables.md",
+            "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+          },
+          {
+            "chunks": 22,
+            "path": "groups.md",
+            "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+          },
+          {
+            "chunks": 5,
+            "path": "ip.md",
+            "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+          },
+          {
+            "chunks": 47,
+            "path": "ipv4.md",
+            "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+          },
+          {
+            "chunks": 82,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+          },
+          {
+            "chunks": 6,
+            "path": "qos.md",
+            "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+          },
+          {
+            "chunks": 9,
+            "path": "zone.md",
+            "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+          }
+        ],
+        "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+      },
+      "rag_directory": "sut/langchain_rag_agent/rag_document",
+      "rag_embedding_model": null,
+      "rag_mode": "both",
+      "rag_retriever": "bm25",
+      "rag_top_k": 4,
+      "recursion_limit": 1000,
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.1.0",
+      "healthy": "1.1.0",
+      "preservation": "1.0.0",
+      "repair": "1.1.0"
+    },
+    "provider_reported_model": "gpt-5.4",
+    "reference_state_sha256": "aabccb4fa22361db9111d4f97ba3100348f4cacba3230e9c29987c1b9e8113b5",
+    "scenario_seed": 7108852,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {},
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_reported_model": "gpt-5.4",
+    "sut_version": "1.0.0",
+    "topology_sha256": "44581d20915f3187d6afc416dca4faafc7c1cb83dff57ed3720dbefec34d66a8"
+  },
+  "run_id": "langchain_rag_agent-gpt-5-4-dhcp_dns-dhcp_provisioning-m3-fault-seed7108852-d419d3f09f46",
+  "scenario": {
+    "domain": "dhcp_dns",
+    "id": "dhcp_dns.dhcp_provisioning.m3",
+    "sut_task_id": "sut-1af95b015f665a2206bb8ffb1aff3740",
+    "version": "1.0.0"
+  },
+  "schema_version": "1.0",
+  "status": "completed",
+  "sut_result": {
+    "ani_operations": [
+      {
+        "arguments": {
+          "nodes": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.00011812799493782222,
+        "error": null,
+        "ok": true,
+        "operation": "get_topology",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-a89148adf8ae9d9fcdf13709a460367b6ee8b4463e0d7edc8ff74831ec3036fc.json",
+        "category": "validation",
+        "duration_seconds": 64.27562036798918,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "finance1"
+          ],
+          "views": [
+            "interfaces",
+            "routes"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.2842636260029394,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": [
+            "service dhcp-server"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.13371022601495497,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "eth1",
+          "node": "finance1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.1298851509927772,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "dhcp_pool",
+          "name": "FINANCE1",
+          "node": "firewall",
+          "reason": "Validation shows only finance1 fails hostname-based reachability while IP connectivity and default gateway are correct; DHCP scope FINANCE1 lacks a name-server option unlike sibling scopes.",
+          "set": {
+            "name_server": "10.10.60.10"
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 7.781098247505724e-05,
+        "error": "update_object: dhcp_pool needs subnet with any option",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "dhcp_pool",
+          "name": "FINANCE1",
+          "node": "firewall",
+          "reason": "Validation shows only finance1 fails hostname-based reachability while IP connectivity and default gateway are correct; DHCP scope FINANCE1 lacks a name-server option unlike sibling scopes.",
+          "set": {
+            "name_server": "10.10.60.10",
+            "subnet": "10.10.30.0/24"
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 3.3132350750092883,
+        "error": null,
+        "ok": true,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_d64c9787a61bf2e4"
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-73b73becd4037c8f6fb77ee6adaa8f9047ce881a046add1ddae714c381961474.json",
+        "category": "validation",
+        "duration_seconds": 82.01639511800022,
+        "error": null,
+        "ok": true,
+        "operation": "execute_validation",
+        "transaction_id": null
+      }
+    ],
+    "device_changes": [
+      {
+        "action": {
+          "command": "delete service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10",
+          "machine": "firewall",
+          "reason": "Validation shows only finance1 fails hostname-based reachability while IP connectivity and default gateway are correct; DHCP scope FINANCE1 lacks a name-server option unlike sibling scopes."
+        },
+        "objective_verification": {
+          "checks": [
+            {
+              "connectivity": [
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=1.35 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.301 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.582 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 5612ms\nrtt min/avg/max/mdev = 0.301/0.743/1.348/0.442 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": "web1.sme01.example",
+                  "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.220 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.337 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.259 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.220/0.272/0.337/0.048 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.40.10",
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.296 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.422 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.265 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.265/0.327/0.422/0.067 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": "user1.sme01.internal",
+                  "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.192 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.296 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.294 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.192/0.260/0.296/0.048 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.10.10",
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=0.435 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.338 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.310 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.310/0.361/0.435/0.053 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": "app1.sme01.example",
+                  "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.198 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.339 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.268 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.198/0.268/0.339/0.057 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.50.10",
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.347 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.276 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.250 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.250/0.291/0.347/0.041 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": "user1.sme01.internal",
+                  "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.362 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.240 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.233 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2020ms\nrtt min/avg/max/mdev = 0.233/0.278/0.362/0.059 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.10.10",
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=0.915 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.309 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.342 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.309/0.522/0.915/0.278 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": "web1.sme01.example",
+                  "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.210 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.279 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.284 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.210/0.257/0.284/0.033 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.40.10",
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=62 time=0.387 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=62 time=0.264 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=62 time=0.300 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.264/0.317/0.387/0.051 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": "guest1.sme01.internal",
+                  "output": "PING guest1.sme01.internal (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=1 ttl=62 time=0.185 ms\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=2 ttl=62 time=0.293 ms\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=3 ttl=62 time=0.293 ms\n\n--- guest1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.185/0.257/0.293/0.050 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.20.10",
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=1.70 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.243 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.352 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2005ms\nrtt min/avg/max/mdev = 0.243/0.763/1.696/0.660 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "finance1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": "app1.sme01.example",
+                  "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.228 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.306 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.301 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.228/0.278/0.306/0.035 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.50.10",
+                  "source": "finance1",
+                  "success": true
+                },
+                {
+                  "destination": "finance1",
+                  "destination_ip": "10.10.30.10",
+                  "hostname": null,
+                  "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=62 time=0.347 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=62 time=0.321 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=62 time=0.307 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.307/0.325/0.347/0.016 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "finance1",
+                  "destination_ip": "10.10.30.10",
+                  "hostname": "finance1.sme01.internal",
+                  "output": "PING finance1.sme01.internal (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=1 ttl=62 time=0.276 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=2 ttl=62 time=0.261 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=3 ttl=62 time=0.261 ms\n\n--- finance1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 5608ms\nrtt min/avg/max/mdev = 0.261/0.266/0.276/0.007 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.30.10",
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=63 time=0.059 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=63 time=0.077 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=63 time=0.059 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.059/0.065/0.077/0.008 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": "web1.sme01.example",
+                  "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=63 time=0.033 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=63 time=0.061 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=63 time=0.062 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 6016ms\nrtt min/avg/max/mdev = 0.033/0.052/0.062/0.013 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.40.10",
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=63 time=0.060 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=63 time=0.048 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=63 time=0.053 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.048/0.053/0.060/0.005 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "dns-int",
+                  "destination_ip": "10.10.60.10",
+                  "hostname": null,
+                  "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=63 time=0.321 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=63 time=0.218 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=63 time=0.248 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.218/0.262/0.321/0.043 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "dns-int",
+                  "destination_ip": "10.10.60.10",
+                  "hostname": "dns-int.sme01.internal",
+                  "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=63 time=0.197 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=63 time=0.214 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=63 time=0.227 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.197/0.212/0.227/0.012 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.60.10",
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "dns-int",
+                  "destination_ip": "10.10.60.10",
+                  "hostname": null,
+                  "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=62 time=0.359 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=62 time=0.295 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=62 time=0.299 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.295/0.317/0.359/0.029 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "dns-int",
+                  "destination_ip": "10.10.60.10",
+                  "hostname": "dns-int.sme01.internal",
+                  "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=62 time=0.168 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=62 time=0.247 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=62 time=0.413 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.168/0.276/0.413/0.102 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": "10.10.60.10",
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "dns-dmz",
+                  "destination_ip": "10.10.41.10",
+                  "hostname": null,
+                  "output": "PING 10.10.41.10 (10.10.41.10) 56(84) bytes of data.\n64 bytes from 10.10.41.10: icmp_seq=1 ttl=63 time=0.061 ms\n64 bytes from 10.10.41.10: icmp_seq=2 ttl=63 time=0.075 ms\n64 bytes from 10.10.41.10: icmp_seq=3 ttl=63 time=0.056 ms\n\n--- 10.10.41.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.056/0.064/0.075/0.008 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                }
+              ],
+              "passed": true,
+              "type": "lab_connectivity"
+            }
+          ],
+          "lease_renewal": {
+            "clients": [
+              {
+                "client": "admin1",
+                "ok": true,
+                "returncode": 0
+              },
+              {
+                "client": "finance1",
+                "ok": true,
+                "returncode": 0
+              },
+              {
+                "client": "guest1",
+                "ok": true,
+                "returncode": 0
+              },
+              {
+                "client": "user1",
+                "ok": true,
+                "returncode": 0
+              }
+            ]
+          },
+          "passed": true,
+          "type": "public_success_criteria"
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "delete service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server\nset service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "firewall"
+        },
+        "transaction_id": "ani_tx_d64c9787a61bf2e4",
+        "verified_after_action": true
+      }
+    ],
+    "error": null,
+    "execution": {
+      "ani_version": "ibn_eval.ani.v0.2",
+      "budget_seconds": 400.0,
+      "conclusion_source": "structured_response",
+      "configured_model": "gpt-5.4",
+      "elapsed_seconds": 166.4714718249743,
+      "failed_operations": 2,
+      "interaction_limits": {
+        "ani": {
+          "limit": null,
+          "reached": false,
+          "refused": 0,
+          "used": 8
+        }
+      },
+      "llm_calls": 9,
+      "model_parameters": {
+        "ani_call_limit": null,
+        "context_budget_chars": null,
+        "enable_thinking": null,
+        "max_consecutive_rejections": null,
+        "max_context_chars": 12000,
+        "max_execution_seconds": 400.0,
+        "max_tokens": 400,
+        "min_retry_tokens": null,
+        "model": "gpt-5.4",
+        "prompt_variant": "default",
+        "rag_chunk_chars": 1500,
+        "rag_chunk_overlap": 200,
+        "rag_context_corpus": {
+          "chunks": 105,
+          "files": [
+            {
+              "chunks": 105,
+              "path": "network_troubleshooting_guide_rag.md",
+              "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+            }
+          ],
+          "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+        },
+        "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+        "rag_corpus": {
+          "chunks": 1940,
+          "files": [
+            {
+              "chunks": 164,
+              "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+              "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+            },
+            {
+              "chunks": 1191,
+              "path": "Advanced_Configuration_Guide_26.7.md",
+              "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+            },
+            {
+              "chunks": 294,
+              "path": "Interfaces_Guide_26.7.md",
+              "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+            },
+            {
+              "chunks": 4,
+              "path": "arp.md",
+              "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+            },
+            {
+              "chunks": 16,
+              "path": "bridge.md",
+              "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+            },
+            {
+              "chunks": 4,
+              "path": "default-route.md",
+              "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+            },
+            {
+              "chunks": 40,
+              "path": "dhcp-server.md",
+              "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+            },
+            {
+              "chunks": 21,
+              "path": "dns.md",
+              "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+            },
+            {
+              "chunks": 21,
+              "path": "ethernet.md",
+              "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+            },
+            {
+              "chunks": 14,
+              "path": "flowtables.md",
+              "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+            },
+            {
+              "chunks": 22,
+              "path": "groups.md",
+              "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+            },
+            {
+              "chunks": 5,
+              "path": "ip.md",
+              "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+            },
+            {
+              "chunks": 47,
+              "path": "ipv4.md",
+              "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+            },
+            {
+              "chunks": 82,
+              "path": "network_troubleshooting_guide_rag.md",
+              "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+            },
+            {
+              "chunks": 6,
+              "path": "qos.md",
+              "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+            },
+            {
+              "chunks": 9,
+              "path": "zone.md",
+              "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+            }
+          ],
+          "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+        },
+        "rag_directory": "sut/langchain_rag_agent/rag_document",
+        "rag_embedding_model": null,
+        "rag_mode": "both",
+        "rag_retriever": "bm25",
+        "rag_top_k": 4,
+        "recursion_limit": 1000,
+        "temperature": null,
+        "thinking_directive_applied": false,
+        "thinking_effort": null,
+        "thinking_mechanism": "unset",
+        "thinking_request": {},
+        "thinking_style": "auto",
+        "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+        "tool_choice": "auto",
+        "tool_result_chars": null
+      },
+      "model_seconds": 16.272,
+      "model_turns": [
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            1
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.621,
+          "tool_calls": [
+            "get_topology"
+          ],
+          "turn": 1
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            2
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.086,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 2
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            3
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.499,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 3
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            4
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.06,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 4
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            5
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.304,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 5
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            6
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.588,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 6
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            7
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.64,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 7
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            8
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.125,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 8
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 2.349,
+          "tool_calls": [
+            "StructuredConclusion"
+          ],
+          "turn": 9
+        }
+      ],
+      "mutations": 2,
+      "provider_model": "gpt-5.4",
+      "rag": {
+        "context_excerpts": 4,
+        "searches": [
+          {
+            "error": null,
+            "origin": "context",
+            "query": "Restore correct DHCP provisioning for the affected endpoints without disrupting the subnets that are still served correctly. lab_connectivity",
+            "results": [
+              {
+                "chunk": 85,
+                "id": "network_troubleshooting_guide_rag.md#85",
+                "score": 32.8087,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 13,
+                "id": "network_troubleshooting_guide_rag.md#13",
+                "score": 32.5476,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 83,
+                "id": "network_troubleshooting_guide_rag.md#83",
+                "score": 24.7298,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 82,
+                "id": "network_troubleshooting_guide_rag.md#82",
+                "score": 22.196,
+                "source": "network_troubleshooting_guide_rag.md"
+              }
+            ],
+            "seconds": 0.001,
+            "top_k": 4
+          }
+        ],
+        "tool_searches": 0
+      },
+      "reads": 4,
+      "serving": {},
+      "successful_mutations": 1,
+      "termination": {
+        "cause": "own_conclusion",
+        "detail": "completed",
+        "turn": 9
+      },
+      "token_usage": {
+        "input_tokens": 95353,
+        "output_tokens": 475,
+        "total_tokens": 95828
+      },
+      "tool_call_count": 8,
+      "trace_ref": null,
+      "unsafe_operations": 0,
+      "validations": 2
+    },
+    "final_observation": {
+      "checks": [
+        {
+          "connectivity": [
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=1.35 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.301 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.582 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 5612ms\nrtt min/avg/max/mdev = 0.301/0.743/1.348/0.442 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": "web1.sme01.example",
+              "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.220 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.337 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.259 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.220/0.272/0.337/0.048 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.40.10",
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.296 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.422 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.265 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.265/0.327/0.422/0.067 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": "user1.sme01.internal",
+              "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.192 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.296 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.294 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.192/0.260/0.296/0.048 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.10.10",
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=0.435 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.338 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.310 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.310/0.361/0.435/0.053 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": "app1.sme01.example",
+              "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.198 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.339 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.268 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.198/0.268/0.339/0.057 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.50.10",
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=62 time=0.347 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=62 time=0.276 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=62 time=0.250 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.250/0.291/0.347/0.041 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": "user1.sme01.internal",
+              "output": "PING user1.sme01.internal (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=1 ttl=62 time=0.362 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=2 ttl=62 time=0.240 ms\n64 bytes from 10.10.10.10 (10.10.10.10): icmp_seq=3 ttl=62 time=0.233 ms\n\n--- user1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2020ms\nrtt min/avg/max/mdev = 0.233/0.278/0.362/0.059 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.10.10",
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=62 time=0.915 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=62 time=0.309 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=62 time=0.342 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.309/0.522/0.915/0.278 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": "web1.sme01.example",
+              "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=62 time=0.210 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=62 time=0.279 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=62 time=0.284 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.210/0.257/0.284/0.033 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.40.10",
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=62 time=0.387 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=62 time=0.264 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=62 time=0.300 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.264/0.317/0.387/0.051 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": "guest1.sme01.internal",
+              "output": "PING guest1.sme01.internal (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=1 ttl=62 time=0.185 ms\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=2 ttl=62 time=0.293 ms\n64 bytes from 10.10.20.10 (10.10.20.10): icmp_seq=3 ttl=62 time=0.293 ms\n\n--- guest1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.185/0.257/0.293/0.050 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.20.10",
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=62 time=1.70 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=62 time=0.243 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=62 time=0.352 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2005ms\nrtt min/avg/max/mdev = 0.243/0.763/1.696/0.660 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "finance1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": "app1.sme01.example",
+              "output": "PING app1.sme01.example (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=1 ttl=62 time=0.228 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=2 ttl=62 time=0.306 ms\n64 bytes from 10.10.50.10 (10.10.50.10): icmp_seq=3 ttl=62 time=0.301 ms\n\n--- app1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.228/0.278/0.306/0.035 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.50.10",
+              "source": "finance1",
+              "success": true
+            },
+            {
+              "destination": "finance1",
+              "destination_ip": "10.10.30.10",
+              "hostname": null,
+              "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=62 time=0.347 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=62 time=0.321 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=62 time=0.307 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.307/0.325/0.347/0.016 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "finance1",
+              "destination_ip": "10.10.30.10",
+              "hostname": "finance1.sme01.internal",
+              "output": "PING finance1.sme01.internal (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=1 ttl=62 time=0.276 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=2 ttl=62 time=0.261 ms\n64 bytes from 10.10.30.10 (10.10.30.10): icmp_seq=3 ttl=62 time=0.261 ms\n\n--- finance1.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 5608ms\nrtt min/avg/max/mdev = 0.261/0.266/0.276/0.007 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.30.10",
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=63 time=0.059 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=63 time=0.077 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=63 time=0.059 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.059/0.065/0.077/0.008 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": "web1.sme01.example",
+              "output": "PING web1.sme01.example (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=1 ttl=63 time=0.033 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=2 ttl=63 time=0.061 ms\n64 bytes from 10.10.40.10 (10.10.40.10): icmp_seq=3 ttl=63 time=0.062 ms\n\n--- web1.sme01.example ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 6016ms\nrtt min/avg/max/mdev = 0.033/0.052/0.062/0.013 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.40.10",
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=63 time=0.060 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=63 time=0.048 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=63 time=0.053 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.048/0.053/0.060/0.005 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": null,
+              "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=63 time=0.321 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=63 time=0.218 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=63 time=0.248 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.218/0.262/0.321/0.043 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": "dns-int.sme01.internal",
+              "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=63 time=0.197 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=63 time=0.214 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=63 time=0.227 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.197/0.212/0.227/0.012 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.60.10",
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": null,
+              "output": "PING 10.10.60.10 (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10: icmp_seq=1 ttl=62 time=0.359 ms\n64 bytes from 10.10.60.10: icmp_seq=2 ttl=62 time=0.295 ms\n64 bytes from 10.10.60.10: icmp_seq=3 ttl=62 time=0.299 ms\n\n--- 10.10.60.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.295/0.317/0.359/0.029 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "dns-int",
+              "destination_ip": "10.10.60.10",
+              "hostname": "dns-int.sme01.internal",
+              "output": "PING dns-int.sme01.internal (10.10.60.10) 56(84) bytes of data.\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=1 ttl=62 time=0.168 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=2 ttl=62 time=0.247 ms\n64 bytes from 10.10.60.10 (10.10.60.10): icmp_seq=3 ttl=62 time=0.413 ms\n\n--- dns-int.sme01.internal ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.168/0.276/0.413/0.102 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": "10.10.60.10",
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "dns-dmz",
+              "destination_ip": "10.10.41.10",
+              "hostname": null,
+              "output": "PING 10.10.41.10 (10.10.41.10) 56(84) bytes of data.\n64 bytes from 10.10.41.10: icmp_seq=1 ttl=63 time=0.061 ms\n64 bytes from 10.10.41.10: icmp_seq=2 ttl=63 time=0.075 ms\n64 bytes from 10.10.41.10: icmp_seq=3 ttl=63 time=0.056 ms\n\n--- 10.10.41.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.056/0.064/0.075/0.008 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            }
+          ],
+          "passed": true,
+          "type": "lab_connectivity"
+        }
+      ],
+      "lease_renewal": {
+        "clients": [
+          {
+            "client": "admin1",
+            "ok": true,
+            "returncode": 0
+          },
+          {
+            "client": "finance1",
+            "ok": true,
+            "returncode": 0
+          },
+          {
+            "client": "guest1",
+            "ok": true,
+            "returncode": 0
+          },
+          {
+            "client": "user1",
+            "ok": true,
+            "returncode": 0
+          }
+        ]
+      },
+      "passed": true,
+      "type": "public_success_criteria"
+    },
+    "final_response": {
+      "status": "completed",
+      "summary": "Observed that only finance1 failed hostname-based connectivity while IP reachability, address 10.10.30.10/24, and default route via 10.10.30.1 were correct. Read firewall DHCP config and found FINANCE1 scope missing the name-server option present in sibling scopes. Added name-server 10.10.60.10 to DHCP scope FINANCE1 on firewall. Public success criteria validation then passed, including finance1 resolving and reaching app1.sme01.example."
+    },
+    "mode": "self_execute",
+    "model_reported_by_sut": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "status": "completed",
+    "summary": "Observed that only finance1 failed hostname-based connectivity while IP reachability, address 10.10.30.10/24, and default route via 10.10.30.1 were correct. Read firewall DHCP config and found FINANCE1 scope missing the name-server option present in sibling scopes. Added name-server 10.10.60.10 to DHCP scope FINANCE1 on firewall. Public success criteria validation then passed, including finance1 resolving and reaching app1.sme01.example.",
+    "sut_identity": "langchain_rag_agent",
+    "sut_version": "1.0.0",
+    "verified": true
+  }
+}

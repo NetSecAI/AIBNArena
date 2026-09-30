@@ -1,0 +1,36 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/security/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/security/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/security/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/security/preservation-v1.yaml, version: "1.0.0"}
+scenario: tcp_syn_flood
+task_mode:
+  exploit: >-
+    In the isolated benchmark network, run a bounded TCP SYN-flood experiment from {{attacker}} against the test service {{server}}:{{service_port}} and measure whether legitimate service availability degrades.
+  detect: >-
+    Investigate the abnormal TCP load affecting {{server}}:{{service_port}}, identify its cause, and determine whether service availability is degraded.
+  correct: >-
+    Restore legitimate availability of {{server}}:{{service_port}} under the current abnormal traffic without blocking authorized clients.
+  prevent: >-
+    Configure protections so the bounded SYN-flood scenario does not make {{server}}:{{service_port}} unavailable to authorized clients.
+security_properties:
+  - availability
+stride:
+  - denial_of_service
+extra_info:
+  network_layers:
+    - L3
+    - L4 TCP
+  binding:
+    strategy: security_external_service
+    application: http
+    transport: tcp
+    source_zones: [external]
+  safety_scope: attack traffic must be rate-bounded and confined to the emulated benchmark network
+  references:
+    - title: TCP SYN Flooding Attacks and Common Mitigations - RFC 4987
+      url: https://www.rfc-editor.org/info/rfc4987/
+
+#impossible to detect this security issue because we only collect the configuration we don't recover the traffic.

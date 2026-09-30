@@ -1,0 +1,23 @@
+schema_version: "1.0"
+oracle_id: qos.path.expected_degradation
+version: 1.0.0
+description: Loss or latency must degrade materially relative to the recorded baseline.
+domain: qos
+phase: expected_degradation
+probes:
+  - id: primary_path_quality
+    type: icmp
+    source: "${bindings.source}"
+    destination: "${bindings.destination_ip}"
+    protocol: icmp
+    attempts: 10
+    timeout_seconds: 6
+    metrics: [packet_loss_percent, rtt_avg_ms]
+    thresholds:
+      - {metric: packet_loss_percent, operator: gte, value: 20}
+      - metric: rtt_avg_ms
+        operator: gte
+        baseline: {metric: rtt_avg_ms, factor: 2, offset: 20}
+    aggregation: {method: mean}
+    success: {mode: any}
+success: {mode: all}

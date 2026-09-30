@@ -1,0 +1,114 @@
+name: sme01-fw
+
+mgmt:
+  network: clab-sme01-fw
+  ipv4-subnet: 172.23.0.0/24
+
+topology:
+  kinds:
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:latest
+    vyosnetworks_vyos:
+      image: vyos:1.5-stream-2025-Q1
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    # Two firewalls back to back. fw-int owns every internal VLAN and all the
+    # traffic between them; anything leaving the enterprise is handed to fw-ext
+    # over a routed transit link, and fw-ext alone faces the DMZ and the
+    # Internet. Neither one can be bypassed by the other's traffic.
+    fw-int:
+      kind: vyosnetworks_vyos
+    fw-ext:
+      kind: vyosnetworks_vyos
+
+    # Layer-2 aggregation between the leaves and the internal firewall.
+    # A single switch: there is no MLAG on this platform, so a second spine
+    # could only ever be an inert standby -- see the README.
+    spine1:
+      kind: nokia_srlinux
+
+    leaf1:
+      kind: nokia_srlinux
+    leaf2:
+      kind: nokia_srlinux
+
+    user1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.10.10/24 dev eth1
+        - ip route replace default via 10.10.10.1
+    guest1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.20.10/24 dev eth1
+        - ip route replace default via 10.10.20.1
+    admin1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.99.100/24 dev eth1
+        - ip route replace default via 10.10.99.1
+    finance1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.30.10/24 dev eth1
+        - ip route replace default via 10.10.30.1
+
+    # DMZ servers are cabled straight to the external firewall, no switch in
+    # between: every packet between a DMZ application and an internal endpoint
+    # crosses both firewalls.
+    web1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.40.10/24 dev eth1
+        - ip route replace default via 10.10.40.1
+    app1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.50.10/24 dev eth1
+        - ip route replace default via 10.10.50.1
+
+    # OUTSIDE zone: the simulated Internet, also on the external firewall.
+    external1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 203.0.113.10/24 dev eth1
+        - ip route replace default via 203.0.113.1
+
+    attacker1:
+      kind: linux
+      exec:
+        - ip link set eth1 down
+
+  links:
+    # Access ports behind leaf1.
+    - endpoints: ["user1:eth1", "leaf1:e1-10"]
+    - endpoints: ["guest1:eth1", "leaf1:e1-20"]
+    - endpoints: ["attacker1:eth1", "leaf1:e1-30"]
+    - endpoints: ["admin1:eth1", "leaf1:e1-57"]
+
+    # Access port behind leaf2.
+    - endpoints: ["finance1:eth1", "leaf2:e1-30"]
+
+    # One 802.1Q trunk per leaf up to the aggregation switch.
+    - endpoints: ["leaf1:e1-1", "spine1:e1-1"]
+    - endpoints: ["leaf2:e1-1", "spine1:e1-2"]
+
+    # The aggregation switch trunks every VLAN to the internal firewall.
+    - endpoints: ["spine1:e1-3", "fw-int:eth1"]
+
+    # Routed transit between the two firewalls: the only way out of INTERNAL.
+    - endpoints: ["fw-int:eth2", "fw-ext:eth1"]
+
+    # DMZ and OUTSIDE, on the external firewall.
+    - endpoints: ["fw-ext:eth2", "web1:eth1"]
+    - endpoints: ["fw-ext:eth3", "app1:eth1"]
+    - endpoints: ["fw-ext:eth4", "external1:eth1"]

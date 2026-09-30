@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Models — AIBNArena{% endblock %}
+{% block subtitle %}model endpoints: where each subject's model is served{% endblock %}
+
+{% block content %}
+<section>
+  <h2>Endpoints</h2>
+  <p class="note">
+    One entry is a provider: a base URL, the key it takes, and the models it serves.
+    Keys are stored in <code>webui/models.json</code>, readable by its owner alone and
+    kept out of git. A key is never shown again, never sent back to this page, and never
+    put on a command line — it reaches the subject through its environment.
+  </p>
+  <table id="endpoints">
+    <thead><tr><th>Name</th><th>Base URL</th><th>Key</th><th>Models</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<section>
+  <h2 id="form-title">Add an endpoint</h2>
+  <form id="endpoint">
+    <input type="hidden" id="id" />
+    <div class="grid">
+      <label title="A label for this endpoint. It is what the launcher's model list shows next to each model this endpoint serves.">
+        Name
+        <input id="name" type="text" required placeholder="internal LiteLLM proxy" />
+      </label>
+      <label title="OpenAI-compatible endpoint, as the subject's --api-base takes it: a LiteLLM or vLLM proxy, or a provider's own URL.">
+        Base URL
+        <input id="api_base" type="url" required placeholder="http://127.0.0.1:4000/v1" />
+        <small>OpenAI-compatible endpoint, as the subject's <code>--api-base</code> takes it.</small>
+      </label>
+      <label title="The key this endpoint takes. It is stored in webui/models.json, never shown again, never sent back to this page and never put on a command line. Leave it empty to keep the stored one.">
+        API key
+        <input id="api_key" type="password" placeholder="leave empty to keep the stored key" />
+        <small id="key-note"></small>
+      </label>
+      <label title="Comma-separated model ids this endpoint serves, exactly as litellm takes them. They are what the launcher's model field then offers.">
+        Models
+        <input id="models" type="text" placeholder="openai/gpt-5.4, openai/gpt-4o-mini" />
+        <small>Comma-separated model ids, exactly as litellm takes them.</small>
+      </label>
+    </div>
+    <div class="actions">
+      <button type="submit">Save endpoint</button>
+      <button type="button" id="reset">Clear the form</button>
+    </div>
+    <pre id="feedback" hidden></pre>
+  </form>
+</section>
+
+<p><a href="/">Back to the launcher</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/endpoint_sync.js"></script>
+<script src="/static/models.js"></script>
+{% endblock %}

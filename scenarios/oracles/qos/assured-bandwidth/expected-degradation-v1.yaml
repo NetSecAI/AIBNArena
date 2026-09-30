@@ -1,0 +1,45 @@
+schema_version: "1.0"
+oracle_id: qos.assured_bandwidth.expected_degradation
+version: 1.0.0
+description: >-
+  The competing flow is this family's own fault, so the oracle neither starts one
+  nor stops the one that is there. The pre-fault measurement therefore lands on an
+  idle link, which is the point: it says the path can carry the rate at all, and so
+  separates a broken path from a broken policy when the later numbers come in low.
+
+    Under contention the protected class either keeps its contractual share or it does
+  not, and every fault of these families -- policy removed, class starved, classifier
+  deleted, allocation inverted -- shows up the same way: a flow below the rate it was
+  promised. The bar is the lower of the contractual figure and what the reference
+  itself managed under the same load, because an intact policy that over-delivered
+  must not become a bar a correct repair fails on a bad draw.
+domain: qos
+phase: expected_degradation
+probes:
+  - id: protected_flow
+    type: throughput
+    source: "${bindings.protected_source}"
+    destination: "${bindings.sink_ip}"
+    protocol: tcp
+    measurement:
+      protected_source: "${bindings.protected_source}"
+      sink_ip: "${bindings.sink_ip}"
+      destination: "${bindings.destination}"
+      destination_ip: "${bindings.destination_ip}"
+      assured_bandwidth_mbps: "${bindings.assured_bandwidth_mbps}"
+      measurement_port: "${bindings.measurement_port}"
+      seconds: 10
+      contended: false
+    attempts: 1
+    timeout_seconds: 60
+    metrics: [success, throughput_mbps, timed_out]
+    thresholds:
+      - metric: throughput_mbps
+        operator: lt
+        value: "${bindings.assured_bandwidth_mbps}"
+        factor: 0.85
+        baseline: {metric: throughput_mbps, factor: 0.85}
+        combine: min
+    aggregation: {method: mean}
+    success: {mode: all}
+success: {mode: all}

@@ -1,0 +1,1 @@
+"""Future security benchmark domain."""

@@ -1,0 +1,341 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b-base-20260929T092315Z/langchain_agent-openai-qwen-qwen3-8-27b-connectivity-wrong_routing_table-m2-fault-seed713030911-d21c52994e65.json",
+    "sha256": "80d784fa4b72a537f7b5126cda247931a479b06112e83bdc7eb8ec7f24742ee3",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-openai-qwen-qwen3-8-27b-connectivity-wrong_routing_table-m2-fault-seed713030911-d21c52994e65",
+    "created_at": "2026-09-29T12:10:23.844711+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-openai-qwen-qwen3-8-27b-connectivity-wrong_routing_table-m2-fault-seed713030911",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.wrong_routing_table.m2",
+      "sut_task_id": "sut-d18e79b8530867dbd81de44cf593b489",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "openai/qwen/qwen3.8-27b",
+        "subject": "openai/qwen/qwen3.8-27b",
+        "provider": "openai/qwen/qwen3.8-27b"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "Identified and removed a blackhole static route (10.10.20.10/32 → next-hop-group ibn-wrt-m2/blackhole) on leaf2 that was silently dropping all traffic destined to guest1 (10.10.20.10). This was causing both guest1↔web1 ping paths to fail. After deleting the /32 blackhole route, the less-specific 10.10.20.0/24 route (next-hop-group to-leaf1) correctly handles guest1 traffic. All 10 connectivity checks now pass with 0% packet loss. No other devices or paths were modified.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Identified and removed a blackhole static route (10.10.20.10/32 → next-hop-group ibn-wrt-m2/blackhole) on leaf2 that was silently dropping all traffic destined to guest1 (10.10.20.10). This was causing both guest1↔web1 ping paths to fail. After deleting the /32 blackhole route, the less-specific 10.10.20.0/24 route (next-hop-group to-leaf1) correctly handles guest1 traffic. All 10 connectivity checks now pass with 0% packet loss. No other devices or paths were modified.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.9297,
+      "log_p_yes": 0.0,
+      "method": "router_more_specific_blackhole",
+      "operation": "set_static_route_disposition",
+      "reason": null,
+      "reference": "On leaf2, a more specific static route to 10.10.20.10/32 (guest1) is configured as a blackhole (discard), so traffic to guest1 is dropped.",
+      "score": 31.9297,
+      "target": "leaf2"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 186.54243236599905,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Identified and removed a blackhole static route (10.10.20.10/32 → next-hop-group ibn-wrt-m2/blackhole) on leaf2 that was silently dropping all traffic destined to guest1 (10.10.20.10). This was causing both guest1↔web1 ping paths to fail. After deleting the /32 blackhole route, the less-specific 10.10.20.0/24 route (next-hop-group to-leaf1) correctly handles guest1 traffic. All 10 connectivity checks now pass with 0% packet loss. No other devices or paths were modified.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.9297,
+      "log_p_yes": 0.0,
+      "method": "router_more_specific_blackhole",
+      "operation": "set_static_route_disposition",
+      "reason": null,
+      "reference": "On leaf2, a more specific static route to 10.10.20.10/32 (guest1) is configured as a blackhole (discard), so traffic to guest1 is dropped.",
+      "score": 31.9297,
+      "target": "leaf2"
+    },
+    "domain": "connectivity",
+    "environment_success": true,
+    "failed_operation_count": 1,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 1,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 1.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 9,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 1,
+    "successful_read_count": 9,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 13,
+    "containerlab_reads": 9,
+    "containerlab_mutations": 1,
+    "containerlab_mutations_ok": 1,
+    "sut_validations": 2,
+    "failed_operations": 1,
+    "unsafe_operations": 0,
+    "input_tokens": 185287,
+    "output_tokens": 2191,
+    "total_tokens": 187478,
+    "recorded": {
+      "ani_mutations": 1,
+      "ani_reads": 9,
+      "failed_operations": 1,
+      "input_tokens": 185287,
+      "llm_calls": 13,
+      "output_tokens": 2191,
+      "successful_mutations": 1,
+      "successful_reads": 9,
+      "total_tokens": 187478,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 118.38,
+    "action_seconds": 0.682,
+    "reading_seconds": 7.229,
+    "validation_seconds": 60.178,
+    "episode_seconds": 186.54243236599905,
+    "unaccounted_seconds": 0.073,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 185287,
+    "output_tokens": 2191,
+    "total_tokens": 187478,
+    "llm_calls": 13,
+    "output_tokens_per_call": 168.5,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 12,
+      "calls": 12
+    },
+    "repeat_action_rate": {
+      "repeated": 3,
+      "calls": 12
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 9,
+      "validate": 2,
+      "apply_config": 1
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 12
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "11 of 12 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 187478
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 118.38,
+        "action_seconds": 0.682,
+        "reading_seconds": 7.229,
+        "validation_seconds": 60.178,
+        "episode_seconds": 186.54243236599905,
+        "unaccounted_seconds": 0.073
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 12
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: leaf2"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 67.85093150899957,
+    "calculate_metrics": 4.956700104230549e-05,
+    "deploy_reset_testbed": 19.2126266940013,
+    "evaluate_degradation": 6.50585295000019,
+    "evaluate_healthy": 22.63774276699951,
+    "evaluate_repair_preservation": 68.22122225299972,
+    "inject_fault": 0.8032949589996861,
+    "invoke_sut": 186.57307945200046,
+    "load_configuration": 0.00025960299899452366,
+    "load_oracles": 0.006376930001351866,
+    "load_validate_scenario": 0.03787163699962548,
+    "record_baseline": 5.048999810242094e-06,
+    "restore_destroy": 7.91459743699852,
+    "score_diagnosis": 1.2483503999992536,
+    "snapshot_after_sut": 8.81579423400035,
+    "snapshot_before_sut": 9.822204719001093,
+    "snapshot_healthy": 9.846268953999243,
+    "write_result": 0.004447346998858848
+  },
+  "files": {
+    "record": "../../../records/connectivity.wrong_routing_table.m2.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.wrong_routing_table.m2.judge.log",
+    "devices": "../../../logs/devices/connectivity.wrong_routing_table.m2/",
+    "note": "relative to this folder"
+  }
+}

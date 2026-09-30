@@ -1,0 +1,4352 @@
+{
+  "cleanup_result": {
+    "ok": true,
+    "results": [
+      {
+        "command": "sh -c 'tc qdisc del dev eth2 root 2>/dev/null || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc qdisc add dev eth2 root handle 1: htb default 20",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip address replace 10.10.10.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip route replace default via 10.10.10.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip address replace 10.10.20.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip route replace default via 10.10.20.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip address replace 10.10.30.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip route replace default via 10.10.30.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip address replace 10.10.40.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip route replace default via 10.10.40.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip address replace 10.10.50.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip route replace default via 10.10.50.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip address replace 10.10.99.100/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip route replace default via 10.10.99.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip address replace 203.0.113.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip route replace default via 203.0.113.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'pkill -x iperf3 || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'pkill -x iperf3 || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5201 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5201 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5202 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 10.255.1.1/31 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth3 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth3 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 10.255.1.3/31 dev eth3",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth2 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth2 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 203.0.113.1/24 dev eth2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "sysctl -w net.ipv4.ip_forward=1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "net.ipv4.ip_forward = 1\n",
+        "target": "wan1"
+      },
+      {
+        "command": "ip route replace 10.10.0.0/16 nexthop via 10.255.1.0 dev eth1 nexthop via 10.255.1.2 dev eth3",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "sh -c 'tc qdisc del dev eth2 root 2>/dev/null || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc qdisc add dev eth2 root handle 1: htb default 20",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.0/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.4/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/3 admin-state enable\nset / interface ethernet-1/3 subinterface 0 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 address 10.255.1.0/31\nset / network-instance default interface ethernet-1/3.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.1 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.5 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.1.1 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "spine1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.2/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.6/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/3 admin-state enable\nset / interface ethernet-1/3 subinterface 0 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 address 10.255.1.2/31\nset / network-instance default interface ethernet-1/3.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.3 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.7 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.1.3 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "spine2"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.1/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.3/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/10 admin-state enable\nset / interface ethernet-1/10 subinterface 0 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 address 10.10.10.1/24\nset / network-instance default interface ethernet-1/10.0\nset / interface ethernet-1/20 admin-state enable\nset / interface ethernet-1/20 subinterface 0 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 address 10.10.20.1/24\nset / network-instance default interface ethernet-1/20.0\nset / interface ethernet-1/57 admin-state enable\nset / interface ethernet-1/57 subinterface 0 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 address 10.10.99.1/24\nset / network-instance default interface ethernet-1/57.0\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 2 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.5/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.7/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/30 admin-state enable\nset / interface ethernet-1/30 subinterface 0 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 address 10.10.30.1/24\nset / network-instance default interface ethernet-1/30.0\nset / interface ethernet-1/40 admin-state enable\nset / interface ethernet-1/40 subinterface 0 admin-state enable\nset / interface ethernet-1/40 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/40 subinterface 0 ipv4 address 10.10.40.1/24\nset / network-instance default interface ethernet-1/40.0\nset / interface ethernet-1/50 admin-state enable\nset / interface ethernet-1/50 subinterface 0 admin-state enable\nset / interface ethernet-1/50 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/50 subinterface 0 ipv4 address 10.10.50.1/24\nset / network-instance default interface ethernet-1/50.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.4 admin-state enable\nset / network-instance default next-hop-groups group to-leaf1 nexthop 2 ip-address 10.255.0.6 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.4 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.6 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf2"
+      }
+    ]
+  },
+  "convergence_result": {
+    "converged": true,
+    "interval_seconds": 2.0,
+    "lease_renewal": {
+      "clients": []
+    },
+    "observation": {
+      "connectivity": [
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.44 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.730 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=1.34 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.730/1.503/2.438/0.706 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.988 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.715 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=1.22 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.715/0.975/1.223/0.207 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=5.39 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.863 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.741 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2020ms\nrtt min/avg/max/mdev = 0.741/2.329/5.385/2.161 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.827 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.960 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.730 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 3477ms\nrtt min/avg/max/mdev = 0.730/0.839/0.960/0.094 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.813 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.732 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=1.37 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2060ms\nrtt min/avg/max/mdev = 0.732/0.970/1.365/0.281 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=1.01 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.921 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.990 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2002ms\nrtt min/avg/max/mdev = 0.921/0.973/1.010/0.038 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=0.302 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.264 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.327 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.264/0.297/0.327/0.025 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "finance1",
+          "success": true
+        },
+        {
+          "destination": "finance1",
+          "destination_ip": "10.10.30.10",
+          "hostname": null,
+          "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.325 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.305 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.642 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2033ms\nrtt min/avg/max/mdev = 0.305/0.424/0.642/0.154 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=1.51 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.678 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.784 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2013ms\nrtt min/avg/max/mdev = 0.678/0.989/1.505/0.367 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.649 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.778 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.544 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.544/0.657/0.778/0.095 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.741 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.527 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.601 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.527/0.623/0.741/0.088 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.555 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.598 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.513 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.513/0.555/0.598/0.034 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.725 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.576 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.546 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2028ms\nrtt min/avg/max/mdev = 0.546/0.615/0.725/0.078 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.742 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.515 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.468 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.468/0.575/0.742/0.119 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        }
+      ],
+      "lab_name": "sme01-qos-d",
+      "nodes": [
+        {
+          "container_name": "clab-sme01-qos-d-spine1",
+          "kind": "nokia_srlinux",
+          "name": "spine1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-spine2",
+          "kind": "nokia_srlinux",
+          "name": "spine2"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-leaf1",
+          "kind": "nokia_srlinux",
+          "name": "leaf1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-leaf2",
+          "kind": "nokia_srlinux",
+          "name": "leaf2"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-wan1",
+          "kind": "linux",
+          "name": "wan1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-user1",
+          "kind": "linux",
+          "name": "user1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-guest1",
+          "kind": "linux",
+          "name": "guest1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-finance1",
+          "kind": "linux",
+          "name": "finance1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-web1",
+          "kind": "linux",
+          "name": "web1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-app1",
+          "kind": "linux",
+          "name": "app1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-external1",
+          "kind": "linux",
+          "name": "external1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-admin1",
+          "kind": "linux",
+          "name": "admin1"
+        },
+        {
+          "container_name": "clab-sme01-qos-d-attacker1",
+          "kind": "linux",
+          "name": "attacker1"
+        }
+      ],
+      "raw": {
+        "admin1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4347      UP             192.168.251.7/24 \neth1@if4357      UP             10.10.99.100/24 fe80::a8c1:abff:fe42:a5c4/64 \n",
+        "app1:ip_brief_address": "eth1@if4351      UP             10.10.50.10/24 fe80::a8c1:abff:fe20:3eba/64 \nlo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4341      UP             192.168.251.5/24 \n",
+        "attacker1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4359      UP             192.168.251.11/24 \neth1@if4373      DOWN           \n",
+        "external1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4350      UP             192.168.251.8/24 \neth1@if4360      UP             203.0.113.10/24 fe80::a8c1:abff:fe0e:67d3/64 \n",
+        "finance1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4339      UP             192.168.251.3/24 \neth1@if4345      UP             10.10.30.10/24 fe80::a8c1:abff:fe07:222d/64 \n",
+        "guest1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4338      UP             192.168.251.2/24 \neth1@if4342      UP             10.10.20.10/24 fe80::a8c1:abff:fe7d:9655/64 \n",
+        "leaf1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:6F:06:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:57:02.995Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12217136 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "leaf2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:E2:07:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:57:03.069Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12211724 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "spine1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : spine1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:FC:08:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:57:03.019Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12217136 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "spine2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : spine2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:1B:09:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:57:03.022Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12217136 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "user1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4340      UP             192.168.251.4/24 \neth1@if4348      UP             10.10.10.10/24 fe80::a8c1:abff:fec5:316/64 \n",
+        "wan1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4355      UP             192.168.251.9/24 \neth2@if4361      UP             203.0.113.1/24 fe80::a8c1:abff:fe08:f1c2/64 \neth1@if4363      UP             10.255.1.1/31 fe80::a8c1:abff:fe35:4cf0/64 \neth3@if4366      UP             10.255.1.3/31 fe80::a8c1:abff:fe3a:3a28/64 \n",
+        "web1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth1@if4353      UP             10.10.40.10/24 fe80::a8c1:abff:fe3d:4515/64 \neth0@if4344      UP             192.168.251.6/24 \n"
+      }
+    },
+    "ok": true,
+    "timeout_seconds": 30.0
+  },
+  "created_at": "2026-09-29T13:07:00.872526+00:00",
+  "device_configurations": {
+    "changed_by_sut": [
+      "wan1"
+    ],
+    "changes": {
+      "before_sut_to_after_sut": {
+        "wan1": {
+          "file": "wan1/before_sut_to_after_sut.diff",
+          "lines_added": 5,
+          "lines_removed": 0
+        }
+      },
+      "healthy_to_before_sut": {
+        "wan1": {
+          "file": "wan1/healthy_to_before_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 6
+        }
+      }
+    },
+    "directory": "/home/jongmin/ibn-integration-test/bench-laned/reports/campaigns/runs/netrepairarena-qwen38-27b-rag-20260929T092319Z/devices/qos.wan_shaping_policy_repair.m1-20260929T125656-48573c1e",
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes",
+    "snapshots": {
+      "after_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1244,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 986,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1246,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77541,
+            "command": "info from running /",
+            "file": "leaf1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77478,
+            "command": "info from running /",
+            "file": "leaf2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77163,
+            "command": "info from running /",
+            "file": "spine1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77163,
+            "command": "info from running /",
+            "file": "spine2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1241,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2870,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "before_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1244,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 986,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1246,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77541,
+            "command": "info from running /",
+            "file": "leaf1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77478,
+            "command": "info from running /",
+            "file": "leaf2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77163,
+            "command": "info from running /",
+            "file": "spine1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77163,
+            "command": "info from running /",
+            "file": "spine2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1241,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2532,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "healthy": {
+        "devices": {
+          "admin1": {
+            "bytes": 1244,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 986,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1246,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77541,
+            "command": "info from running /",
+            "file": "leaf1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77478,
+            "command": "info from running /",
+            "file": "leaf2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77163,
+            "command": "info from running /",
+            "file": "spine1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77163,
+            "command": "info from running /",
+            "file": "spine2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1241,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2875,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1242,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      }
+    }
+  },
+  "error": null,
+  "evaluations": {
+    "expected_degradation": {
+      "injection": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "degraded": true,
+            "reinjected": null,
+            "restored": null,
+            "voided": false
+          }
+        ],
+        "attempts_allowed": 1
+      },
+      "oracle_id": "qos.shaping_repair.expected_degradation",
+      "passed": true,
+      "phase": "expected_degradation",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 0.0,
+            "timed_out": true,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "baseline": {
+                "factor": 0.85,
+                "metric": "throughput_mbps"
+              },
+              "combine": "min",
+              "factor": 0.85,
+              "metric": "throughput_mbps",
+              "operator": "lt",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "healthy": {
+      "oracle_id": "qos.shaping_repair.healthy",
+      "passed": true,
+      "phase": "healthy",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 7.65,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "factor": 0.5,
+              "metric": "throughput_mbps",
+              "operator": "gte",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "preservation": {
+      "oracle_id": "qos.shaping_repair.preservation",
+      "passed": true,
+      "phase": "preservation",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.677,
+                "rtt_max_ms": 0.705,
+                "rtt_min_ms": 0.632,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.726,
+                "rtt_max_ms": 0.795,
+                "rtt_min_ms": 0.684,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.333,
+                "rtt_max_ms": 0.408,
+                "rtt_min_ms": 0.264,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.275,
+                "rtt_max_ms": 0.38,
+                "rtt_min_ms": 0.203,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.55,
+                "rtt_max_ms": 0.708,
+                "rtt_min_ms": 0.461,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.527,
+                "rtt_max_ms": 0.682,
+                "rtt_min_ms": 0.436,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.546,
+                "rtt_max_ms": 0.58,
+                "rtt_min_ms": 0.52,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.695,
+                "rtt_max_ms": 0.954,
+                "rtt_min_ms": 0.529,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 8,
+            "success": true,
+            "total_checks": 8
+          },
+          "passed": true,
+          "probe_id": "unaffected_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "repair": {
+      "oracle_id": "qos.shaping_repair.repair",
+      "passed": true,
+      "phase": "repair",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 8.607,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "baseline": {
+                "factor": 0.85,
+                "metric": "throughput_mbps"
+              },
+              "combine": "min",
+              "factor": 0.85,
+              "metric": "throughput_mbps",
+              "operator": "gte",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    }
+  },
+  "experiment_id": "langchain_rag_agent-openai-qwen-qwen3-8-27b-qos-wan_shaping_policy_repair-m1-fault-seed401943731",
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "The business class on wan1's shaped WAN egress (eth2 HTB) was broken: baseline user1\u2192external1 measured 0.002 Mbps under contention while all connectivity passed. Diagnosis showed the HTB root and best-effort class 1:20 (root default) were intact, but the business class 1:10 and its classifier were missing, so user1 (10.10.10.0/24) traffic fell to best-effort. I restored the guarantee in place on wan1/eth2: created class 1:10 (rate 9mbit, ceil 20mbit, prio 1) and added a u32 classifier matching ip src 10.10.10.0/24 into flowid 1:10. No other device was modified. Validation: lab_connectivity all passed, and observed_throughput under contention measured 8.607 Mbps (min 8.0, floor 6.8) \u2014 public_success_criteria passed.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-laned/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.0938,
+      "log_p_yes": 0.0,
+      "method": "shaping_policy_removed",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the traffic shaping policy was removed, so the assured class 10 (8 Mbit/s for user1 to external1) is no longer protected from the background traffic.",
+      "score": 31.0938,
+      "target": "wan1"
+    },
+    "domain": "qos",
+    "environment_success": true,
+    "failed_operation_count": 8,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 8,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "quality_repair_pass_rate": 1.0,
+    "read_count": 13,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 2,
+    "successful_read_count": 12,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "ani_mutations": 8,
+    "ani_reads": 13,
+    "failed_operations": 8,
+    "input_tokens": 473931,
+    "llm_calls": 26,
+    "output_tokens": 3781,
+    "successful_mutations": 2,
+    "successful_reads": 12,
+    "total_tokens": 477712,
+    "unsafe_operations": 0,
+    "validations": 6
+  },
+  "phase_durations": {
+    "apply_reference_state": 91.78191195900035,
+    "calculate_metrics": 3.33500011038268e-05,
+    "deploy_reset_testbed": 17.465444626001045,
+    "evaluate_degradation": 45.483850505999726,
+    "evaluate_healthy": 17.163142769999467,
+    "evaluate_repair_preservation": 71.78635262700118,
+    "inject_fault": 0.5872350210011064,
+    "invoke_sut": 292.89035858999887,
+    "load_configuration": 0.00021322499924281146,
+    "load_oracles": 0.008622680999906152,
+    "load_validate_scenario": 0.03948873399895092,
+    "record_baseline": 4.880999767920002e-06,
+    "restore_destroy": 12.66874762900079,
+    "score_diagnosis": 1.622687193999809,
+    "snapshot_after_sut": 9.778276074999667,
+    "snapshot_before_sut": 8.91864249199898,
+    "snapshot_healthy": 8.504698058999566,
+    "write_result": 0.00822167200021795
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "git": {
+      "commit": "0a19e7fd927278448014f992a5765dc718ff6430",
+      "dirty": true,
+      "modified_files": 7,
+      "untracked_files": 36
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 8000,
+      "min_retry_tokens": null,
+      "model": "openai/qwen/qwen3.8-27b",
+      "prompt_variant": "default",
+      "rag_chunk_chars": 1500,
+      "rag_chunk_overlap": 200,
+      "rag_context_corpus": {
+        "chunks": 105,
+        "files": [
+          {
+            "chunks": 105,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+          }
+        ],
+        "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+      },
+      "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+      "rag_corpus": {
+        "chunks": 1940,
+        "files": [
+          {
+            "chunks": 164,
+            "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+            "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+          },
+          {
+            "chunks": 1191,
+            "path": "Advanced_Configuration_Guide_26.7.md",
+            "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+          },
+          {
+            "chunks": 294,
+            "path": "Interfaces_Guide_26.7.md",
+            "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+          },
+          {
+            "chunks": 4,
+            "path": "arp.md",
+            "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+          },
+          {
+            "chunks": 16,
+            "path": "bridge.md",
+            "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+          },
+          {
+            "chunks": 4,
+            "path": "default-route.md",
+            "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+          },
+          {
+            "chunks": 40,
+            "path": "dhcp-server.md",
+            "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+          },
+          {
+            "chunks": 21,
+            "path": "dns.md",
+            "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+          },
+          {
+            "chunks": 21,
+            "path": "ethernet.md",
+            "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+          },
+          {
+            "chunks": 14,
+            "path": "flowtables.md",
+            "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+          },
+          {
+            "chunks": 22,
+            "path": "groups.md",
+            "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+          },
+          {
+            "chunks": 5,
+            "path": "ip.md",
+            "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+          },
+          {
+            "chunks": 47,
+            "path": "ipv4.md",
+            "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+          },
+          {
+            "chunks": 82,
+            "path": "network_troubleshooting_guide_rag.md",
+            "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+          },
+          {
+            "chunks": 6,
+            "path": "qos.md",
+            "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+          },
+          {
+            "chunks": 9,
+            "path": "zone.md",
+            "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+          }
+        ],
+        "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+      },
+      "rag_directory": "sut/langchain_rag_agent/rag_document",
+      "rag_embedding_model": null,
+      "rag_mode": "both",
+      "rag_retriever": "bm25",
+      "rag_top_k": 4,
+      "recursion_limit": 1000,
+      "request_extra_body": {
+        "provider": {
+          "allow_fallbacks": false,
+          "order": [
+            "deepinfra"
+          ],
+          "quantizations": [
+            "bf16"
+          ]
+        },
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.0.0",
+      "healthy": "1.0.0",
+      "preservation": "1.0.0",
+      "repair": "1.0.0"
+    },
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "reference_state_sha256": "f60fd0f4b36c6d0b42be8c9cc4664d19524d831cfb792a062c926a6edb54f53d",
+    "scenario_seed": 401943731,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {
+      "served_model_names": [
+        "anthropic/claude-sonnet-5.5",
+        "anthropic/claude-sonnet-5.5:batch",
+        "typesafe/jev-router",
+        "perceptron/perceptron-mk1.5",
+        "fireworks/ember-1",
+        "z-ai/glm-5.3-prime",
+        "qwen/qwen3.8-max-prime",
+        "stealth/space-bunny-alpha",
+        "aion-labs/aion-3.5-mini",
+        "aion-labs/aion-3.5",
+        "upstage/solar-mini4",
+        "cohere/command-a-plus",
+        "openai/gpt-6-luna-pro",
+        "openai/gpt-6-luna-pro:batch",
+        "openai/gpt-6-luna",
+        "openai/gpt-6-luna:batch",
+        "openai/gpt-6-sol-pro",
+        "openai/gpt-6-sol-pro:batch",
+        "openai/gpt-6-sol",
+        "openai/gpt-6-sol:batch",
+        "anthropic/claude-opus-5.5",
+        "anthropic/claude-opus-5.5:batch",
+        "xiaomi/mimo-v2.6-pro-ultraspeed",
+        "xiaomi/mimo-v2.6-flash",
+        "xiaomi/mimo-v2.6-pro",
+        "x-ai/grok-4.7",
+        "qwen/qwen3.8-omni-flash",
+        "prism-ml/ternary-bonsai-2-27b",
+        "z-ai/glm-5.3-flashx",
+        "unbiased/pareto",
+        "~deepseek/deepseek-pro-latest",
+        "~deepseek/deepseek-flash-latest",
+        "inference-net/schematron-v2-turbo",
+        "inference-net/schematron-v2-small",
+        "~openai/gpt-astra-latest",
+        "~openai/gpt-sol-latest",
+        "~openai/gpt-terra-latest",
+        "~openai/gpt-luna-latest",
+        "sakana/fugu-ultra-v2",
+        "sakana/fugu-max",
+        "inclusionai/ling-3.0-flash-vl",
+        "deepseek/deepseek-v4.1-flash",
+        "deepseek/deepseek-v4.1-flash:batch",
+        "inception/mercury-2.5",
+        "nex-agi/nex-n2.5-mini",
+        "nex-agi/nex-n2.5-pro",
+        "openai/gpt-6-astra",
+        "openai/gpt-6-astra:batch",
+        "openai/gpt-6-astra-pro",
+        "openai/gpt-6-astra-pro:batch",
+        "inclusionai/ling-3.0-flash-sante:free",
+        "qwen/qwen3.8-max-0902",
+        "meta/muse-spark-1.3-contributor",
+        "meta/muse-spark-1.3",
+        "google/gemini-3.8-flash",
+        "google/gemini-3.8-flash:batch",
+        "anthropic/claude-fable-5.1",
+        "anthropic/claude-fable-5.1:batch",
+        "ibm-granite/granite-4.2-8b",
+        "tencent/hy4-preview",
+        "inclusionai/ling-3.0-flash-fin",
+        "~z-ai/glm-flash-latest",
+        "qwen/qwen3.8-flash",
+        "z-ai/glm-5.3-flash",
+        "z-ai/glm-5.3-flash:batch",
+        "meta/muse-spark-1.2-contributor",
+        "deepseek/deepseek-v4-flash-vision-exp",
+        "tencent/hy-mt2-1.8b",
+        "tencent/hy-mt2-30b-a3b",
+        "~z-ai/glm-latest",
+        "tencent/hy-mt2-7b",
+        "z-ai/glm-5.3",
+        "z-ai/glm-5.3:batch",
+        "qwen/qwen3.8-27b",
+        "qwen/qwen3.8-27b:free",
+        "dots-studio/dots-3-note-preview:free",
+        "google/gemini-3.7-flash",
+        "google/gemini-3.7-flash:batch",
+        "bytedance-seed/seed-2-1-turbo",
+        "qwen/qwen3.8-2.4t-a95b",
+        "bytedance-seed/seed-2.0-code",
+        "deepseek/deepseek-v4-pro-0813",
+        "x-ai/grok-4.6",
+        "liquid/lfm-2.5-2.6b:free",
+        "nvidia/nemotron-3.5-lightning",
+        "nvidia/nemotron-3.5-lightning:free",
+        "sakana/sakana-namazu",
+        "upstage/solar-pro4",
+        "meta/muse-glimmer-30b",
+        "meta/muse-spark-1.2",
+        "~deepseek/deepseek-v4-flash-latest",
+        "deepseek/deepseek-v4-flash-0731",
+        "thinkingmachines/inkling-small",
+        "thinkingmachines/inkling-small:free",
+        "qwen/qwen3.7-flash",
+        "anthropic/claude-opus-5",
+        "anthropic/claude-opus-5:batch",
+        "inclusionai/ling-3.0-flash",
+        "poolside/laguna-s-2.1",
+        "poolside/laguna-s-2.1:free",
+        "google/gemini-3.6-flash",
+        "google/gemini-3.6-flash:batch",
+        "google/gemini-3.5-flash-lite",
+        "google/gemini-3.5-flash-lite:batch",
+        "meituan/longcat-2.0",
+        "thinkingmachines/inkling",
+        "thinkingmachines/inkling:free",
+        "openrouter/auto-beta",
+        "moonshotai/kimi-k3",
+        "moonshotai/kimi-k3:batch",
+        "meta/muse-spark-1.1",
+        "kwaipilot/kat-coder-pro-v2.5",
+        "openai/gpt-5.6-luna-pro",
+        "openai/gpt-5.6-luna-pro:batch",
+        "openai/gpt-5.6-luna",
+        "openai/gpt-5.6-luna:batch",
+        "openai/gpt-5.6-terra-pro",
+        "openai/gpt-5.6-terra-pro:batch",
+        "openai/gpt-5.6-terra",
+        "openai/gpt-5.6-terra:batch",
+        "openai/gpt-5.6-sol-pro",
+        "openai/gpt-5.6-sol-pro:batch",
+        "openai/gpt-5.6-sol",
+        "openai/gpt-5.6-sol:batch",
+        "x-ai/grok-4.5",
+        "~x-ai/grok-latest",
+        "aion-labs/aion-3.0-mini",
+        "aion-labs/aion-3.0",
+        "tencent/hy3",
+        "poolside/laguna-xs-2.1",
+        "poolside/laguna-xs-2.1:free",
+        "anthropic/claude-sonnet-5",
+        "anthropic/claude-sonnet-5:batch",
+        "google/gemini-3.1-flash-lite-image",
+        "sakana/fugu-ultra",
+        "google/gemini-3.1-flash-image",
+        "google/gemini-3-pro-image",
+        "cohere/north-mini-code:free",
+        "z-ai/glm-5.2",
+        "openrouter/fusion",
+        "moonshotai/kimi-k2.7-code",
+        "~anthropic/claude-fable-latest",
+        "anthropic/claude-fable-5",
+        "anthropic/claude-fable-5:batch",
+        "nvidia/nemotron-3.5-content-safety",
+        "nvidia/nemotron-3.5-content-safety:free",
+        "nvidia/nemotron-3-ultra-550b-a55b",
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "qwen/qwen3.7-plus",
+        "minimax/minimax-m3",
+        "stepfun/step-3.7-flash",
+        "anthropic/claude-opus-4.8",
+        "anthropic/claude-opus-4.8:batch",
+        "qwen/qwen3.7-max",
+        "x-ai/grok-build-0.1",
+        "google/gemini-3.5-flash",
+        "google/gemini-3.5-flash:batch",
+        "perceptron/perceptron-mk1",
+        "google/gemini-3.1-flash-lite",
+        "google/gemini-3.1-flash-lite:batch",
+        "openai/gpt-chat-latest",
+        "x-ai/grok-4.3",
+        "x-ai/grok-4.3:batch",
+        "mistralai/mistral-medium-3-5",
+        "mistralai/mistral-medium-3-5:batch",
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "~anthropic/claude-haiku-latest",
+        "~openai/gpt-mini-latest",
+        "~google/gemini-pro-latest",
+        "~moonshotai/kimi-latest",
+        "~google/gemini-flash-latest",
+        "~anthropic/claude-sonnet-latest",
+        "qwen/qwen3.5-plus-20260420",
+        "qwen/qwen3.6-flash",
+        "qwen/qwen3.6-35b-a3b",
+        "qwen/qwen3.6-max-preview",
+        "qwen/qwen3.6-27b",
+        "openai/gpt-5.5-pro",
+        "openai/gpt-5.5-pro:batch",
+        "openai/gpt-5.5",
+        "openai/gpt-5.5:batch",
+        "deepseek/deepseek-v4-pro",
+        "deepseek/deepseek-v4-flash",
+        "tencent/hy3-preview",
+        "xiaomi/mimo-v2.5-pro",
+        "xiaomi/mimo-v2.5",
+        "openai/gpt-5.4-image-2",
+        "~anthropic/claude-opus-latest",
+        "openrouter/pareto-code",
+        "moonshotai/kimi-k2.6",
+        "anthropic/claude-opus-4.7",
+        "anthropic/claude-opus-4.7:batch",
+        "z-ai/glm-5.1",
+        "google/gemma-4-26b-a4b-it",
+        "google/gemma-4-26b-a4b-it:free",
+        "google/gemma-4-31b-it",
+        "google/gemma-4-31b-it:free",
+        "qwen/qwen3.6-plus",
+        "z-ai/glm-5v-turbo",
+        "arcee-ai/trinity-large-thinking",
+        "x-ai/grok-4.20-multi-agent",
+        "x-ai/grok-4.20",
+        "google/lyria-3-pro-preview",
+        "google/lyria-3-clip-preview",
+        "rekaai/reka-edge",
+        "minimax/minimax-m2.7",
+        "openai/gpt-5.4-nano",
+        "openai/gpt-5.4-nano:batch",
+        "openai/gpt-5.4-mini",
+        "openai/gpt-5.4-mini:batch",
+        "mistralai/mistral-small-2603",
+        "mistralai/mistral-small-2603:batch",
+        "z-ai/glm-5-turbo",
+        "nvidia/nemotron-3-super-120b-a12b",
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "bytedance-seed/seed-2.0-lite",
+        "qwen/qwen3.5-9b",
+        "openai/gpt-5.4-pro",
+        "openai/gpt-5.4-pro:batch",
+        "openai/gpt-5.4",
+        "openai/gpt-5.4:batch",
+        "inception/mercury-2",
+        "google/gemini-3.1-flash-lite-preview",
+        "bytedance-seed/seed-2.0-mini",
+        "google/gemini-3.1-flash-image-preview",
+        "qwen/qwen3.5-35b-a3b",
+        "qwen/qwen3.5-27b",
+        "qwen/qwen3.5-122b-a10b",
+        "qwen/qwen3.5-flash-02-23",
+        "google/gemini-3.1-pro-preview-customtools",
+        "openai/gpt-5.3-codex",
+        "aion-labs/aion-2.0",
+        "google/gemini-3.1-pro-preview",
+        "google/gemini-3.1-pro-preview:batch",
+        "anthropic/claude-sonnet-4.6",
+        "anthropic/claude-sonnet-4.6:batch",
+        "qwen/qwen3.5-plus-02-15",
+        "qwen/qwen3.5-397b-a17b",
+        "minimax/minimax-m2.5",
+        "z-ai/glm-5",
+        "qwen/qwen3-max-thinking",
+        "anthropic/claude-opus-4.6",
+        "anthropic/claude-opus-4.6:batch",
+        "qwen/qwen3-coder-next",
+        "openrouter/free",
+        "stepfun/step-3.5-flash",
+        "moonshotai/kimi-k2.5",
+        "upstage/solar-pro-3",
+        "minimax/minimax-m2-her",
+        "writer/palmyra-x5",
+        "openai/gpt-audio",
+        "openai/gpt-audio-mini",
+        "z-ai/glm-4.7-flash",
+        "openai/gpt-5.2-codex",
+        "bytedance-seed/seed-1.6-flash",
+        "bytedance-seed/seed-1.6",
+        "minimax/minimax-m2.1",
+        "z-ai/glm-4.7",
+        "google/gemini-3-flash-preview",
+        "google/gemini-3-flash-preview:batch",
+        "nvidia/nemotron-3-nano-30b-a3b",
+        "openai/gpt-5.2-chat",
+        "openai/gpt-5.2-pro",
+        "openai/gpt-5.2-pro:batch",
+        "openai/gpt-5.2",
+        "openai/gpt-5.2:batch",
+        "mistralai/devstral-2512",
+        "relace/relace-search",
+        "z-ai/glm-4.6v",
+        "openrouter/bodybuilder",
+        "openai/gpt-5.1-codex-max",
+        "amazon/nova-2-lite-v1",
+        "mistralai/ministral-14b-2512",
+        "mistralai/ministral-8b-2512",
+        "mistralai/ministral-8b-2512:batch",
+        "mistralai/ministral-3b-2512",
+        "mistralai/mistral-large-2512",
+        "mistralai/mistral-large-2512:batch",
+        "deepseek/deepseek-v3.2",
+        "anthropic/claude-opus-4.5",
+        "anthropic/claude-opus-4.5:batch",
+        "google/gemini-3-pro-image-preview",
+        "openai/gpt-5.1",
+        "openai/gpt-5.1:batch",
+        "openai/gpt-5.1-codex",
+        "openai/gpt-5.1-codex-mini",
+        "moonshotai/kimi-k2-thinking",
+        "amazon/nova-premier-v1",
+        "perplexity/sonar-pro-search",
+        "mistralai/voxtral-small-24b-2507",
+        "openai/gpt-oss-safeguard-20b",
+        "minimax/minimax-m2",
+        "qwen/qwen3-vl-32b-instruct",
+        "ibm-granite/granite-4.0-h-micro",
+        "openai/gpt-5-image-mini",
+        "anthropic/claude-haiku-4.5",
+        "anthropic/claude-haiku-4.5:batch",
+        "qwen/qwen3-vl-8b-thinking",
+        "qwen/qwen3-vl-8b-instruct",
+        "openai/gpt-5-image",
+        "google/gemini-2.5-flash-image",
+        "qwen/qwen3-vl-30b-a3b-thinking",
+        "qwen/qwen3-vl-30b-a3b-instruct",
+        "openai/gpt-5-pro",
+        "openai/gpt-5-pro:batch",
+        "z-ai/glm-4.6",
+        "anthropic/claude-sonnet-4.5",
+        "anthropic/claude-sonnet-4.5:batch",
+        "deepseek/deepseek-v3.2-exp",
+        "thedrummer/cydonia-24b-v4.1",
+        "relace/relace-apply-3",
+        "qwen/qwen3-vl-235b-a22b-thinking",
+        "qwen/qwen3-vl-235b-a22b-instruct",
+        "qwen/qwen3-max",
+        "qwen/qwen3-coder-plus",
+        "deepseek/deepseek-v3.1-terminus",
+        "qwen/qwen3-coder-flash",
+        "qwen/qwen3-next-80b-a3b-thinking",
+        "qwen/qwen3-next-80b-a3b-instruct",
+        "qwen/qwen-plus-2025-07-28",
+        "moonshotai/kimi-k2-0905",
+        "qwen/qwen3-30b-a3b-thinking-2507",
+        "nousresearch/hermes-4-405b",
+        "deepseek/deepseek-chat-v3.1",
+        "mistralai/mistral-medium-3.1",
+        "mistralai/mistral-medium-3.1:batch",
+        "z-ai/glm-4.5v",
+        "openai/gpt-5",
+        "openai/gpt-5:batch",
+        "openai/gpt-5-mini",
+        "openai/gpt-5-mini:batch",
+        "openai/gpt-5-nano",
+        "openai/gpt-5-nano:batch",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-120b:batch",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-20b:batch",
+        "anthropic/claude-opus-4.1",
+        "anthropic/claude-opus-4.1:batch",
+        "mistralai/codestral-2508",
+        "mistralai/codestral-2508:batch",
+        "qwen/qwen3-coder-30b-a3b-instruct",
+        "qwen/qwen3-30b-a3b-instruct-2507",
+        "z-ai/glm-4.5",
+        "z-ai/glm-4.5-air",
+        "qwen/qwen3-235b-a22b-thinking-2507",
+        "qwen/qwen3-coder",
+        "bytedance/ui-tars-1.5-7b",
+        "google/gemini-2.5-flash-lite",
+        "google/gemini-2.5-flash-lite:batch",
+        "qwen/qwen3-235b-a22b-2507",
+        "moonshotai/kimi-k2",
+        "cognitivecomputations/dolphin-mistral-24b-venice-edition",
+        "tencent/hunyuan-a13b-instruct",
+        "morph/morph-v3-large",
+        "morph/morph-v3-fast",
+        "baidu/ernie-4.5-vl-424b-a47b",
+        "mistralai/mistral-small-3.2-24b-instruct",
+        "minimax/minimax-m1",
+        "google/gemini-2.5-flash",
+        "google/gemini-2.5-flash:batch",
+        "google/gemini-2.5-pro",
+        "google/gemini-2.5-pro:batch",
+        "openai/o3-pro",
+        "google/gemini-2.5-pro-preview",
+        "deepseek/deepseek-r1-0528",
+        "anthropic/claude-sonnet-4",
+        "mistralai/mistral-medium-3",
+        "meta-llama/llama-guard-4-12b",
+        "qwen/qwen3-30b-a3b",
+        "qwen/qwen3-8b",
+        "qwen/qwen3-14b",
+        "qwen/qwen3-32b",
+        "qwen/qwen3-235b-a22b",
+        "openai/o4-mini-high",
+        "openai/o3",
+        "openai/o3:batch",
+        "openai/o4-mini",
+        "openai/o4-mini:batch",
+        "openai/gpt-4.1",
+        "openai/gpt-4.1:batch",
+        "openai/gpt-4.1-mini",
+        "openai/gpt-4.1-mini:batch",
+        "openai/gpt-4.1-nano",
+        "openai/gpt-4.1-nano:batch",
+        "meta-llama/llama-4-maverick",
+        "meta-llama/llama-4-scout",
+        "deepseek/deepseek-chat-v3-0324",
+        "openai/o1-pro",
+        "mistralai/mistral-small-3.1-24b-instruct",
+        "google/gemma-3-4b-it",
+        "google/gemma-3-12b-it",
+        "cohere/command-a",
+        "rekaai/reka-flash-3",
+        "google/gemma-3-27b-it",
+        "thedrummer/skyfall-36b-v2",
+        "perplexity/sonar-reasoning-pro",
+        "perplexity/sonar-pro",
+        "perplexity/sonar-deep-research",
+        "mistralai/mistral-saba",
+        "openai/o3-mini-high",
+        "aion-labs/aion-rp-llama-3.1-8b",
+        "qwen/qwen2.5-vl-72b-instruct",
+        "qwen/qwen-plus",
+        "openai/o3-mini",
+        "openai/o3-mini:batch",
+        "mistralai/mistral-small-24b-instruct-2501",
+        "perplexity/sonar",
+        "deepseek/deepseek-r1",
+        "minimax/minimax-01",
+        "microsoft/phi-4",
+        "deepseek/deepseek-chat",
+        "sao10k/l3.3-euryale-70b",
+        "openai/o1",
+        "cohere/command-r7b-12-2024",
+        "meta-llama/llama-3.3-70b-instruct",
+        "amazon/nova-lite-v1",
+        "amazon/nova-micro-v1",
+        "amazon/nova-pro-v1",
+        "openai/gpt-4o-2024-11-20",
+        "mistralai/mistral-large-2407",
+        "qwen/qwen-2.5-coder-32b-instruct",
+        "thedrummer/unslopnemo-12b",
+        "anthracite-org/magnum-v4-72b",
+        "qwen/qwen-2.5-7b-instruct",
+        "meta-llama/llama-3.2-1b-instruct",
+        "meta-llama/llama-3.2-3b-instruct",
+        "qwen/qwen-2.5-72b-instruct",
+        "cohere/command-r-08-2024",
+        "cohere/command-r-plus-08-2024",
+        "sao10k/l3.1-euryale-70b",
+        "nousresearch/hermes-3-llama-3.1-70b",
+        "nousresearch/hermes-3-llama-3.1-405b",
+        "sao10k/l3-lunaris-8b",
+        "openai/gpt-4o-2024-08-06",
+        "meta-llama/llama-3.1-70b-instruct",
+        "meta-llama/llama-3.1-8b-instruct",
+        "mistralai/mistral-nemo",
+        "openai/gpt-4o-mini",
+        "openai/gpt-4o-mini-2024-07-18",
+        "openai/gpt-4o-mini:batch",
+        "google/gemma-2-27b-it",
+        "openai/gpt-4o",
+        "openai/gpt-4o-2024-05-13",
+        "openai/gpt-4o:batch",
+        "mistralai/mixtral-8x22b-instruct",
+        "microsoft/wizardlm-2-8x22b",
+        "openai/gpt-4-turbo",
+        "openai/gpt-4-turbo:batch",
+        "mistralai/mistral-large",
+        "openai/gpt-3.5-turbo-0613",
+        "openrouter/auto",
+        "openai/gpt-3.5-turbo-instruct",
+        "openai/gpt-3.5-turbo-16k",
+        "mancer/weaver",
+        "undi95/remm-slerp-l2-13b",
+        "gryphe/mythomax-l2-13b",
+        "openai/gpt-3.5-turbo",
+        "openai/gpt-3.5-turbo:batch",
+        "openai/gpt-4"
+      ]
+    },
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "sut_version": "1.0.0",
+    "topology_sha256": "eec661660ab47a2ab99dba4562d3e6017889d55ab8a65723e9484404bc204cea"
+  },
+  "run_id": "langchain_rag_agent-openai-qwen-qwen3-8-27b-qos-wan_shaping_policy_repair-m1-fault-seed401943731-918619b0e87c",
+  "scenario": {
+    "domain": "qos",
+    "id": "qos.wan_shaping_policy_repair.m1",
+    "sut_task_id": "sut-fba07a9cb8c829630ffe4f9f48573c1e",
+    "version": "1.0.0"
+  },
+  "schema_version": "1.0",
+  "status": "completed",
+  "sut_result": {
+    "ani_operations": [
+      {
+        "arguments": {
+          "nodes": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 5.575599971052725e-05,
+        "error": null,
+        "ok": true,
+        "operation": "get_topology",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "wan1",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.19571633899977314,
+        "error": "Cannot find device \"wan1\"",
+        "ok": false,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.21592564300044614,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.18136094700093963,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.4019254140002886,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "system"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.14297973199973057,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.36965425000016694,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "leaf1"
+          ],
+          "views": [
+            "interfaces"
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-676bcdf85c6f6c09747cf648ee5d0ecf5adc666d5891699f79b5d0e5290e4b5d.json",
+        "category": "read",
+        "duration_seconds": 0.8664669209993008,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.2892109620006522,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "ethernet-1/10",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.8087549350002519,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "ethernet-1/20",
+          "node": "leaf2"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.8196284309997282,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 73.01548486400134,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc -s class show dev eth2",
+                "tc -s filter show dev eth2"
+              ],
+              "reason": "Baseline failed at 0.002 Mbps under contention; read full HTB classes and filters on egress eth2 to find which element (class rates or classifier) is broken. Read-only.",
+              "rollback_commands": [],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 5.3869000112172216e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "interface",
+          "name": "ethernet-1/20",
+          "node": "leaf1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.9093937649995496,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Baseline: user1 (10.10.10.0/24, business) to external1 measured 0.002 Mbps under contention (floor 6.8, min 8.0) while all connectivity passed \u2014 the HTB business class/guarantee is broken on the WAN egress. Restore class 0x10 to an 8 Mbps guarantee (8.8m with header margin, ceil 20m, high priority) and class 0x20 to best-effort, and classify business source prefix into 0x10.",
+          "set": {
+            "filter": {
+              "flowid": "1:10",
+              "src": "10.10.10.0/24"
+            },
+            "htb": {
+              "class_10": {
+                "ceiling": "20mbit",
+                "priority": 1,
+                "rate": "8.8mbit"
+              },
+              "class_20": {
+                "ceiling": "20mbit",
+                "priority": 7,
+                "rate": "11.2mbit"
+              }
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.14168509299997822,
+        "error": null,
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_54d710b2fe11501a"
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.6096225949986547,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Root htb already exists and cannot be replaced in place. Repair the business class 0x10 rates in place: 8.8m guaranteed (8 + header margin), 20m ceiling, highest priority, so user traffic gets its 8 Mbps guarantee.",
+          "set": {
+            "class": {
+              "ceiling": "20mbit",
+              "id": "1:10",
+              "parent": "1:",
+              "priority": 1,
+              "rate": "8.8mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 3.6422999983187765e-05,
+        "error": "update_object: class.rate must be a tc rate such as 8mbit or 794kbit",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Business class 0x10 on the WAN egress is broken; repair in place with 9mbit guaranteed (8 + header margin), 20m ceiling, priority 1.",
+          "set": {
+            "class": {
+              "ceiling": "20mbit",
+              "id": "1:10",
+              "parent": "1:",
+              "priority": 1,
+              "rate": "9mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.18006301799869107,
+        "error": null,
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_70b15f7b0aa9e408"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 20mbit prio 1",
+                "tc class add dev eth2 parent 1: classid 1:20 htb rate 11mbit ceil 20mbit prio 7",
+                "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10"
+              ],
+              "reason": "Business class 0x10 absent under root (class change returned no such file); rebuild the hierarchy on WAN egress: business 1:10 rate 9mbit ceil 20mbit prio1, best-effort 1:20 rate 11mbit ceil 20mbit prio7, classify user business prefix 10.10.10.0/24 to 1:10. Root default 0x20 already routes unclassified to best-effort.",
+              "rollback_commands": [
+                "tc qdisc replace dev eth2 root handle 1: htb default 20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.00023819399939384311,
+        "error": "update_config.change.commands contains 3 commands for Linux target wan1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 20mbit prio 1"
+              ],
+              "reason": "Business class 0x10 absent under root; create it: 9mbit guaranteed, 20mbit ceiling, priority 1, so user1 business traffic gets its 8 Mbps guarantee under contention.",
+              "rollback_commands": [
+                "tc qdisc replace dev eth2 root handle 1: htb default 20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.13572494300024118,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_b9a66ed009fc3bc1"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1: classid 1:20 htb rate 11mbit ceil 20mbit prio 7"
+              ],
+              "reason": "Create best-effort class 1:20 (matches root default 0x20): 11mbit guaranteed, 20mbit ceiling, lower priority, so guest/bulk traffic keeps a non-zero share while leaving room for the 8 Mbps business guarantee.",
+              "rollback_commands": [
+                "tc class del dev eth2 classid 1:20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.1760543090003921,
+        "error": null,
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_97ffea86ee3c8bb7"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10"
+              ],
+              "reason": "Classifier for protected business traffic was missing, so user1 (10.10.10.0/24) traffic fell to the default best-effort class. Classify its source prefix into business class 1:10 to deliver the 8 Mbps guarantee.",
+              "rollback_commands": [
+                "tc qdisc replace dev eth2 root handle 1: htb default 20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.18634325799939688,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_f9c9dfde9bf5fd15"
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 59.58938925599978,
+        "error": null,
+        "ok": true,
+        "operation": "execute_validation",
+        "transaction_id": null
+      }
+    ],
+    "device_changes": [
+      {
+        "action": {
+          "command": "tc qdisc replace dev eth2 root handle 1: htb default 20",
+          "machine": "wan1",
+          "reason": "Baseline: user1 (10.10.10.0/24, business) to external1 measured 0.002 Mbps under contention (floor 6.8, min 8.0) while all connectivity passed \u2014 the HTB business class/guarantee is broken on the WAN egress. Restore class 0x10 to an 8 Mbps guarantee (8.8m with header margin, ceil 20m, high priority) and class 0x20 to best-effort, and classify business source prefix into 0x10."
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc qdisc replace dev eth2 root handle 1: htb default 20",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: Invalid argument\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_54d710b2fe11501a",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class change dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 9mbit",
+          "machine": "wan1",
+          "reason": "Business class 0x10 on the WAN egress is broken; repair in place with 9mbit guaranteed (8 + header margin), 20m ceiling, priority 1."
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc class change dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 9mbit",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: No such file or directory\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_70b15f7b0aa9e408",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 20mbit prio 1",
+          "machine": "wan1",
+          "reason": "Business class 0x10 absent under root; create it: 9mbit guaranteed, 20mbit ceiling, priority 1, so user1 business traffic gets its 8 Mbps guarantee under contention."
+        },
+        "objective_verification": {
+          "checks": [
+            {
+              "connectivity": [
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.83 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.627 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.775 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2026ms\nrtt min/avg/max/mdev = 0.627/1.411/2.833/1.006 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.900 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.815 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.708 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.708/0.807/0.900/0.078 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=2.03 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.695 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.787 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2027ms\nrtt min/avg/max/mdev = 0.695/1.171/2.031/0.609 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.761 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.763 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.710 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.710/0.744/0.763/0.024 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.774 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.678 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.781 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.678/0.744/0.781/0.047 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=1.03 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.656 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.929 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2005ms\nrtt min/avg/max/mdev = 0.656/0.870/1.025/0.156 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=2.31 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.285 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.310 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.285/0.967/2.307/0.947 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "finance1",
+                  "success": true
+                },
+                {
+                  "destination": "finance1",
+                  "destination_ip": "10.10.30.10",
+                  "hostname": null,
+                  "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.236 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.269 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.274 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.236/0.259/0.274/0.016 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.14 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.493 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.592 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2012ms\nrtt min/avg/max/mdev = 0.493/1.076/2.143/0.755 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.651 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.517 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.493 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.493/0.553/0.651/0.069 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.532 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.486 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.483 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.483/0.500/0.532/0.022 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.571 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.540 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.637 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.540/0.582/0.637/0.040 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.627 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.562 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.563 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.562/0.584/0.627/0.030 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.780 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.613 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.498 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.498/0.630/0.780/0.115 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                }
+              ],
+              "passed": true,
+              "type": "lab_connectivity"
+            },
+            {
+              "limits": {
+                "enforced_floor_mbps": 6.8,
+                "min_mbps": 8.0,
+                "tolerance": 0.85
+              },
+              "measurement": {
+                "contended": true,
+                "contention_attempts": 1,
+                "contention_checks": {
+                  "after_measurement": 1,
+                  "after_start": 1
+                },
+                "contention_observed": true,
+                "destination": "external1",
+                "destination_ip": "203.0.113.10",
+                "error": null,
+                "passed": true,
+                "seconds": 10,
+                "source": "user1",
+                "throughput_mbps": 8.607,
+                "timed_out": false,
+                "unverified_throughput_mbps": null
+              },
+              "passed": true,
+              "type": "observed_throughput"
+            }
+          ],
+          "passed": true,
+          "type": "public_success_criteria"
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 20mbit prio 1",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_b9a66ed009fc3bc1",
+        "verified_after_action": true
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1: classid 1:20 htb rate 11mbit ceil 20mbit prio 7",
+          "machine": "wan1",
+          "reason": "Create best-effort class 1:20 (matches root default 0x20): 11mbit guaranteed, 20mbit ceiling, lower priority, so guest/bulk traffic keeps a non-zero share while leaving room for the 8 Mbps business guarantee."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1: classid 1:20 htb rate 11mbit ceil 20mbit prio 7",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: File exists\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_97ffea86ee3c8bb7",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+          "machine": "wan1",
+          "reason": "Classifier for protected business traffic was missing, so user1 (10.10.10.0/24) traffic fell to the default best-effort class. Classify its source prefix into business class 1:10 to deliver the 8 Mbps guarantee."
+        },
+        "objective_verification": {
+          "checks": [
+            {
+              "connectivity": [
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.83 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.627 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.775 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2026ms\nrtt min/avg/max/mdev = 0.627/1.411/2.833/1.006 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.900 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.815 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.708 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.708/0.807/0.900/0.078 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=2.03 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.695 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.787 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2027ms\nrtt min/avg/max/mdev = 0.695/1.171/2.031/0.609 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.761 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.763 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.710 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.710/0.744/0.763/0.024 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.774 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.678 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.781 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.678/0.744/0.781/0.047 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=1.03 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.656 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.929 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2005ms\nrtt min/avg/max/mdev = 0.656/0.870/1.025/0.156 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "app1",
+                  "destination_ip": "10.10.50.10",
+                  "hostname": null,
+                  "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=2.31 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.285 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.310 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.285/0.967/2.307/0.947 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "finance1",
+                  "success": true
+                },
+                {
+                  "destination": "finance1",
+                  "destination_ip": "10.10.30.10",
+                  "hostname": null,
+                  "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.236 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.269 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.274 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.236/0.259/0.274/0.016 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "app1",
+                  "success": true
+                },
+                {
+                  "destination": "web1",
+                  "destination_ip": "10.10.40.10",
+                  "hostname": null,
+                  "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.14 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.493 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.592 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2012ms\nrtt min/avg/max/mdev = 0.493/1.076/2.143/0.755 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.651 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.517 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.493 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.493/0.553/0.651/0.069 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "web1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.532 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.486 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.483 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.483/0.500/0.532/0.022 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "user1",
+                  "success": true
+                },
+                {
+                  "destination": "user1",
+                  "destination_ip": "10.10.10.10",
+                  "hostname": null,
+                  "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.571 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.540 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.637 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.540/0.582/0.637/0.040 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                },
+                {
+                  "destination": "external1",
+                  "destination_ip": "203.0.113.10",
+                  "hostname": null,
+                  "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.627 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.562 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.563 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.562/0.584/0.627/0.030 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "guest1",
+                  "success": true
+                },
+                {
+                  "destination": "guest1",
+                  "destination_ip": "10.10.20.10",
+                  "hostname": null,
+                  "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.780 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.613 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.498 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.498/0.630/0.780/0.115 ms",
+                  "packet_loss_percent": 0.0,
+                  "resolved_ip": null,
+                  "source": "external1",
+                  "success": true
+                }
+              ],
+              "passed": true,
+              "type": "lab_connectivity"
+            },
+            {
+              "limits": {
+                "enforced_floor_mbps": 6.8,
+                "min_mbps": 8.0,
+                "tolerance": 0.85
+              },
+              "measurement": {
+                "contended": true,
+                "contention_attempts": 1,
+                "contention_checks": {
+                  "after_measurement": 1,
+                  "after_start": 1
+                },
+                "contention_observed": true,
+                "destination": "external1",
+                "destination_ip": "203.0.113.10",
+                "error": null,
+                "passed": true,
+                "seconds": 10,
+                "source": "user1",
+                "throughput_mbps": 8.607,
+                "timed_out": false,
+                "unverified_throughput_mbps": null
+              },
+              "passed": true,
+              "type": "observed_throughput"
+            }
+          ],
+          "passed": true,
+          "type": "public_success_criteria"
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_f9c9dfde9bf5fd15",
+        "verified_after_action": true
+      }
+    ],
+    "error": null,
+    "execution": {
+      "ani_version": "ibn_eval.ani.v0.2",
+      "budget_seconds": 400.0,
+      "conclusion_source": "structured_response",
+      "configured_model": "openai/qwen/qwen3.8-27b",
+      "elapsed_seconds": 292.8657053170009,
+      "failed_operations": 8,
+      "interaction_limits": {
+        "ani": {
+          "limit": null,
+          "reached": false,
+          "refused": 0,
+          "used": 23
+        }
+      },
+      "llm_calls": 26,
+      "model_parameters": {
+        "ani_call_limit": null,
+        "context_budget_chars": null,
+        "enable_thinking": null,
+        "max_consecutive_rejections": null,
+        "max_context_chars": 12000,
+        "max_execution_seconds": 400.0,
+        "max_tokens": 8000,
+        "min_retry_tokens": null,
+        "model": "openai/qwen/qwen3.8-27b",
+        "prompt_variant": "default",
+        "rag_chunk_chars": 1500,
+        "rag_chunk_overlap": 200,
+        "rag_context_corpus": {
+          "chunks": 105,
+          "files": [
+            {
+              "chunks": 105,
+              "path": "network_troubleshooting_guide_rag.md",
+              "sha256": "85f19338c76bfec59e286a85c31211b6fa11d25dbb2f4194cb4025f0896860df"
+            }
+          ],
+          "sha256": "44d65ccfbf04ef48348bdb07687322c0d10638e38b61324f975ac745e0ff69d2"
+        },
+        "rag_context_directory": "sut/langchain_rag_agent/rag_context",
+        "rag_corpus": {
+          "chunks": 1940,
+          "files": [
+            {
+              "chunks": 164,
+              "path": "ACL_and_Traffic_Steering_Guide_26.7.md",
+              "sha256": "0a0b0c844bb91c6ac45a58834801e44ed6e5983db87096ed7244c50e7f413f87"
+            },
+            {
+              "chunks": 1191,
+              "path": "Advanced_Configuration_Guide_26.7.md",
+              "sha256": "43049b263a9fde4b6d922fbbb90ff268bd1b3d02c847fc3a6fdcaa8f46aa70c2"
+            },
+            {
+              "chunks": 294,
+              "path": "Interfaces_Guide_26.7.md",
+              "sha256": "f21160085df8edd91300bda3b273adef6d0ceb92227b26fa8e396e53cd34c016"
+            },
+            {
+              "chunks": 4,
+              "path": "arp.md",
+              "sha256": "f15a276c9413f9745c336487c8c82fa558f2dce62dea07e510e2955146858e48"
+            },
+            {
+              "chunks": 16,
+              "path": "bridge.md",
+              "sha256": "8adeeb0212b4e142c57ecf4f4829eb776800e533550f25b20cf1ef0620a89a83"
+            },
+            {
+              "chunks": 4,
+              "path": "default-route.md",
+              "sha256": "864896ff961c5e498e6f475e87ac9b8c00eb56de3094097c92a7b0a2754b7fd1"
+            },
+            {
+              "chunks": 40,
+              "path": "dhcp-server.md",
+              "sha256": "db17afef49e2281003f04049597190623e90d335f55fd9ce9dbdffadd21c95b3"
+            },
+            {
+              "chunks": 21,
+              "path": "dns.md",
+              "sha256": "6e27b9e7a03a3c888015cd9883318ec9d0d28314cbb06c550a1e54422b30a3a4"
+            },
+            {
+              "chunks": 21,
+              "path": "ethernet.md",
+              "sha256": "15632c2ea261cede9765d31a8c9d20743639df64dbbe0a9940cbf330a93153f8"
+            },
+            {
+              "chunks": 14,
+              "path": "flowtables.md",
+              "sha256": "e387fc433e00ddebda17553e4292142e90a003045bcc6b62a3327d71bc2468e5"
+            },
+            {
+              "chunks": 22,
+              "path": "groups.md",
+              "sha256": "29667ae1725f872dfa9c31737c2bcd5f7ceb8f9312824da7674d9494235bbb29"
+            },
+            {
+              "chunks": 5,
+              "path": "ip.md",
+              "sha256": "a6af7e7d40137900da4419719b4ca92cfbf2bbe98a7b2476763817d4dbd7ba7c"
+            },
+            {
+              "chunks": 47,
+              "path": "ipv4.md",
+              "sha256": "7ca31891b425053778830e5eb74aba1d43393a851360c5f84275e706c39dc969"
+            },
+            {
+              "chunks": 82,
+              "path": "network_troubleshooting_guide_rag.md",
+              "sha256": "81613005e99d8b0bb0c21164cc548a343434b79a541b6265092ce783919d3401"
+            },
+            {
+              "chunks": 6,
+              "path": "qos.md",
+              "sha256": "da7c9c227718e8a3d56b60211b12f1864e46a44e15e8f4f0dd7564b59449cba5"
+            },
+            {
+              "chunks": 9,
+              "path": "zone.md",
+              "sha256": "497e18c365f9907666cdec5aeedb50d8978aa80baa3b7acddc32df121e08ecb1"
+            }
+          ],
+          "sha256": "3f621af9945f9d61fef11aea2c31fe36f42144c785f0d5f2e0be8e714754bbc9"
+        },
+        "rag_directory": "sut/langchain_rag_agent/rag_document",
+        "rag_embedding_model": null,
+        "rag_mode": "both",
+        "rag_retriever": "bm25",
+        "rag_top_k": 4,
+        "recursion_limit": 1000,
+        "request_extra_body": {
+          "provider": {
+            "allow_fallbacks": false,
+            "order": [
+              "deepinfra"
+            ],
+            "quantizations": [
+              "bf16"
+            ]
+          },
+          "reasoning": {
+            "enabled": false
+          }
+        },
+        "temperature": null,
+        "thinking_directive_applied": false,
+        "thinking_effort": null,
+        "thinking_mechanism": "unset",
+        "thinking_request": {},
+        "thinking_style": "auto",
+        "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+        "tool_choice": "auto",
+        "tool_result_chars": null
+      },
+      "model_seconds": 153.491,
+      "model_turns": [
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            1
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.832,
+          "tool_calls": [
+            "get_topology"
+          ],
+          "turn": 1
+        },
+        {
+          "content_chars": 140,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            2
+          ],
+          "reasoning_chars": 0,
+          "seconds": 12.514,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 2
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            3
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.447,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 3
+        },
+        {
+          "content_chars": 123,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            4
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.252,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 4
+        },
+        {
+          "content_chars": 98,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            5
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.631,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 5
+        },
+        {
+          "content_chars": 120,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            6
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.758,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 6
+        },
+        {
+          "content_chars": 114,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 1.931,
+          "tool_calls": [
+            "search_documents"
+          ],
+          "turn": 7
+        },
+        {
+          "content_chars": 123,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            7
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.529,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 8
+        },
+        {
+          "content_chars": 155,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            8
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.778,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 9
+        },
+        {
+          "content_chars": 169,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            9
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.458,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 10
+        },
+        {
+          "content_chars": 129,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            10
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.09,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 11
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            11
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.351,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 12
+        },
+        {
+          "content_chars": 104,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            12
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.795,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 13
+        },
+        {
+          "content_chars": 336,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            13
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.373,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 14
+        },
+        {
+          "content_chars": 198,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            14
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.316,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 15
+        },
+        {
+          "content_chars": 237,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 4.183,
+          "tool_calls": [
+            "search_documents"
+          ],
+          "turn": 16
+        },
+        {
+          "content_chars": 639,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            15
+          ],
+          "reasoning_chars": 0,
+          "seconds": 11.609,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 17
+        },
+        {
+          "content_chars": 292,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            16
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.405,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 18
+        },
+        {
+          "content_chars": 258,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            17
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.941,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 19
+        },
+        {
+          "content_chars": 127,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            18
+          ],
+          "reasoning_chars": 0,
+          "seconds": 6.044,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 20
+        },
+        {
+          "content_chars": 400,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            19
+          ],
+          "reasoning_chars": 0,
+          "seconds": 10.08,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 21
+        },
+        {
+          "content_chars": 77,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            20
+          ],
+          "reasoning_chars": 0,
+          "seconds": 8.153,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 22
+        },
+        {
+          "content_chars": 53,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            21
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.021,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 23
+        },
+        {
+          "content_chars": 298,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            22
+          ],
+          "reasoning_chars": 0,
+          "seconds": 8.5,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 24
+        },
+        {
+          "content_chars": 220,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            23
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.776,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 25
+        },
+        {
+          "content_chars": 206,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 23.724,
+          "tool_calls": [
+            "StructuredConclusion"
+          ],
+          "turn": 26
+        }
+      ],
+      "mutations": 8,
+      "provider_model": "openai/qwen/qwen3.8-27b",
+      "rag": {
+        "context_excerpts": 4,
+        "searches": [
+          {
+            "error": null,
+            "origin": "context",
+            "query": "The business traffic class on the shaped WAN uplink no longer receives its contractual guarantee of at least 8 Mbps under contention. Restore that guarantee without disrupting any other connectivity. lab_connectivity observed_throughput 8 user1 external1 203.0.113.10",
+            "results": [
+              {
+                "chunk": 94,
+                "id": "network_troubleshooting_guide_rag.md#94",
+                "score": 72.0067,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 93,
+                "id": "network_troubleshooting_guide_rag.md#93",
+                "score": 65.239,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 97,
+                "id": "network_troubleshooting_guide_rag.md#97",
+                "score": 41.5814,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 96,
+                "id": "network_troubleshooting_guide_rag.md#96",
+                "score": 39.4938,
+                "source": "network_troubleshooting_guide_rag.md"
+              }
+            ],
+            "seconds": 0.0,
+            "top_k": 4
+          },
+          {
+            "error": null,
+            "origin": "tool",
+            "query": "tc class show filter htb bandwidth guarantee wan uplink class rate ceil priority classifier",
+            "results": [
+              {
+                "chunk": 43,
+                "id": "network_troubleshooting_guide_rag.md#43",
+                "score": 45.1706,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 80,
+                "id": "network_troubleshooting_guide_rag.md#80",
+                "score": 42.629,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 81,
+                "id": "network_troubleshooting_guide_rag.md#81",
+                "score": 42.0439,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 44,
+                "id": "network_troubleshooting_guide_rag.md#44",
+                "score": 31.4345,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 41,
+                "id": "ipv4.md#41",
+                "score": 29.4994,
+                "source": "ipv4.md"
+              },
+              {
+                "chunk": 3,
+                "id": "qos.md#3",
+                "score": 26.4411,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 4,
+                "id": "qos.md#4",
+                "score": 24.3539,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 5,
+                "id": "qos.md#5",
+                "score": 24.0847,
+                "source": "qos.md"
+              }
+            ],
+            "seconds": 0.001,
+            "top_k": 8
+          },
+          {
+            "error": null,
+            "origin": "tool",
+            "query": "business traffic class 8 Mbps guarantee guest best-effort shaper 20 mbit eth2 wan1 ip 10.10.10.0 10.10.20.0",
+            "results": [
+              {
+                "chunk": 44,
+                "id": "network_troubleshooting_guide_rag.md#44",
+                "score": 79.4229,
+                "source": "network_troubleshooting_guide_rag.md"
+              },
+              {
+                "chunk": 5,
+                "id": "qos.md#5",
+                "score": 52.4163,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 4,
+                "id": "qos.md#4",
+                "score": 40.622,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 3,
+                "id": "qos.md#3",
+                "score": 36.7453,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 2,
+                "id": "qos.md#2",
+                "score": 36.4643,
+                "source": "qos.md"
+              },
+              {
+                "chunk": 43,
+                "id": "network_troubleshooting_guide_rag.md#43",
+                "score": 28.8221,
+                "source": "network_troubleshooting_guide_rag.md"
+              }
+            ],
+            "seconds": 0.002,
+            "top_k": 6
+          }
+        ],
+        "tool_searches": 2
+      },
+      "reads": 13,
+      "serving": {
+        "served_model_names": [
+          "anthropic/claude-sonnet-5.5",
+          "anthropic/claude-sonnet-5.5:batch",
+          "typesafe/jev-router",
+          "perceptron/perceptron-mk1.5",
+          "fireworks/ember-1",
+          "z-ai/glm-5.3-prime",
+          "qwen/qwen3.8-max-prime",
+          "stealth/space-bunny-alpha",
+          "aion-labs/aion-3.5-mini",
+          "aion-labs/aion-3.5",
+          "upstage/solar-mini4",
+          "cohere/command-a-plus",
+          "openai/gpt-6-luna-pro",
+          "openai/gpt-6-luna-pro:batch",
+          "openai/gpt-6-luna",
+          "openai/gpt-6-luna:batch",
+          "openai/gpt-6-sol-pro",
+          "openai/gpt-6-sol-pro:batch",
+          "openai/gpt-6-sol",
+          "openai/gpt-6-sol:batch",
+          "anthropic/claude-opus-5.5",
+          "anthropic/claude-opus-5.5:batch",
+          "xiaomi/mimo-v2.6-pro-ultraspeed",
+          "xiaomi/mimo-v2.6-flash",
+          "xiaomi/mimo-v2.6-pro",
+          "x-ai/grok-4.7",
+          "qwen/qwen3.8-omni-flash",
+          "prism-ml/ternary-bonsai-2-27b",
+          "z-ai/glm-5.3-flashx",
+          "unbiased/pareto",
+          "~deepseek/deepseek-pro-latest",
+          "~deepseek/deepseek-flash-latest",
+          "inference-net/schematron-v2-turbo",
+          "inference-net/schematron-v2-small",
+          "~openai/gpt-astra-latest",
+          "~openai/gpt-sol-latest",
+          "~openai/gpt-terra-latest",
+          "~openai/gpt-luna-latest",
+          "sakana/fugu-ultra-v2",
+          "sakana/fugu-max",
+          "inclusionai/ling-3.0-flash-vl",
+          "deepseek/deepseek-v4.1-flash",
+          "deepseek/deepseek-v4.1-flash:batch",
+          "inception/mercury-2.5",
+          "nex-agi/nex-n2.5-mini",
+          "nex-agi/nex-n2.5-pro",
+          "openai/gpt-6-astra",
+          "openai/gpt-6-astra:batch",
+          "openai/gpt-6-astra-pro",
+          "openai/gpt-6-astra-pro:batch",
+          "inclusionai/ling-3.0-flash-sante:free",
+          "qwen/qwen3.8-max-0902",
+          "meta/muse-spark-1.3-contributor",
+          "meta/muse-spark-1.3",
+          "google/gemini-3.8-flash",
+          "google/gemini-3.8-flash:batch",
+          "anthropic/claude-fable-5.1",
+          "anthropic/claude-fable-5.1:batch",
+          "ibm-granite/granite-4.2-8b",
+          "tencent/hy4-preview",
+          "inclusionai/ling-3.0-flash-fin",
+          "~z-ai/glm-flash-latest",
+          "qwen/qwen3.8-flash",
+          "z-ai/glm-5.3-flash",
+          "z-ai/glm-5.3-flash:batch",
+          "meta/muse-spark-1.2-contributor",
+          "deepseek/deepseek-v4-flash-vision-exp",
+          "tencent/hy-mt2-1.8b",
+          "tencent/hy-mt2-30b-a3b",
+          "~z-ai/glm-latest",
+          "tencent/hy-mt2-7b",
+          "z-ai/glm-5.3",
+          "z-ai/glm-5.3:batch",
+          "qwen/qwen3.8-27b",
+          "qwen/qwen3.8-27b:free",
+          "dots-studio/dots-3-note-preview:free",
+          "google/gemini-3.7-flash",
+          "google/gemini-3.7-flash:batch",
+          "bytedance-seed/seed-2-1-turbo",
+          "qwen/qwen3.8-2.4t-a95b",
+          "bytedance-seed/seed-2.0-code",
+          "deepseek/deepseek-v4-pro-0813",
+          "x-ai/grok-4.6",
+          "liquid/lfm-2.5-2.6b:free",
+          "nvidia/nemotron-3.5-lightning",
+          "nvidia/nemotron-3.5-lightning:free",
+          "sakana/sakana-namazu",
+          "upstage/solar-pro4",
+          "meta/muse-glimmer-30b",
+          "meta/muse-spark-1.2",
+          "~deepseek/deepseek-v4-flash-latest",
+          "deepseek/deepseek-v4-flash-0731",
+          "thinkingmachines/inkling-small",
+          "thinkingmachines/inkling-small:free",
+          "qwen/qwen3.7-flash",
+          "anthropic/claude-opus-5",
+          "anthropic/claude-opus-5:batch",
+          "inclusionai/ling-3.0-flash",
+          "poolside/laguna-s-2.1",
+          "poolside/laguna-s-2.1:free",
+          "google/gemini-3.6-flash",
+          "google/gemini-3.6-flash:batch",
+          "google/gemini-3.5-flash-lite",
+          "google/gemini-3.5-flash-lite:batch",
+          "meituan/longcat-2.0",
+          "thinkingmachines/inkling",
+          "thinkingmachines/inkling:free",
+          "openrouter/auto-beta",
+          "moonshotai/kimi-k3",
+          "moonshotai/kimi-k3:batch",
+          "meta/muse-spark-1.1",
+          "kwaipilot/kat-coder-pro-v2.5",
+          "openai/gpt-5.6-luna-pro",
+          "openai/gpt-5.6-luna-pro:batch",
+          "openai/gpt-5.6-luna",
+          "openai/gpt-5.6-luna:batch",
+          "openai/gpt-5.6-terra-pro",
+          "openai/gpt-5.6-terra-pro:batch",
+          "openai/gpt-5.6-terra",
+          "openai/gpt-5.6-terra:batch",
+          "openai/gpt-5.6-sol-pro",
+          "openai/gpt-5.6-sol-pro:batch",
+          "openai/gpt-5.6-sol",
+          "openai/gpt-5.6-sol:batch",
+          "x-ai/grok-4.5",
+          "~x-ai/grok-latest",
+          "aion-labs/aion-3.0-mini",
+          "aion-labs/aion-3.0",
+          "tencent/hy3",
+          "poolside/laguna-xs-2.1",
+          "poolside/laguna-xs-2.1:free",
+          "anthropic/claude-sonnet-5",
+          "anthropic/claude-sonnet-5:batch",
+          "google/gemini-3.1-flash-lite-image",
+          "sakana/fugu-ultra",
+          "google/gemini-3.1-flash-image",
+          "google/gemini-3-pro-image",
+          "cohere/north-mini-code:free",
+          "z-ai/glm-5.2",
+          "openrouter/fusion",
+          "moonshotai/kimi-k2.7-code",
+          "~anthropic/claude-fable-latest",
+          "anthropic/claude-fable-5",
+          "anthropic/claude-fable-5:batch",
+          "nvidia/nemotron-3.5-content-safety",
+          "nvidia/nemotron-3.5-content-safety:free",
+          "nvidia/nemotron-3-ultra-550b-a55b",
+          "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "qwen/qwen3.7-plus",
+          "minimax/minimax-m3",
+          "stepfun/step-3.7-flash",
+          "anthropic/claude-opus-4.8",
+          "anthropic/claude-opus-4.8:batch",
+          "qwen/qwen3.7-max",
+          "x-ai/grok-build-0.1",
+          "google/gemini-3.5-flash",
+          "google/gemini-3.5-flash:batch",
+          "perceptron/perceptron-mk1",
+          "google/gemini-3.1-flash-lite",
+          "google/gemini-3.1-flash-lite:batch",
+          "openai/gpt-chat-latest",
+          "x-ai/grok-4.3",
+          "x-ai/grok-4.3:batch",
+          "mistralai/mistral-medium-3-5",
+          "mistralai/mistral-medium-3-5:batch",
+          "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+          "~anthropic/claude-haiku-latest",
+          "~openai/gpt-mini-latest",
+          "~google/gemini-pro-latest",
+          "~moonshotai/kimi-latest",
+          "~google/gemini-flash-latest",
+          "~anthropic/claude-sonnet-latest",
+          "qwen/qwen3.5-plus-20260420",
+          "qwen/qwen3.6-flash",
+          "qwen/qwen3.6-35b-a3b",
+          "qwen/qwen3.6-max-preview",
+          "qwen/qwen3.6-27b",
+          "openai/gpt-5.5-pro",
+          "openai/gpt-5.5-pro:batch",
+          "openai/gpt-5.5",
+          "openai/gpt-5.5:batch",
+          "deepseek/deepseek-v4-pro",
+          "deepseek/deepseek-v4-flash",
+          "tencent/hy3-preview",
+          "xiaomi/mimo-v2.5-pro",
+          "xiaomi/mimo-v2.5",
+          "openai/gpt-5.4-image-2",
+          "~anthropic/claude-opus-latest",
+          "openrouter/pareto-code",
+          "moonshotai/kimi-k2.6",
+          "anthropic/claude-opus-4.7",
+          "anthropic/claude-opus-4.7:batch",
+          "z-ai/glm-5.1",
+          "google/gemma-4-26b-a4b-it",
+          "google/gemma-4-26b-a4b-it:free",
+          "google/gemma-4-31b-it",
+          "google/gemma-4-31b-it:free",
+          "qwen/qwen3.6-plus",
+          "z-ai/glm-5v-turbo",
+          "arcee-ai/trinity-large-thinking",
+          "x-ai/grok-4.20-multi-agent",
+          "x-ai/grok-4.20",
+          "google/lyria-3-pro-preview",
+          "google/lyria-3-clip-preview",
+          "rekaai/reka-edge",
+          "minimax/minimax-m2.7",
+          "openai/gpt-5.4-nano",
+          "openai/gpt-5.4-nano:batch",
+          "openai/gpt-5.4-mini",
+          "openai/gpt-5.4-mini:batch",
+          "mistralai/mistral-small-2603",
+          "mistralai/mistral-small-2603:batch",
+          "z-ai/glm-5-turbo",
+          "nvidia/nemotron-3-super-120b-a12b",
+          "nvidia/nemotron-3-super-120b-a12b:free",
+          "bytedance-seed/seed-2.0-lite",
+          "qwen/qwen3.5-9b",
+          "openai/gpt-5.4-pro",
+          "openai/gpt-5.4-pro:batch",
+          "openai/gpt-5.4",
+          "openai/gpt-5.4:batch",
+          "inception/mercury-2",
+          "google/gemini-3.1-flash-lite-preview",
+          "bytedance-seed/seed-2.0-mini",
+          "google/gemini-3.1-flash-image-preview",
+          "qwen/qwen3.5-35b-a3b",
+          "qwen/qwen3.5-27b",
+          "qwen/qwen3.5-122b-a10b",
+          "qwen/qwen3.5-flash-02-23",
+          "google/gemini-3.1-pro-preview-customtools",
+          "openai/gpt-5.3-codex",
+          "aion-labs/aion-2.0",
+          "google/gemini-3.1-pro-preview",
+          "google/gemini-3.1-pro-preview:batch",
+          "anthropic/claude-sonnet-4.6",
+          "anthropic/claude-sonnet-4.6:batch",
+          "qwen/qwen3.5-plus-02-15",
+          "qwen/qwen3.5-397b-a17b",
+          "minimax/minimax-m2.5",
+          "z-ai/glm-5",
+          "qwen/qwen3-max-thinking",
+          "anthropic/claude-opus-4.6",
+          "anthropic/claude-opus-4.6:batch",
+          "qwen/qwen3-coder-next",
+          "openrouter/free",
+          "stepfun/step-3.5-flash",
+          "moonshotai/kimi-k2.5",
+          "upstage/solar-pro-3",
+          "minimax/minimax-m2-her",
+          "writer/palmyra-x5",
+          "openai/gpt-audio",
+          "openai/gpt-audio-mini",
+          "z-ai/glm-4.7-flash",
+          "openai/gpt-5.2-codex",
+          "bytedance-seed/seed-1.6-flash",
+          "bytedance-seed/seed-1.6",
+          "minimax/minimax-m2.1",
+          "z-ai/glm-4.7",
+          "google/gemini-3-flash-preview",
+          "google/gemini-3-flash-preview:batch",
+          "nvidia/nemotron-3-nano-30b-a3b",
+          "openai/gpt-5.2-chat",
+          "openai/gpt-5.2-pro",
+          "openai/gpt-5.2-pro:batch",
+          "openai/gpt-5.2",
+          "openai/gpt-5.2:batch",
+          "mistralai/devstral-2512",
+          "relace/relace-search",
+          "z-ai/glm-4.6v",
+          "openrouter/bodybuilder",
+          "openai/gpt-5.1-codex-max",
+          "amazon/nova-2-lite-v1",
+          "mistralai/ministral-14b-2512",
+          "mistralai/ministral-8b-2512",
+          "mistralai/ministral-8b-2512:batch",
+          "mistralai/ministral-3b-2512",
+          "mistralai/mistral-large-2512",
+          "mistralai/mistral-large-2512:batch",
+          "deepseek/deepseek-v3.2",
+          "anthropic/claude-opus-4.5",
+          "anthropic/claude-opus-4.5:batch",
+          "google/gemini-3-pro-image-preview",
+          "openai/gpt-5.1",
+          "openai/gpt-5.1:batch",
+          "openai/gpt-5.1-codex",
+          "openai/gpt-5.1-codex-mini",
+          "moonshotai/kimi-k2-thinking",
+          "amazon/nova-premier-v1",
+          "perplexity/sonar-pro-search",
+          "mistralai/voxtral-small-24b-2507",
+          "openai/gpt-oss-safeguard-20b",
+          "minimax/minimax-m2",
+          "qwen/qwen3-vl-32b-instruct",
+          "ibm-granite/granite-4.0-h-micro",
+          "openai/gpt-5-image-mini",
+          "anthropic/claude-haiku-4.5",
+          "anthropic/claude-haiku-4.5:batch",
+          "qwen/qwen3-vl-8b-thinking",
+          "qwen/qwen3-vl-8b-instruct",
+          "openai/gpt-5-image",
+          "google/gemini-2.5-flash-image",
+          "qwen/qwen3-vl-30b-a3b-thinking",
+          "qwen/qwen3-vl-30b-a3b-instruct",
+          "openai/gpt-5-pro",
+          "openai/gpt-5-pro:batch",
+          "z-ai/glm-4.6",
+          "anthropic/claude-sonnet-4.5",
+          "anthropic/claude-sonnet-4.5:batch",
+          "deepseek/deepseek-v3.2-exp",
+          "thedrummer/cydonia-24b-v4.1",
+          "relace/relace-apply-3",
+          "qwen/qwen3-vl-235b-a22b-thinking",
+          "qwen/qwen3-vl-235b-a22b-instruct",
+          "qwen/qwen3-max",
+          "qwen/qwen3-coder-plus",
+          "deepseek/deepseek-v3.1-terminus",
+          "qwen/qwen3-coder-flash",
+          "qwen/qwen3-next-80b-a3b-thinking",
+          "qwen/qwen3-next-80b-a3b-instruct",
+          "qwen/qwen-plus-2025-07-28",
+          "moonshotai/kimi-k2-0905",
+          "qwen/qwen3-30b-a3b-thinking-2507",
+          "nousresearch/hermes-4-405b",
+          "deepseek/deepseek-chat-v3.1",
+          "mistralai/mistral-medium-3.1",
+          "mistralai/mistral-medium-3.1:batch",
+          "z-ai/glm-4.5v",
+          "openai/gpt-5",
+          "openai/gpt-5:batch",
+          "openai/gpt-5-mini",
+          "openai/gpt-5-mini:batch",
+          "openai/gpt-5-nano",
+          "openai/gpt-5-nano:batch",
+          "openai/gpt-oss-120b",
+          "openai/gpt-oss-120b:batch",
+          "openai/gpt-oss-20b",
+          "openai/gpt-oss-20b:batch",
+          "anthropic/claude-opus-4.1",
+          "anthropic/claude-opus-4.1:batch",
+          "mistralai/codestral-2508",
+          "mistralai/codestral-2508:batch",
+          "qwen/qwen3-coder-30b-a3b-instruct",
+          "qwen/qwen3-30b-a3b-instruct-2507",
+          "z-ai/glm-4.5",
+          "z-ai/glm-4.5-air",
+          "qwen/qwen3-235b-a22b-thinking-2507",
+          "qwen/qwen3-coder",
+          "bytedance/ui-tars-1.5-7b",
+          "google/gemini-2.5-flash-lite",
+          "google/gemini-2.5-flash-lite:batch",
+          "qwen/qwen3-235b-a22b-2507",
+          "moonshotai/kimi-k2",
+          "cognitivecomputations/dolphin-mistral-24b-venice-edition",
+          "tencent/hunyuan-a13b-instruct",
+          "morph/morph-v3-large",
+          "morph/morph-v3-fast",
+          "baidu/ernie-4.5-vl-424b-a47b",
+          "mistralai/mistral-small-3.2-24b-instruct",
+          "minimax/minimax-m1",
+          "google/gemini-2.5-flash",
+          "google/gemini-2.5-flash:batch",
+          "google/gemini-2.5-pro",
+          "google/gemini-2.5-pro:batch",
+          "openai/o3-pro",
+          "google/gemini-2.5-pro-preview",
+          "deepseek/deepseek-r1-0528",
+          "anthropic/claude-sonnet-4",
+          "mistralai/mistral-medium-3",
+          "meta-llama/llama-guard-4-12b",
+          "qwen/qwen3-30b-a3b",
+          "qwen/qwen3-8b",
+          "qwen/qwen3-14b",
+          "qwen/qwen3-32b",
+          "qwen/qwen3-235b-a22b",
+          "openai/o4-mini-high",
+          "openai/o3",
+          "openai/o3:batch",
+          "openai/o4-mini",
+          "openai/o4-mini:batch",
+          "openai/gpt-4.1",
+          "openai/gpt-4.1:batch",
+          "openai/gpt-4.1-mini",
+          "openai/gpt-4.1-mini:batch",
+          "openai/gpt-4.1-nano",
+          "openai/gpt-4.1-nano:batch",
+          "meta-llama/llama-4-maverick",
+          "meta-llama/llama-4-scout",
+          "deepseek/deepseek-chat-v3-0324",
+          "openai/o1-pro",
+          "mistralai/mistral-small-3.1-24b-instruct",
+          "google/gemma-3-4b-it",
+          "google/gemma-3-12b-it",
+          "cohere/command-a",
+          "rekaai/reka-flash-3",
+          "google/gemma-3-27b-it",
+          "thedrummer/skyfall-36b-v2",
+          "perplexity/sonar-reasoning-pro",
+          "perplexity/sonar-pro",
+          "perplexity/sonar-deep-research",
+          "mistralai/mistral-saba",
+          "openai/o3-mini-high",
+          "aion-labs/aion-rp-llama-3.1-8b",
+          "qwen/qwen2.5-vl-72b-instruct",
+          "qwen/qwen-plus",
+          "openai/o3-mini",
+          "openai/o3-mini:batch",
+          "mistralai/mistral-small-24b-instruct-2501",
+          "perplexity/sonar",
+          "deepseek/deepseek-r1",
+          "minimax/minimax-01",
+          "microsoft/phi-4",
+          "deepseek/deepseek-chat",
+          "sao10k/l3.3-euryale-70b",
+          "openai/o1",
+          "cohere/command-r7b-12-2024",
+          "meta-llama/llama-3.3-70b-instruct",
+          "amazon/nova-lite-v1",
+          "amazon/nova-micro-v1",
+          "amazon/nova-pro-v1",
+          "openai/gpt-4o-2024-11-20",
+          "mistralai/mistral-large-2407",
+          "qwen/qwen-2.5-coder-32b-instruct",
+          "thedrummer/unslopnemo-12b",
+          "anthracite-org/magnum-v4-72b",
+          "qwen/qwen-2.5-7b-instruct",
+          "meta-llama/llama-3.2-1b-instruct",
+          "meta-llama/llama-3.2-3b-instruct",
+          "qwen/qwen-2.5-72b-instruct",
+          "cohere/command-r-08-2024",
+          "cohere/command-r-plus-08-2024",
+          "sao10k/l3.1-euryale-70b",
+          "nousresearch/hermes-3-llama-3.1-70b",
+          "nousresearch/hermes-3-llama-3.1-405b",
+          "sao10k/l3-lunaris-8b",
+          "openai/gpt-4o-2024-08-06",
+          "meta-llama/llama-3.1-70b-instruct",
+          "meta-llama/llama-3.1-8b-instruct",
+          "mistralai/mistral-nemo",
+          "openai/gpt-4o-mini",
+          "openai/gpt-4o-mini-2024-07-18",
+          "openai/gpt-4o-mini:batch",
+          "google/gemma-2-27b-it",
+          "openai/gpt-4o",
+          "openai/gpt-4o-2024-05-13",
+          "openai/gpt-4o:batch",
+          "mistralai/mixtral-8x22b-instruct",
+          "microsoft/wizardlm-2-8x22b",
+          "openai/gpt-4-turbo",
+          "openai/gpt-4-turbo:batch",
+          "mistralai/mistral-large",
+          "openai/gpt-3.5-turbo-0613",
+          "openrouter/auto",
+          "openai/gpt-3.5-turbo-instruct",
+          "openai/gpt-3.5-turbo-16k",
+          "mancer/weaver",
+          "undi95/remm-slerp-l2-13b",
+          "gryphe/mythomax-l2-13b",
+          "openai/gpt-3.5-turbo",
+          "openai/gpt-3.5-turbo:batch",
+          "openai/gpt-4"
+        ]
+      },
+      "successful_mutations": 2,
+      "termination": {
+        "cause": "own_conclusion",
+        "detail": "completed",
+        "turn": 26
+      },
+      "token_usage": {
+        "input_tokens": 473931,
+        "output_tokens": 3781,
+        "total_tokens": 477712
+      },
+      "tool_call_count": 23,
+      "trace_ref": null,
+      "unsafe_operations": 0,
+      "validations": 2
+    },
+    "final_observation": {
+      "checks": [
+        {
+          "connectivity": [
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.83 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.627 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.775 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2026ms\nrtt min/avg/max/mdev = 0.627/1.411/2.833/1.006 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.900 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.815 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.708 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.708/0.807/0.900/0.078 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=2.03 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.695 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.787 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2027ms\nrtt min/avg/max/mdev = 0.695/1.171/2.031/0.609 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.761 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.763 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.710 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2052ms\nrtt min/avg/max/mdev = 0.710/0.744/0.763/0.024 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.774 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.678 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.781 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.678/0.744/0.781/0.047 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=1.03 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.656 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.929 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2005ms\nrtt min/avg/max/mdev = 0.656/0.870/1.025/0.156 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=2.31 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.285 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.310 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2032ms\nrtt min/avg/max/mdev = 0.285/0.967/2.307/0.947 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "finance1",
+              "success": true
+            },
+            {
+              "destination": "finance1",
+              "destination_ip": "10.10.30.10",
+              "hostname": null,
+              "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.236 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.269 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.274 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2037ms\nrtt min/avg/max/mdev = 0.236/0.259/0.274/0.016 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.14 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.493 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.592 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2012ms\nrtt min/avg/max/mdev = 0.493/1.076/2.143/0.755 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.651 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.517 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.493 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2045ms\nrtt min/avg/max/mdev = 0.493/0.553/0.651/0.069 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.532 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.486 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.483 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.483/0.500/0.532/0.022 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.571 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.540 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.637 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.540/0.582/0.637/0.040 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.627 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.562 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.563 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.562/0.584/0.627/0.030 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.780 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.613 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.498 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2040ms\nrtt min/avg/max/mdev = 0.498/0.630/0.780/0.115 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            }
+          ],
+          "passed": true,
+          "type": "lab_connectivity"
+        },
+        {
+          "limits": {
+            "enforced_floor_mbps": 6.8,
+            "min_mbps": 8.0,
+            "tolerance": 0.85
+          },
+          "measurement": {
+            "contended": true,
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_observed": true,
+            "destination": "external1",
+            "destination_ip": "203.0.113.10",
+            "error": null,
+            "passed": true,
+            "seconds": 10,
+            "source": "user1",
+            "throughput_mbps": 8.607,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "type": "observed_throughput"
+        }
+      ],
+      "passed": true,
+      "type": "public_success_criteria"
+    },
+    "final_response": {
+      "status": "completed",
+      "summary": "The business class on wan1's shaped WAN egress (eth2 HTB) was broken: baseline user1\u2192external1 measured 0.002 Mbps under contention while all connectivity passed. Diagnosis showed the HTB root and best-effort class 1:20 (root default) were intact, but the business class 1:10 and its classifier were missing, so user1 (10.10.10.0/24) traffic fell to best-effort. I restored the guarantee in place on wan1/eth2: created class 1:10 (rate 9mbit, ceil 20mbit, prio 1) and added a u32 classifier matching ip src 10.10.10.0/24 into flowid 1:10. No other device was modified. Validation: lab_connectivity all passed, and observed_throughput under contention measured 8.607 Mbps (min 8.0, floor 6.8) \u2014 public_success_criteria passed."
+    },
+    "mode": "self_execute",
+    "model_reported_by_sut": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "status": "completed",
+    "summary": "The business class on wan1's shaped WAN egress (eth2 HTB) was broken: baseline user1\u2192external1 measured 0.002 Mbps under contention while all connectivity passed. Diagnosis showed the HTB root and best-effort class 1:20 (root default) were intact, but the business class 1:10 and its classifier were missing, so user1 (10.10.10.0/24) traffic fell to best-effort. I restored the guarantee in place on wan1/eth2: created class 1:10 (rate 9mbit, ceil 20mbit, prio 1) and added a u32 classifier matching ip src 10.10.10.0/24 into flowid 1:10. No other device was modified. Validation: lab_connectivity all passed, and observed_throughput under contention measured 8.607 Mbps (min 8.0, floor 6.8) \u2014 public_success_criteria passed.",
+    "sut_identity": "langchain_rag_agent",
+    "sut_version": "1.0.0",
+    "verified": true
+  }
+}

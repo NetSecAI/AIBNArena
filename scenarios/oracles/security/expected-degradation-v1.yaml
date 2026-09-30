@@ -1,0 +1,20 @@
+schema_version: "1.0"
+oracle_id: security.control.expected_degradation
+version: 1.0.0
+description: The controlled fault makes the scenario-specific violation observable.
+domain: security
+phase: expected_degradation
+probes:
+  - id: security_control
+    type: security_event
+    source: testbed
+    destination: security_target
+    protocol: tcp
+    attempts: 3
+    timeout_seconds: 2
+    metrics: [event_count]
+    thresholds:
+      - {metric: event_count, operator: gte, value: 1}
+    aggregation: {method: maximum}
+    success: {mode: all}
+success: {mode: all}

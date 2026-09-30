@@ -1,0 +1,43 @@
+{
+  "faults": [
+    {
+      "id": "leaf1_client_interface_down",
+      "description": "Disable the leaf1 interface facing client1.",
+      "intent": "Restore connectivity between client1 and client2.",
+      "expected_failure": "client1 cannot reach client2 and client2 cannot reach client1.",
+      "commands": [
+        {
+          "target": "leaf1",
+          "mode": "srl_cli",
+          "command": "set / interface ethernet-1/2 admin-state disable"
+        }
+      ]
+    },
+    {
+      "id": "leaf1_route_to_client2_deleted",
+      "description": "Remove leaf1's static route towards client2's subnet.",
+      "intent": "Restore connectivity between client1 and client2.",
+      "expected_failure": "client1 traffic towards 192.168.20.0/24 is no longer routed correctly.",
+      "commands": [
+        {
+          "target": "leaf1",
+          "mode": "srl_cli",
+          "command": "delete / network-instance default static-routes route 192.168.20.0/24"
+        }
+      ]
+    },
+    {
+      "id": "client1_default_route_wrong",
+      "description": "Point client1's default route to a non-existent gateway.",
+      "intent": "Restore connectivity between client1 and client2.",
+      "expected_failure": "client1 cannot send traffic outside 192.168.10.0/24.",
+      "commands": [
+        {
+          "target": "client1",
+          "mode": "shell",
+          "command": "ip route replace default via 192.168.10.254"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.756600017368328e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "count": 10,
+            "destination": "web1",
+            "destination_ip": "10.10.40.10",
+            "source": "external1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 12.775267631001043,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-c9c484f89418f3e079ed502d7199fdb175920bc49425c28b701fb11a2058032c.json",
+      "category": "read",
+      "duration_seconds": 0.9377673660001165,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2",
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.3216087900000275,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2",
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 2.941684584999166,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2",
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.0212706199999957,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2",
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.5640198290002445,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2",
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.0808404050003446,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2",
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.1700702920006734,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "external1",
+          "web1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.9254692170015915,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "external1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.40589772400016955,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc del dev eth1 root"
+            ],
+            "reason": "tc qdisc show shows 'qdisc netem ... dev eth1 root ... delay 3.6s' on external1 eth1, adding 3.6s egress delay to the affected external1->web1 path (observed RTT ~3980ms, requirement max 10ms). Removing it returns the interface to its default noqueue qdisc.",
+            "rollback_commands": [
+              "tc qdisc add dev eth1 root netem delay 3600ms limit 1000"
+            ],
+            "target": "external1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 7.327100138354581e-05,
+      "error": "update_config.change.rollback_commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported qdisc hierarchy or netem form",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc del dev eth1 root"
+            ],
+            "reason": "tc qdisc show on external1 shows 'qdisc netem ... dev eth1 root ... delay 3.6s', adding 3.6s egress delay to the external1->web1 path (observed RTT ~3980ms; requirement max 10ms). Removing it returns the interface to its default noqueue qdisc.",
+            "target": "external1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.21276278599907528,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_bd09048c27b0cd20"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          },
+          {
+            "count": 10,
+            "destination": "web1",
+            "destination_ip": "10.10.40.10",
+            "source": "external1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 46.25628464699912,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

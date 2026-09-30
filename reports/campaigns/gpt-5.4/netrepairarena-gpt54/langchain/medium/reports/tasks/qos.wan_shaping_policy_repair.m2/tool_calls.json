@@ -1,0 +1,265 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 6.345199653878808e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "count": 3,
+            "destination": "external1",
+            "destination_ip": "203.0.113.10",
+            "source": "user1",
+            "timeout_seconds": 3,
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 2.1749962350004353,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2863714080012869,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "/qos",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.743468494998524,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.12477571700583212,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class show dev eth2",
+              "tc filter show dev eth2"
+            ],
+            "reason": "Need to inspect HTB classes and filters on wan1 eth2 because only root qdisc is visible and business class guarantee failure likely stems from missing or incorrect class rate/filter mapping on the shaped WAN uplink.",
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 4.510601866059005e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5005255050200503,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "wan1 eth2 has only an HTB root qdisc visible and the business traffic class is no longer receiving its 8 Mbps guarantee under contention; rebuilding the shaped WAN uplink hierarchy with an 8 Mbps business class restores the contractual minimum while keeping overall shaping intact.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "classes": [
+              {
+                "ceil": "10mbit",
+                "classid": "1:1",
+                "parent": "root",
+                "rate": "10mbit"
+              },
+              {
+                "ceil": "10mbit",
+                "classid": "1:10",
+                "parent": "1:1",
+                "rate": "8mbit"
+              },
+              {
+                "ceil": "10mbit",
+                "classid": "1:20",
+                "parent": "1:1",
+                "rate": "2mbit"
+              }
+            ],
+            "default": "0x20"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.597998875193298e-05,
+      "error": "update_object: htb.default must be an integer",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "wan1 eth2 has an HTB root qdisc but the business class guarantee is not being met; rebuilding the eth2 HTB hierarchy with an explicit 8 Mbps business class guarantee is the narrowest repair on the shaped WAN uplink.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "classes": [
+              {
+                "ceil": "10mbit",
+                "classid": "1:1",
+                "parent": "root",
+                "rate": "10mbit"
+              },
+              {
+                "ceil": "10mbit",
+                "classid": "1:10",
+                "parent": "1:1",
+                "rate": "8mbit"
+              },
+              {
+                "ceil": "10mbit",
+                "classid": "1:20",
+                "parent": "1:1",
+                "rate": "2mbit"
+              }
+            ],
+            "default": 32
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.7085002986714244e-05,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "wan1 eth2 has an HTB root qdisc but the business traffic guarantee is failing; rebuilding the WAN HTB hierarchy with an explicit 8 Mbps business class is the scoped repair on the implicated device and interface.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "classes": [
+              {
+                "ceil": "10mbit",
+                "id": "1:1",
+                "parent": "root",
+                "rate": "10mbit"
+              },
+              {
+                "ceil": "10mbit",
+                "id": "1:10",
+                "parent": "1:1",
+                "rate": "8mbit"
+              },
+              {
+                "ceil": "10mbit",
+                "id": "1:20",
+                "parent": "1:1",
+                "rate": "2mbit"
+              }
+            ],
+            "default": 32
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00014906399883329868,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; invalid tc handle 'root'",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 64.27176827201038,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

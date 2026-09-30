@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-v2-20260927T135117Z/langchain_agent-gpt-5-4-connectivity-wrong_routing_table-m5-fault-seed259566329-4721cbc2315d.json",
+    "sha256": "88071791c1c799ed16c0dc12740ad32d9735aa0f2b1713758a415dffa851f7f5",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-gpt-5-4-connectivity-wrong_routing_table-m5-fault-seed259566329-4721cbc2315d",
+    "created_at": "2026-09-27T17:03:14.188403+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-gpt-5-4-connectivity-wrong_routing_table-m5-fault-seed259566329",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.wrong_routing_table.m5",
+      "sut_task_id": "sut-02deee59cd8c09857563e22ef7be3887",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "failed",
+    "sut_verified": false,
+    "final_summary": "Initial validation showed only external1<->web1 failing while all other IPv4 paths were healthy. I confirmed leaf2 provides 10.10.40.1/24 toward web1 and 203.0.113.1/24 toward external1, then added a default route on leaf2 pointing to 203.0.113.10. Post-change public validation still showed 100% packet loss both external1->web1 and web1->external1, so the safe narrow repair attempted did not restore the failing path.",
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Initial validation showed only external1<->web1 failing while all other IPv4 paths were healthy. I confirmed leaf2 provides 10.10.40.1/24 toward web1 and 203.0.113.1/24 toward external1, then added a default route on leaf2 pointing to 203.0.113.10. Post-change public validation still showed 100% packet loss both external1->web1 and web1->external1, so the safe narrow repair attempted did not restore the failing path.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -30.6172,
+      "method": "endpoint_wrong_default_gateway",
+      "operation": "set_default_route_gateway",
+      "reason": null,
+      "reference": "On external1, the default route points to 203.0.113.254, a gateway address that does not exist on the internet segment; it should point to 203.0.113.1.",
+      "score": -30.6172,
+      "target": "external1"
+    },
+    "success": false,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 195.1509034249757,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": false,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": false,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Initial validation showed only external1<->web1 failing while all other IPv4 paths were healthy. I confirmed leaf2 provides 10.10.40.1/24 toward web1 and 203.0.113.1/24 toward external1, then added a default route on leaf2 pointing to 203.0.113.10. Post-change public validation still showed 100% packet loss both external1->web1 and web1->external1, so the safe narrow repair attempted did not restore the failing path.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -30.6172,
+      "method": "endpoint_wrong_default_gateway",
+      "operation": "set_default_route_gateway",
+      "reason": null,
+      "reference": "On external1, the default route points to 203.0.113.254, a gateway address that does not exist on the internet segment; it should point to 203.0.113.1.",
+      "score": -30.6172,
+      "target": "external1"
+    },
+    "domain": "connectivity",
+    "environment_success": false,
+    "failed_operation_count": 3,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 1,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 0.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 20,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 1,
+    "successful_read_count": 19,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 24,
+    "containerlab_reads": 20,
+    "containerlab_mutations": 1,
+    "containerlab_mutations_ok": 1,
+    "sut_validations": 2,
+    "failed_operations": 3,
+    "unsafe_operations": 0,
+    "input_tokens": 304278,
+    "output_tokens": 1231,
+    "total_tokens": 305509,
+    "recorded": {
+      "ani_mutations": 1,
+      "ani_reads": 20,
+      "failed_operations": 3,
+      "input_tokens": 304278,
+      "llm_calls": 24,
+      "output_tokens": 1231,
+      "successful_mutations": 1,
+      "successful_reads": 19,
+      "total_tokens": 305509,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 38.646,
+    "action_seconds": 0.492,
+    "reading_seconds": 24.982,
+    "validation_seconds": 130.921,
+    "episode_seconds": 195.1509034249757,
+    "unaccounted_seconds": 0.11,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 304278,
+    "output_tokens": 1231,
+    "total_tokens": 305509,
+    "llm_calls": 24,
+    "output_tokens_per_call": 51.3,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 2,
+    "last_public_validation_passed": false
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": false,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 22,
+      "calls": 23
+    },
+    "repeat_action_rate": {
+      "repeated": 6,
+      "calls": 23
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": false
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": true
+    },
+    "llm_found_problem_rate": {
+      "fault_located": false,
+      "change_reached_the_faulty_device": false,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 2,
+      "check_config": 20,
+      "apply_config": 1
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 23
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "20 of 23 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 305509
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 38.646,
+        "action_seconds": 0.492,
+        "reading_seconds": 24.982,
+        "validation_seconds": 130.921,
+        "episode_seconds": 195.1509034249757,
+        "unaccounted_seconds": 0.11
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 23
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 2
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": false
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: leaf2"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 65.7555891519878,
+    "calculate_metrics": 7.335899863392115e-05,
+    "deploy_reset_testbed": 17.37634032400092,
+    "evaluate_degradation": 6.328868433018215,
+    "evaluate_healthy": 22.477663385972846,
+    "evaluate_repair_preservation": 103.06703413499054,
+    "inject_fault": 0.13309108497924171,
+    "invoke_sut": 195.1699148780026,
+    "load_configuration": 0.00017908599693328142,
+    "load_oracles": 0.00526548401103355,
+    "load_validate_scenario": 0.03470665498753078,
+    "record_baseline": 4.341010935604572e-06,
+    "restore_destroy": 7.0370091080258135,
+    "score_diagnosis": 0.7231495100131724,
+    "snapshot_after_sut": 6.083813006000128,
+    "snapshot_before_sut": 8.183099113986827,
+    "snapshot_healthy": 7.94604986498598,
+    "write_result": 0.007709967001574114
+  },
+  "files": {
+    "record": "../../../records/connectivity.wrong_routing_table.m5.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.wrong_routing_table.m5.judge.log",
+    "devices": "../../../logs/devices/connectivity.wrong_routing_table.m5/",
+    "note": "relative to this folder"
+  }
+}

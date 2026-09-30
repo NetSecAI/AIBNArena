@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/ibn/containerlab_runtime_profile.schema.json",
+  "title": "Private ContainerLab scenario runtime profile",
+  "type": "object",
+  "required": ["schema_version", "runtime_profile"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "runtime_profile": {
+      "type": "object",
+      "required": ["id", "topology_id", "environment", "nodes", "operations"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "topology_id": {"type": "string", "minLength": 1},
+        "environment": {
+          "type": "object",
+          "required": ["type", "lab_name", "topology_path", "connectivity_checks"],
+          "properties": {
+            "type": {"const": "containerlab"},
+            "lab_name": {"type": "string", "minLength": 1},
+            "topology_path": {"type": "string", "minLength": 1},
+            "connectivity_checks": {"type": "array", "minItems": 1}
+          }
+        },
+        "nodes": {"type": "object", "minProperties": 1},
+        "operations": {"type": "object", "minProperties": 1}
+      }
+    }
+  },
+  "additionalProperties": false
+}

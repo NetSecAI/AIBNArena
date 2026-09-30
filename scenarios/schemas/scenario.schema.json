@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/ibn/scenario.schema.json",
+  "title": "Generic IBN benchmark scenario",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scenario",
+    "version",
+    "oracles"
+  ],
+  "if": {
+    "required": [
+      "task"
+    ],
+    "properties": {
+      "task": {
+        "type": "object"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "base_variant"
+    ]
+  },
+  "anyOf": [
+    {
+      "required": [
+        "task"
+      ]
+    },
+    {
+      "required": [
+        "task_mode"
+      ]
+    }
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "oracles": {
+      "type": "object",
+      "required": ["healthy", "expected_degradation", "repair", "preservation"],
+      "properties": {
+        "healthy": {"$ref": "#/$defs/oracle_reference"},
+        "expected_degradation": {"$ref": "#/$defs/oracle_reference"},
+        "repair": {"$ref": "#/$defs/oracle_reference"},
+        "preservation": {"$ref": "#/$defs/oracle_reference"}
+      },
+      "additionalProperties": false
+    },
+    "scenario": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "base_variant": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "task_mode": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "exploit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detect": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correct": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prevent": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "success_criteria": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "security_properties": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "stride": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "spoofing",
+          "tampering",
+          "repudiation",
+          "information_disclosure",
+          "denial_of_service",
+          "elevation_of_privilege"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "extra_info": {
+      "type": "object"
+    },
+    "methods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "selector",
+          "operation"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "selector": {
+            "type": "object",
+            "required": [
+              "node"
+            ],
+            "properties": {
+              "node": {
+                "enum": [
+                  "router",
+                  "gateway",
+                  "switch",
+                  "dns_server",
+                  "dhcp_server",
+                  "endpoint",
+                  "wan_edge",
+                  "zone_enforcer"
+                ]
+              },
+              "interface": {
+                "enum": [
+                  "data",
+                  "access",
+                  "trunk",
+                  "shaped",
+                  "zoned"
+                ]
+              },
+              "interfaces": {
+                "const": "data"
+              },
+              "route": {
+                "enum": [
+                  "required_remote_prefix",
+                  "required_remote_host"
+                ]
+              },
+              "subnet": {
+                "const": "required_endpoint_segment"
+              },
+              "zone": {
+                "enum": [
+                  "served",
+                  "forwarded"
+                ]
+              }
+            },
+            "not": {
+              "required": [
+                "interface",
+                "interfaces"
+              ]
+            },
+            "additionalProperties": false
+          },
+          "operation": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "oracle_reference": {
+      "type": "object",
+      "required": ["path", "version"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^scenarios/oracles/(connectivity|dhcp_dns|filtering|qos|security)/([a-z0-9-]+/)?[a-z0-9-]+-v[0-9]+\\.yaml$"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

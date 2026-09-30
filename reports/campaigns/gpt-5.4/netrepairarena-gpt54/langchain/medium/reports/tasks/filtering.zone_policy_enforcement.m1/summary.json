@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-v2-20260927T135117Z/langchain_agent-gpt-5-4-filtering-zone_policy_enforcement-m1-fault-seed195376173-b40124580fde.json",
+    "sha256": "872d7cac6a4139bac212666ac5e98e541ddd7738638e48affee65c6935be07c0",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-gpt-5-4-filtering-zone_policy_enforcement-m1-fault-seed195376173-b40124580fde",
+    "created_at": "2026-09-27T13:57:46.700970+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-gpt-5-4-filtering-zone_policy_enforcement-m1-fault-seed195376173",
+    "scenario": {
+      "domain": "filtering",
+      "id": "filtering.zone_policy_enforcement.m1",
+      "sut_task_id": "sut-2129b2541722565dd9efbfdd7948c603",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "Initial validation showed only external1<->web1 IPv4 ICMP failing while all internal paths were healthy. On fw-ext, I found the OUTSIDE-TO-DMZ ruleset existed but DMZ had no from OUTSIDE attachment, and rule 30 also had an unnecessary source restriction. I updated fw-ext to remove the source match from OUTSIDE-TO-DMZ rule 30 and add state new, then attached OUTSIDE-TO-DMZ under firewall zone DMZ from OUTSIDE. Final public_success_criteria validation passed with all lab connectivity checks successful, including external1<->web1 in both directions.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Initial validation showed only external1<->web1 IPv4 ICMP failing while all internal paths were healthy. On fw-ext, I found the OUTSIDE-TO-DMZ ruleset existed but DMZ had no from OUTSIDE attachment, and rule 30 also had an unnecessary source restriction. I updated fw-ext to remove the source match from OUTSIDE-TO-DMZ rule 30 and add state new, then attached OUTSIDE-TO-DMZ under firewall zone DMZ from OUTSIDE. Final public_success_criteria validation passed with all lab connectivity checks successful, including external1<->web1 in both directions.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -28.5625,
+      "log_p_yes": 0.0,
+      "method": "zone_pair_ruleset_detached",
+      "operation": "set_zone_pair_binding",
+      "reason": null,
+      "reference": "On the firewall fw-ext, ruleset OUTSIDE-TO-DMZ is detached from the zone pair OUTSIDE to DMZ, so that traffic falls to the default deny.",
+      "score": 28.5625,
+      "target": "fw-ext"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 166.85913685700507,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "filtering.policy.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "filtering.policy.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "filtering.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "filtering.policy.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Initial validation showed only external1<->web1 IPv4 ICMP failing while all internal paths were healthy. On fw-ext, I found the OUTSIDE-TO-DMZ ruleset existed but DMZ had no from OUTSIDE attachment, and rule 30 also had an unnecessary source restriction. I updated fw-ext to remove the source match from OUTSIDE-TO-DMZ rule 30 and add state new, then attached OUTSIDE-TO-DMZ under firewall zone DMZ from OUTSIDE. Final public_success_criteria validation passed with all lab connectivity checks successful, including external1<->web1 in both directions.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -28.5625,
+      "log_p_yes": 0.0,
+      "method": "zone_pair_ruleset_detached",
+      "operation": "set_zone_pair_binding",
+      "reason": null,
+      "reference": "On the firewall fw-ext, ruleset OUTSIDE-TO-DMZ is detached from the zone pair OUTSIDE to DMZ, so that traffic falls to the default deny.",
+      "score": 28.5625,
+      "target": "fw-ext"
+    },
+    "domain": "filtering",
+    "environment_success": true,
+    "failed_operation_count": 4,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 3,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "policy_repair_pass_rate": 1.0,
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 6,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 2,
+    "successful_read_count": 5,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 7
+  },
+  "operation_counts": {
+    "llm_calls": 13,
+    "containerlab_reads": 6,
+    "containerlab_mutations": 3,
+    "containerlab_mutations_ok": 2,
+    "sut_validations": 3,
+    "failed_operations": 4,
+    "unsafe_operations": 0,
+    "input_tokens": 168034,
+    "output_tokens": 979,
+    "total_tokens": 169013,
+    "recorded": {
+      "ani_mutations": 3,
+      "ani_reads": 6,
+      "failed_operations": 4,
+      "input_tokens": 168034,
+      "llm_calls": 13,
+      "output_tokens": 979,
+      "successful_mutations": 2,
+      "successful_reads": 5,
+      "total_tokens": 169013,
+      "unsafe_operations": 0,
+      "validations": 7
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 27.243,
+    "action_seconds": 5.385,
+    "reading_seconds": 2.517,
+    "validation_seconds": 131.646,
+    "episode_seconds": 166.85913685700507,
+    "unaccounted_seconds": 0.068,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 168034,
+    "output_tokens": 979,
+    "total_tokens": 169013,
+    "llm_calls": 13,
+    "output_tokens_per_call": 75.3,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 3,
+    "public_validations_failed": 2,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 10,
+      "calls": 12
+    },
+    "repeat_action_rate": {
+      "repeated": 2,
+      "calls": 12
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 3,
+      "check_config": 6,
+      "apply_config": 3
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 12
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "8 of 12 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 169013
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 27.243,
+        "action_seconds": 5.385,
+        "reading_seconds": 2.517,
+        "validation_seconds": 131.646,
+        "episode_seconds": 166.85913685700507,
+        "unaccounted_seconds": 0.068
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 12
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 2
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: fw-ext"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 47.234436410988565,
+    "calculate_metrics": 3.307299630250782e-05,
+    "deploy_reset_testbed": 16.435012043002644,
+    "evaluate_degradation": 6.376581193006132,
+    "evaluate_healthy": 21.90144795300148,
+    "evaluate_repair_preservation": 67.25235262200295,
+    "inject_fault": 2.464839459003997,
+    "invoke_sut": 166.88493652299803,
+    "load_configuration": 0.00020116299856454134,
+    "load_oracles": 0.006005999995977618,
+    "load_validate_scenario": 0.04103348600619938,
+    "record_baseline": 4.915011231787503e-06,
+    "restore_destroy": 15.241893034995883,
+    "score_diagnosis": 0.5942277779977303,
+    "snapshot_after_sut": 7.195318416997907,
+    "snapshot_before_sut": 5.9640253340039635,
+    "snapshot_healthy": 6.01512440899387,
+    "write_result": 0.008323654998093843
+  },
+  "files": {
+    "record": "../../../records/filtering.zone_policy_enforcement.m1.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/filtering.zone_policy_enforcement.m1.judge.log",
+    "devices": "../../../logs/devices/filtering.zone_policy_enforcement.m1/",
+    "note": "relative to this folder"
+  }
+}

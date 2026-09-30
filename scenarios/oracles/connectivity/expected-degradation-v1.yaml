@@ -1,0 +1,22 @@
+schema_version: "1.0"
+oracle_id: connectivity.path.expected_degradation
+version: 1.0.0
+description: The fault must break at least one required path involving an affected endpoint.
+domain: connectivity
+phase: expected_degradation
+probes:
+  - id: affected_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: affected_paths
+    protocol: icmp
+    scope: affected
+    affected_nodes: "${bindings.affected_nodes}"
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: gte, value: 1}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

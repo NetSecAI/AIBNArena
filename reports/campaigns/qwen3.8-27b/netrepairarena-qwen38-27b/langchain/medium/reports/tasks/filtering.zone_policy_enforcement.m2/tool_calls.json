@@ -1,0 +1,162 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.4318050388246775e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "fw-int"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3676588859525509,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "fw-int"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.48637059301836416,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "fw-ext"
+        ],
+        "views": [
+          "routes",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7938876409898512,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 29.50618788797874,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-1411a481b3a0a4343a7e4b3d0c332fe68172dd1fa079923f6462907e208529d1.json",
+      "category": "read",
+      "duration_seconds": 0.260253885993734,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "acl",
+        "name": "DMZ-TO-OUTSIDE",
+        "node": "fw-ext",
+        "reason": "Rule 1 (action drop, description ibn-shadow-deny) in DMZ-TO-OUTSIDE is a shadow deny that matches and drops all traffic before rule 10 (established/related) and rule 20 (web1-ping-outside) can match. This blocks web1→external1 and breaks return traffic for external1→web1 connections.",
+        "set": {
+          "delete_entry": [
+            1
+          ]
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.282900433987379e-05,
+      "error": "update_object: a vyos node has no acl objects to change",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set firewall ipv4 name DMZ-TO-OUTSIDE description dmz-to-outside",
+              "delete firewall ipv4 name DMZ-TO-OUTSIDE rule 1"
+            ],
+            "reason": "Rule 1 in DMZ-TO-OUTSIDE is a shadow deny that matches all traffic before rule 10 (established/related) and rule 20 (web1-ping-outside), blocking web1→external1 and return traffic for external1→web1",
+            "rollback_commands": [
+              "set firewall ipv4 name DMZ-TO-OUTSIDE rule 1 action drop",
+              "set firewall ipv4 name DMZ-TO-OUTSIDE rule 1 description ibn-shadow-deny"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.6830716830445454,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_7c9082ddf9ab0b89"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 33.79832650400931,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+schema_version: "1.0"
+oracle_id: filtering.policy.repair
+version: 1.0.0
+description: >-
+  Every permitted flow is carried again.
+
+  KNOWN GAP, deliberate and recorded here rather than in a comment nobody reads: this
+  is a reachability oracle, so it sees a policy that became too strict and is blind to
+  one that became too permissive. An agent that repairs the broken pair by permitting
+  everything passes this oracle. Closing it needs a configuration-type probe reading
+  the zone model back, which `ContainerlabPlatform.run_probe` refuses today rather
+  than pretending to answer.
+domain: filtering
+phase: repair
+probes:
+  - id: required_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: required_paths
+    protocol: icmp
+    scope: all
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

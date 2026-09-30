@@ -1,0 +1,357 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.631500294432044e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 26.553046348999487,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "routes",
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5002466200094204,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "app1"
+        ],
+        "views": [
+          "routes",
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.4634138279943727,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/30",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.950824867002666,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/network-instance[name=default]/interface[name=ethernet-1/30.0]",
+          "/network-instance[name=default]/interface[name=ethernet-1/50.0]",
+          "/network-instance[name=default]/protocols"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.5048794169852044,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "routes",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.7533917510008905,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-53a51c7a046050575d18401890102c733c720285846e042cc538a1f9eff20a22.json",
+      "category": "read",
+      "duration_seconds": 0.544573744002264,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "network-instance default static-routes",
+          "network-instance default interface ethernet-1/30.0",
+          "network-instance default interface ethernet-1/50.0"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.507419124012813,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "interface ethernet-1/30",
+          "interface ethernet-1/50"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.9842045519908424,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7656903299794067,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "app1"
+        ],
+        "paths": [
+          "/"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.29817475102026947,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "finance1"
+        ],
+        "paths": [
+          "/"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.36579291700036265,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route add default via 10.10.30.1 dev eth1"
+            ],
+            "reason": "finance1 lacks a default route and sits in the finance VLAN 10.10.30.0/24 behind leaf2 gateway 10.10.30.1, causing 'Network unreachable' to app1 while other routed VLANs work.",
+            "rollback_commands": [
+              "ip route del default via 10.10.30.1 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.13406472399947233,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_67d53fea30855f93"
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.13615121800103225,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip address add 10.10.30.10/24 dev eth1",
+              "ip route add default via 10.10.30.1 dev eth1"
+            ],
+            "reason": "finance1 is on finance_vlan per topology but eth1 is misaddressed as 203.0.113.10/24 with no route to gateway, while validation expects finance1 at 10.10.30.10 and app1 cannot reach it.",
+            "rollback_commands": [
+              "ip route del default via 10.10.30.1 dev eth1",
+              "ip address del 10.10.30.10/24 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.000160185998538509,
+      "error": "update_config.change.commands contains 2 commands for Linux target finance1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip address add 10.10.30.10/24 dev eth1"
+            ],
+            "reason": "finance1 is on finance_vlan per topology but eth1 is misaddressed as 203.0.113.10/24; validation expects finance1 reachable at 10.10.30.10 and current address prevents reaching leaf2 gateway 10.10.30.1.",
+            "rollback_commands": [
+              "ip address del 10.10.30.10/24 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.13109179498860613,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_2aee29e58db9cba1"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route add default via 10.10.30.1 dev eth1"
+            ],
+            "reason": "After restoring finance1 address 10.10.30.10/24 on eth1, finance1 still needs the VLAN gateway 10.10.30.1 as default route for off-subnet IPv4 connectivity to app1.",
+            "rollback_commands": [
+              "ip route del default via 10.10.30.1 dev eth1"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.10752497398061678,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_4b76abfd8e3e1b61"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 36.169445631006965,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

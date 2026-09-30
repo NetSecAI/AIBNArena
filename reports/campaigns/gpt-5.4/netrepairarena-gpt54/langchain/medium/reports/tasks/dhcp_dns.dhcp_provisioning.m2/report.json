@@ -1,0 +1,935 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-v2-20260927T135117Z/langchain_agent-gpt-5-4-dhcp_dns-dhcp_provisioning-m2-fault-seed450331920-7165ce8339e7.json",
+    "sha256": "c3058eff40904bf42fe3963d093fd976aa302784beeb6eaa4ecd496dad9c1e05",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-gpt-5-4-dhcp_dns-dhcp_provisioning-m2-fault-seed450331920-7165ce8339e7",
+    "created_at": "2026-09-27T14:29:33.988971+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-gpt-5-4-dhcp_dns-dhcp_provisioning-m2-fault-seed450331920",
+    "scenario": {
+      "domain": "dhcp_dns",
+      "id": "dhcp_dns.dhcp_provisioning.m2",
+      "sut_task_id": "sut-1be1ca3fa9a32fa85018f1966ded1a49",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "Observed public validation initially failing only for guest1 connectivity to and from web1 while other DHCP-served subnets were healthy. Read leaf1 and firewall DHCP configuration and found GUEST1 pool on firewall advertising incorrect default-router 10.10.20.2 even though leaf1 is the guest gateway/relay at 10.10.20.1. Updated firewall DHCP pool GUEST1 default-router to 10.10.20.1. Re-ran public success criteria and guest1-to-web1 and web1-to-guest1 connectivity then passed; public validation passed.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed public validation initially failing only for guest1 connectivity to and from web1 while other DHCP-served subnets were healthy. Read leaf1 and firewall DHCP configuration and found GUEST1 pool on firewall advertising incorrect default-router 10.10.20.2 even though leaf1 is the guest gateway/relay at 10.10.20.1. Updated firewall DHCP pool GUEST1 default-router to 10.10.20.1. Re-ran public success criteria and guest1-to-web1 and web1-to-guest1 connectivity then passed; public validation passed.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -33.2305,
+      "log_p_yes": 0.0,
+      "method": "pool_gateway_misassigned",
+      "operation": "set_dhcp_default_router",
+      "reason": null,
+      "reference": "On the DHCP server firewall, pool GUEST1 (10.10.20.0/24) hands out 10.10.20.2 as the default router instead of 10.10.20.1.",
+      "score": 33.2305,
+      "target": "firewall"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 252.3311205150094,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "dhcp_dns.provisioning.expected_degradation",
+      "version": "1.1.0",
+      "passed": true,
+      "probe_count": 2
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "dhcp_dns.provisioning.healthy",
+      "version": "1.1.0",
+      "passed": true,
+      "probe_count": 2
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "dhcp_dns.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "dhcp_dns.provisioning.repair",
+      "version": "1.1.0",
+      "passed": true,
+      "probe_count": 2
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed public validation initially failing only for guest1 connectivity to and from web1 while other DHCP-served subnets were healthy. Read leaf1 and firewall DHCP configuration and found GUEST1 pool on firewall advertising incorrect default-router 10.10.20.2 even though leaf1 is the guest gateway/relay at 10.10.20.1. Updated firewall DHCP pool GUEST1 default-router to 10.10.20.1. Re-ran public success criteria and guest1-to-web1 and web1-to-guest1 connectivity then passed; public validation passed.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -33.2305,
+      "log_p_yes": 0.0,
+      "method": "pool_gateway_misassigned",
+      "operation": "set_dhcp_default_router",
+      "reason": null,
+      "reference": "On the DHCP server firewall, pool GUEST1 (10.10.20.0/24) hands out 10.10.20.2 as the default router instead of 10.10.20.1.",
+      "score": 33.2305,
+      "target": "firewall"
+    },
+    "domain": "dhcp_dns",
+    "environment_success": true,
+    "failed_operation_count": 2,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 2,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "provisioning_repair_pass_rate": 1.0,
+    "read_count": 5,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 1,
+    "successful_read_count": 5,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 10,
+    "containerlab_reads": 5,
+    "containerlab_mutations": 2,
+    "containerlab_mutations_ok": 1,
+    "sut_validations": 2,
+    "failed_operations": 2,
+    "unsafe_operations": 0,
+    "input_tokens": 115200,
+    "output_tokens": 596,
+    "total_tokens": 115796,
+    "recorded": {
+      "ani_mutations": 2,
+      "ani_reads": 5,
+      "failed_operations": 2,
+      "input_tokens": 115200,
+      "llm_calls": 10,
+      "output_tokens": 596,
+      "successful_mutations": 1,
+      "successful_reads": 5,
+      "total_tokens": 115796,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 18.825,
+    "action_seconds": 3.357,
+    "reading_seconds": 1.511,
+    "validation_seconds": 228.587,
+    "episode_seconds": 252.3311205150094,
+    "unaccounted_seconds": 0.051,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 115200,
+    "output_tokens": 596,
+    "total_tokens": 115796,
+    "llm_calls": 10,
+    "output_tokens_per_call": 59.6,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 8,
+      "calls": 9
+    },
+    "repeat_action_rate": {
+      "repeated": 2,
+      "calls": 9
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 2,
+      "check_config": 5,
+      "apply_config": 2
+    }
+  },
+  "device_configurations": {
+    "available": true,
+    "directory": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-v2-20260927T135117Z/devices/dhcp_dns.dhcp_provisioning.m2-20260927T141750-6ded1a49",
+    "snapshots_taken": [
+      "after_sut",
+      "before_sut",
+      "healthy"
+    ],
+    "snapshots_failed": [],
+    "changed_by_sut": [
+      "firewall",
+      "guest1"
+    ],
+    "devices": [
+      {
+        "device": "admin1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "app1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "attacker1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "dns-dmz",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "dns-int",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "external1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "finance1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "firewall",
+        "kind": "vyos",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": true,
+        "changed_by_sut": true,
+        "fault_change": {
+          "file": "firewall/healthy_to_before_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 1
+        },
+        "sut_change": {
+          "file": "firewall/before_sut_to_after_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 1
+        }
+      },
+      {
+        "device": "guest1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": true,
+        "changed_by_sut": true,
+        "fault_change": {
+          "file": "guest1/healthy_to_before_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 1
+        },
+        "sut_change": {
+          "file": "guest1/before_sut_to_after_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 1
+        }
+      },
+      {
+        "device": "leaf1",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "leaf2",
+        "kind": "nokia_srlinux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "user1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      },
+      {
+        "device": "web1",
+        "kind": "linux",
+        "snapshots": {
+          "after_sut": true,
+          "before_sut": true,
+          "healthy": true
+        },
+        "changed_by_fault": false,
+        "changed_by_sut": false,
+        "fault_change": null,
+        "sut_change": null
+      }
+    ],
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes"
+  },
+  "phase_durations": {
+    "apply_reference_state": 113.52101021700946,
+    "calculate_metrics": 6.210501305758953e-05,
+    "deploy_reset_testbed": 73.6303440000047,
+    "evaluate_degradation": 26.776408214995172,
+    "evaluate_healthy": 28.82539122700109,
+    "evaluate_repair_preservation": 126.38414278099663,
+    "inject_fault": 6.559938485996099,
+    "invoke_sut": 252.35756009299075,
+    "load_configuration": 0.00022906999220140278,
+    "load_oracles": 0.008529929997166619,
+    "load_validate_scenario": 0.04764849299681373,
+    "record_baseline": 5.341018550097942e-06,
+    "restore_destroy": 18.792885839007795,
+    "score_diagnosis": 0.6515982850105502,
+    "snapshot_after_sut": 5.846151166013442,
+    "snapshot_before_sut": 6.545793670025887,
+    "snapshot_healthy": 5.84896399898571,
+    "write_result": 0.006643480999628082
+  },
+  "timeline": {
+    "trace": {
+      "path": null,
+      "available": false,
+      "reason": "the result records no trace file"
+    },
+    "budget": {
+      "granted_seconds": 400.0,
+      "used_seconds": 252.3311205150094,
+      "remaining_seconds": 147.669,
+      "used_ratio": 0.6308,
+      "exhausted": false,
+      "exceeded": false,
+      "overrun_seconds": 0.0,
+      "sut_status": "completed",
+      "invoke_sut_seconds": 252.35756009299075
+    },
+    "turns": 10,
+    "turns_source": "record (execution.model_turns)",
+    "seconds": {
+      "thinking": 18.825,
+      "tools": 233.455,
+      "episode": 252.3311205150094,
+      "unaccounted": 0.051
+    },
+    "final_response": {
+      "status": "completed",
+      "summary": "Observed public validation initially failing only for guest1 connectivity to and from web1 while other DHCP-served subnets were healthy. Read leaf1 and firewall DHCP configuration and found GUEST1 pool on firewall advertising incorrect default-router 10.10.20.2 even though leaf1 is the guest gateway/relay at 10.10.20.1. Updated firewall DHCP pool GUEST1 default-router to 10.10.20.1. Re-ran public success criteria and guest1-to-web1 and web1-to-guest1 connectivity then passed; public validation passed."
+    },
+    "steps": [
+      {
+        "type": "thinking",
+        "turn": 1,
+        "seconds": 2.972,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "execute_validation"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 1
+      },
+      {
+        "type": "call",
+        "position": 1,
+        "tool": "execute_validation",
+        "category": "validation",
+        "ok": false,
+        "seconds": 146.79819851098,
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "error": null,
+        "step": 2
+      },
+      {
+        "type": "thinking",
+        "turn": 2,
+        "seconds": 1.944,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_topology"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 3
+      },
+      {
+        "type": "call",
+        "position": 2,
+        "tool": "get_topology",
+        "category": "read",
+        "ok": true,
+        "seconds": 4.528800491243601e-05,
+        "arguments": {
+          "nodes": null
+        },
+        "error": null,
+        "step": 4
+      },
+      {
+        "type": "thinking",
+        "turn": 3,
+        "seconds": 1.746,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 5
+      },
+      {
+        "type": "call",
+        "position": 3,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.6910747769870795,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": [
+            "/"
+          ]
+        },
+        "error": null,
+        "step": 6
+      },
+      {
+        "type": "thinking",
+        "turn": 4,
+        "seconds": 1.205,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_topology"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 7
+      },
+      {
+        "type": "call",
+        "position": 4,
+        "tool": "get_topology",
+        "category": "read",
+        "ok": true,
+        "seconds": 3.8390979170799255e-05,
+        "arguments": {
+          "nodes": null
+        },
+        "error": null,
+        "step": 8
+      },
+      {
+        "type": "thinking",
+        "turn": 5,
+        "seconds": 1.558,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_running_config"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 9
+      },
+      {
+        "type": "call",
+        "position": 5,
+        "tool": "get_running_config",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.5250968520122115,
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "firewall"
+          ],
+          "paths": [
+            "/service",
+            "/interfaces",
+            "/protocols"
+          ]
+        },
+        "error": null,
+        "step": 10
+      },
+      {
+        "type": "thinking",
+        "turn": 6,
+        "seconds": 2.113,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "update_object"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 11
+      },
+      {
+        "type": "call",
+        "position": 6,
+        "tool": "update_object",
+        "category": "mutation",
+        "ok": false,
+        "seconds": 7.706799078732729e-05,
+        "arguments": {
+          "kind": "dhcp_pool",
+          "name": "GUEST1",
+          "node": "firewall",
+          "reason": "Guest subnet 10.10.20.0/24 fails connectivity while other DHCP-served subnets work; firewall DHCP pool GUEST1 advertises default-router 10.10.20.2, but leaf1 is the actual guest gateway/relay with 10.10.20.1.",
+          "set": {
+            "default_router": "10.10.20.1"
+          }
+        },
+        "error": "update_object: dhcp_pool needs subnet with any option",
+        "step": 12
+      },
+      {
+        "type": "thinking",
+        "turn": 7,
+        "seconds": 1.36,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "get_object"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 13
+      },
+      {
+        "type": "call",
+        "position": 7,
+        "tool": "get_object",
+        "category": "read",
+        "ok": true,
+        "seconds": 0.29481116897659376,
+        "arguments": {
+          "kind": "dhcp_pool",
+          "name": "GUEST1",
+          "node": "firewall"
+        },
+        "error": null,
+        "step": 14
+      },
+      {
+        "type": "thinking",
+        "turn": 8,
+        "seconds": 2.109,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "update_object"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 15
+      },
+      {
+        "type": "call",
+        "position": 8,
+        "tool": "update_object",
+        "category": "mutation",
+        "ok": true,
+        "seconds": 3.356749906000914,
+        "arguments": {
+          "kind": "dhcp_pool",
+          "name": "GUEST1",
+          "node": "firewall",
+          "reason": "Guest subnet 10.10.20.0/24 fails connectivity while other DHCP-served subnets work; firewall DHCP pool GUEST1 advertises default-router 10.10.20.2, but leaf1 is the actual guest gateway/relay with 10.10.20.1.",
+          "set": {
+            "default_router": "10.10.20.1",
+            "subnet": "10.10.20.0/24"
+          }
+        },
+        "error": null,
+        "step": 16
+      },
+      {
+        "type": "thinking",
+        "turn": 9,
+        "seconds": 1.322,
+        "kind": "tool_calls",
+        "tool_calls": [
+          "execute_validation"
+        ],
+        "content_chars": 0,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 17
+      },
+      {
+        "type": "call",
+        "position": 9,
+        "tool": "execute_validation",
+        "category": "validation",
+        "ok": true,
+        "seconds": 81.78920012700837,
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "error": null,
+        "step": 18
+      },
+      {
+        "type": "thinking",
+        "turn": 10,
+        "seconds": 2.496,
+        "kind": "text",
+        "tool_calls": [],
+        "content_chars": 541,
+        "text": null,
+        "reasoning": null,
+        "error": null,
+        "step": 19
+      }
+    ]
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "gpt-5.4",
+    "git": {
+      "commit": "bb5ffc04af04795f6866b264c67ce836a76396a0",
+      "dirty": true,
+      "modified_files": 1,
+      "untracked_files": 3572
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 400,
+      "min_retry_tokens": null,
+      "model": "gpt-5.4",
+      "prompt_variant": "default",
+      "recursion_limit": 1000,
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.1.0",
+      "healthy": "1.1.0",
+      "preservation": "1.0.0",
+      "repair": "1.1.0"
+    },
+    "provider_reported_model": "gpt-5.4",
+    "reference_state_sha256": "aabccb4fa22361db9111d4f97ba3100348f4cacba3230e9c29987c1b9e8113b5",
+    "scenario_seed": 450331920,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {},
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_reported_model": "gpt-5.4",
+    "sut_version": "1.0.0",
+    "topology_sha256": "44581d20915f3187d6afc416dca4faafc7c1cb83dff57ed3720dbefec34d66a8"
+  },
+  "sut_result": {
+    "see": "../../../records/dhcp_dns.dhcp_provisioning.m2.json",
+    "key": "sut_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "convergence_result": {
+    "see": "../../../records/dhcp_dns.dhcp_provisioning.m2.json",
+    "key": "convergence_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "cleanup_result": {
+    "see": "../../../records/dhcp_dns.dhcp_provisioning.m2.json",
+    "key": "cleanup_result",
+    "note": "verbatim in the record; not copied into the report"
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 9
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "7 of 9 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 115796
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 18.825,
+        "action_seconds": 3.357,
+        "reading_seconds": 1.511,
+        "validation_seconds": 228.587,
+        "episode_seconds": 252.3311205150094,
+        "unaccounted_seconds": 0.051
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 9
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "2 device(s) changed by the subject: firewall, guest1"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "files": {
+    "record": "../../../records/dhcp_dns.dhcp_provisioning.m2.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/dhcp_dns.dhcp_provisioning.m2.judge.log",
+    "devices": "../../../logs/devices/dhcp_dns.dhcp_provisioning.m2/",
+    "note": "relative to this folder"
+  }
+}

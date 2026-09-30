@@ -1,0 +1,403 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.558397970162332e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 81.9422126779973,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.29731811201781966,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.47790587798226625,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "/"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.25682966099702753,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2755359949951526,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "sudo tc class show dev eth2",
+              "sudo tc filter show dev eth2"
+            ],
+            "reason": "Inspect WAN HTB class hierarchy and filters on wan1 eth2 because public validation shows throughput criterion fails under contention while connectivity passes, implicating WAN QoS rather than routing.",
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.691401358693838e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; expected ip or tc",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "/etc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5152718659956008,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class show dev eth2",
+              "tc filter show dev eth2"
+            ],
+            "reason": "Inspect WAN HTB classes and filters on wan1 eth2 because throughput guarantee fails under contention while general connectivity passes, implicating QoS classification or shaping on the WAN uplink.",
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 4.7918001655489206e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "user1",
+          "external1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5898262369737495,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "spine1",
+          "spine2",
+          "leaf1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 2.0898703380080406,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7300709010160062,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc replace dev eth2 root handle 1: htb default 20",
+              "tc class replace dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+              "tc class replace dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 0",
+              "tc class replace dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 1",
+              "tc filter replace dev eth2 protocol ip parent 1: prio 1 u32 match ip src 10.10.10.10/32 match ip dst 203.0.113.10/32 flowid 1:10"
+            ],
+            "reason": "Public validation shows only throughput under contention fails while connectivity is intact. wan1 is the WAN shaper on eth2, and restoring an explicit HTB hierarchy with an 8 Mbps business class for traffic from user1 to external1 is the narrowest fix consistent with the observed symptom.",
+            "rollback_commands": [
+              "tc qdisc del dev eth2 root"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00019440101459622383,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; filter is missing its parent",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc replace dev eth2 root handle 1: htb default 20",
+              "tc class replace dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+              "tc class replace dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 0",
+              "tc class replace dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 1",
+              "tc filter replace dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.10/32 match ip dst 203.0.113.10/32 flowid 1:10"
+            ],
+            "reason": "Public validation shows the WAN throughput guarantee fails under contention while connectivity still passes. wan1 eth2 is the only shaped WAN uplink observed, so restoring an explicit HTB parent and business child with 8 Mbps minimum for user1 to external1 is the narrowest safe repair.",
+            "rollback_commands": [
+              "tc qdisc del dev eth2 root"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00018513199756853282,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported u32 filter matcher",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "spine1",
+          "spine2"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-95b536acc26846440acbface4e707cb18f4fc669d0c6bb888b15dbff9b49b4f7.json",
+      "category": "read",
+      "duration_seconds": 2.913933094998356,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "spine1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6791757820174098,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3392815330007579,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Rebuild the WAN root qdisc on wan1 eth2 because the public validation shows the throughput SLA fails under contention and the current QoS object only exposes a bare HTB root with no visible guarantee details.",
+        "set": {
+          "delete_root": true,
+          "htb": {
+            "default": "20",
+            "handle": "1:"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.3280957929964643,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_abd3f0c8b88e6dbf"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add the HTB parent class on wan1 eth2 as part of restoring explicit bandwidth guarantees after the throughput validation failed under contention.",
+        "set": {
+          "class": {
+            "ceil": "10mbit",
+            "classid": "1:1",
+            "parent": "1:",
+            "rate": "10mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 4.570497549138963e-05,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add the HTB parent class on wan1 eth2 as part of restoring explicit bandwidth guarantees after the throughput validation failed under contention.",
+        "set": {
+          "class": {
+            "ceil": "10mbit",
+            "id": "1:1",
+            "parent": "1:",
+            "rate": "10mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.12698124500457197,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_fc9cc9e1fdafb8d4"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 61.69151081200107,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.6707020374014974e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 25.916787909984123,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "user1",
+          "app1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6860493719868828,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "web1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.30928742900141515,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.5546684159780852,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "/interface",
+          "/network-instance"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.0016202850092668,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-5e7f8877ce0b792635a4603e4d85922ec0843a0764e3afe4f50955309e1dbf5d.json",
+      "category": "read",
+      "duration_seconds": 1.3455772479937878,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/10",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7374770079914015,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5679168209899217,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route del prohibit default",
+              "ip route add default via 10.10.10.1 dev eth1"
+            ],
+            "reason": "Validation showed only paths involving user1 failed; user1 route table has 'prohibit default' instead of a unicast default via leaf1 gateway 10.10.10.1, while local interface addressing is correct.",
+            "rollback_commands": [
+              "ip route del default via 10.10.10.1 dev eth1",
+              "ip route add prohibit default"
+            ],
+            "target": "user1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 8.405398693867028e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; route delete takes no route type",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route del default",
+              "ip route add default via 10.10.10.1 dev eth1"
+            ],
+            "reason": "Validation showed only paths involving user1 failed; user1 route table has a prohibit default instead of a unicast default via the local gateway 10.10.10.1 on leaf1 ethernet-1/10.0.",
+            "rollback_commands": [
+              "ip route del default via 10.10.10.1 dev eth1",
+              "ip route add prohibit default"
+            ],
+            "target": "user1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.0001518110220786184,
+      "error": "update_config.change.commands contains 2 commands for Linux target user1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip route replace default via 10.10.10.1 dev eth1"
+            ],
+            "reason": "Validation showed only paths involving user1 failed; user1 route table has a prohibit default instead of a unicast default via the local gateway 10.10.10.1 on leaf1 ethernet-1/10.0.",
+            "rollback_commands": [
+              "ip route replace prohibit default"
+            ],
+            "target": "user1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.1422570540162269,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_44fe19241062d479"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 35.494270453986246,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

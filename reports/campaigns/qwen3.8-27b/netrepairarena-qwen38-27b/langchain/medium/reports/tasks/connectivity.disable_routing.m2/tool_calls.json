@@ -1,0 +1,857 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.671000013127923e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null,
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-9545ece11ff1d4aa8ad408b5ca34066b7e1c3db9147873f7cf89114205623351.json",
+      "category": "read",
+      "duration_seconds": 4.55203650500016,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1",
+          "leaf2",
+          "spine1",
+          "spine2"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-9ad8935bf66adab8b50bf06271543888c8d30b4b8bba51a2131d506719d1d8ac.json",
+      "category": "read",
+      "duration_seconds": 3.472183763999965,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/10",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.77072306700029,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1",
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-2aed9d0d1da07433828aea933900e3018410abdf5b2b1e6e5238607fb095f61c.json",
+      "category": "read",
+      "duration_seconds": 1.1718850499996734,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-c529d0221ed82eb10e9a091fb69fac35dc1f0e8a3b24019cc69adeda22e8fae0.json",
+      "category": "read",
+      "duration_seconds": 0.8240561830002662,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-94a8bb53de6ce6730b86c593d37863b12f6885ce4084e843be7e9aee4e06ee90.json",
+      "category": "read",
+      "duration_seconds": 0.7884055310000804,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "spine1",
+          "spine2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-f066bbde88256e29c205c9ad47251c61e655a3384e3a21f32ba34baa51178dcb.json",
+      "category": "read",
+      "duration_seconds": 1.594408741999814,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 37.244637824000165,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "configure network-instance default next-hop-group to-leaf2 delete nexthop 1 ip-address 10.255.0.5"
+            ],
+            "reason": "spine1's to-leaf2 group has a single next-hop 10.255.0.5, the wrong peer on its fabric_l2_s1 link (10.255.0.4/31: spine1 has .4, leaf2 has .5); the link-local peer is 10.255.0.4 so the next-hop must be 10.255.0.4, otherwise leaf2-bound traffic (10.10.30/40/50.0/24, 203.0.113.0/24) is black-holed.",
+            "rollback_commands": [
+              "configure network-instance default next-hop-group to-leaf2 nexthop 1 ip-address 10.255.0.5"
+            ],
+            "target": "spine1"
+          },
+          {
+            "commands": [
+              "configure network-instance default next-hop-group to-leaf2 delete nexthop 1 ip-address 10.255.0.5",
+              "configure network-instance default next-hop-group to-leaf2 nexthop 1 ip-address 10.255.0.7"
+            ],
+            "reason": "spine2's to-leaf2 group points at 10.255.0.5, but its fabric_l2_s2 link (10.255.0.6/31) peers with leaf2's 10.255.0.7/31, so the correct next-hop is 10.255.0.7; as-is, all leaf2-bound prefixes via spine2 fail.",
+            "rollback_commands": [
+              "configure network-instance default next-hop-group to-leaf2 delete nexthop 1 ip-address 10.255.0.7",
+              "configure network-instance default next-hop-group to-leaf2 nexthop 1 ip-address 10.255.0.5"
+            ],
+            "target": "spine2"
+          },
+          {
+            "commands": [
+              "configure network-instance default next-hop-group to-leaf1 delete nexthop 1 ip-address 10.255.0.1",
+              "configure network-instance default next-hop-group to-leaf1 nexthop 1 ip-address 10.255.0.6"
+            ],
+            "reason": "spine2's to-leaf1 group points at 10.255.0.1 (leaf1's address), but spine2's fabric_l1_s2 link is 10.255.0.6/31 peering with leaf1's ethernet-1/2 at 10.255.0.3/31; correct next-hop is 10.255.0.3, so leaf1-bound prefixes (10.10.10.0/24, 10.10.20.0/24, 10.10.99.0/24) via spine2 black-hole.",
+            "rollback_commands": [
+              "configure network-instance default next-hop-group to-leaf1 delete nexthop 1 ip-address 10.255.0.6",
+              "configure network-instance default next-hop-group to-leaf1 nexthop 1 ip-address 10.255.0.1"
+            ],
+            "target": "spine2"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.566100000782171e-05,
+      "error": "update_config.change.commands failed backend safety preflight: SR Linux configuration commands must be 'set / <path>' or 'delete / <path>'",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "delete /network-instance[name=default]/next-hop-groups[group=to-leaf2]/nexthop[index=1]/ip-address",
+              "set /network-instance[name=default]/next-hop-groups[group=to-leaf2]/nexthop[index=1]/ip-address 10.255.0.4"
+            ],
+            "reason": "spine1's to-leaf2 group had next-hop 10.255.0.5, which is leaf2's own address, not the peer on spine1's fabric_l2_s1 link (10.255.0.4/31, peer 10.255.0.5/31); the next-hop must be the peer address 10.255.0.5. Wait: on a /31 link the neighbor is the other end; spine1's eth1 is 10.255.0.4/31 so neighbor is 10.255.0.5 (leaf2). The wrong value was 10.255.0.5? No -- reread: the config showed 10.255.0.5 which IS the neighbor. Re-check actual current value before deciding.",
+            "rollback_commands": [
+              "delete /network-instance[name=default]/next-hop-groups[group=to-leaf2]/nexthop[index=1]/ip-address",
+              "set /network-instance[name=default]/next-hop-groups[group=to-leaf2]/nexthop[index=1]/ip-address 10.255.0.5"
+            ],
+            "target": "spine1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.013199981680373e-05,
+      "error": "update_config.change.commands failed backend safety preflight: SR Linux configuration commands must be 'set / <path>' or 'delete / <path>'",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "10.255.0.5",
+            "destination_ip": "10.255.0.5",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.255.0.7",
+            "destination_ip": "10.255.0.7",
+            "source": "user1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 4.3570853129999705,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.9183827090000705,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-c529d0221ed82eb10e9a091fb69fac35dc1f0e8a3b24019cc69adeda22e8fae0.json",
+      "category": "read",
+      "duration_seconds": 0.7776805759999661,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "spine2"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-81700f97c4021f02360d4964afef1578a2a91cd90635bb9aa4119da873bd08d0.json",
+      "category": "read",
+      "duration_seconds": 0.7795744550003292,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/2",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.779540691999955,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.30.0/24",
+        "node": "leaf1",
+        "reason": "leaf1's to-leaf2 next-hop-group lists 10.255.0.0 and 10.255.0.2, but 10.255.0.2 is leaf1's own address (ethernet-1/2 is 10.255.0.3/31, peer is 10.255.0.2 — wait, peer is .2; correct next-hop toward leaf2 via spine2 is 10.255.0.2; via spine1 is 10.255.0.0; the /31 neighbor of 10.255.0.3 is 10.255.0.2. Group should be [10.255.0.0, 10.255.0.2]. It IS that. Re-examine: leaf1 e1/1=10.255.0.1/31 (peer .0, spine1) — correct. e1/2=10.255.0.3/31 (peer .2, spine2) — correct. So leaf1 group looks fine. The earlier ping failure of 10.255.0.5 from user1 suggests spine1's to-leaf2 points at 10.255.0.5 which IS correct (leaf2's e1/1). Need direct check on leaf2's state.\"}",
+        "set": {
+          "next_hop": "10.255.0.0"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5312290370002302,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_218e5041aba5d257"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "delete /network-instance[name=default]/static-routes[route=10.10.30.0/24]",
+              "set /network-instance[name=default]/static-routes[route=10.10.30.0/24]/next-hop-group to-leaf2",
+              "set /network-instance[name=default]/static-routes[route=10.10.30.0/24]/admin-state enable"
+            ],
+            "reason": "The previous update_object call inadvertently created a parallel route 10.10.30.0/24 pointing at a new nhg-10-10-30-0-24 group; restoring the intended static route bound to the original to-leaf2 group.",
+            "rollback_commands": [
+              "set /network-instance[name=default]/static-routes[route=10.10.30.0/24]/next-hop-group nhg-10-10-30-0-24"
+            ],
+            "target": "leaf1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 5.906900014451821e-05,
+      "error": "update_config.change.commands failed backend safety preflight: SR Linux configuration commands must be 'set / <path>' or 'delete / <path>'",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.30.0/24",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5870028620001904,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.30.0/24",
+        "node": "leaf1",
+        "reason": "update_object earlier bound route 10.10.30.0/24 to an auto-created group nhg-10-10-30-0-24 (nexthop 10.255.0.0 only); restore it to the intended group to-leaf2 so both spine paths are used again.\"",
+        "set": {
+          "next_hop_group": "to-leaf2"
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5167968040000233,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_57272a8c301e5edd"
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.30.0/24",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5712532310003553,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-2b2d110faca97431de25d34191973e46b1afe468bed325ca78f655689fad8539.json",
+      "category": "read",
+      "duration_seconds": 0.8922127890000411,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.10.0/24",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6022679010002321,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "user1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.14129306399991037,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "default",
+        "node": "web1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.24245181000014782,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "10.255.0.0",
+            "destination_ip": "10.255.0.0",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.255.0.5",
+            "destination_ip": "10.255.0.5",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.40.10",
+            "destination_ip": "10.10.40.10",
+            "source": "user1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 9.68925710900021,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.255.0.5",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5788249189999988,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "10.255.0.1",
+            "destination_ip": "10.255.0.1",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.255.0.3",
+            "destination_ip": "10.255.0.3",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.255.0.4",
+            "destination_ip": "10.255.0.4",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.255.0.7",
+            "destination_ip": "10.255.0.7",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.255.0.5",
+            "destination_ip": "10.255.0.5",
+            "source": "web1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 25.996592144999795,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/1",
+        "node": "spine1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8413215260002289,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "10.10.10.10",
+            "destination_ip": "10.10.10.10",
+            "source": "web1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 5.261576419999983,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "10.10.40.10",
+            "destination_ip": "10.10.40.10",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.10.10",
+            "destination_ip": "10.10.10.10",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.30.10",
+            "destination_ip": "10.10.30.10",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.50.10",
+            "destination_ip": "10.10.50.10",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.20.10",
+            "destination_ip": "10.10.20.10",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.40.10",
+            "destination_ip": "10.10.40.10",
+            "source": "app1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.10.10",
+            "destination_ip": "10.10.10.10",
+            "source": "app1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.50.10",
+            "destination_ip": "10.10.50.10",
+            "source": "finance1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 38.83178301099997,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/1",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8036378669999067,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/58",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7900155440001981,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/30",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7578774479998174,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "203.0.113.1",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6448426950000794,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/40",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7923027609999735,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "route",
+        "name": "10.10.50.0/24",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6359865510003146,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "10.10.50.1",
+            "destination_ip": "10.10.50.1",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.40.1",
+            "destination_ip": "10.10.40.1",
+            "source": "app1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.40.1",
+            "destination_ip": "10.10.40.1",
+            "source": "finance1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.30.1",
+            "destination_ip": "10.10.30.1",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.40.10",
+            "destination_ip": "10.10.40.10",
+            "source": "app1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.10.1",
+            "destination_ip": "10.10.10.1",
+            "source": "web1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 31.349421067000094,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set / network-instance default next-hop-groups group to-leaf2 nexthop 2 ip-address 10.255.0.6",
+              "set / network-instance default next-hop-groups group to-leaf2 nexthop 2 admin-state enable"
+            ],
+            "reason": "leaf1's to-leaf2 group's second next-hop 10.255.0.2 is spine2's own address on fabric_l1_s2 (spine2 e1/1 is 10.255.0.2/31); the peer address leaf1 should use to reach spine2 is 10.255.0.6 (leaf1 e1/2 is 10.255.0.3/31, spine2 e1/2 is 10.255.0.6/31). As-is, ECMP via spine2 is broken and traffic hashing to that next-hop is dropped.",
+            "rollback_commands": [
+              "delete / network-instance default next-hop-groups group to-leaf2 nexthop 2"
+            ],
+            "target": "leaf1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5283874629999445,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_279c3c9c11feac53"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "destination": "10.10.40.10",
+            "destination_ip": "10.10.40.10",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.30.10",
+            "destination_ip": "10.10.30.10",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.50.10",
+            "destination_ip": "10.10.50.10",
+            "source": "user1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.10.10",
+            "destination_ip": "10.10.10.10",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.20.10",
+            "destination_ip": "10.10.20.10",
+            "source": "web1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.10.10",
+            "destination_ip": "10.10.10.10",
+            "source": "app1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.40.10",
+            "destination_ip": "10.10.40.10",
+            "source": "app1",
+            "type": "icmp"
+          },
+          {
+            "destination": "10.10.50.10",
+            "destination_ip": "10.10.50.10",
+            "source": "finance1",
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 41.599484479999774,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

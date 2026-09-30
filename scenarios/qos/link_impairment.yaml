@@ -1,0 +1,44 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/qos/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/qos/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/qos/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/qos/preservation-v1.yaml, version: "1.0.0"}
+scenario: link_impairment
+task:
+  low: >-
+    An application path on this network is performing badly. Put it back to how it should
+    perform.
+  medium: >-
+    Restore the expected performance of the affected application path without disrupting
+    unrelated connectivity.
+  high: >-
+    Traffic from {{affected_nodes}} to {{destination}} is measurably worse than that path should
+    be, while unrelated connectivity looks normal. Restore the expected performance without
+    disrupting it.
+base_variant: medium
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+    - type: observed_icmp_service
+      source: "{{target}}"
+      destination: "{{destination}}"
+      destination_ip: "{{destination_ip}}"
+      max_packet_loss_percent: 0
+      max_rtt_avg_ms: 10
+methods:
+  - id: 1
+    name: endpoint_egress_high_delay
+    selector: {node: endpoint, interface: data}
+    operation:
+      name: set_link_netem
+      impairment: delay
+      delay_ms_range: [1000, 5000]
+  - id: 2
+    name: endpoint_egress_packet_corruption
+    selector: {node: endpoint, interface: data}
+    operation:
+      name: set_link_netem
+      impairment: corruption
+      corruption_percent_range: [20, 50]

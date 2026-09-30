@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Campaigns — AIBNArena{% endblock %}
+{% block subtitle %}one campaign: a matrix of episodes, judged one after another, then compared{% endblock %}
+
+{% block content %}
+<p class="note">
+  A matrix of episodes: subjects × models × scenarios × seeds, run one at a time
+  against as few subject processes as it can. Records, reports and logs are written
+  under <code>reports/campaigns/runs/&lt;campaign&gt;/</code>, which is where
+  <code>scripts/export_results.py</code> is pointed afterwards.
+</p>
+
+<form id="campaign">
+  <section>
+    <h2>Campaign</h2>
+    <div class="grid">
+      <label title="Names the directory this campaign writes to, with the date appended: a name of 'E6 tool sets' gives reports/campaigns/runs/e6-tool-sets-<date>/.">
+        Name
+        <input id="name" type="text" value="campaign" />
+        <small id="campaign-note"></small>
+      </label>
+      <label title="Either a campaign seed already in reports/seed-registry.json — picking one restores the whole matrix it ran: its subjects, its models, its scenario rows and the seed of every cell — or a new one, drawn at launch and written into every record the campaign produces.">
+        Seed
+        <select id="seed-choice"></select>
+        <small id="seed-note"></small>
+      </label>
+      <label title="Wall-clock seconds each episode gets. Sent to the judge as --execution-budget-seconds and to the subject as --max-execution-seconds, so the two cannot disagree.">
+        SUT time budget (seconds)
+        <input id="execution_budget_seconds" type="number" step="1" min="1" value="400" />
+      </label>
+      <label title="What happens to the lab after each episode is judged. restore replays the fault's restore commands and re-applies the reference state; destroy tears the topology down. Empty keeps each experiment's own choice.">
+        Cleanup
+        <select id="cleanup">
+          <option value="">experiment default</option>
+          <option value="restore">restore</option>
+          <option value="destroy">destroy</option>
+        </select>
+      </label>
+      <label title="Address every subject binds to, and the one the judge is pointed at. One port serves the whole matrix: the subjects run one at a time.">
+        Host
+        <input id="host" type="text" value="127.0.0.1" />
+      </label>
+      <label title="Port every subject listens on. Empty uses each subject's own default. The port is freed before each server starts.">
+        Port
+        <input id="port" type="number" />
+      </label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Subjects <span class="stream-note">one server per subject, model and topology</span></h2>
+    <div class="grid" id="architectures"></div>
+  </section>
+
+  <section>
+    <h2>Models <span class="stream-note">crossed with every subject</span></h2>
+    <div class="grid" id="models"></div>
+    <label title="Model ids no registered endpoint serves, comma separated. They run on whatever base URL and key .env already defines.">
+      Unregistered model ids
+      <input id="extra-models" type="text" placeholder="openai/gpt-4o-mini, fr-gpt-5.4" />
+    </label>
+    <label title="The model that judges each cell's stated diagnosis against the injected fault (evaluation parameter 13, the ParaPLUIE score). A model a registered endpoint serves. None keeps the diagnosis in every record, unjudged.">
+      Diagnosis judge
+      <select id="diagnosis-judge"></select>
+    </label>
+    <label id="diagnosis-judge-custom" title="A judge model id no registered endpoint serves. It runs on each cell's subject endpoint with that key.">
+      Judge model id
+      <input id="diagnosis_judge_model" type="text" />
+    </label>
+    <label title="How the judge reads the Yes/No log-probabilities. prompt_logprobs is the exact reading a vLLM endpoint gives; top_logprobs reads them from the candidates the OpenAI API lists for the generated token (gpt-4.1, gpt-4o).">
+      Judge reading
+      <select id="diagnosis_judge_reading">
+        <option value="">prompt_logprobs (vLLM, exact)</option>
+        <option value="top_logprobs">top_logprobs (OpenAI API)</option>
+      </select>
+    </label>
+  </section>
+
+  <section>
+    <h2>Scenarios</h2>
+    <p class="note">
+      One row is one fault of the matrix, run against every subject and model chosen
+      above, and chosen the way the Episode page chooses one: the scenario, the wording of
+      its task, its method, then the topology and the reference state it runs from. Tick <strong>false positive</strong> to run it on a healthy lab with no fault
+      injected, where any attempted mutation is the failure.
+      Each row carries its own seed, drawn at launch and written down with the fault it
+      resolved to, so the same scenario added twice is two different faults — which is how
+      a scenario is measured on more than one.
+    </p>
+    <div id="selections"></div>
+    <div class="actions">
+      <button type="button" id="add-selection" title="Add one row, started the way the Episode page starts, to choose a scenario in.">Add a scenario</button>
+      <select id="bulk-domain" title="The domain the button fills from: every scenario of it and every method, each on the topology and reference state it was written for."></select>
+      <select id="bulk-task" title="The wording every added row puts its task in. A scenario without that wording keeps its default."></select>
+      <button type="button" id="add-every" title="Add one row per scenario and method of this domain. Rows already in the table are left alone rather than repeated."></button>
+    </div>
+  </section>
+
+  <details>
+    <summary>Advanced <span class="stream-note">applied to every cell</span></summary>
+    <p class="note">
+      Only settings every subject accepts are offered here. A matrix that refused its
+      third subject over a flag the first two took would have wasted the two runs
+      before it.
+    </p>
+    <div class="grid">
+      <label title="Ceiling on output tokens per model call.">Max tokens<input id="max_tokens" type="number" /></label>
+      <label title="Sampling temperature. Empty leaves the model's own supported default.">Temperature<input id="temperature" type="number" step="0.1" /></label>
+      <label title="Whether each subject asks its model to reason. A model family with no reasoning switch is refused at startup rather than run as if the setting had held.">
+        Thinking
+        <select id="enable_thinking">
+          <option value="">model default</option>
+          <option value="true">on</option>
+          <option value="false">off</option>
+        </select>
+      </label>
+      <label title="The mechanism used to ask for it: auto reads it from the model family, chat_template sends the vLLM/Qwen flag, system_prompt puts a directive in front of the prompt.">
+        Thinking style
+        <select id="thinking_style">
+          <option value="">unset</option>
+          <option value="auto">auto</option>
+          <option value="chat_template">chat_template</option>
+          <option value="system_prompt">system_prompt</option>
+        </select>
+      </label>
+      <label title="Effort level, for the families that take one instead of a flag. Only meaningful with thinking on.">
+        Thinking effort
+        <select id="thinking_effort">
+          <option value="">unset</option>
+          <option value="minimal">minimal</option>
+          <option value="low">low</option>
+          <option value="medium">medium</option>
+          <option value="high">high</option>
+        </select>
+      </label>
+      <label title="How much of each subject's audit trace is printed to its own server log. Never returned over A2A and never saved in the benchmark JSON.">
+        Debug trace
+        <select id="debug_trace">
+          <option value="">unset</option>
+          <option value="off">off</option>
+          <option value="summary">summary</option>
+          <option value="full">full</option>
+        </select>
+      </label>
+      <label title="How many ANI calls a subject may make in one episode. A call past the cap is refused, never dispatched.">ANI call limit<input id="ani_call_limit" type="number" /></label>
+      <label title="The LangChain agent's recursion limit: how many steps its LangGraph run may take in one episode.">Recursion limit<input id="recursion_limit" type="number" /></label>
+      <label class="checkbox" title="Every subject returns a placeholder report without calling a provider or its tools. The matrix, the lab and the judge all run: only the model is not called.">
+        <input id="dry_run" type="checkbox" />
+        Dry run (no provider is called)
+      </label>
+    </div>
+  </details>
+
+  <div class="actions">
+    <span id="matrix-size" class="state"></span>
+    <button type="button" id="validate" title="Compile every cell of the matrix and report what would run. Nothing is started and no lab is touched.">Validate the matrix</button>
+    <button type="submit" id="launch" title="Run the matrix: one subject process per subject, model and topology, every cell judged in turn.">Launch campaign</button>
+    {% if busy %}<span class="warning">A run is already in flight.</span>{% endif %}
+  </div>
+  <pre id="feedback" hidden></pre>
+</form>
+
+{% if campaigns %}
+<section>
+  <h2>Recent campaigns</h2>
+  <table>
+    <thead><tr><th>Campaign</th><th>State</th><th>Cells</th><th>Started</th></tr></thead>
+    <tbody>
+      {% for item in campaigns %}
+      <tr>
+        <td><a href="/campaign/{{ item.id }}">{{ item.campaign_id }}</a></td>
+        <td><span class="state {{ item.state }}">{{ item.state }}</span></td>
+        <td>{{ item.counts.done or 0 }}/{{ item.counts.total }} done</td>
+        <td><time datetime="{{ item.started_at }}">{{ item.started_at }}</time></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>window.CATALOG = {{ catalog | safe }};
+window.SEEDS = {{ seeds | safe }};</script>
+<script src="/static/endpoint_sync.js"></script>
+<script src="/static/scenario_picker.js"></script>
+<script src="/static/campaign.js"></script>
+{% endblock %}

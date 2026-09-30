@@ -1,0 +1,341 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b-base-20260929T092315Z/langchain_agent-openai-qwen-qwen3-8-27b-dhcp_dns-dhcp_provisioning-m3-fault-seed7108852-ebd97b713754.json",
+    "sha256": "bade4be7a670a74fd58de39d6bc20043bce41749c2905c6ef7b83741b14932ae",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-openai-qwen-qwen3-8-27b-dhcp_dns-dhcp_provisioning-m3-fault-seed7108852-ebd97b713754",
+    "created_at": "2026-09-29T09:37:41.108202+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-openai-qwen-qwen3-8-27b-dhcp_dns-dhcp_provisioning-m3-fault-seed7108852",
+    "scenario": {
+      "domain": "dhcp_dns",
+      "id": "dhcp_dns.dhcp_provisioning.m3",
+      "sut_task_id": "sut-1db7fc5ad5078ea960168add47a3d450",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "openai/qwen/qwen3.8-27b",
+        "subject": "openai/qwen/qwen3.8-27b",
+        "provider": "openai/qwen/qwen3.8-27b"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "The firewall's FINANCE1 DHCP subnet (10.10.30.0/24) was missing the name-server option that all other subnets (USER1/GUEST1/ADMIN1) carried, so finance1 could not resolve app1.sme01.example (DNS failure in the first check). I added `set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10`. Re-validation passed: the previously failing finance1→app1.sme01.example path now resolves 10.10.50.10 with 0% loss, and all other connectivity paths remained at 0% loss (no subnets disrupted).",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "The firewall's FINANCE1 DHCP subnet (10.10.30.0/24) was missing the name-server option that all other subnets (USER1/GUEST1/ADMIN1) carried, so finance1 could not resolve app1.sme01.example (DNS failure in the first check). I added `set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10`. Re-validation passed: the previously failing finance1→app1.sme01.example path now resolves 10.10.50.10 with 0% loss, and all other connectivity paths remained at 0% loss (no subnets disrupted).",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.877,
+      "log_p_yes": 0.0,
+      "method": "pool_resolver_unadvertised",
+      "operation": "set_dhcp_resolver_presence",
+      "reason": null,
+      "reference": "On the DHCP server firewall, pool FINANCE1 (10.10.30.0/24) no longer advertises a DNS resolver (10.10.60.10), so clients cannot resolve names.",
+      "score": 31.877,
+      "target": "firewall"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 319.665021368,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "dhcp_dns.provisioning.expected_degradation",
+      "version": "1.1.0",
+      "passed": true,
+      "probe_count": 2
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "dhcp_dns.provisioning.healthy",
+      "version": "1.1.0",
+      "passed": true,
+      "probe_count": 2
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "dhcp_dns.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "dhcp_dns.provisioning.repair",
+      "version": "1.1.0",
+      "passed": true,
+      "probe_count": 2
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "The firewall's FINANCE1 DHCP subnet (10.10.30.0/24) was missing the name-server option that all other subnets (USER1/GUEST1/ADMIN1) carried, so finance1 could not resolve app1.sme01.example (DNS failure in the first check). I added `set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10`. Re-validation passed: the previously failing finance1→app1.sme01.example path now resolves 10.10.50.10 with 0% loss, and all other connectivity paths remained at 0% loss (no subnets disrupted).",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -31.877,
+      "log_p_yes": 0.0,
+      "method": "pool_resolver_unadvertised",
+      "operation": "set_dhcp_resolver_presence",
+      "reason": null,
+      "reference": "On the DHCP server firewall, pool FINANCE1 (10.10.30.0/24) no longer advertises a DNS resolver (10.10.60.10), so clients cannot resolve names.",
+      "score": 31.877,
+      "target": "firewall"
+    },
+    "domain": "dhcp_dns",
+    "environment_success": true,
+    "failed_operation_count": 5,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 2,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "provisioning_repair_pass_rate": 1.0,
+    "read_count": 13,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 1,
+    "successful_read_count": 11,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 7
+  },
+  "operation_counts": {
+    "llm_calls": 19,
+    "containerlab_reads": 13,
+    "containerlab_mutations": 2,
+    "containerlab_mutations_ok": 1,
+    "sut_validations": 3,
+    "failed_operations": 5,
+    "unsafe_operations": 0,
+    "input_tokens": 331935,
+    "output_tokens": 1696,
+    "total_tokens": 333631,
+    "recorded": {
+      "ani_mutations": 2,
+      "ani_reads": 13,
+      "failed_operations": 5,
+      "input_tokens": 331935,
+      "llm_calls": 19,
+      "output_tokens": 1696,
+      "successful_mutations": 1,
+      "successful_reads": 11,
+      "total_tokens": 333631,
+      "unsafe_operations": 0,
+      "validations": 7
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 170.532,
+    "action_seconds": 3.855,
+    "reading_seconds": 5.583,
+    "validation_seconds": 139.605,
+    "episode_seconds": 319.665021368,
+    "unaccounted_seconds": 0.09,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 331935,
+    "output_tokens": 1696,
+    "total_tokens": 333631,
+    "llm_calls": 19,
+    "output_tokens_per_call": 89.3,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 3,
+    "public_validations_failed": 2,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 14,
+      "calls": 18
+    },
+    "repeat_action_rate": {
+      "repeated": 4,
+      "calls": 18
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 13,
+      "validate": 3,
+      "apply_config": 2
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 18
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "13 of 18 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 333631
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 170.532,
+        "action_seconds": 3.855,
+        "reading_seconds": 5.583,
+        "validation_seconds": 139.605,
+        "episode_seconds": 319.665021368,
+        "unaccounted_seconds": 0.09
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 18
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 2
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: firewall"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 123.94134340899996,
+    "calculate_metrics": 2.994499982378329e-05,
+    "deploy_reset_testbed": 15.881654807000018,
+    "evaluate_degradation": 24.74551722199999,
+    "evaluate_healthy": 28.94138877599994,
+    "evaluate_repair_preservation": 128.480088302,
+    "inject_fault": 7.195496173000038,
+    "invoke_sut": 319.68949743200005,
+    "load_configuration": 0.00023364100002254418,
+    "load_oracles": 0.008419093000043176,
+    "load_validate_scenario": 0.044294863000004625,
+    "record_baseline": 7.386999982372799e-06,
+    "restore_destroy": 18.015426229000013,
+    "score_diagnosis": 1.18170007599997,
+    "snapshot_after_sut": 7.243210511999905,
+    "snapshot_before_sut": 7.583186482999963,
+    "snapshot_healthy": 7.263319672999955,
+    "write_result": 0.009986293999872942
+  },
+  "files": {
+    "record": "../../../records/dhcp_dns.dhcp_provisioning.m3.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/dhcp_dns.dhcp_provisioning.m3.judge.log",
+    "devices": "../../../logs/devices/dhcp_dns.dhcp_provisioning.m3/",
+    "note": "relative to this folder"
+  }
+}

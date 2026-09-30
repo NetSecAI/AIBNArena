@@ -1,0 +1,24 @@
+schema_version: "1.0"
+oracle_id: filtering.policy.healthy
+version: 1.0.0
+description: >-
+  Every topology-required path is loss-free before the policy fault. Required paths
+  are the flows the zone policy is meant to permit, so a clean run here is also
+  evidence that the reference policy admits what it should.
+domain: filtering
+phase: healthy
+probes:
+  - id: required_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: required_paths
+    protocol: icmp
+    scope: all
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

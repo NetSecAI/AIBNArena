@@ -1,0 +1,76 @@
+schema_version: "0.1"
+version: "1.0.0"
+# The shaped families never break reachability: an ICMP oracle passes them whether
+# or not the policy was ever repaired. They are judged on the rate the protected
+# class keeps under contention instead.
+oracles:
+  healthy: {path: scenarios/oracles/qos/shaping-repair/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/qos/shaping-repair/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/qos/shaping-repair/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/qos/shaping-repair/preservation-v1.yaml, version: "1.0.0"}
+scenario: wan_shaping_policy_repair
+task:
+  low: >-
+    The business traffic on the WAN uplink is not getting what it is owed. Fix it.
+  medium: >-
+    The business traffic class on the shaped WAN uplink no longer receives its contractual
+    guarantee of at least {{assured_bandwidth_mbps}} Mbps under contention. Restore that
+    guarantee without disrupting any other connectivity.
+  high: >-
+    Under contention, traffic from {{protected_source}} to {{destination}} measures below its
+    contractual {{assured_bandwidth_mbps}} Mbps. Restore the guarantee without disrupting any
+    other connectivity.
+base_variant: medium
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+    # These faults leave the link idle and reachable, so a connectivity-only
+    # oracle passes them repaired or not. The guarantee only means something
+    # while the uplink is disputed, which is why the check offers the contention
+    # itself before measuring.
+    - type: observed_throughput
+      min_mbps: "{{assured_bandwidth_mbps}}"
+      under_contention: true
+extra_info:
+  origin: project-defined IBN task family; mechanism grounded in hierarchical link sharing
+  initial_condition: >-
+    the WAN edge carries a working two-class shaping policy; the fault degrades exactly
+    one of its objects, leaving forwarding and addressing untouched
+  network_layers:
+    - QoS / forwarding queues
+  intent_semantics: >-
+    restore a quantitative minimum-throughput guarantee; the fault never breaks
+    reachability, so a connectivity-only oracle cannot tell repaired from broken
+  references:
+    - title: An Architecture for Differentiated Services - RFC 2475
+      url: https://www.rfc-editor.org/info/rfc2475/
+    - title: Hierarchical Link Sharing - Floyd & Jacobson
+      url: https://www.rfc-editor.org/info/rfc2597/
+  oracle_hint: >-
+    the protected flow regains its assured rate while competing traffic keeps flowing
+methods:
+  - id: 1
+    name: shaping_policy_removed
+    selector: {node: wan_edge, interface: shaped}
+    operation:
+      name: set_traffic_shaping_policy
+      policy: remove
+  - id: 2
+    name: assured_class_starved
+    selector: {node: wan_edge, interface: shaped}
+    operation:
+      name: set_traffic_shaping_policy
+      policy: starve_assured_class
+      starved_kbit_range: [200, 800]
+  - id: 3
+    name: assured_classifier_removed
+    selector: {node: wan_edge, interface: shaped}
+    operation:
+      name: set_traffic_shaping_policy
+      policy: remove_classifier
+  - id: 4
+    name: class_allocation_inverted
+    selector: {node: wan_edge, interface: shaped}
+    operation:
+      name: set_traffic_shaping_policy
+      policy: invert_class_allocation

@@ -1,0 +1,259 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 55.42912838500342,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "user1",
+          "external1"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 6.378200487233698e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.1920022340491414e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.28786547100753523,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "/qos",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6054847860068548,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.24780330000794493,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class show dev eth2",
+              "tc filter show dev eth2",
+              "tc -s class show dev eth2"
+            ],
+            "reason": "Inspect WAN HTB class and filter configuration on shaped uplink to confirm business-class guarantee mismatch without changing state.",
+            "rollback_commands": [],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.514502456411719e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.142199759371579e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/qos",
+          "/interface"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.9059894479869399,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "spine1"
+        ],
+        "paths": [
+          "/qos"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.4376456399913877,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "sudo tc class change dev eth2 parent 1: classid 1:10 htb rate 8mbit ceil 10mbit burst 15k cburst 15k"
+            ],
+            "reason": "Public validation shows business-class throughput only 1.912 Mbps under contention while WAN eth2 has HTB shaping; restoring the business class guaranteed rate on the shaped uplink to 8 Mbps addresses the implicated QoS guarantee without changing unrelated forwarding.",
+            "rollback_commands": [
+              "sudo tc class change dev eth2 parent 1: classid 1:10 htb rate 2mbit ceil 10mbit burst 15k cburst 15k"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 5.8904028264805675e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; expected ip or tc",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class change dev eth2 parent 1: classid 1:10 htb rate 8mbit ceil 10mbit burst 15k cburst 15k"
+            ],
+            "reason": "Public validation shows business-class throughput only 1.912 Mbps under contention while WAN eth2 has HTB shaping; restoring the business class guaranteed rate on the shaped uplink to 8 Mbps addresses the implicated QoS guarantee without changing unrelated forwarding.",
+            "rollback_commands": [
+              "tc class change dev eth2 parent 1: classid 1:10 htb rate 2mbit ceil 10mbit burst 15k cburst 15k"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 9.937799768522382e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; invalid HTB burst",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class change dev eth2 parent 1: classid 1:10 htb rate 8mbit ceil 10mbit"
+            ],
+            "reason": "Public validation shows business-class throughput only 1.912 Mbps under contention while WAN eth2 has HTB shaping; restore the implicated business-class guaranteed rate on the shaped uplink to 8 Mbps.",
+            "rollback_commands": [
+              "tc class change dev eth2 parent 1: classid 1:10 htb rate 2mbit ceil 10mbit"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.14648325901362114,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_a8af02a9390b359c"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 61.680667816021014,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

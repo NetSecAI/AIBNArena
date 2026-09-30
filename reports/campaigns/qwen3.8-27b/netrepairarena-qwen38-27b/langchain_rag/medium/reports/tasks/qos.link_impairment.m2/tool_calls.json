@@ -1,0 +1,225 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 7.295400064322166e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.654899956018198e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-b3a90422ab0db07c0f0a04af32233668e166e94957ec6b0c0dc899aff9f621fe.json",
+      "category": "read",
+      "duration_seconds": 2.121335928000917,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-2ac9315a4e25636fb26c90f9d8d4eedf86056f4fa02618cef5fd4bf5a48397ad.json",
+      "category": "read",
+      "duration_seconds": 0.8315100679992611,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "count": 10,
+            "destination_ip": "10.10.50.10",
+            "source": "finance1",
+            "timeout_seconds": 5,
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 10.386643141000604,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "ethernet-1/1",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8294564019997779,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "count": 10,
+            "destination_ip": "10.10.50.1",
+            "source": "web1",
+            "timeout_seconds": 5,
+            "type": "icmp"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 9.301830411999617,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "finance1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.14168849400084582,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.40542903799905616,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc qdisc del dev eth1 root",
+              "tc qdisc add dev eth1 root noqueue"
+            ],
+            "reason": "finance1 eth1 egress has a netem qdisc with corrupt 30%, causing 10% ICMP loss to 10.10.50.10; healthy path web1->10.10.50.1 has 0% loss. Remove the emulation, restore default queue.",
+            "rollback_commands": [
+              "tc qdisc del dev eth1 root",
+              "tc qdisc add dev eth1 root netem corrupt 30%"
+            ],
+            "target": "finance1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.160100019769743e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported qdisc hierarchy or netem form",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth1",
+        "node": "finance1",
+        "reason": "finance1 eth1 egress carries a netem qdisc (corrupt 30%) degrading the app path; removing the root qdisc restores the default noqueue.",
+        "set": {
+          "delete_root": true
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.24036732999957167,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_507072784227039b"
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "finance1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.13708040399978927,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 36.37070743299955,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

@@ -1,0 +1,341 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/langchain_rag_agent-gpt-5-4-connectivity-remove_ip-m1-fault-seed506567882-9809c529e848.json",
+    "sha256": "bdb6cfb814280b3fcf049897189e17dc31716de8f02131419c133ebdb3020f9f",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_rag_agent-gpt-5-4-connectivity-remove_ip-m1-fault-seed506567882-9809c529e848",
+    "created_at": "2026-09-29T06:06:11.466813+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_rag_agent-gpt-5-4-connectivity-remove_ip-m1-fault-seed506567882",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.remove_ip.m1",
+      "sut_task_id": "sut-27fdda9615865453077f7923d179bc32",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "Observed only user1 connectivity to networks behind leaf2 was failing, while other cross-subnet paths were healthy. Read user1 and leaf1 state/config and found leaf1 ethernet-1/1.0 had IPv4 enabled but no address, despite leaf1 static routes toward leaf2 using spine next-hops 10.255.0.0 and 10.255.0.2. Added 10.255.0.1/31 to leaf1 ethernet-1/1.0. Public success criteria then passed with all lab connectivity checks succeeding.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed only user1 connectivity to networks behind leaf2 was failing, while other cross-subnet paths were healthy. Read user1 and leaf1 state/config and found leaf1 ethernet-1/1.0 had IPv4 enabled but no address, despite leaf1 static routes toward leaf2 using spine next-hops 10.255.0.0 and 10.255.0.2. Added 10.255.0.1/31 to leaf1 ethernet-1/1.0. Public success criteria then passed with all lab connectivity checks succeeding.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -32.8379,
+      "log_p_yes": 0.0,
+      "method": "router_interface_address_removed",
+      "operation": "set_interface_ipv4_presence",
+      "reason": null,
+      "reference": "On leaf1, interface ethernet-1/1 lost its IPv4 address: 10.255.0.1/31 was removed, so the interface has no address on the fabric_l1_s1 segment.",
+      "score": 32.8379,
+      "target": "leaf1"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 137.9637424729881,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "Observed only user1 connectivity to networks behind leaf2 was failing, while other cross-subnet paths were healthy. Read user1 and leaf1 state/config and found leaf1 ethernet-1/1.0 had IPv4 enabled but no address, despite leaf1 static routes toward leaf2 using spine next-hops 10.255.0.0 and 10.255.0.2. Added 10.255.0.1/31 to leaf1 ethernet-1/1.0. Public success criteria then passed with all lab connectivity checks succeeding.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -32.8379,
+      "log_p_yes": 0.0,
+      "method": "router_interface_address_removed",
+      "operation": "set_interface_ipv4_presence",
+      "reason": null,
+      "reference": "On leaf1, interface ethernet-1/1 lost its IPv4 address: 10.255.0.1/31 was removed, so the interface has no address on the fabric_l1_s1 segment.",
+      "score": 32.8379,
+      "target": "leaf1"
+    },
+    "domain": "connectivity",
+    "environment_success": true,
+    "failed_operation_count": 2,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 1,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 1.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 10,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 1,
+    "successful_read_count": 9,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 14,
+    "containerlab_reads": 10,
+    "containerlab_mutations": 1,
+    "containerlab_mutations_ok": 1,
+    "sut_validations": 2,
+    "failed_operations": 2,
+    "unsafe_operations": 0,
+    "input_tokens": 166273,
+    "output_tokens": 764,
+    "total_tokens": 167037,
+    "recorded": {
+      "ani_mutations": 1,
+      "ani_reads": 10,
+      "failed_operations": 2,
+      "input_tokens": 166273,
+      "llm_calls": 14,
+      "output_tokens": 764,
+      "successful_mutations": 1,
+      "successful_reads": 9,
+      "total_tokens": 167037,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 28.466,
+    "action_seconds": 1.161,
+    "reading_seconds": 11.322,
+    "validation_seconds": 96.951,
+    "episode_seconds": 137.9637424729881,
+    "unaccounted_seconds": 0.064,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 166273,
+    "output_tokens": 764,
+    "total_tokens": 167037,
+    "llm_calls": 14,
+    "output_tokens_per_call": 54.6,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 12,
+      "calls": 13
+    },
+    "repeat_action_rate": {
+      "repeated": 1,
+      "calls": 13
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 10,
+      "validate": 2,
+      "apply_config": 1
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 13
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "11 of 13 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 167037
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 28.466,
+        "action_seconds": 1.161,
+        "reading_seconds": 11.322,
+        "validation_seconds": 96.951,
+        "episode_seconds": 137.9637424729881,
+        "unaccounted_seconds": 0.064
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 13
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: leaf1"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 63.86477189400466,
+    "calculate_metrics": 3.141502384096384e-05,
+    "deploy_reset_testbed": 17.340571372013073,
+    "evaluate_degradation": 21.64034913305659,
+    "evaluate_healthy": 22.04866301099537,
+    "evaluate_repair_preservation": 52.90906852897024,
+    "inject_fault": 0.4771734259556979,
+    "invoke_sut": 137.98430936603108,
+    "load_configuration": 0.0003689840086735785,
+    "load_oracles": 0.00614429300185293,
+    "load_validate_scenario": 0.045052464003674686,
+    "record_baseline": 4.5460183173418045e-06,
+    "restore_destroy": 7.036398048978299,
+    "score_diagnosis": 0.6160000850213692,
+    "snapshot_after_sut": 6.178724902973045,
+    "snapshot_before_sut": 7.119598855962977,
+    "snapshot_healthy": 6.166567153006326,
+    "write_result": 0.0067834509536623955
+  },
+  "files": {
+    "record": "../../../records/connectivity.remove_ip.m1.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.remove_ip.m1.judge.log",
+    "devices": "../../../logs/devices/connectivity.remove_ip.m1/",
+    "note": "relative to this folder"
+  }
+}

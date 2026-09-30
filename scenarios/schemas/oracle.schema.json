@@ -1,0 +1,461 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ibn-eval.example/schemas/oracle.schema.json",
+  "title": "IBN experimental oracle",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "oracle_id",
+    "version",
+    "domain",
+    "phase",
+    "probes",
+    "success"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "oracle_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_.-]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "enum": [
+        "connectivity",
+        "dhcp_dns",
+        "filtering",
+        "qos",
+        "security"
+      ]
+    },
+    "phase": {
+      "enum": [
+        "healthy",
+        "expected_degradation",
+        "repair",
+        "preservation"
+      ]
+    },
+    "probes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/probe"
+      }
+    },
+    "success": {
+      "$ref": "#/$defs/success"
+    }
+  },
+  "$defs": {
+    "endpoint": {
+      "type": [
+        "string",
+        "integer"
+      ]
+    },
+    "probe": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "source",
+        "destination",
+        "protocol",
+        "attempts",
+        "timeout_seconds",
+        "metrics",
+        "thresholds",
+        "aggregation",
+        "success"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]+$"
+        },
+        "type": {
+          "enum": [
+            "icmp",
+            "tcp",
+            "dns",
+            "http",
+            "throughput",
+            "connectivity_matrix",
+            "security_event",
+            "configuration"
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/endpoint"
+        },
+        "destination": {
+          "$ref": "#/$defs/endpoint"
+        },
+        "protocol": {
+          "enum": [
+            "icmp",
+            "tcp",
+            "udp",
+            "dns",
+            "http",
+            "https",
+            "config"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "scope": {
+          "enum": [
+            "all",
+            "affected",
+            "unaffected"
+          ]
+        },
+        "affected_nodes": {
+          "oneOf": [
+            {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            {
+              "type": "string",
+              "pattern": "^\\$\\{bindings\\.[a-zA-Z0-9_]+\\}$"
+            }
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 600
+        },
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "success",
+              "packet_loss_percent",
+              "rtt_min_ms",
+              "rtt_avg_ms",
+              "rtt_max_ms",
+              "throughput_mbps",
+              "jitter_ms",
+              "http_status",
+              "answer_count",
+              "event_count",
+              "configuration_match",
+              "total_checks",
+              "passed_checks",
+              "failed_checks",
+              "timed_out"
+            ]
+          }
+        },
+        "thresholds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/threshold"
+          }
+        },
+        "aggregation": {
+          "type": "object",
+          "required": [
+            "method"
+          ],
+          "properties": {
+            "method": {
+              "enum": [
+                "all_attempts",
+                "any_attempt",
+                "mean",
+                "minimum",
+                "maximum",
+                "percentile"
+              ]
+            },
+            "percentile": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "method": {
+                    "const": "percentile"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "percentile"
+                ]
+              }
+            }
+          ],
+          "additionalProperties": false
+        },
+        "success": {
+          "$ref": "#/$defs/success"
+        },
+        "measurement": {
+          "type": "object",
+          "description": "Inputs a throughput probe needs beyond source and destination, including whether the oracle offers the competing flow itself. A family whose fault is already the flood declares contended: false -- starting a second one would distort it, and stopping it would remove what is being measured.",
+          "required": [
+            "protected_source",
+            "sink_ip",
+            "measurement_port",
+            "destination",
+            "destination_ip",
+            "assured_bandwidth_mbps",
+            "seconds",
+            "contended"
+          ],
+          "properties": {
+            "protected_source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sink_ip": {
+              "type": "string",
+              "minLength": 1
+            },
+            "measurement_port": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/$defs/binding_ref"
+                }
+              ]
+            },
+            "seconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "background_source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "load_port": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/$defs/binding_ref"
+                }
+              ]
+            },
+            "link_mbps": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/$defs/binding_ref"
+                }
+              ]
+            },
+            "destination": {
+              "type": "string",
+              "minLength": 1
+            },
+            "destination_ip": {
+              "type": "string",
+              "minLength": 1
+            },
+            "assured_bandwidth_mbps": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/$defs/binding_ref"
+                }
+              ]
+            },
+            "contended": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "threshold": {
+      "type": "object",
+      "required": [
+        "metric",
+        "operator"
+      ],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operator": {
+          "enum": [
+            "lt",
+            "lte",
+            "eq",
+            "ne",
+            "gte",
+            "gt"
+          ]
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": [
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "$ref": "#/$defs/binding_ref"
+            }
+          ]
+        },
+        "baseline": {
+          "type": "object",
+          "required": [
+            "metric",
+            "factor"
+          ],
+          "properties": {
+            "metric": {
+              "type": "string",
+              "minLength": 1
+            },
+            "factor": {
+              "type": "number",
+              "minimum": 0
+            },
+            "offset": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "combine": {
+          "enum": [
+            "min",
+            "max"
+          ]
+        },
+        "factor": {
+          "type": "number",
+          "minimum": 0,
+          "default": 1
+        },
+        "offset": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "value"
+          ],
+          "not": {
+            "required": [
+              "baseline"
+            ]
+          }
+        },
+        {
+          "required": [
+            "baseline"
+          ],
+          "not": {
+            "required": [
+              "value"
+            ]
+          }
+        },
+        {
+          "required": [
+            "value",
+            "baseline",
+            "combine"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "success": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "all",
+            "any",
+            "minimum_pass_rate"
+          ]
+        },
+        "minimum_pass_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "minimum_pass_rate"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "minimum_pass_rate"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "binding_ref": {
+      "type": "string",
+      "pattern": "^\\$\\{bindings\\.[a-zA-Z0-9_]+\\}$"
+    }
+  },
+  "additionalProperties": false
+}

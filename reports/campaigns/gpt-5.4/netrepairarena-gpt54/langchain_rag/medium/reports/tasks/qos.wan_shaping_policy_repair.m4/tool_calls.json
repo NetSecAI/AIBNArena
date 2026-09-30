@@ -1,0 +1,488 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.923902451992035e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 58.08214702602709,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.31094267294975,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.4488712760503404,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.31314416299574077,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "external1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.36955006199423224,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc -s qdisc show dev eth2 ; tc -s class show dev eth2 ; tc -s filter show dev eth2"
+            ],
+            "reason": "Inspect WAN egress shaping hierarchy on wan1 eth2 because user1 to external1 throughput under contention is 1.913 Mbps despite connectivity passing",
+            "rollback_commands": [
+              "true"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.4578959457576275e-05,
+      "error": "ANI commands must be one native command each; use the commands list",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc -s qdisc show dev eth2",
+              "tc -s class show dev eth2",
+              "tc -s filter show dev eth2"
+            ],
+            "reason": "Inspect WAN egress shaping hierarchy on wan1 eth2 because user1 to external1 throughput under contention is 1.913 Mbps despite connectivity passing",
+            "rollback_commands": [
+              "true",
+              "true",
+              "true"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 4.722998710349202e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1819924569572322,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "/qos"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2967603619908914,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Probe existing broken root HTB on wan1 eth2; public validation shows only 1.913 Mbps for protected flow under contention and current qdisc has default 0x20, suggesting malformed hierarchy",
+        "set": {
+          "delete_root": true
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.17530661396449432,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_8750a5d33c6e898a"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.15413068502675742,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Rebuild WAN egress HTB on wan1 eth2 to restore at least 8 Mbps guarantee for protected business flow while preserving bandwidth for other traffic",
+        "set": {
+          "htb": {
+            "classes": [
+              {
+                "ceil": "20mbit",
+                "classid": "1:1",
+                "parent": "root",
+                "rate": "20mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "classid": "1:10",
+                "parent": "1:1",
+                "prio": 0,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "classid": "1:20",
+                "parent": "1:1",
+                "prio": 1,
+                "rate": "11mbit"
+              }
+            ],
+            "default_class": "1:20",
+            "root_rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00032477296190336347,
+      "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Rebuild WAN egress HTB on wan1 eth2 to restore at least 8 Mbps guarantee for protected business flow while preserving bandwidth for other traffic",
+        "set": {
+          "htb": {
+            "classes": [
+              {
+                "ceil": "20mbit",
+                "id": "1:1",
+                "parent": "root",
+                "rate": "20mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:10",
+                "parent": "1:1",
+                "prio": 0,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:20",
+                "parent": "1:1",
+                "prio": 1,
+                "rate": "11mbit"
+              }
+            ],
+            "default_class": "1:20",
+            "root_rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.0001482610241509974,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; invalid tc handle 'root'",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "user1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2786722839809954,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Rebuild WAN egress HTB on wan1 eth2 with protected and best-effort classes to restore minimum guaranteed throughput under contention",
+        "set": {
+          "htb": {
+            "class": [
+              {
+                "ceil": "20mbit",
+                "id": "1:1",
+                "rate": "20mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:10",
+                "parent": "1:1",
+                "prio": 0,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:20",
+                "parent": "1:1",
+                "prio": 1,
+                "rate": "11mbit"
+              }
+            ],
+            "default": "1:20",
+            "rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.8897018637508154e-05,
+      "error": "update_object: htb.default must be an integer",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Rebuild WAN egress HTB on wan1 eth2 with protected and best-effort classes to restore minimum guaranteed throughput under contention",
+        "set": {
+          "htb": {
+            "class": [
+              {
+                "ceil": "20mbit",
+                "id": "1:1",
+                "rate": "20mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:10",
+                "parent": "1:1",
+                "prio": 0,
+                "rate": "9mbit"
+              },
+              {
+                "ceil": "20mbit",
+                "id": "1:20",
+                "parent": "1:1",
+                "prio": 1,
+                "rate": "11mbit"
+              }
+            ],
+            "default": 20,
+            "rate": "20mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.4354934300063178,
+      "error": null,
+      "ok": true,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_d4f179af5260ae54"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2295188440475613,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add protected HTB class on wan1 eth2 for business traffic guarantee",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:10",
+            "parent": "1:1",
+            "prio": 0,
+            "rate": "9mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.2025254309992306,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_bce1a95c0acd4574"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add protected HTB class on wan1 eth2 for business traffic guarantee",
+        "set": {
+          "class": {
+            "ceil": "20mbit",
+            "id": "1:10",
+            "parent": "1:",
+            "prio": 0,
+            "rate": "9mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.18065541697433218,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_98e2e55102a75b43"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Add protected HTB class on wan1 eth2 for business traffic guarantee",
+        "set": {
+          "class": {
+            "add": true,
+            "ceil": "20mbit",
+            "id": "1:10",
+            "parent": "1:",
+            "prio": 0,
+            "rate": "9mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.1443803790025413,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_d1ff719155784ce4"
+    }
+  ]
+}

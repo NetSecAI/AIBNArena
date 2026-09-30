@@ -1,0 +1,127 @@
+schema_version: "0.1"
+topology:
+  id: sme_leaf_spine_dmz_small
+  name: Small SME leaf-spine topology with enterprise zones and a DMZ
+  size: small
+  profile: enterprise_sme
+  defaults:
+    endpoint_interface_mtu: 1500
+    static_next_hop_group_template: "to-{gateway}"
+  environment:
+    type: containerlab
+    lab_name: sme01-small
+    topology_path: benchmarks/testbeds/containerlab/sme01-small/topology.clab.yml
+  nodes:
+    spine1:
+      kind: nokia_srlinux
+      roles: [spine, router, transit]
+      capabilities: [ipv4_forwarding, static_routing, ospf, acl, qos]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l1_s1, ipv4: 10.255.0.0/31}
+        "ethernet-1/2": {segment: fabric_l2_s1, ipv4: 10.255.0.4/31}
+    spine2:
+      kind: nokia_srlinux
+      roles: [spine, router, transit]
+      capabilities: [ipv4_forwarding, static_routing, ospf, acl, qos]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l1_s2, ipv4: 10.255.0.2/31}
+        "ethernet-1/2": {segment: fabric_l2_s2, ipv4: 10.255.0.6/31}
+    leaf1:
+      kind: nokia_srlinux
+      roles: [leaf, router, access_switch, gateway]
+      capabilities: [ipv4_forwarding, static_routing, ospf, acl, qos, vlan, trunk]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l1_s1, ipv4: 10.255.0.1/31}
+        "ethernet-1/2": {segment: fabric_l1_s2, ipv4: 10.255.0.3/31}
+        "ethernet-1/10": {segment: users_vlan, ipv4: 10.10.10.1/24}
+        "ethernet-1/20": {segment: guest_vlan, ipv4: 10.10.20.1/24}
+        "ethernet-1/57": {segment: mgmt_vlan, ipv4: 10.10.99.1/24}
+    leaf2:
+      kind: nokia_srlinux
+      roles: [leaf, router, access_switch, gateway]
+      capabilities: [ipv4_forwarding, static_routing, ospf, acl, qos, vlan, trunk]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l2_s1, ipv4: 10.255.0.5/31}
+        "ethernet-1/2": {segment: fabric_l2_s2, ipv4: 10.255.0.7/31}
+        "ethernet-1/30": {segment: finance_vlan, ipv4: 10.10.30.1/24}
+        "ethernet-1/40": {segment: dmz_vlan, ipv4: 10.10.40.1/24}
+        "ethernet-1/50": {segment: server_vlan, ipv4: 10.10.50.1/24}
+        "ethernet-1/58": {segment: internet, ipv4: 203.0.113.1/24}
+    user1:
+      kind: linux
+      roles: [client, employee]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: users_vlan, ipv4: 10.10.10.10/24}
+    guest1:
+      kind: linux
+      roles: [client, guest]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: guest_vlan, ipv4: 10.10.20.10/24}
+    finance1:
+      kind: linux
+      roles: [client, restricted_endpoint]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: finance_vlan, ipv4: 10.10.30.10/24}
+    web1:
+      kind: linux
+      roles: [server, dmz_server]
+      capabilities: [ipv4, http_server]
+      interfaces:
+        eth1: {segment: dmz_vlan, ipv4: 10.10.40.10/24}
+    app1:
+      kind: linux
+      roles: [server, application_server]
+      capabilities: [ipv4, traffic_sink]
+      interfaces:
+        eth1: {segment: server_vlan, ipv4: 10.10.50.10/24}
+    external1:
+      kind: linux
+      roles: [client, external_client]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: internet, ipv4: 203.0.113.10/24}
+    admin1:
+      kind: linux
+      roles: [admin_client, management_actor]
+      capabilities: [ipv4, network_management]
+      interfaces:
+        eth1: {segment: mgmt_vlan, ipv4: 10.10.99.100/24}
+  connectivity_requirements:
+    - {source: user1, destination: web1, bidirectional: true}
+    - {source: user1, destination: app1, bidirectional: true}
+    - {source: guest1, destination: web1, bidirectional: true}
+    - {source: finance1, destination: app1, bidirectional: true}
+    - {source: external1, destination: web1, bidirectional: true}
+  optional_nodes:
+    attacker1:
+      kind: linux
+      roles: [attacker]
+      capabilities: [ipv4, raw_packets, packet_capture, traffic_generation, vlan_tagging]
+      attachable_segments: [users_vlan, guest_vlan, dmz_vlan, internet]
+  segments:
+    fabric_l1_s1: {type: p2p, cidr: 10.255.0.0/31, members: [leaf1, spine1], capacity_mbps: 1000}
+    fabric_l1_s2: {type: p2p, cidr: 10.255.0.2/31, members: [leaf1, spine2], capacity_mbps: 1000}
+    fabric_l2_s1: {type: p2p, cidr: 10.255.0.4/31, members: [leaf2, spine1], capacity_mbps: 1000}
+    fabric_l2_s2: {type: p2p, cidr: 10.255.0.6/31, members: [leaf2, spine2], capacity_mbps: 1000}
+    users_vlan: {type: vlan, vlan_id: 10, cidr: 10.10.10.0/24, members: [leaf1, user1], security_zone: users, capacity_mbps: 1000}
+    guest_vlan: {type: vlan, vlan_id: 20, cidr: 10.10.20.0/24, members: [leaf1, guest1], security_zone: guest, capacity_mbps: 1000}
+    finance_vlan: {type: vlan, vlan_id: 30, cidr: 10.10.30.0/24, members: [leaf2, finance1], security_zone: finance, capacity_mbps: 1000}
+    dmz_vlan: {type: vlan, vlan_id: 40, cidr: 10.10.40.0/24, members: [leaf2, web1], security_zone: dmz, capacity_mbps: 1000}
+    server_vlan: {type: vlan, vlan_id: 50, cidr: 10.10.50.0/24, members: [leaf2, app1], security_zone: servers, capacity_mbps: 1000}
+    internet: {type: external, cidr: 203.0.113.0/24, members: [leaf2, external1], security_zone: external, capacity_mbps: 1000}
+    mgmt_vlan: {type: management, vlan_id: 99, cidr: 10.10.99.0/24, members: [leaf1, admin1], security_zone: management, capacity_mbps: 1000}
+  services:
+    web_http:
+      node: web1
+      transport: tcp
+      port: 80
+      application: http
+      security: cleartext
+    app_test:
+      node: app1
+      transport: tcp
+      port: 5201
+      application: iperf3

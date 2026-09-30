@@ -1,0 +1,231 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 28.881168941006763,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.735100083053112e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": [
+          "interfaces",
+          "protocols",
+          "nat",
+          "firewall",
+          "zone-policy"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8683327759936219,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "fw-ext"
+        ],
+        "views": [
+          "routes",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6416838680015644,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "web1",
+          "external1"
+        ],
+        "paths": [
+          "/"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5625542570051039,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 state new",
+              "delete firewall ipv4 name OUTSIDE-TO-DMZ rule 30 source address 203.0.113.10"
+            ],
+            "reason": "Public validation shows only external1<->web1 ICMP fails. fw-ext OUTSIDE-TO-DMZ rule 30 permits ping to 10.10.40.10 only from source 203.0.113.10, but echo replies are translated and arrive at fw-ext with source 10.10.40.1, so the source match blocks the request. Narrowly removing the source constraint and matching new state preserves segmentation while allowing the intended outside-to-DMZ ping flow.",
+            "rollback_commands": [
+              "delete firewall ipv4 name OUTSIDE-TO-DMZ rule 30 state new",
+              "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 source address 203.0.113.10"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.5402926149981795,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_514294db1a188d07"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 67.7866931569879,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": [
+          "firewall"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.222076678997837,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set zone-policy zone DMZ from OUTSIDE firewall name OUTSIDE-TO-DMZ"
+            ],
+            "reason": "Validation still shows only external1<->web1 ICMP failing after correcting the rule match. Reading fw-ext firewall and zones shows OUTSIDE-TO-DMZ exists but is not attached under zone DMZ from OUTSIDE, so outside-to-DMZ traffic is not permitted by the intended policy. Attaching that existing ruleset is the narrow fix for the failed path without loosening other segmentation.",
+            "rollback_commands": [
+              "delete zone-policy zone DMZ from OUTSIDE firewall name OUTSIDE-TO-DMZ"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.27946517000964377,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_0430758bfb1272f6"
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": [
+          "/"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-fe4e397a0500a0e947e2e2f1bb36fc0e78b68483aa9bbc0f4f0ec3f139ab6f67.json",
+      "category": "read",
+      "duration_seconds": 0.2226566370081855,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set firewall zone DMZ from OUTSIDE firewall name OUTSIDE-TO-DMZ"
+            ],
+            "reason": "fw-ext full config shows zone policy is configured under 'firewall zone', and DMZ lacks a from OUTSIDE attachment while the OUTSIDE-TO-DMZ ruleset exists. This missing binding explains why external1<->web1 ICMP still fails. Attaching the existing OUTSIDE-TO-DMZ ruleset to firewall zone DMZ from OUTSIDE is the narrow repair.",
+            "rollback_commands": [
+              "delete firewall zone DMZ from OUTSIDE firewall name OUTSIDE-TO-DMZ"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.565383784007281,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_39518c3e3d728e61"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 34.97766830200271,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

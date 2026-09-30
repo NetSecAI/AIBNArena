@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-v2-20260927T135117Z/langchain_agent-gpt-5-4-connectivity-disable_interface-m3-fault-seed61059369-d98a65438b3a.json",
+    "sha256": "5674a7e9d40ab6eec39f8552f607fb51e50a139bbb38a0e0204f809ddd91ed8f",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-gpt-5-4-connectivity-disable_interface-m3-fault-seed61059369-d98a65438b3a",
+    "created_at": "2026-09-27T15:06:26.330757+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-gpt-5-4-connectivity-disable_interface-m3-fault-seed61059369",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.disable_interface.m3",
+      "sut_task_id": "sut-9c77eaf8ccf886e38c39b540a8605621",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "failed",
+    "sut_verified": false,
+    "final_summary": "Observed only the guest1<->web1 path failing: public validation showed 100% loss in both directions while all other tested IPv4 paths passed. Verified guest1 and web1 had correct IPs/default gateways, leaf1 and leaf2 interfaces were up, static routes existed between 10.10.20.0/24 and 10.10.40.0/24, and both leaves had ARP entries for the endpoints. This implicated a policy/filter issue on the guest/DMZ path, but a safe repair could not be completed from available evidence. One attempted SR Linux ACL change on leaf1 was rejected during preflight/parse and was not proven committed. Public success criteria therefore remain failing.",
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Observed only the guest1<->web1 path failing: public validation showed 100% loss in both directions while all other tested IPv4 paths passed. Verified guest1 and web1 had correct IPs/default gateways, leaf1 and leaf2 interfaces were up, static routes existed between 10.10.20.0/24 and 10.10.40.0/24, and both leaves had ARP entries for the endpoints. This implicated a policy/filter issue on the guest/DMZ path, but a safe repair could not be completed from available evidence. One attempted SR Linux ACL change on leaf1 was rejected during preflight/parse and was not proven committed. Public success criteria therefore remain failing.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -30.877,
+      "method": "endpoint_low_mtu",
+      "operation": "set_interface_mtu",
+      "reason": null,
+      "reference": "On guest1, interface eth1 has its MTU lowered to 68 bytes, far below the normal value, so normal-sized packets cannot pass.",
+      "score": -30.877,
+      "target": "guest1"
+    },
+    "success": false,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 95.18069236699375,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": false,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": false,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Observed only the guest1<->web1 path failing: public validation showed 100% loss in both directions while all other tested IPv4 paths passed. Verified guest1 and web1 had correct IPs/default gateways, leaf1 and leaf2 interfaces were up, static routes existed between 10.10.20.0/24 and 10.10.40.0/24, and both leaves had ARP entries for the endpoints. This implicated a policy/filter issue on the guest/DMZ path, but a safe repair could not be completed from available evidence. One attempted SR Linux ACL change on leaf1 was rejected during preflight/parse and was not proven committed. Public success criteria therefore remain failing.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -30.877,
+      "method": "endpoint_low_mtu",
+      "operation": "set_interface_mtu",
+      "reason": null,
+      "reference": "On guest1, interface eth1 has its MTU lowered to 68 bytes, far below the normal value, so normal-sized packets cannot pass.",
+      "score": -30.877,
+      "target": "guest1"
+    },
+    "domain": "connectivity",
+    "environment_success": false,
+    "failed_operation_count": 5,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 2,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 0.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 22,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 0,
+    "successful_read_count": 21,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 27,
+    "containerlab_reads": 22,
+    "containerlab_mutations": 2,
+    "containerlab_mutations_ok": 0,
+    "sut_validations": 2,
+    "failed_operations": 5,
+    "unsafe_operations": 0,
+    "input_tokens": 560384,
+    "output_tokens": 1550,
+    "total_tokens": 561934,
+    "recorded": {
+      "ani_mutations": 2,
+      "ani_reads": 22,
+      "failed_operations": 5,
+      "input_tokens": 560384,
+      "llm_calls": 27,
+      "output_tokens": 1550,
+      "successful_mutations": 0,
+      "successful_reads": 21,
+      "total_tokens": 561934,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 44.332,
+    "action_seconds": 0.534,
+    "reading_seconds": 15.518,
+    "validation_seconds": 34.672,
+    "episode_seconds": 95.18069236699375,
+    "unaccounted_seconds": 0.125,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 560384,
+    "output_tokens": 1550,
+    "total_tokens": 561934,
+    "llm_calls": 27,
+    "output_tokens_per_call": 57.4,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 2,
+    "last_public_validation_passed": false
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": false,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 23,
+      "calls": 26
+    },
+    "repeat_action_rate": {
+      "repeated": 6,
+      "calls": 26
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": false
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": true
+    },
+    "llm_found_problem_rate": {
+      "fault_located": false,
+      "change_reached_the_faulty_device": false,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 2,
+      "check_config": 22,
+      "apply_config": 2
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 26
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "21 of 26 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 561934
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 44.332,
+        "action_seconds": 0.534,
+        "reading_seconds": 15.518,
+        "validation_seconds": 34.672,
+        "episode_seconds": 95.18069236699375,
+        "unaccounted_seconds": 0.125
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 26
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 2
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": false
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "0 device(s) changed by the subject: none"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 66.83198170701507,
+    "calculate_metrics": 8.828699355944991e-05,
+    "deploy_reset_testbed": 17.43058638498769,
+    "evaluate_degradation": 6.340679857996292,
+    "evaluate_healthy": 22.642347182001686,
+    "evaluate_repair_preservation": 73.1168668520113,
+    "inject_fault": 0.1424557270074729,
+    "invoke_sut": 95.20791765800095,
+    "load_configuration": 0.00021524500334635377,
+    "load_oracles": 0.004925872985040769,
+    "load_validate_scenario": 0.0357351349957753,
+    "record_baseline": 4.968984285369515e-06,
+    "restore_destroy": 5.892678674979834,
+    "score_diagnosis": 0.7054547330189962,
+    "snapshot_after_sut": 7.634603220009012,
+    "snapshot_before_sut": 6.591943643987179,
+    "snapshot_healthy": 7.093362960004015,
+    "write_result": 0.009122933988692239
+  },
+  "files": {
+    "record": "../../../records/connectivity.disable_interface.m3.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.disable_interface.m3.judge.log",
+    "devices": "../../../logs/devices/connectivity.disable_interface.m3/",
+    "note": "relative to this folder"
+  }
+}

@@ -1,0 +1,35 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/security/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/security/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/security/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/security/preservation-v1.yaml, version: "1.0.0"}
+scenario: cleartext_http_information_disclosure
+task_mode:
+  exploit: >-
+    In the isolated benchmark network, determine whether {{observer}} can recover the benign sensitive test value sent by {{client}} to the cleartext HTTP service on {{server}}.
+  detect: >-
+    Identify whether the sensitive application flow from {{client}} to {{server}} is exposed in cleartext on the network path.
+  correct: >-
+    Remove the cleartext exposure for the application flow between {{client}} and {{server}} while keeping the service available.
+  prevent: >-
+    Enforce protected client-server transport so passive network observation cannot recover the application payload while preserving service availability.
+security_properties:
+  - confidentiality
+stride:
+  - information_disclosure
+extra_info:
+  network_layers:
+    - L7 HTTP
+    - secure transport
+  binding:
+    strategy: security_http_path
+    application: http
+  observer_position: on-path network device or equivalent mirror/tap; a passive host on an ordinary switched access VLAN is not assumed to receive unrelated unicast traffic
+  references:
+    - title: TLS 1.3 - RFC 9846
+      url: https://www.rfc-editor.org/info/rfc9846/
+
+#Difficult to spote this security issue because we only collect the configuration we don't recover the traffic. 
+#We can only detect it by looking at the configuration of the network and checking if there is a cleartext HTTP service running. If there is, then we can conclude that there is a cleartext HTTP information disclosure issue.

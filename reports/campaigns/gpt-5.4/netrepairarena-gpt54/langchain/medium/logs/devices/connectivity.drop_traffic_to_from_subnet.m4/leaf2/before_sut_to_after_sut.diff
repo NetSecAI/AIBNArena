@@ -1,0 +1,26 @@
+--- leaf2/before_sut.txt
++++ leaf2/after_sut.txt
+@@ -95,6 +95,10 @@
+         interface ethernet-1/58.0 {
+         }
+         static-routes {
++            route 0.0.0.0/0 {
++                admin-state enable
++                next-hop-group nhg-0-0-0-0-0
++            }
+             route 10.10.10.0/24 {
+                 admin-state enable
+                 next-hop-group to-leaf1
+@@ -109,6 +113,12 @@
+             }
+         }
+         next-hop-groups {
++            group nhg-0-0-0-0-0 {
++                nexthop 1 {
++                    ip-address 203.0.113.10
++                    admin-state enable
++                }
++            }
+             group to-leaf1 {
+                 nexthop 1 {
+                     ip-address 10.255.0.4

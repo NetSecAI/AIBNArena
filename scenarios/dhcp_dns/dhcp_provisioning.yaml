@@ -1,0 +1,39 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/dhcp_dns/healthy-v1.yaml, version: "1.1.0"}
+  expected_degradation: {path: scenarios/oracles/dhcp_dns/expected-degradation-v1.yaml, version: "1.1.0"}
+  repair: {path: scenarios/oracles/dhcp_dns/repair-v1.yaml, version: "1.1.0"}
+  preservation: {path: scenarios/oracles/dhcp_dns/preservation-v1.yaml, version: "1.0.0"}
+scenario: dhcp_provisioning
+task:
+  low: >-
+    A host on this network cannot get onto it. Fix that.
+  medium: >-
+    Restore correct DHCP provisioning for the affected endpoints without disrupting the subnets
+    that are still served correctly.
+  high: >-
+    {{client}} does not come up with a working address, gateway and resolver on {{subnet}} the
+    way the other hosts on that segment do. Restore correct provisioning without disrupting the
+    subnets that are still served correctly.
+base_variant: medium
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+methods:
+  - id: 1
+    name: pool_subnet_unserved
+    selector: {node: dhcp_server}
+    operation: {name: set_dhcp_pool_presence, present: false}
+  - id: 2
+    name: pool_gateway_misassigned
+    selector: {node: dhcp_server}
+    operation: {name: set_dhcp_default_router, value_source: unused_address}
+  - id: 3
+    name: pool_resolver_unadvertised
+    selector: {node: dhcp_server}
+    operation: {name: set_dhcp_resolver_presence, present: false}
+  - id: 4
+    name: pool_resolver_misassigned
+    selector: {node: dhcp_server}
+    operation: {name: set_dhcp_resolver, value_source: unused_address}

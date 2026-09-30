@@ -1,0 +1,532 @@
+firewall {
+    ipv4 {
+        name DMZ-TO-INTERNAL {
+            default-action drop
+            description dmz-to-internal
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description web1-ping-user1
+                destination {
+                    address 10.10.10.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.40.10
+                }
+            }
+            rule 30 {
+                action accept
+                description app1-ping-user1
+                destination {
+                    address 10.10.10.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.50.10
+                }
+            }
+            rule 40 {
+                action accept
+                description web1-ping-guest1
+                destination {
+                    address 10.10.20.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.40.10
+                }
+            }
+            rule 50 {
+                action accept
+                description app1-ping-finance1
+                destination {
+                    address 10.10.30.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.50.10
+                }
+            }
+        }
+        name DMZ-TO-OUTSIDE {
+            default-action drop
+            description dmz-to-outside
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description web1-ping-outside
+                destination {
+                    address 203.0.113.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.40.10
+                }
+            }
+        }
+        name INTERNAL-TO-DMZ {
+            default-action drop
+            description internal-to-dmz
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description user1-to-web
+                destination {
+                    address 10.10.40.10
+                    port 80
+                }
+                protocol tcp
+                source {
+                    address 10.10.10.10
+                }
+            }
+            rule 30 {
+                action accept
+                description user1-ping-web
+                destination {
+                    address 10.10.40.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.10.10
+                }
+            }
+            rule 40 {
+                action accept
+                description user1-to-app
+                destination {
+                    address 10.10.50.10
+                    port 5201
+                }
+                protocol tcp
+                source {
+                    address 10.10.10.10
+                }
+            }
+            rule 50 {
+                action accept
+                description user1-ping-app
+                destination {
+                    address 10.10.50.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.10.10
+                }
+            }
+            rule 60 {
+                action accept
+                description guest1-to-web
+                destination {
+                    address 10.10.40.10
+                    port 80
+                }
+                protocol tcp
+                source {
+                    address 10.10.20.10
+                }
+            }
+            rule 70 {
+                action accept
+                description guest1-ping-web
+                destination {
+                    address 10.10.40.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.20.10
+                }
+            }
+            rule 80 {
+                action accept
+                description finance1-to-app
+                destination {
+                    address 10.10.50.10
+                    port 5201
+                }
+                protocol tcp
+                source {
+                    address 10.10.30.10
+                }
+            }
+            rule 90 {
+                action accept
+                description finance1-ping-app
+                destination {
+                    address 10.10.50.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 10.10.30.10
+                }
+            }
+            rule 100 {
+                action accept
+                description admin-to-dmz
+                source {
+                    address 10.10.99.100
+                }
+            }
+        }
+        name INTERNAL-TO-OUTSIDE {
+            default-action drop
+            description internal-to-outside
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description internal-http-out
+                destination {
+                    port 80
+                }
+                protocol tcp
+            }
+            rule 30 {
+                action accept
+                description internal-tls-out
+                destination {
+                    port 443
+                }
+                protocol tcp
+            }
+            rule 40 {
+                action accept
+                description internal-ping-out
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+            }
+            rule 50 {
+                action accept
+                description admin-to-outside
+                source {
+                    address 10.10.99.100
+                }
+            }
+        }
+        name OUTSIDE-TO-DMZ {
+            default-action drop
+            description outside-to-dmz
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+            rule 20 {
+                action accept
+                description internet-to-web
+                destination {
+                    address 10.10.40.10
+                    port 80
+                }
+                protocol tcp
+                source {
+                    address 203.0.113.10
+                }
+            }
+            rule 30 {
+                action accept
+                description internet-ping-web
+                destination {
+                    address 10.10.40.10
+                }
+                icmp {
+                    type-name echo-request
+                }
+                protocol icmp
+                source {
+                    address 203.0.113.10
+                }
+            }
+        }
+        name OUTSIDE-TO-INTERNAL {
+            default-action drop
+            description outside-to-internal
+            rule 10 {
+                action accept
+                description return-traffic
+                state established
+                state related
+            }
+        }
+    }
+    zone DMZ {
+        description dmz-zone
+        from INTERNAL {
+            firewall {
+                name INTERNAL-TO-DMZ
+            }
+        }
+        from OUTSIDE {
+            firewall {
+                name OUTSIDE-TO-DMZ
+            }
+        }
+        interface eth2
+        interface eth3
+    }
+    zone INTERNAL {
+        description internal-zone
+        from DMZ {
+            firewall {
+                name DMZ-TO-INTERNAL
+            }
+        }
+        from OUTSIDE {
+            firewall {
+                name OUTSIDE-TO-INTERNAL
+            }
+        }
+        interface eth1
+    }
+    zone OUTSIDE {
+        description outside-zone
+        from DMZ {
+            firewall {
+                name DMZ-TO-OUTSIDE
+            }
+        }
+        from INTERNAL {
+            firewall {
+                name INTERNAL-TO-OUTSIDE
+            }
+        }
+        interface eth4
+    }
+}
+interfaces {
+    ethernet eth1 {
+        address 10.255.1.2/30
+        description transit-to-fw-int
+    }
+    ethernet eth2 {
+        address 10.10.40.1/24
+        description dmz-web-gateway
+    }
+    ethernet eth3 {
+        address 10.10.50.1/24
+        description dmz-app-gateway
+    }
+    ethernet eth4 {
+        address 203.0.113.1/24
+        description outside-gateway
+    }
+    loopback lo {
+    }
+}
+nat {
+    destination {
+        rule 10 {
+            description publish-web
+            destination {
+                port 80
+            }
+            inbound-interface {
+                name eth4
+            }
+            protocol tcp
+            translation {
+                address 10.10.40.10
+            }
+        }
+    }
+    source {
+        rule 101 {
+            description users-masquerade
+            outbound-interface {
+                name eth4
+            }
+            source {
+                address 10.10.10.0/24
+            }
+            translation {
+                address masquerade
+            }
+        }
+        rule 102 {
+            description guest-masquerade
+            outbound-interface {
+                name eth4
+            }
+            source {
+                address 10.10.20.0/24
+            }
+            translation {
+                address masquerade
+            }
+        }
+        rule 103 {
+            description finance-masquerade
+            outbound-interface {
+                name eth4
+            }
+            source {
+                address 10.10.30.0/24
+            }
+            translation {
+                address masquerade
+            }
+        }
+        rule 104 {
+            description mgmt-masquerade
+            outbound-interface {
+                name eth4
+            }
+            source {
+                address 10.10.99.0/24
+            }
+            translation {
+                address masquerade
+            }
+        }
+    }
+}
+pki {
+    ca clab {
+        certificate MIIDhTCCAm2gAwIBAgICB+MwDQYJKoZIhvcNAQELBQAwVDELMAkGA1UEBhMCVVMxCTAHBgNVBAcTADEVMBMGA1UEChMMY29udGFpbmVybGFiMQkwBwYDVQQLEwAxGDAWBgNVBAMTD3NtZTAxLWZ3IGxhYiBDQTAeFw0yNjA5MjcxMzU3NDlaFw0yNzA5MjcxMzU3NDlaMFQxCzAJBgNVBAYTAlVTMQkwBwYDVQQHEwAxFTATBgNVBAoTDGNvbnRhaW5lcmxhYjEJMAcGA1UECxMAMRgwFgYDVQQDEw9zbWUwMS1mdyBsYWIgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDRtxVjMEbPApYMW1MGUUKLB/AcoHGmxopQ5OKUGQ0j/xhcm/zi3YPRWMrkNLCQ2LuRV6pdQt0FC9h7YIZENXJa3o9N/HhJbYI46t6qeNFF8BRBoNk12l3cMvU8NRfcECoykj2F+RNUxs/YmcD6TNVzoNC4iaj/KtgRxrzWu6U8aQRsCjlyn9nZUwMCDBfRRznHeD5WjtYfYMtPX7LJ58wruKLob4M7IbKE+TZZohpaRS72U1FQTlCvOXox8jvZkV2ZvEvfmd0gARmd+Ad9tn+KJ+xDiiOWbpOgMI984PZmhY5PupTpWutziRglHK9bYUpynIrp0eQRzqgcpZqX9BPZAgMBAAGjYTBfMA4GA1UdDwEB/wQEAwIChDAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQURnB5EvWomF23xX6koj3O0whBooYwDQYJKoZIhvcNAQELBQADggEBAGzfMYMdpbT/has8n9spfxHEnLTQXoQAkUkwa1MNeOdKU122IL5FjB9Xn/l2uHwqdC7iQayAdqkgLJSCWjUtqwy2Uz2xIHD45MrfxmI3f8RGpD4Cw691R1KfnJc5YkMgW15smIlneTCacnjlbxqKlz0H5X9HYzayhcgtKvgklaOV87uOxAVA+oBlMPcMFvFCACpE7Hd4kz03B4lFWxdbzmPvS3CfHMheyASyNz0KvxgqF6tp6WZqyJvuK6k24mKtc9fZ9lZmP/e3JIBVE5XPfu+tHMx1A+Oq9gfabc6dIk/NcruWin14TmAU/t5eHlxIXRrW2b8FMC8tqy8STHcsGTA=
+    }
+    certificate self {
+        certificate MIIDyDCCArCgAwIBAgICBnowDQYJKoZIhvcNAQELBQAwVDELMAkGA1UEBhMCVVMxCTAHBgNVBAcTADEVMBMGA1UEChMMY29udGFpbmVybGFiMQkwBwYDVQQLEwAxGDAWBgNVBAMTD3NtZTAxLWZ3IGxhYiBDQTAeFw0yNjA5MjcxMzU3NDlaFw0yNzA5MjcxMzU3NDlaMFcxCzAJBgNVBAYTAlVTMQkwBwYDVQQHEwAxFTATBgNVBAoTDGNvbnRhaW5lcmxhYjEJMAcGA1UECxMAMRswGQYDVQQDExJmdy1leHQuc21lMDEtZncuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDkV2PRSmW6iibPo+cIMnVCIzD+4bwoKTZm7M5rXwjiHPa3kltV9gV6GkMUdlRh2lriFBAGVtgu4b46F7sfiXRLN0dxUFSVzO3DvRfh6jRb8IGUz10vGifvZQ5NBkl0VQ0UDLD9iJuaojd5j0wGWiJb+pmBwqMYdi+43pvEdaa+SBP+nrUIsPiNP3BrF7fy/5CwDmwcD9jhCdewqqxVzeuZpQzK4GO8HJzVDU5x6GBD+X9UGABWxylG6/3mwbAc/+O/F03u3QVEr8ML50Tplff/kujDIHSed75xQeHx8itLTIQ7XHnwOdXsamBPi/O2uTLuS7zC1RrxloqzGdZMlmB7AgMBAAGjgaAwgZ0wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAOBgNVHQ4EBwQFAQIDBAYwHwYDVR0jBBgwFoAURnB5EvWomF23xX6koj3O0whBooYwOwYDVR0RBDQwMoIGZnctZXh0ghRjbGFiLXNtZTAxLWZ3LWZ3LWV4dIISZnctZXh0LnNtZTAxLWZ3LmlvMA0GCSqGSIb3DQEBCwUAA4IBAQA69lgIq0tV1wA+UaV39ynkA+GSScA/93sOCzNhilCnJOWQDb7J7DnuvQ04puQ/V3UZNgNauBxLu56FJnmIyyIDFp30As7pbruomYaLm0pxIY/5r3KumGwpTuEE9q6SacIcqL43Kzb6gmqH2vePNWQ/ZPejMIIiWHtuPaEsCUYFOavbQM8tBBkpty/d84XHBvkeEnoAIy0pXaZHlMAXdofS7a+60fq1bg5bXKl5F68mZLeHqZLxwg/XNjStKy7PZYociSo+JQ8PY445zgu0F+6MmfQ46pxTUGNx7Q6HidnGGkKPq1FntJsJbPq1FSNAPb1EvVwHr8bV8Pj0W9ZWgBeq
+        private {
+            key MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDkV2PRSmW6iibPo+cIMnVCIzD+4bwoKTZm7M5rXwjiHPa3kltV9gV6GkMUdlRh2lriFBAGVtgu4b46F7sfiXRLN0dxUFSVzO3DvRfh6jRb8IGUz10vGifvZQ5NBkl0VQ0UDLD9iJuaojd5j0wGWiJb+pmBwqMYdi+43pvEdaa+SBP+nrUIsPiNP3BrF7fy/5CwDmwcD9jhCdewqqxVzeuZpQzK4GO8HJzVDU5x6GBD+X9UGABWxylG6/3mwbAc/+O/F03u3QVEr8ML50Tplff/kujDIHSed75xQeHx8itLTIQ7XHnwOdXsamBPi/O2uTLuS7zC1RrxloqzGdZMlmB7AgMBAAECggEAQkE5LVkw+1dqu4ULXE2HyJD9fndxaRXMO0ErA+ynXzSYQduttNuV60ADhsRu55W8GS1JGQ3J3JCT6bdJDHWN0OVRTYfJg03bD5imfV6/oo2+i7c/ipNEUyo3ZBIW7jJfgRnNoUMqI0w+XH8/x/gPUDD+qbAYMtjYMAQnnnGk2ED1bVT5ObGM6BXBQGUBDAstR2iplQKV/LCTBtQh0dZ7TiGZxtm70zS+fjdXVWJr+te52YLoqApJ1UVPAzbGRJSotYVzTI8lUlgZI92CghjSCLZALr4pF9ai5A2a5bCrsHRtu4cNx3RW5AtBNiS0s3EOzjWZ/Re1E+v8raEGXnu8QQKBgQDqoWqPYaJz+Z7mzZkrXxr1TSSWL2HMb6APpj7rnj13Ni8h9j68WFGyWkmO1iwMJxAo/zng7PMPfzJcyyzY3GlU3/vEc16h28W9PdIFjwLbXrwRsivtjNXLSLk+NZXXhlKY4kZC/Z1iWR3Z/h8K1SCbiYQI9wiM2o/MVEjcRdGFzQKBgQD5I1ZOmJZz3IDbKwi1Du+TDws1fBQbULEwhD1TbhwSGunNbDldjLXkTQWV3YQXaFvCA32z/318VJtO7TFqN0lf4q+4MlVUa20LkUBZUIOMLv9uNUWgg0IrO7KMbbFIcieAFKI0mTFQPrn7zHIKezRmuUOpNJEvDP77MsxmRTS3ZwKBgFTREx9P0RURmJKgog0erTUdtOshp73qYDcoBrjQFDIjATjKtnUJjEboAo1C+NtPx7S6Rqb7oQXqGj+XJtgiHWWULoQenIfwVXQKhACEaSj5/wx6lwyhi6uX13cYkdk+cl9X9MREv/8MbhEenwQgdVAkjvlaq9mXLMJVeZ0/E/XFAoGAILkjfO9N06oCwsbEPgPYM9imAEBr46qVm2nDJFIyHa6rRvAQGNmCipoTQbv2vZxXcQREXoAQW2RBgfxloS3h1VZQ/kCeNJhnmj1Z1mFc5ezGYBNfMdYLuuH8cbV2s61Kwufy5jW45HFYvFn+IKJOH6/10yO0bhmm5BeoAUbVxcECgYANQMnhzEmL4O26NeEAv8VRIyXVYRKVs/uh6YZ8sXf3mstenIAeagZfxzmQ1EbOaHp8dH8nSgxipXyxygLsKNTHyRGXthG0fp3A4JIpLiIV6LRV+NjZM7eMCe1LWQA0UBN9eykzAzHFBQW7KSbBsM0xgYoM2q/gn6r5PlTKSZZcgg==
+        }
+    }
+}
+protocols {
+    static {
+        route 10.10.10.0/24 {
+            next-hop 10.255.1.1 {
+            }
+        }
+        route 10.10.20.0/24 {
+            next-hop 10.255.1.1 {
+            }
+        }
+        route 10.10.30.0/24 {
+            next-hop 10.255.1.1 {
+            }
+        }
+        route 10.10.99.0/24 {
+            next-hop 10.255.1.1 {
+            }
+        }
+    }
+}
+service {
+    https {
+        api {
+            keys {
+                id admin {
+                    key admin
+                }
+            }
+        }
+        certificates {
+            ca-certificate clab
+            certificate self
+        }
+        listen-address 0.0.0.0
+    }
+    ntp {
+        allow-client {
+            address 127.0.0.0/8
+            address 169.254.0.0/16
+            address 10.0.0.0/8
+            address 172.16.0.0/12
+            address 192.168.0.0/16
+            address ::1/128
+            address fe80::/10
+            address fc00::/7
+        }
+        server time1.vyos.net {
+        }
+        server time2.vyos.net {
+        }
+        server time3.vyos.net {
+        }
+    }
+    ssh {
+        listen-address 0.0.0.0
+    }
+}
+system {
+    config-management {
+        commit-revisions 100
+    }
+    console {
+        device ttyS0 {
+            speed 115200
+        }
+    }
+    host-name fw-ext
+    login {
+        user admin {
+            authentication {
+                encrypted-password $6$rounds=656000$w6UUG1WPnL0UExyi$1fwFLpCm/b4LvGxm8jpqHfZTuHks0.IoA5rCGu1vlmiEinXnsaKRZgnydATblqnAqvXOsHMdzFnYvxhpwDQWr0
+                public-keys clab {
+                    key AAAAC3NzaC1lZDI1NTE5AAAAINqS93spjlcsRyDTjxTQjLXqdjO7+K06cEdOPdW9YyPI
+                    type ssh-ed25519
+                }
+            }
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level info
+            }
+            facility local7 {
+                level debug
+            }
+        }
+    }
+}

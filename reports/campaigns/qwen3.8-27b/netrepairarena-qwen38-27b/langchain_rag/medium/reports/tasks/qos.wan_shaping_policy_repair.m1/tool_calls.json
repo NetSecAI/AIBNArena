@@ -1,0 +1,429 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.575599971052725e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "wan1",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.19571633899977314,
+      "error": "Cannot find device \"wan1\"",
+      "ok": false,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.21592564300044614,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.18136094700093963,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.4019254140002886,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.14297973199973057,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.36965425000016694,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-676bcdf85c6f6c09747cf648ee5d0ecf5adc666d5891699f79b5d0e5290e4b5d.json",
+      "category": "read",
+      "duration_seconds": 0.8664669209993008,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.2892109620006522,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/10",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8087549350002519,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/20",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8196284309997282,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 73.01548486400134,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc -s class show dev eth2",
+              "tc -s filter show dev eth2"
+            ],
+            "reason": "Baseline failed at 0.002 Mbps under contention; read full HTB classes and filters on egress eth2 to find which element (class rates or classifier) is broken. Read-only.",
+            "rollback_commands": [],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 5.3869000112172216e-05,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/20",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.9093937649995496,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Baseline: user1 (10.10.10.0/24, business) to external1 measured 0.002 Mbps under contention (floor 6.8, min 8.0) while all connectivity passed — the HTB business class/guarantee is broken on the WAN egress. Restore class 0x10 to an 8 Mbps guarantee (8.8m with header margin, ceil 20m, high priority) and class 0x20 to best-effort, and classify business source prefix into 0x10.",
+        "set": {
+          "filter": {
+            "flowid": "1:10",
+            "src": "10.10.10.0/24"
+          },
+          "htb": {
+            "class_10": {
+              "ceiling": "20mbit",
+              "priority": 1,
+              "rate": "8.8mbit"
+            },
+            "class_20": {
+              "ceiling": "20mbit",
+              "priority": 7,
+              "rate": "11.2mbit"
+            }
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.14168509299997822,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_54d710b2fe11501a"
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6096225949986547,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Root htb already exists and cannot be replaced in place. Repair the business class 0x10 rates in place: 8.8m guaranteed (8 + header margin), 20m ceiling, highest priority, so user traffic gets its 8 Mbps guarantee.",
+        "set": {
+          "class": {
+            "ceiling": "20mbit",
+            "id": "1:10",
+            "parent": "1:",
+            "priority": 1,
+            "rate": "8.8mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.6422999983187765e-05,
+      "error": "update_object: class.rate must be a tc rate such as 8mbit or 794kbit",
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1",
+        "reason": "Business class 0x10 on the WAN egress is broken; repair in place with 9mbit guaranteed (8 + header margin), 20m ceiling, priority 1.",
+        "set": {
+          "class": {
+            "ceiling": "20mbit",
+            "id": "1:10",
+            "parent": "1:",
+            "priority": 1,
+            "rate": "9mbit"
+          }
+        }
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.18006301799869107,
+      "error": null,
+      "ok": false,
+      "operation": "update_object",
+      "transaction_id": "ani_tx_70b15f7b0aa9e408"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 20mbit prio 1",
+              "tc class add dev eth2 parent 1: classid 1:20 htb rate 11mbit ceil 20mbit prio 7",
+              "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10"
+            ],
+            "reason": "Business class 0x10 absent under root (class change returned no such file); rebuild the hierarchy on WAN egress: business 1:10 rate 9mbit ceil 20mbit prio1, best-effort 1:20 rate 11mbit ceil 20mbit prio7, classify user business prefix 10.10.10.0/24 to 1:10. Root default 0x20 already routes unclassified to best-effort.",
+            "rollback_commands": [
+              "tc qdisc replace dev eth2 root handle 1: htb default 20"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00023819399939384311,
+      "error": "update_config.change.commands contains 3 commands for Linux target wan1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 1:10 htb rate 9mbit ceil 20mbit prio 1"
+            ],
+            "reason": "Business class 0x10 absent under root; create it: 9mbit guaranteed, 20mbit ceiling, priority 1, so user1 business traffic gets its 8 Mbps guarantee under contention.",
+            "rollback_commands": [
+              "tc qdisc replace dev eth2 root handle 1: htb default 20"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.13572494300024118,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_b9a66ed009fc3bc1"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 1:20 htb rate 11mbit ceil 20mbit prio 7"
+            ],
+            "reason": "Create best-effort class 1:20 (matches root default 0x20): 11mbit guaranteed, 20mbit ceiling, lower priority, so guest/bulk traffic keeps a non-zero share while leaving room for the 8 Mbps business guarantee.",
+            "rollback_commands": [
+              "tc class del dev eth2 classid 1:20"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.1760543090003921,
+      "error": null,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_97ffea86ee3c8bb7"
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10"
+            ],
+            "reason": "Classifier for protected business traffic was missing, so user1 (10.10.10.0/24) traffic fell to the default best-effort class. Classify its source prefix into business class 1:10 to deliver the 8 Mbps guarantee.",
+            "rollback_commands": [
+              "tc qdisc replace dev eth2 root handle 1: htb default 20"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.18634325799939688,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_f9c9dfde9bf5fd15"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 59.58938925599978,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

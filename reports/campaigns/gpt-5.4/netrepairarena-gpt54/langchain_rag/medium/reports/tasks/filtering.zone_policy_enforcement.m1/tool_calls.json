@@ -1,0 +1,245 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.130499999950189e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 29.21310618199999,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "fw-ext",
+          "web1",
+          "external1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 2.0199958300000276,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": [
+          "/firewall",
+          "/zone-policy",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5050803089999931,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "web1"
+        ],
+        "paths": [
+          "/"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.3979975740000441,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": [
+          "/nat"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.20016102099998534,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set nat source rule 105 description 'dmz-web-masquerade'",
+              "set nat source rule 105 outbound-interface name 'eth4'",
+              "set nat source rule 105 source address '10.10.40.0/24'",
+              "set nat source rule 105 translation address 'masquerade'"
+            ],
+            "reason": "Public validation shows only web1<->external1 ICMP fails while internal<->DMZ paths succeed; fw-ext has OUTSIDE/DMZ policy allowing the ICMP both directions, but NAT lacks any source masquerade rule for DMZ subnet 10.10.40.0/24, so replies from web1 to external1 are sent with unroutable private source.",
+            "rollback_commands": [
+              "delete nat source rule 105"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.0543082169999707,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_c94023f567f40bb6"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 71.23682812800001,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-int"
+        ],
+        "paths": [
+          "/nat",
+          "/firewall",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5122259189999454,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "firewall_rule",
+        "name": "OUTSIDE-TO-DMZ",
+        "node": "fw-ext"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.23276623099997096,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": [
+          "/"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1652644000000123,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set nat destination rule 11 description 'publish-web-icmp'",
+              "set nat destination rule 11 inbound-interface name 'eth4'",
+              "set nat destination rule 11 protocol 'icmp'",
+              "set nat destination rule 11 translation address '10.10.40.10'"
+            ],
+            "reason": "After adding missing DMZ source NAT, public validation still shows only external1<->web1 ICMP failing while all other allowed paths pass. fw-ext outside-to-dmz firewall explicitly permits ICMP to 10.10.40.10 from 203.0.113.10, but destination NAT publishes web1 only for TCP/80, so pings to 203.0.113.1 are not translated to web1.",
+            "rollback_commands": [
+              "delete nat destination rule 11"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.775165483999956,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_417ae2a5caad1762"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 70.47636042599999,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

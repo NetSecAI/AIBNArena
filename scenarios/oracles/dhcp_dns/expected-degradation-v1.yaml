@@ -1,0 +1,41 @@
+schema_version: "1.0"
+oracle_id: dhcp_dns.provisioning.expected_degradation
+version: 1.1.0
+description: >-
+  The provisioning fault must cost at least one required path involving an affected
+  client. A pool that no longer serves a subnet, a default-router option pointing at
+  nobody, or a resolver option dropped all end the same way: the client cannot use
+  the network it was provisioned for. Two probes, either of which is the symptom: a
+  resolver fault leaves every ICMP path intact and shows only as a name the client no
+  longer resolves, so an oracle that measured ICMP alone judged that fault by the
+  moment its release happened to catch a client without an address.
+domain: dhcp_dns
+phase: expected_degradation
+probes:
+  - id: affected_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: affected_paths
+    protocol: icmp
+    scope: affected
+    affected_nodes: "${bindings.affected_nodes}"
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: gte, value: 1}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+  - id: name_resolution
+    type: dns
+    source: "${bindings.client}"
+    destination: web1
+    protocol: dns
+    attempts: 2
+    timeout_seconds: 12
+    metrics: [success, answer_count]
+    thresholds:
+      - {metric: answer_count, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: any}

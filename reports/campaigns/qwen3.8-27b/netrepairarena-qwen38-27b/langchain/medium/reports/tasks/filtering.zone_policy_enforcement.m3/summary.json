@@ -1,0 +1,341 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b-20260929T081552Z/langchain_agent-openai-qwen-qwen3-8-27b-filtering-zone_policy_enforcement-m3-fault-seed354304266-305b259b9bcf.json",
+    "sha256": "83404b74c6fec5bab31ddce6a0cbde400930de45854bad73e15905a19f29022b",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-openai-qwen-qwen3-8-27b-filtering-zone_policy_enforcement-m3-fault-seed354304266-305b259b9bcf",
+    "created_at": "2026-09-29T08:33:28.271092+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-openai-qwen-qwen3-8-27b-filtering-zone_policy_enforcement-m3-fault-seed354304266",
+    "scenario": {
+      "domain": "filtering",
+      "id": "filtering.zone_policy_enforcement.m3",
+      "sut_task_id": "sut-44953981f3fa1ba3ce071cdc767c5249",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "openai/qwen/qwen3.8-27b",
+        "subject": "openai/qwen/qwen3.8-27b",
+        "provider": "openai/qwen/qwen3.8-27b"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "All failing ping pairs involved web1 (10.10.40.10) on fw-ext's eth2; the DMZ zone only listed eth3, so eth2 traffic was not subject to DMZ zone policies and was dropped. Added `set firewall zone DMZ interface eth2` on fw-ext (txn ani_tx_6c7ec969784582bd). Validation now shows all 10 endpoint pairs passing with 0% loss, and previously healthy paths (user1↔app1, finance1↔app1) remain up; no firewall rules were altered, so segmentation elsewhere is preserved.",
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "All failing ping pairs involved web1 (10.10.40.10) on fw-ext's eth2; the DMZ zone only listed eth3, so eth2 traffic was not subject to DMZ zone policies and was dropped. Added `set firewall zone DMZ interface eth2` on fw-ext (txn ani_tx_6c7ec969784582bd). Validation now shows all 10 endpoint pairs passing with 0% loss, and previously healthy paths (user1↔app1, finance1↔app1) remain up; no firewall rules were altered, so segmentation elsewhere is preserved.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -32.2808,
+      "log_p_yes": 0.0,
+      "method": "zone_interface_unassigned",
+      "operation": "set_zone_interface_membership",
+      "reason": null,
+      "reference": "On the firewall fw-ext, interface eth2 was removed from zone DMZ, so traffic from DMZ to OUTSIDE is no longer matched by ruleset DMZ-TO-OUTSIDE and is dropped.",
+      "score": 32.2808,
+      "target": "fw-ext"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 103.73391343100229,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "filtering.policy.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "filtering.policy.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "filtering.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "filtering.policy.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": true,
+      "hypothesis": "All failing ping pairs involved web1 (10.10.40.10) on fw-ext's eth2; the DMZ zone only listed eth3, so eth2 traffic was not subject to DMZ zone policies and was dropped. Added `set firewall zone DMZ interface eth2` on fw-ext (txn ani_tx_6c7ec969784582bd). Validation now shows all 10 endpoint pairs passing with 0% loss, and previously healthy paths (user1↔app1, finance1↔app1) remain up; no firewall rules were altered, so segmentation elsewhere is preserved.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": true,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": -32.2808,
+      "log_p_yes": 0.0,
+      "method": "zone_interface_unassigned",
+      "operation": "set_zone_interface_membership",
+      "reason": null,
+      "reference": "On the firewall fw-ext, interface eth2 was removed from zone DMZ, so traffic from DMZ to OUTSIDE is no longer matched by ruleset DMZ-TO-OUTSIDE and is dropped.",
+      "score": 32.2808,
+      "target": "fw-ext"
+    },
+    "domain": "filtering",
+    "environment_success": true,
+    "failed_operation_count": 1,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 1,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "policy_repair_pass_rate": 1.0,
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 3,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 1,
+    "successful_read_count": 3,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 7,
+    "containerlab_reads": 3,
+    "containerlab_mutations": 1,
+    "containerlab_mutations_ok": 1,
+    "sut_validations": 2,
+    "failed_operations": 1,
+    "unsafe_operations": 0,
+    "input_tokens": 61933,
+    "output_tokens": 672,
+    "total_tokens": 62605,
+    "recorded": {
+      "ani_mutations": 1,
+      "ani_reads": 3,
+      "failed_operations": 1,
+      "input_tokens": 61933,
+      "llm_calls": 7,
+      "output_tokens": 672,
+      "successful_mutations": 1,
+      "successful_reads": 3,
+      "total_tokens": 62605,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 32.199,
+    "action_seconds": 2.935,
+    "reading_seconds": 1.412,
+    "validation_seconds": 67.148,
+    "episode_seconds": 103.73391343100229,
+    "unaccounted_seconds": 0.04,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 61933,
+    "output_tokens": 672,
+    "total_tokens": 62605,
+    "llm_calls": 7,
+    "output_tokens_per_call": 96.0,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 6,
+      "calls": 6
+    },
+    "repeat_action_rate": {
+      "repeated": 1,
+      "calls": 6
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 3,
+      "validate": 2,
+      "apply_config": 1
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 6
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "5 of 6 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 62605
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 32.199,
+        "action_seconds": 2.935,
+        "reading_seconds": 1.412,
+        "validation_seconds": 67.148,
+        "episode_seconds": 103.73391343100229,
+        "unaccounted_seconds": 0.04
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 6
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: fw-ext"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 47.6934243789874,
+    "calculate_metrics": 0.0005201500025577843,
+    "deploy_reset_testbed": 20.100590885966085,
+    "evaluate_degradation": 19.16945161402691,
+    "evaluate_healthy": 22.006090865004808,
+    "evaluate_repair_preservation": 57.16846072796034,
+    "inject_fault": 2.756877328036353,
+    "invoke_sut": 103.75778704299591,
+    "load_configuration": 0.00030240899650380015,
+    "load_oracles": 0.005260391975753009,
+    "load_validate_scenario": 0.043919068994000554,
+    "record_baseline": 5.050969775766134e-06,
+    "restore_destroy": 1.9669589879922569,
+    "score_diagnosis": 1.29061373998411,
+    "snapshot_after_sut": 6.127580075000878,
+    "snapshot_before_sut": 6.448383411974646,
+    "snapshot_healthy": 6.976652960001957,
+    "write_result": 0.011748712044209242
+  },
+  "files": {
+    "record": "../../../records/filtering.zone_policy_enforcement.m3.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/filtering.zone_policy_enforcement.m3.judge.log",
+    "devices": "../../../logs/devices/filtering.zone_policy_enforcement.m3/",
+    "note": "relative to this folder"
+  }
+}

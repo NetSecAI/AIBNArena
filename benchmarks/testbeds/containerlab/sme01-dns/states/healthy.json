@@ -1,0 +1,1981 @@
+{
+  "id": "sme01_dns_firewall_dhcp_healthy",
+  "description": "Healthy reference state for SME01-dns. A single VyOS firewall replaces the two SR Linux spines: it is the fabric transit router, the DHCP server the leaves relay to, and the policy enforcement point between the INTERNAL, DMZ and OUTSIDE zones. Access stays routed -- one /24 per endpoint behind a leaf interface -- while the DMZ servers (web1, app1, dns-dmz) and external1 are cabled straight to the firewall, so every packet between a DMZ application and an internal endpoint crosses the zone policy. The client endpoints (user1, guest1, finance1, admin1) acquire their address, default gateway, resolver and search domain from the firewall's DHCP reservations, relayed by the leaves; the servers stay statically addressed. Rulesets are default-action drop and filter on source address, destination address and port; OUTSIDE gets no ruleset toward INTERNAL at all. ICMP echo is opened on every declared flow because the benchmark oracle probes reachability with ping.",
+  "commands": [
+    {
+      "target": "user1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "user1",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:user1'"
+    },
+    {
+      "target": "dns-int",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "dns-int",
+      "mode": "shell",
+      "command": "ip address replace 10.10.60.10/24 dev eth1"
+    },
+    {
+      "target": "dns-int",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.60.1"
+    },
+    {
+      "target": "guest1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "guest1",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:guest1'"
+    },
+    {
+      "target": "admin1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "admin1",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:admin1'"
+    },
+    {
+      "target": "finance1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "finance1",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -O search -t 4 -T 2 -A 3 -x hostname:finance1'"
+    },
+    {
+      "target": "web1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "web1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.40.10/24 dev eth1"
+    },
+    {
+      "target": "web1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.40.1"
+    },
+    {
+      "target": "web1",
+      "mode": "shell",
+      "command": "sh -c 'printf \"search sme01.internal sme01.example\\nnameserver 10.10.60.10\\n\" > /etc/resolv.conf'"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "ip address replace 10.10.41.10/24 dev eth1"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.41.1"
+    },
+    {
+      "target": "app1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "app1",
+      "mode": "shell",
+      "command": "ip address replace 10.10.50.10/24 dev eth1"
+    },
+    {
+      "target": "app1",
+      "mode": "shell",
+      "command": "ip route replace default via 10.10.50.1"
+    },
+    {
+      "target": "app1",
+      "mode": "shell",
+      "command": "sh -c 'printf \"search sme01.internal sme01.example\\nnameserver 10.10.60.10\\n\" > /etc/resolv.conf'"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip address replace 203.0.113.10/24 dev eth1"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip route replace default via 203.0.113.1"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "sh -c 'printf \"search sme01.example\\nnameserver 10.10.41.10\\n\" > /etc/resolv.conf'"
+    },
+    {
+      "target": "dns-int",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options"
+    },
+    {
+      "target": "dns-int",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local"
+    },
+    {
+      "target": "dns-int",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/db.sme01.internal /etc/bind/db.sme01.internal"
+    },
+    {
+      "target": "dns-int",
+      "mode": "shell",
+      "command": "rndc reload"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/db.sme01.example /etc/bind/db.sme01.example"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "rndc reload"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth1 address 10.255.0.0/31"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth1 description fabric-to-leaf1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth2 address 10.255.0.2/31"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth2 description fabric-to-leaf2"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.1/31"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/1.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.3/31"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/1.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 ipv4 address 10.10.10.1/24"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/10.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay gi-address 10.10.10.1"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/10 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/11 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/11 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/11 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/11 subinterface 0 ipv4 address 10.10.60.1/24"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/11.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 ipv4 address 10.10.20.1/24"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/20.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay gi-address 10.10.20.1"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/20 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 ipv4 address 10.10.99.1/24"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/57.0"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay gi-address 10.10.99.1"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/57 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.0 ]"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 ipv4 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 ipv4 address 10.10.30.1/24"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default interface ethernet-1/30.0"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay gi-address 10.10.30.1"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / interface ethernet-1/30 subinterface 0 ipv4 dhcp-relay server [ 10.255.0.2 ]"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default next-hop-groups group to-firewall nexthop 1 ip-address 10.255.0.0 admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.41.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf1",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default next-hop-groups group to-firewall nexthop 1 ip-address 10.255.0.2 admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.60.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.41.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "leaf2",
+      "mode": "srl_cli",
+      "command": "set / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-firewall admin-state enable"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth3 address 10.10.40.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth3 description web1-gateway"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth4 address 10.10.41.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth4 description dns-dmz-gateway"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth5 address 10.10.50.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth5 description app1-gateway"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth6 address 203.0.113.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth6 description external1-gateway"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.10.10.0/24 next-hop 10.255.0.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.10.20.0/24 next-hop 10.255.0.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.10.60.0/24 next-hop 10.255.0.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.10.99.0/24 next-hop 10.255.0.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.10.30.0/24 next-hop 10.255.0.3"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server listen-address 10.255.0.0"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server listen-address 10.255.0.2"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 subnet-id 10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option default-router 10.10.10.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option name-server 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-name sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-search sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 option domain-search sme01.example"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 lease 3600"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 static-mapping user1 mac 02:c1:ab:0a:0a:0a"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name USER1 subnet 10.10.10.0/24 static-mapping user1 ip-address 10.10.10.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 subnet-id 20"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option default-router 10.10.20.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option name-server 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-name sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.example"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 lease 3600"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 mac 02:c1:ab:0a:14:0a"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 ip-address 10.10.20.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 subnet-id 30"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option default-router 10.10.30.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option name-server 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-name sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-search sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 option domain-search sme01.example"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 lease 3600"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 static-mapping finance1 mac 02:c1:ab:0a:1e:0a"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name FINANCE1 subnet 10.10.30.0/24 static-mapping finance1 ip-address 10.10.30.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 subnet-id 99"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option default-router 10.10.99.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option name-server 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-name sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-search sme01.internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 option domain-search sme01.example"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 lease 3600"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 static-mapping admin1 mac 02:c1:ab:0a:63:64"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name ADMIN1 subnet 10.10.99.0/24 static-mapping admin1 ip-address 10.10.99.100"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone INTERNAL description internal-zone"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone INTERNAL interface eth1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone INTERNAL interface eth2"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ description dmz-zone"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ interface eth3"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ interface eth4"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ interface eth5"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone OUTSIDE description outside-zone"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone OUTSIDE interface eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ description internal-to-dmz"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 10 description return-traffic"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 10 state established"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 10 state related"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 20 description user1-to-web"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 20 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 20 source address 10.10.10.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 20 destination address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 20 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 30 description user1-ping-web"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 30 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 30 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 30 source address 10.10.10.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 30 destination address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 40 description user1-to-app"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 40 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 40 source address 10.10.10.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 40 destination address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 40 destination port 5201"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 50 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 50 description user1-ping-app"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 50 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 50 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 50 source address 10.10.10.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 50 destination address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 60 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 60 description guest1-to-web"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 60 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 60 source address 10.10.20.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 60 destination address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 60 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 70 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 70 description guest1-ping-web"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 70 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 70 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 70 source address 10.10.20.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 70 destination address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 80 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 80 description finance1-to-app"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 80 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 80 source address 10.10.30.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 80 destination address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 80 destination port 5201"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 90 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 90 description finance1-ping-app"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 90 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 90 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 90 source address 10.10.30.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 90 destination address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 100 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 100 description resolver-forward-udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 100 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 100 source address 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 100 destination address 10.10.41.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 100 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 110 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 110 description resolver-forward-tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 110 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 110 source address 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 110 destination address 10.10.41.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 110 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 120 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 120 description admin-to-dmz"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-DMZ rule 120 source address 10.10.99.100"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ from INTERNAL firewall name INTERNAL-TO-DMZ"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL description dmz-to-internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 10 description return-traffic"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 10 state established"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 10 state related"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 20 description web1-resolve-udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 20 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 20 source address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 20 destination address 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 20 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 30 description web1-resolve-tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 30 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 30 source address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 30 destination address 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 30 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 40 description app1-resolve-udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 40 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 40 source address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 40 destination address 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 40 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 50 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 50 description app1-resolve-tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 50 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 50 source address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 50 destination address 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 50 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 60 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 60 description app1-ping-resolver"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 60 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 60 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 60 source address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 60 destination address 10.10.60.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 70 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 70 description web1-ping-user1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 70 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 70 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 70 source address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 70 destination address 10.10.10.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 80 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 80 description app1-ping-user1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 80 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 80 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 80 source address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 80 destination address 10.10.10.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 90 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 90 description web1-ping-guest1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 90 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 90 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 90 source address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 90 destination address 10.10.20.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 100 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 100 description app1-ping-finance1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 100 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 100 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 100 source address 10.10.50.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-INTERNAL rule 100 destination address 10.10.30.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone INTERNAL from DMZ firewall name DMZ-TO-INTERNAL"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ description outside-to-dmz"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 10 description return-traffic"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 10 state established"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 10 state related"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 20 description internet-to-web"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 20 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 20 source address 203.0.113.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 20 destination address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 20 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 description internet-ping-web"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 source address 203.0.113.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 30 destination address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 40 description internet-resolve-udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 40 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 40 source address 203.0.113.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 40 destination address 10.10.41.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 40 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 50 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 50 description internet-resolve-tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 50 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 50 source address 203.0.113.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 50 destination address 10.10.41.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 50 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 60 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 60 description internet-ping-dns"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 60 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 60 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 60 source address 203.0.113.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-DMZ rule 60 destination address 10.10.41.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ from OUTSIDE firewall name OUTSIDE-TO-DMZ"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE description dmz-to-outside"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 10 description return-traffic"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 10 state established"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 10 state related"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 20 description web1-ping-outside"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 20 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 20 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 20 source address 10.10.40.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-TO-OUTSIDE rule 20 destination address 203.0.113.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone OUTSIDE from DMZ firewall name DMZ-TO-OUTSIDE"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE description internal-to-outside"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 description return-traffic"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 state established"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 10 state related"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 description internal-web-out"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 20 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 description internal-tls-out"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 30 destination port 443"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 description internal-ping-out"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 40 icmp type-name echo-request"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 description admin-to-outside"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name INTERNAL-TO-OUTSIDE rule 50 source address 10.10.99.100"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone OUTSIDE from INTERNAL firewall name INTERNAL-TO-OUTSIDE"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-INTERNAL default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-INTERNAL description outside-to-internal"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 description return-traffic"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 state established"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name OUTSIDE-TO-INTERNAL rule 10 state related"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone INTERNAL from OUTSIDE firewall name OUTSIDE-TO-INTERNAL"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 101 description masquerade-10.10.10.0"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 101 outbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 101 source address 10.10.10.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 101 translation address masquerade"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 102 description masquerade-10.10.20.0"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 102 outbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 102 source address 10.10.20.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 102 translation address masquerade"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 103 description masquerade-10.10.30.0"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 103 outbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 103 source address 10.10.30.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 103 translation address masquerade"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 104 description masquerade-10.10.60.0"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 104 outbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 104 source address 10.10.60.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 104 translation address masquerade"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 105 description masquerade-10.10.99.0"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 105 outbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 105 source address 10.10.99.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 105 translation address masquerade"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat destination rule 10 description publish-web"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat destination rule 10 inbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat destination rule 10 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat destination rule 10 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat destination rule 10 translation address 10.10.40.10"
+    }
+  ]
+}

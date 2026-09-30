@@ -1,0 +1,385 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.009698750451207e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 84.75631756900111,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "wan1"
+        ],
+        "paths": [
+          "/qos",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5991731690010056,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "wan1"
+        ],
+        "views": [
+          "qdisc",
+          "interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.30447918898425996,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "qos",
+        "name": "eth2",
+        "node": "wan1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.14758759099640884,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "tc class add dev eth2 parent 1: classid 1:10 htb rate 8mbit ceil 8mbit",
+              "tc class add dev eth2 parent 1: classid 1:20 htb rate 1kbit ceil 10mbit",
+              "tc filter add dev eth2 parent 1: protocol ip prio 10 u32 match ip src 10.10.10.10/32 match ip dst 203.0.113.10/32 flowid 1:10",
+              "tc filter add dev eth2 parent 1: protocol ip prio 20 u32 match ip src 10.10.20.10/32 match ip dst 203.0.113.10/32 flowid 1:20"
+            ],
+            "reason": "wan1 uplink eth2 already uses HTB qdisc but has no classes or filters; user1 and guest1 share the external path and user1 throughput objective needs explicit prioritization without disconnecting guest1",
+            "rollback_commands": [
+              "tc filter del dev eth2 parent 1: protocol ip prio 20 u32",
+              "tc filter del dev eth2 parent 1: protocol ip prio 10 u32",
+              "tc class del dev eth2 classid 1:20",
+              "tc class del dev eth2 classid 1:10"
+            ],
+            "target": "wan1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.0001279480056837201,
+      "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported u32 filter matcher",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "/qos",
+          "/interfaces"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8943442630115896,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf1"
+        ],
+        "views": [
+          "interfaces"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-676bcdf85c6f6c09747cf648ee5d0ecf5adc666d5891699f79b5d0e5290e4b5d.json",
+      "category": "read",
+      "duration_seconds": 0.7570969890221022,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "/interface ethernet-1/1",
+          "/interface ethernet-1/2",
+          "/interface ethernet-1/10",
+          "/interface ethernet-1/20",
+          "/interface ethernet-1/30",
+          "/network-instance"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.3608026030124165,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "ethernet-1/30",
+        "node": "leaf1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.7231567589915358,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "spine1",
+          "spine2"
+        ],
+        "paths": [
+          "/interface ethernet-1/1",
+          "/interface ethernet-1/2",
+          "/interface ethernet-1/3",
+          "/interface ethernet-1/4",
+          "/interface ethernet-1/10",
+          "/interface ethernet-1/20",
+          "/network-instance default"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 6.88034069101559,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/interface ethernet-1/1",
+          "/interface ethernet-1/2",
+          "/interface ethernet-1/10",
+          "/interface ethernet-1/20",
+          "/interface ethernet-1/30",
+          "/network-instance default"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 3.1401987390127033,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "enter candidate",
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.0",
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.2",
+              "commit now"
+            ],
+            "reason": "leaf2 default network-instance points 203.0.113.0/24 traffic to next-hop-group to-wan1, but that group incorrectly uses leaf1-facing addresses 10.255.0.4 and 10.255.0.6 instead of spine-facing transit toward wan1 via spine1 10.255.0.0 and spine2 10.255.0.2, matching observed external connectivity loss for leaf2-sourced traffic",
+            "rollback_commands": [
+              "enter candidate",
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.4",
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.6",
+              "commit now"
+            ],
+            "target": "leaf2"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.2096995962783694e-05,
+      "error": "ANI commands must not include session control ('enter'): the ANI opens the candidate session and commits it for you. Send only the configuration commands.",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.0",
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.2"
+            ],
+            "reason": "leaf2 default network-instance points external traffic to next-hop-group to-wan1, but that group is misconfigured with leaf1-facing next hops 10.255.0.4 and 10.255.0.6 instead of spine-facing paths toward wan1 via 10.255.0.0 and 10.255.0.2",
+            "rollback_commands": [
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.4",
+              "/ network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.6"
+            ],
+            "target": "leaf2"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 6.0188991483300924e-05,
+      "error": "update_config.change.commands failed backend safety preflight: SR Linux configuration commands must be 'set / <path>' or 'delete / <path>'",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.0",
+              "set / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.2"
+            ],
+            "reason": "leaf2 default network-instance points external traffic to next-hop-group to-wan1, but that group is misconfigured with leaf1-facing next hops 10.255.0.4 and 10.255.0.6 instead of spine-facing paths toward wan1 via 10.255.0.0 and 10.255.0.2",
+            "rollback_commands": [
+              "set / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.4",
+              "set / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.6"
+            ],
+            "target": "leaf2"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.5183067090110853,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_1d971139fe3c6808"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 136.58163734400296,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "transaction_id": "ani_tx_1d971139fe3c6808"
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.4777431999973487,
+      "error": null,
+      "ok": true,
+      "operation": "rollback_config",
+      "transaction_id": "ani_tx_1d971139fe3c6808"
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf1"
+        ],
+        "paths": [
+          "/network-instance default"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.45853088700096123,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set / qos input policers",
+              "set / qos classifiers"
+            ],
+            "reason": "probe whether SR Linux qos tree is available to express selective uplink treatment for user1 versus guest1 after reads showed no QoS config on leaf1 and Linux tc direct filter commands are blocked",
+            "rollback_commands": [
+              "delete / qos input policers",
+              "delete / qos classifiers"
+            ],
+            "target": "leaf1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.49061955997603945,
+      "error": null,
+      "indeterminate": true,
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_dd7d6f2723da7ea2"
+    }
+  ]
+}

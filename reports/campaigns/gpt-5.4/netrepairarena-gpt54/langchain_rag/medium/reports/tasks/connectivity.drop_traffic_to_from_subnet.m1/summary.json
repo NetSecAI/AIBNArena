@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54-rag-20260929T033725Z/langchain_rag_agent-gpt-5-4-connectivity-drop_traffic_to_from_subnet-m1-fault-seed450677787-8e1c63018f3e.json",
+    "sha256": "65f46493e3cf575c7d8991efdd0e5c1d7c5d4e7bff57d9e7f2fe6535052a0f26",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_rag_agent-gpt-5-4-connectivity-drop_traffic_to_from_subnet-m1-fault-seed450677787-8e1c63018f3e",
+    "created_at": "2026-09-29T05:36:20.221181+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_rag_agent-gpt-5-4-connectivity-drop_traffic_to_from_subnet-m1-fault-seed450677787",
+    "scenario": {
+      "domain": "connectivity",
+      "id": "connectivity.drop_traffic_to_from_subnet.m1",
+      "sut_task_id": "sut-b2c862659007d3f7a0d1a06df6cb3aae",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain RAG ANI Agent",
+    "sut_version": "1.0.0",
+    "configured_model": "gpt-5.4",
+    "sut_reported_model": "gpt-5.4",
+    "provider_reported_model": "gpt-5.4",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "gpt-5.4",
+        "subject": "gpt-5.4",
+        "provider": "gpt-5.4"
+      },
+      "missing": []
+    },
+    "sut_status": "failed",
+    "sut_verified": false,
+    "final_summary": "Observed that only guest1<->web1 connectivity failed while user1<->web1, user1<->app1, app1<->finance1, and web1<->external1 all passed. Read guest1, web1, leaf1, and leaf2 state/configuration: guest1 and web1 both had correct IPv4 addresses and default routes; leaf1 had 10.10.20.1/24 configured and a static route to 10.10.40.0/24; leaf2 had ethernet-1/40 up with 10.10.40.1/24 and an active static route to 10.10.20.0/24. Tried one narrow repair on the implicated return-path device by reinstalling leaf2 static route 10.10.20.0/24 to next-hop-group to-leaf1 (transaction ani_tx_4ac3980356b2308b), but public validation still showed guest1->web1 and web1->guest1 at 100% packet loss with all other tested paths remaining healthy. No further safe, evidence-based repair was identified within budget.",
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Observed that only guest1<->web1 connectivity failed while user1<->web1, user1<->app1, app1<->finance1, and web1<->external1 all passed. Read guest1, web1, leaf1, and leaf2 state/configuration: guest1 and web1 both had correct IPv4 addresses and default routes; leaf1 had 10.10.20.1/24 configured and a static route to 10.10.40.0/24; leaf2 had ethernet-1/40 up with 10.10.40.1/24 and an active static route to 10.10.20.0/24. Tried one narrow repair on the implicated return-path device by reinstalling leaf2 static route 10.10.20.0/24 to next-hop-group to-leaf1 (transaction ani_tx_4ac3980356b2308b), but public validation still showed guest1->web1 and web1->guest1 at 100% packet loss with all other tested paths remaining healthy. No further safe, evidence-based repair was identified within budget.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -29.0,
+      "method": "router_drops_traffic_from_subnet",
+      "operation": "set_subnet_traffic_policy",
+      "reason": null,
+      "reference": "On leaf1, a traffic filter drops all traffic from subnet 10.10.20.0/24 (guest_vlan segment), applied on interface ethernet-1/20.",
+      "score": -29.0,
+      "target": "leaf1"
+    },
+    "success": false,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 174.2834382650035,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "connectivity.path.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "connectivity.path.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "connectivity.unrelated_paths.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "connectivity.path.repair",
+      "version": "1.0.0",
+      "passed": false,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": false,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "Observed that only guest1<->web1 connectivity failed while user1<->web1, user1<->app1, app1<->finance1, and web1<->external1 all passed. Read guest1, web1, leaf1, and leaf2 state/configuration: guest1 and web1 both had correct IPv4 addresses and default routes; leaf1 had 10.10.20.1/24 configured and a static route to 10.10.40.0/24; leaf2 had ethernet-1/40 up with 10.10.40.1/24 and an active static route to 10.10.20.0/24. Tried one narrow repair on the implicated return-path device by reinstalling leaf2 static route 10.10.20.0/24 to next-hop-group to-leaf1 (transaction ani_tx_4ac3980356b2308b), but public validation still showed guest1->web1 and web1->guest1 at 100% packet loss with all other tested paths remaining healthy. No further safe, evidence-based repair was identified within budget.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -29.0,
+      "method": "router_drops_traffic_from_subnet",
+      "operation": "set_subnet_traffic_policy",
+      "reason": null,
+      "reference": "On leaf1, a traffic filter drops all traffic from subnet 10.10.20.0/24 (guest_vlan segment), applied on interface ethernet-1/20.",
+      "score": -29.0,
+      "target": "leaf1"
+    },
+    "domain": "connectivity",
+    "environment_success": false,
+    "failed_operation_count": 5,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 2,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "path_repair_pass_rate": 0.0,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "read_count": 18,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 2,
+    "successful_read_count": 15,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 24,
+    "containerlab_reads": 18,
+    "containerlab_mutations": 2,
+    "containerlab_mutations_ok": 2,
+    "sut_validations": 2,
+    "failed_operations": 5,
+    "unsafe_operations": 0,
+    "input_tokens": 441716,
+    "output_tokens": 1593,
+    "total_tokens": 443309,
+    "recorded": {
+      "ani_mutations": 2,
+      "ani_reads": 18,
+      "failed_operations": 5,
+      "input_tokens": 441716,
+      "llm_calls": 24,
+      "output_tokens": 1593,
+      "successful_mutations": 2,
+      "successful_reads": 15,
+      "total_tokens": 443309,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 52.671,
+    "action_seconds": 1.236,
+    "reading_seconds": 21.098,
+    "validation_seconds": 99.158,
+    "episode_seconds": 174.2834382650035,
+    "unaccounted_seconds": 0.12,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 441716,
+    "output_tokens": 1593,
+    "total_tokens": 443309,
+    "llm_calls": 24,
+    "output_tokens_per_call": 66.4,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 2,
+    "last_public_validation_passed": false
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": false,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 19,
+      "calls": 22
+    },
+    "repeat_action_rate": {
+      "repeated": 2,
+      "calls": 22
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": false
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": true
+    },
+    "llm_found_problem_rate": {
+      "fault_located": false,
+      "change_reached_the_faulty_device": false,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "validate": 2,
+      "check_config": 18,
+      "apply_config": 2
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 22
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "17 of 22 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 443309
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 52.671,
+        "action_seconds": 1.236,
+        "reading_seconds": 21.098,
+        "validation_seconds": 99.158,
+        "episode_seconds": 174.2834382650035,
+        "unaccounted_seconds": 0.12
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 22
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 2
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": false
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "0 device(s) changed by the subject: none"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 64.73173633601982,
+    "calculate_metrics": 8.007301948964596e-05,
+    "deploy_reset_testbed": 17.85497923201183,
+    "evaluate_degradation": 6.317422975000227,
+    "evaluate_healthy": 21.928343342005974,
+    "evaluate_repair_preservation": 101.40819550998276,
+    "inject_fault": 0.4762227089959197,
+    "invoke_sut": 174.3047591020004,
+    "load_configuration": 0.00020421098452061415,
+    "load_oracles": 0.006229356018593535,
+    "load_validate_scenario": 0.03787702901172452,
+    "record_baseline": 4.529982106760144e-06,
+    "restore_destroy": 6.875174436951056,
+    "score_diagnosis": 0.9533496020012535,
+    "snapshot_after_sut": 6.587391884007957,
+    "snapshot_before_sut": 6.6881045330083,
+    "snapshot_healthy": 6.878208833019016,
+    "write_result": 0.008411837974563241
+  },
+  "files": {
+    "record": "../../../records/connectivity.drop_traffic_to_from_subnet.m1.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/connectivity.drop_traffic_to_from_subnet.m1.judge.log",
+    "devices": "../../../logs/devices/connectivity.drop_traffic_to_from_subnet.m1/",
+    "note": "relative to this folder"
+  }
+}

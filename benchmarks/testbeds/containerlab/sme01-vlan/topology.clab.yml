@@ -1,0 +1,86 @@
+name: sme01-vlan
+
+mgmt:
+  network: clab-sme01-vlan
+  ipv4-subnet: 172.22.0.0/24
+
+topology:
+  kinds:
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:latest
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    spine1:
+      kind: nokia_srlinux
+    spine2:
+      kind: nokia_srlinux
+    leaf1:
+      kind: nokia_srlinux
+    leaf2:
+      kind: nokia_srlinux
+
+    user1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.10.10/24 dev eth1
+        - ip route replace default via 10.10.10.1
+    guest1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.20.10/24 dev eth1
+        - ip route replace default via 10.10.20.1
+    finance1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.30.10/24 dev eth1
+        - ip route replace default via 10.10.30.1
+    web1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.40.10/24 dev eth1
+        - ip route replace default via 10.10.40.1
+    app1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.50.10/24 dev eth1
+        - ip route replace default via 10.10.50.1
+    admin1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.10.99.100/24 dev eth1
+        - ip route replace default via 10.10.99.1
+    external1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 203.0.113.10/24 dev eth1
+        - ip route replace default via 203.0.113.1
+
+    attacker1:
+      kind: linux
+      exec:
+        - ip link set eth1 down
+
+  links:
+    - endpoints: ["leaf1:e1-1", "spine1:e1-1"]
+    - endpoints: ["leaf1:e1-2", "spine2:e1-1"]
+    - endpoints: ["leaf2:e1-1", "spine1:e1-2"]
+    - endpoints: ["leaf2:e1-2", "spine2:e1-2"]
+
+    - endpoints: ["user1:eth1", "leaf1:e1-10"]
+    - endpoints: ["guest1:eth1", "leaf1:e1-20"]
+    - endpoints: ["admin1:eth1", "leaf1:e1-57"]
+    - endpoints: ["attacker1:eth1", "leaf1:e1-30"]
+
+    - endpoints: ["finance1:eth1", "leaf2:e1-30"]
+    - endpoints: ["web1:eth1", "leaf2:e1-40"]
+    - endpoints: ["app1:eth1", "leaf2:e1-50"]
+    - endpoints: ["external1:eth1", "leaf2:e1-58"]

@@ -1,0 +1,20 @@
+$TTL 300
+@       IN      SOA     ns.sme01.example. admin.sme01.example. (
+                        2026082501 ; serial
+                        3600       ; refresh
+                        600        ; retry
+                        86400      ; expire
+                        300 )      ; negative cache TTL
+
+@               IN      NS      ns.sme01.example.
+
+ns              IN      A       10.10.41.10
+www             IN      A       10.10.40.10
+mail            IN      A       10.10.40.10
+
+; The DMZ applications, under their own names. This is the only copy: the
+; internal resolver forwards sme01.example here instead of duplicating them,
+; so an internal client and an outside client are answered from the same
+; authoritative source.
+web1            IN      A       10.10.40.10
+app1            IN      A       10.10.50.10

@@ -1,0 +1,345 @@
+{
+  "report_version": "1.0",
+  "source": {
+    "path": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b-base-20260929T092315Z/langchain_agent-openai-qwen-qwen3-8-27b-qos-wan_shaping_policy_repair-m4-fault-seed411389148-cc374eaea138.json",
+    "sha256": "7f42f9a1dfcd47de8c19a6f742886a3483a1fc95f8f0ac0aa05a66cdf4d516f0",
+    "schema_version": "1.0"
+  },
+  "run": {
+    "run_id": "langchain_agent-openai-qwen-qwen3-8-27b-qos-wan_shaping_policy_repair-m4-fault-seed411389148-cc374eaea138",
+    "created_at": "2026-09-29T13:36:16.874172+00:00",
+    "status": "completed",
+    "experiment_id": "langchain_agent-openai-qwen-qwen3-8-27b-qos-wan_shaping_policy_repair-m4-fault-seed411389148",
+    "scenario": {
+      "domain": "qos",
+      "id": "qos.wan_shaping_policy_repair.m4",
+      "sut_task_id": "sut-900b430277b731f060068f97d8208d3b",
+      "version": "1.0.0"
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_version": "1.0.0",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "model_agreement": {
+      "agree": true,
+      "known": {
+        "declared": "openai/qwen/qwen3.8-27b",
+        "subject": "openai/qwen/qwen3.8-27b",
+        "provider": "openai/qwen/qwen3.8-27b"
+      },
+      "missing": []
+    },
+    "sut_status": "completed",
+    "sut_verified": true,
+    "final_summary": "wan1's internet uplink eth2 had a stale HTB root (refcnt 25) whose default class 1:20 swallowed traffic and prevented plain `tc qdisc replace` (RTNETLINK: Invalid argument). I rebuilt the qdisc via update_object: removed the root, recreated `htb default 20`, class 1:1 at rate/ceil 100mbit, and a u32 filter matching dst 203.0.113.10/32 -> class 1:1. No other devices were touched. public_success_criteria now passes: lab_connectivity all green, observed_throughput user1->external1 (203.0.113.10) under contention measured at 66.263 Mbps, above the 8 Mbps contractual guarantee.",
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "wan1's internet uplink eth2 had a stale HTB root (refcnt 25) whose default class 1:20 swallowed traffic and prevented plain `tc qdisc replace` (RTNETLINK: Invalid argument). I rebuilt the qdisc via update_object: removed the root, recreated `htb default 20`, class 1:1 at rate/ceil 100mbit, and a u32 filter matching dst 203.0.113.10/32 -> class 1:1. No other devices were touched. public_success_criteria now passes: lab_connectivity all green, observed_throughput user1->external1 (203.0.113.10) under contention measured at 66.263 Mbps, above the 8 Mbps contractual guarantee.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -22.5,
+      "method": "class_allocation_inverted",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the bandwidth allocation of the classes is inverted: the assured class 10 (8 Mbit/s for user1 to external1) got the small share and the background class the large one.",
+      "score": -22.5,
+      "target": "wan1"
+    },
+    "success": true,
+    "budget_seconds": 400.0,
+    "elapsed_seconds": 326.10576752999987,
+    "budget_exhausted": false,
+    "trace_ref": null
+  },
+  "error": null,
+  "evaluations": [
+    {
+      "phase": "expected_degradation",
+      "oracle_id": "qos.shaping_repair.expected_degradation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "healthy",
+      "oracle_id": "qos.shaping_repair.healthy",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "preservation",
+      "oracle_id": "qos.shaping_repair.preservation",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    },
+    {
+      "phase": "repair",
+      "oracle_id": "qos.shaping_repair.repair",
+      "version": "1.0.0",
+      "passed": true,
+      "probe_count": 1
+    }
+  ],
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": "wan1's internet uplink eth2 had a stale HTB root (refcnt 25) whose default class 1:20 swallowed traffic and prevented plain `tc qdisc replace` (RTNETLINK: Invalid argument). I rebuilt the qdisc via update_object: removed the root, recreated `htb default 20`, class 1:1 at rate/ceil 100mbit, and a u32 filter matching dst 203.0.113.10/32 -> class 1:1. No other devices were touched. public_success_criteria now passes: lab_connectivity all green, observed_throughput user1->external1 (203.0.113.10) under contention measured at 66.263 Mbps, above the 8 Mbps contractual guarantee.",
+      "hypothesis_source": "summary",
+      "judge": {
+        "answer_tokens": {
+          "No": [
+            "No"
+          ],
+          "Yes": [
+            "Yes"
+          ]
+        },
+        "api_base": "https://api.openai.com/v1",
+        "audit_log": "/home/jongmin/ibn-integration-test/bench-gui/reports/manual/diagnosis-audit.jsonl",
+        "bound": false,
+        "method": "top_logprobs",
+        "model": "gpt-4.1",
+        "prompt_id": "fault-pluie-v2",
+        "prompt_sha256": "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939",
+        "reading": "top_logprobs"
+      },
+      "log_p_no": 0.0,
+      "log_p_yes": -22.5,
+      "method": "class_allocation_inverted",
+      "operation": "set_traffic_shaping_policy",
+      "reason": null,
+      "reference": "On the WAN edge wan1, on eth2, the bandwidth allocation of the classes is inverted: the assured class 10 (8 Mbit/s for user1 to external1) got the small share and the background class the large one.",
+      "score": -22.5,
+      "target": "wan1"
+    },
+    "domain": "qos",
+    "environment_success": true,
+    "failed_operation_count": 11,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 14,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": true
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "quality_repair_pass_rate": 1.0,
+    "read_count": 31,
+    "repair_score": 1.0,
+    "success": true,
+    "successful_mutation_count": 6,
+    "successful_read_count": 29,
+    "sut_completed": true,
+    "sut_verified": true,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "llm_calls": 49,
+    "containerlab_reads": 31,
+    "containerlab_mutations": 14,
+    "containerlab_mutations_ok": 6,
+    "sut_validations": 2,
+    "failed_operations": 11,
+    "unsafe_operations": 0,
+    "input_tokens": 1106799,
+    "output_tokens": 3696,
+    "total_tokens": 1110495,
+    "recorded": {
+      "ani_mutations": 14,
+      "ani_reads": 31,
+      "failed_operations": 11,
+      "input_tokens": 1106799,
+      "llm_calls": 49,
+      "output_tokens": 3696,
+      "successful_mutations": 6,
+      "successful_reads": 29,
+      "total_tokens": 1110495,
+      "unsafe_operations": 0,
+      "validations": 6
+    }
+  },
+  "time_by_phase": {
+    "reflection_seconds": 189.705,
+    "action_seconds": 2.356,
+    "reading_seconds": 14.342,
+    "validation_seconds": 119.479,
+    "episode_seconds": 326.10576752999987,
+    "unaccounted_seconds": 0.224,
+    "note": "the same clock as the timeline: reflection is the model's turns, the rest are the tool calls' own durations; unaccounted is transport and the loop's bookkeeping"
+  },
+  "tokens": {
+    "input_tokens": 1106799,
+    "output_tokens": 3696,
+    "total_tokens": 1110495,
+    "llm_calls": 49,
+    "output_tokens_per_call": 75.4,
+    "recorded": true,
+    "note": "counted by the subject from the provider's usage fields; depends on the model's tokenizer"
+  },
+  "validation": {
+    "public_validations": 2,
+    "public_validations_failed": 1,
+    "last_public_validation_passed": true
+  },
+  "evaluation_parameters": {
+    "available": true,
+    "pass_rate": {
+      "repair_passed": true,
+      "oracle_reached_a_verdict": true
+    },
+    "tool_call_success_rate": {
+      "accepted": 37,
+      "calls": 47
+    },
+    "repeat_action_rate": {
+      "repeated": 10,
+      "calls": 47
+    },
+    "time_limit_rate": {
+      "hit_time_limit": false
+    },
+    "interaction_limit_rate": {
+      "hit_interaction_limit": false,
+      "limits_set": false
+    },
+    "early_submission_rate": {
+      "submitted": true,
+      "early_submission": false,
+      "declared_completed": true
+    },
+    "error_submission_rate": {
+      "submitted_and_judged": true,
+      "wrong_submission": false
+    },
+    "llm_found_problem_rate": {
+      "fault_located": true,
+      "change_reached_the_faulty_device": true,
+      "edited_any_device": true
+    },
+    "false_positive_rate": {
+      "no_fault_episode": false,
+      "made_false_positive": null
+    },
+    "ani_call_type_ratio": {
+      "check_config": 31,
+      "apply_config": 14,
+      "validate": 2
+    }
+  },
+  "report_information": [
+    {
+      "item": "each ANI tool called by the agent, with the parameters",
+      "where": "timeline.steps[type=call] (tool, arguments, ok, error); sut_result.ani_operations",
+      "value": 47
+    },
+    {
+      "item": "whether each tool call succeeded",
+      "where": "timeline.steps[type=call].ok; operation_counts",
+      "value": "36 of 47 succeeded"
+    },
+    {
+      "item": "whether the agent ran out of time",
+      "where": "timeline.budget.exhausted, time_by_phase, run.budget_exhausted",
+      "value": false
+    },
+    {
+      "item": "number of tokens used by the LLM",
+      "where": "tokens",
+      "value": 1110495
+    },
+    {
+      "item": "time, split into reflection, action and validation",
+      "where": "time_by_phase",
+      "value": {
+        "reflection_seconds": 189.705,
+        "action_seconds": 2.356,
+        "reading_seconds": 14.342,
+        "validation_seconds": 119.479,
+        "episode_seconds": 326.10576752999987,
+        "unaccounted_seconds": 0.224
+      }
+    },
+    {
+      "item": "number of interactions with the ANI",
+      "where": "operation_counts (containerlab_*), evaluation_parameters.tool_call_success_rate.calls",
+      "value": 47
+    },
+    {
+      "item": "number of errors detected by the validators",
+      "where": "validation",
+      "value": 1
+    },
+    {
+      "item": "whether the task is a success",
+      "where": "run.success, evaluations, metrics",
+      "value": true
+    },
+    {
+      "item": "information on the state of the network",
+      "where": "device_configurations (every device's running configuration healthy, before and after the subject, with what changed); evaluations (probes); files.devices when exported",
+      "value": "1 device(s) changed by the subject: wan1"
+    },
+    {
+      "item": "the model's reasoning",
+      "where": "timeline.steps[type=thinking].reasoning (from the trace)",
+      "value": "0 turns carry a reasoning span"
+    }
+  ],
+  "phase_durations": {
+    "apply_reference_state": 90.37453511700005,
+    "calculate_metrics": 2.8879001547466032e-05,
+    "deploy_reset_testbed": 19.624446805000844,
+    "evaluate_degradation": 22.622400093001488,
+    "evaluate_healthy": 17.50139247900006,
+    "evaluate_repair_preservation": 70.78344783099965,
+    "inject_fault": 0.3959883469997294,
+    "invoke_sut": 326.13104917300006,
+    "load_configuration": 0.00023410200083162636,
+    "load_oracles": 0.007099165999534307,
+    "load_validate_scenario": 0.03967807200024254,
+    "record_baseline": 5.31899968336802e-06,
+    "restore_destroy": 2.049979232999249,
+    "score_diagnosis": 1.8330159640008787,
+    "snapshot_after_sut": 8.764048557999558,
+    "snapshot_before_sut": 8.345279539998955,
+    "snapshot_healthy": 8.512990126999284,
+    "write_result": 0.01192952200108266
+  },
+  "files": {
+    "record": "../../../records/qos.wan_shaping_policy_repair.m4.json",
+    "trace": "",
+    "judge_log": "../../../logs/judge/qos.wan_shaping_policy_repair.m4.judge.log",
+    "devices": "../../../logs/devices/qos.wan_shaping_policy_repair.m4/",
+    "note": "relative to this folder"
+  }
+}

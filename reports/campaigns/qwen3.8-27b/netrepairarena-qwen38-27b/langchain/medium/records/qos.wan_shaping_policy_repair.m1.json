@@ -1,0 +1,4968 @@
+{
+  "cleanup_result": {
+    "ok": true,
+    "results": [
+      {
+        "command": "sh -c 'tc qdisc del dev eth2 root 2>/dev/null || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc qdisc add dev eth2 root handle 1: htb default 20",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip address replace 10.10.10.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip route replace default via 10.10.10.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "user1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip address replace 10.10.20.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip route replace default via 10.10.20.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "guest1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip address replace 10.10.30.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip route replace default via 10.10.30.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "finance1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip address replace 10.10.40.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip route replace default via 10.10.40.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "web1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip address replace 10.10.50.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip route replace default via 10.10.50.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip address replace 10.10.99.100/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip route replace default via 10.10.99.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "admin1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip address replace 203.0.113.10/24 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip route replace default via 203.0.113.1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'pkill -x iperf3 || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'pkill -x iperf3 || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5201 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "app1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5201 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "sh -c 'setsid iperf3 -s -p 5202 >/dev/null 2>&1 </dev/null &'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "external1"
+      },
+      {
+        "command": "ip link set eth1 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth1 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 10.255.1.1/31 dev eth1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth3 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth3 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 10.255.1.3/31 dev eth3",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth2 up",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip link set eth2 mtu 1500",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "ip address replace 203.0.113.1/24 dev eth2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "sysctl -w net.ipv4.ip_forward=1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "net.ipv4.ip_forward = 1\n",
+        "target": "wan1"
+      },
+      {
+        "command": "ip route replace 10.10.0.0/16 nexthop via 10.255.1.0 dev eth1 nexthop via 10.255.1.2 dev eth3",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "sh -c 'tc qdisc del dev eth2 root 2>/dev/null || true'",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc qdisc add dev eth2 root handle 1: htb default 20",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 2",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "",
+        "target": "wan1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.0/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.4/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/3 admin-state enable\nset / interface ethernet-1/3 subinterface 0 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 address 10.255.1.0/31\nset / network-instance default interface ethernet-1/3.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.1 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.5 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.1.1 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "spine1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.2/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.6/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/3 admin-state enable\nset / interface ethernet-1/3 subinterface 0 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/3 subinterface 0 ipv4 address 10.255.1.2/31\nset / network-instance default interface ethernet-1/3.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.3 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.7 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.1.3 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "spine2"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.1/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.3/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/10 admin-state enable\nset / interface ethernet-1/10 subinterface 0 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/10 subinterface 0 ipv4 address 10.10.10.1/24\nset / network-instance default interface ethernet-1/10.0\nset / interface ethernet-1/20 admin-state enable\nset / interface ethernet-1/20 subinterface 0 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/20 subinterface 0 ipv4 address 10.10.20.1/24\nset / network-instance default interface ethernet-1/20.0\nset / interface ethernet-1/57 admin-state enable\nset / interface ethernet-1/57 subinterface 0 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/57 subinterface 0 ipv4 address 10.10.99.1/24\nset / network-instance default interface ethernet-1/57.0\nset / network-instance default next-hop-groups group to-leaf2 nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default next-hop-groups group to-leaf2 nexthop 2 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 10.10.30.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.40.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default static-routes route 10.10.50.0/24 next-hop-group to-leaf2 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.0 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.2 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf1"
+      },
+      {
+        "command": "set / interface ethernet-1/1 admin-state enable\nset / interface ethernet-1/1 subinterface 0 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/1 subinterface 0 ipv4 address 10.255.0.5/31\nset / network-instance default interface ethernet-1/1.0\nset / interface ethernet-1/2 admin-state enable\nset / interface ethernet-1/2 subinterface 0 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/2 subinterface 0 ipv4 address 10.255.0.7/31\nset / network-instance default interface ethernet-1/2.0\nset / interface ethernet-1/30 admin-state enable\nset / interface ethernet-1/30 subinterface 0 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/30 subinterface 0 ipv4 address 10.10.30.1/24\nset / network-instance default interface ethernet-1/30.0\nset / interface ethernet-1/40 admin-state enable\nset / interface ethernet-1/40 subinterface 0 admin-state enable\nset / interface ethernet-1/40 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/40 subinterface 0 ipv4 address 10.10.40.1/24\nset / network-instance default interface ethernet-1/40.0\nset / interface ethernet-1/50 admin-state enable\nset / interface ethernet-1/50 subinterface 0 admin-state enable\nset / interface ethernet-1/50 subinterface 0 ipv4 admin-state enable\nset / interface ethernet-1/50 subinterface 0 ipv4 address 10.10.50.1/24\nset / network-instance default interface ethernet-1/50.0\nset / network-instance default next-hop-groups group to-leaf1 nexthop 1 ip-address 10.255.0.4 admin-state enable\nset / network-instance default next-hop-groups group to-leaf1 nexthop 2 ip-address 10.255.0.6 admin-state enable\nset / network-instance default static-routes route 10.10.10.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.20.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default static-routes route 10.10.99.0/24 next-hop-group to-leaf1 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 1 ip-address 10.255.0.4 admin-state enable\nset / network-instance default next-hop-groups group to-wan1 nexthop 2 ip-address 10.255.0.6 admin-state enable\nset / network-instance default static-routes route 203.0.113.0/24 next-hop-group to-wan1 admin-state enable",
+        "ok": true,
+        "reason": null,
+        "returncode": 0,
+        "safe": true,
+        "stderr": "",
+        "stdout": "Nothing to discard. Starting new transaction.\nAll changes have been committed. Leaving candidate mode.\n",
+        "target": "leaf2"
+      }
+    ]
+  },
+  "convergence_result": {
+    "converged": true,
+    "interval_seconds": 2.0,
+    "lease_renewal": {
+      "clients": []
+    },
+    "observation": {
+      "connectivity": [
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.51 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.851 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.895 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.851/1.417/2.507/0.770 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.894 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.855 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.680 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2041ms\nrtt min/avg/max/mdev = 0.680/0.809/0.894/0.093 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=2.40 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.707 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.811 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 3370ms\nrtt min/avg/max/mdev = 0.707/1.306/2.402/0.775 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=1.27 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.767 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.731 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.731/0.921/1.265/0.243 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=1.17 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.701 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=1.24 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2031ms\nrtt min/avg/max/mdev = 0.701/1.038/1.242/0.240 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.689 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.694 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.789 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2056ms\nrtt min/avg/max/mdev = 0.689/0.724/0.789/0.046 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "app1",
+          "destination_ip": "10.10.50.10",
+          "hostname": null,
+          "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=2.33 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.216 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.230 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2016ms\nrtt min/avg/max/mdev = 0.216/0.924/2.326/0.991 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "finance1",
+          "success": true
+        },
+        {
+          "destination": "finance1",
+          "destination_ip": "10.10.30.10",
+          "hostname": null,
+          "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.275 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.225 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=1.03 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2038ms\nrtt min/avg/max/mdev = 0.225/0.510/1.032/0.369 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "app1",
+          "success": true
+        },
+        {
+          "destination": "web1",
+          "destination_ip": "10.10.40.10",
+          "hostname": null,
+          "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=0.611 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.453 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.465 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2038ms\nrtt min/avg/max/mdev = 0.453/0.509/0.611/0.071 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.588 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.433 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.553 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2046ms\nrtt min/avg/max/mdev = 0.433/0.524/0.588/0.066 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "web1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.523 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.478 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.497 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2029ms\nrtt min/avg/max/mdev = 0.478/0.499/0.523/0.018 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "user1",
+          "success": true
+        },
+        {
+          "destination": "user1",
+          "destination_ip": "10.10.10.10",
+          "hostname": null,
+          "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.521 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.618 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.539 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2035ms\nrtt min/avg/max/mdev = 0.521/0.559/0.618/0.042 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        },
+        {
+          "destination": "external1",
+          "destination_ip": "203.0.113.10",
+          "hostname": null,
+          "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.956 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.526 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.490 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2019ms\nrtt min/avg/max/mdev = 0.490/0.657/0.956/0.211 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "guest1",
+          "success": true
+        },
+        {
+          "destination": "guest1",
+          "destination_ip": "10.10.20.10",
+          "hostname": null,
+          "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.522 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.479 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.550 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2048ms\nrtt min/avg/max/mdev = 0.479/0.517/0.550/0.029 ms",
+          "packet_loss_percent": 0.0,
+          "resolved_ip": null,
+          "source": "external1",
+          "success": true
+        }
+      ],
+      "lab_name": "sme01-qos",
+      "nodes": [
+        {
+          "container_name": "clab-sme01-qos-spine1",
+          "kind": "nokia_srlinux",
+          "name": "spine1"
+        },
+        {
+          "container_name": "clab-sme01-qos-spine2",
+          "kind": "nokia_srlinux",
+          "name": "spine2"
+        },
+        {
+          "container_name": "clab-sme01-qos-leaf1",
+          "kind": "nokia_srlinux",
+          "name": "leaf1"
+        },
+        {
+          "container_name": "clab-sme01-qos-leaf2",
+          "kind": "nokia_srlinux",
+          "name": "leaf2"
+        },
+        {
+          "container_name": "clab-sme01-qos-wan1",
+          "kind": "linux",
+          "name": "wan1"
+        },
+        {
+          "container_name": "clab-sme01-qos-user1",
+          "kind": "linux",
+          "name": "user1"
+        },
+        {
+          "container_name": "clab-sme01-qos-guest1",
+          "kind": "linux",
+          "name": "guest1"
+        },
+        {
+          "container_name": "clab-sme01-qos-finance1",
+          "kind": "linux",
+          "name": "finance1"
+        },
+        {
+          "container_name": "clab-sme01-qos-web1",
+          "kind": "linux",
+          "name": "web1"
+        },
+        {
+          "container_name": "clab-sme01-qos-app1",
+          "kind": "linux",
+          "name": "app1"
+        },
+        {
+          "container_name": "clab-sme01-qos-external1",
+          "kind": "linux",
+          "name": "external1"
+        },
+        {
+          "container_name": "clab-sme01-qos-admin1",
+          "kind": "linux",
+          "name": "admin1"
+        },
+        {
+          "container_name": "clab-sme01-qos-attacker1",
+          "kind": "linux",
+          "name": "attacker1"
+        }
+      ],
+      "raw": {
+        "admin1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4224      UP             172.26.0.12/24 \neth1@if4233      UP             10.10.99.100/24 fe80::a8c1:abff:fed8:417d/64 \n",
+        "app1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4199      UP             172.26.0.3/24 \neth1@if4205      UP             10.10.50.10/24 fe80::a8c1:abff:fe50:e785/64 \n",
+        "attacker1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4198      UP             172.26.0.2/24 \neth1@if4203      DOWN           \n",
+        "external1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4213      UP             172.26.0.9/24 \neth1@if4220      UP             203.0.113.10/24 fe80::a8c1:abff:feff:db50/64 \n",
+        "finance1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4214      UP             172.26.0.10/24 \neth1@if4227      UP             10.10.30.10/24 fe80::a8c1:abff:fea9:d848/64 \n",
+        "guest1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4209      UP             172.26.0.7/24 \neth1@if4217      UP             10.10.20.10/24 fe80::a8c1:abff:fea9:ec30/64 \n",
+        "leaf1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:CD:06:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:50:14.319Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12253960 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "leaf2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : leaf2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:3E:07:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:50:14.113Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12278528 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "spine1:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : spine1\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:4C:08:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:50:14.066Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12278724 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "spine2:show_version": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nHostname             : spine2\nChassis Type         : 7220 IXR-D2L\nPart Number          : Sim Part No.\nSerial Number        : Sim Serial No.\nSystem HW MAC Address: 1A:BC:09:FF:00:00\nOS                   : SR Linux\nSoftware Version     : v26.7.1\nBuild Number         : 554-g78ed635f70a\nArchitecture         : x86_64\nLast Booted          : 2026-09-29T12:50:14.065Z\nTotal Memory         : 49334172 kB\nFree Memory          : 12278528 kB\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+        "user1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4202      UP             172.26.0.6/24 \neth1@if4221      UP             10.10.10.10/24 fe80::a8c1:abff:fec1:32ca/64 \n",
+        "wan1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4200      UP             172.26.0.4/24 \neth1@if4207      UP             10.255.1.1/31 fe80::a8c1:abff:fe60:caa1/64 \neth3@if4211      UP             10.255.1.3/31 fe80::a8c1:abff:fea9:885e/64 \neth2@if4219      UP             203.0.113.1/24 fe80::a8c1:abff:feed:706d/64 \n",
+        "web1:ip_brief_address": "lo               UNKNOWN        127.0.0.1/8 ::1/128 \neth0@if4201      UP             172.26.0.5/24 \neth1@if4215      UP             10.10.40.10/24 fe80::a8c1:abff:fec7:235c/64 \n"
+      }
+    },
+    "ok": true,
+    "timeout_seconds": 30.0
+  },
+  "created_at": "2026-09-29T13:03:36.573345+00:00",
+  "device_configurations": {
+    "changed_by_sut": [
+      "wan1"
+    ],
+    "changes": {
+      "before_sut_to_after_sut": {
+        "wan1": {
+          "file": "wan1/before_sut_to_after_sut.diff",
+          "lines_added": 3,
+          "lines_removed": 2
+        }
+      },
+      "healthy_to_before_sut": {
+        "wan1": {
+          "file": "wan1/healthy_to_before_sut.diff",
+          "lines_added": 1,
+          "lines_removed": 6
+        }
+      }
+    },
+    "directory": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b-base-20260929T092315Z/devices/qos.wan_shaping_policy_repair.m1-20260929T125007-538640f3",
+    "note": "running configuration per device: healthy (after the reference state), before_sut (the faulty network the subject was handed), after_sut (what it left, before convergence); diffs ignore Linux address lifetimes",
+    "snapshots": {
+      "after_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77529,
+            "command": "info from running /",
+            "file": "leaf1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77466,
+            "command": "info from running /",
+            "file": "leaf2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine1/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine2/after_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2598,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/after_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "before_sut": {
+        "devices": {
+          "admin1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77529,
+            "command": "info from running /",
+            "file": "leaf1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77466,
+            "command": "info from running /",
+            "file": "leaf2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine1/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine2/before_sut.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2517,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/before_sut.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      },
+      "healthy": {
+        "devices": {
+          "admin1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "admin1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "app1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "app1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "attacker1": {
+            "bytes": 969,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "attacker1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "external1": {
+            "bytes": 1234,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "external1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "finance1": {
+            "bytes": 1232,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "finance1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "guest1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "guest1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "leaf1": {
+            "bytes": 77529,
+            "command": "info from running /",
+            "file": "leaf1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "leaf2": {
+            "bytes": 77466,
+            "command": "info from running /",
+            "file": "leaf2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine1": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine1/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "spine2": {
+            "bytes": 77155,
+            "command": "info from running /",
+            "file": "spine2/healthy.txt",
+            "kind": "nokia_srlinux",
+            "ok": true
+          },
+          "user1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "user1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "wan1": {
+            "bytes": 2860,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "wan1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          },
+          "web1": {
+            "bytes": 1230,
+            "command": "ip address show; ip route show; tc qdisc/class/filter show",
+            "file": "web1/healthy.txt",
+            "kind": "linux",
+            "ok": true
+          }
+        },
+        "ok": true
+      }
+    }
+  },
+  "error": null,
+  "evaluations": {
+    "expected_degradation": {
+      "injection": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "degraded": true,
+            "reinjected": null,
+            "restored": null,
+            "voided": false
+          }
+        ],
+        "attempts_allowed": 1
+      },
+      "oracle_id": "qos.shaping_repair.expected_degradation",
+      "passed": true,
+      "phase": "expected_degradation",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 0.0,
+            "timed_out": true,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "baseline": {
+                "factor": 0.85,
+                "metric": "throughput_mbps"
+              },
+              "combine": "min",
+              "factor": 0.85,
+              "metric": "throughput_mbps",
+              "operator": "lt",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "healthy": {
+      "oracle_id": "qos.shaping_repair.healthy",
+      "passed": true,
+      "phase": "healthy",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 6.116,
+            "timed_out": false,
+            "unverified_throughput_mbps": null
+          },
+          "passed": true,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "factor": 0.5,
+              "metric": "throughput_mbps",
+              "operator": "gte",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "preservation": {
+      "oracle_id": "qos.shaping_repair.preservation",
+      "passed": true,
+      "phase": "preservation",
+      "probes": [
+        {
+          "metrics": {
+            "checks": [
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 1.315,
+                "rtt_max_ms": 2.568,
+                "rtt_min_ms": 0.679,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.766,
+                "rtt_max_ms": 0.855,
+                "rtt_min_ms": 0.716,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "app1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.9,
+                "rtt_max_ms": 1.949,
+                "rtt_min_ms": 0.333,
+                "source": "finance1",
+                "success": true
+              },
+              {
+                "destination": "finance1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.313,
+                "rtt_max_ms": 0.404,
+                "rtt_min_ms": 0.234,
+                "source": "app1",
+                "success": true
+              },
+              {
+                "destination": "web1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.527,
+                "rtt_max_ms": 0.605,
+                "rtt_min_ms": 0.468,
+                "source": "external1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.674,
+                "rtt_max_ms": 0.909,
+                "rtt_min_ms": 0.555,
+                "source": "web1",
+                "success": true
+              },
+              {
+                "destination": "external1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.616,
+                "rtt_max_ms": 0.631,
+                "rtt_min_ms": 0.596,
+                "source": "guest1",
+                "success": true
+              },
+              {
+                "destination": "guest1",
+                "packet_loss_percent": 0.0,
+                "rtt_avg_ms": 0.668,
+                "rtt_max_ms": 0.713,
+                "rtt_min_ms": 0.645,
+                "source": "external1",
+                "success": true
+              }
+            ],
+            "failed_checks": 0,
+            "passed_checks": 8,
+            "success": true,
+            "total_checks": 8
+          },
+          "passed": true,
+          "probe_id": "unaffected_paths",
+          "threshold_results": [
+            true
+          ],
+          "thresholds": [
+            {
+              "metric": "failed_checks",
+              "operator": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    },
+    "repair": {
+      "oracle_id": "qos.shaping_repair.repair",
+      "passed": false,
+      "phase": "repair",
+      "probes": [
+        {
+          "metrics": {
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_log_tail": null,
+            "contention_observed": true,
+            "error": null,
+            "success": true,
+            "throughput_mbps": 0.0,
+            "timed_out": true,
+            "unverified_throughput_mbps": null
+          },
+          "passed": false,
+          "probe_id": "protected_flow",
+          "threshold_results": [
+            false
+          ],
+          "thresholds": [
+            {
+              "baseline": {
+                "factor": 0.85,
+                "metric": "throughput_mbps"
+              },
+              "combine": "min",
+              "factor": 0.85,
+              "metric": "throughput_mbps",
+              "operator": "gte",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "version": "1.0.0"
+    }
+  },
+  "experiment_id": "langchain_agent-openai-qwen-qwen3-8-27b-qos-wan_shaping_policy_repair-m1-fault-seed401943731",
+  "metrics": {
+    "converged": true,
+    "diagnosis": {
+      "applicable": true,
+      "found": false,
+      "hypothesis": null,
+      "hypothesis_source": null,
+      "judge": null,
+      "log_p_no": null,
+      "log_p_yes": null,
+      "method": "shaping_policy_removed",
+      "operation": "set_traffic_shaping_policy",
+      "reason": "the subject stated no diagnosis",
+      "reference": "On the WAN edge wan1, on eth2, the traffic shaping policy was removed, so the assured class 10 (8 Mbit/s for user1 to external1) is no longer protected from the background traffic.",
+      "score": null,
+      "target": "wan1"
+    },
+    "domain": "qos",
+    "environment_success": false,
+    "failed_operation_count": 22,
+    "false_positive": null,
+    "fault_applicable": true,
+    "mutation_count": 25,
+    "non_regression_passed": true,
+    "non_regression_vacuous": false,
+    "phase_passed": {
+      "expected_degradation": true,
+      "healthy": true,
+      "preservation": true,
+      "repair": false
+    },
+    "preservation_score": 1.0,
+    "preservation_vacuous": false,
+    "quality_repair_pass_rate": 0.0,
+    "read_count": 30,
+    "repair_score": 0.0,
+    "success": false,
+    "successful_mutation_count": 7,
+    "successful_read_count": 27,
+    "sut_completed": false,
+    "sut_verified": false,
+    "unsafe_operation_count": 0,
+    "validation_count": 6
+  },
+  "operation_counts": {
+    "ani_mutations": 25,
+    "ani_reads": 30,
+    "failed_operations": 22,
+    "input_tokens": 1527421,
+    "llm_calls": 51,
+    "output_tokens": 7469,
+    "successful_mutations": 7,
+    "successful_reads": 27,
+    "total_tokens": 1534890,
+    "unsafe_operations": 0,
+    "validations": 6
+  },
+  "phase_durations": {
+    "apply_reference_state": 91.93761575899953,
+    "calculate_metrics": 3.146999915770721e-05,
+    "deploy_reset_testbed": 17.761219197000173,
+    "evaluate_degradation": 45.243691141000454,
+    "evaluate_healthy": 15.795568183000796,
+    "evaluate_repair_preservation": 99.63561667999966,
+    "inject_fault": 0.6124239929995383,
+    "invoke_sut": 465.1508677950005,
+    "load_configuration": 0.0002565790000517154,
+    "load_oracles": 0.007066060999932233,
+    "load_validate_scenario": 0.03978836799979035,
+    "record_baseline": 5.7680008467286825e-06,
+    "restore_destroy": 13.488426947000335,
+    "score_diagnosis": 3.5442999433143996e-05,
+    "snapshot_after_sut": 8.516552007000428,
+    "snapshot_before_sut": 8.285431354999673,
+    "snapshot_healthy": 8.516363884000384,
+    "write_result": 0.008632242999738082
+  },
+  "provenance": {
+    "a2a_sdk_version": "1.1.2",
+    "configured_model": "openai/qwen/qwen3.8-27b",
+    "git": {
+      "commit": "0a19e7fd927278448014f992a5765dc718ff6430",
+      "dirty": true,
+      "modified_files": 1,
+      "untracked_files": 15173
+    },
+    "intent_variant": "medium",
+    "model_parameters": {
+      "ani_call_limit": null,
+      "context_budget_chars": null,
+      "enable_thinking": null,
+      "max_consecutive_rejections": null,
+      "max_context_chars": 12000,
+      "max_execution_seconds": 400.0,
+      "max_tokens": 8000,
+      "min_retry_tokens": null,
+      "model": "openai/qwen/qwen3.8-27b",
+      "prompt_variant": "default",
+      "recursion_limit": 1000,
+      "request_extra_body": {
+        "provider": {
+          "allow_fallbacks": false,
+          "order": [
+            "deepinfra"
+          ],
+          "quantizations": [
+            "bf16"
+          ]
+        },
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "temperature": null,
+      "thinking_directive_applied": false,
+      "thinking_effort": null,
+      "thinking_mechanism": "unset",
+      "thinking_request": {},
+      "thinking_style": "auto",
+      "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+      "tool_choice": "auto",
+      "tool_result_chars": null
+    },
+    "oracle_versions": {
+      "expected_degradation": "1.0.0",
+      "healthy": "1.0.0",
+      "preservation": "1.0.0",
+      "repair": "1.0.0"
+    },
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "reference_state_sha256": "f60fd0f4b36c6d0b42be8c9cc4664d19524d831cfb792a062c926a6edb54f53d",
+    "scenario_seed": 401943731,
+    "scenario_version": "1.0.0",
+    "seed_campaign": 151103432,
+    "serving": {
+      "served_model_names": [
+        "anthropic/claude-sonnet-5.5",
+        "anthropic/claude-sonnet-5.5:batch",
+        "typesafe/jev-router",
+        "perceptron/perceptron-mk1.5",
+        "fireworks/ember-1",
+        "z-ai/glm-5.3-prime",
+        "qwen/qwen3.8-max-prime",
+        "stealth/space-bunny-alpha",
+        "aion-labs/aion-3.5-mini",
+        "aion-labs/aion-3.5",
+        "upstage/solar-mini4",
+        "cohere/command-a-plus",
+        "openai/gpt-6-luna-pro",
+        "openai/gpt-6-luna-pro:batch",
+        "openai/gpt-6-luna",
+        "openai/gpt-6-luna:batch",
+        "openai/gpt-6-sol-pro",
+        "openai/gpt-6-sol-pro:batch",
+        "openai/gpt-6-sol",
+        "openai/gpt-6-sol:batch",
+        "anthropic/claude-opus-5.5",
+        "anthropic/claude-opus-5.5:batch",
+        "xiaomi/mimo-v2.6-pro-ultraspeed",
+        "xiaomi/mimo-v2.6-flash",
+        "xiaomi/mimo-v2.6-pro",
+        "x-ai/grok-4.7",
+        "qwen/qwen3.8-omni-flash",
+        "prism-ml/ternary-bonsai-2-27b",
+        "z-ai/glm-5.3-flashx",
+        "unbiased/pareto",
+        "~deepseek/deepseek-pro-latest",
+        "~deepseek/deepseek-flash-latest",
+        "inference-net/schematron-v2-turbo",
+        "inference-net/schematron-v2-small",
+        "~openai/gpt-astra-latest",
+        "~openai/gpt-sol-latest",
+        "~openai/gpt-terra-latest",
+        "~openai/gpt-luna-latest",
+        "sakana/fugu-ultra-v2",
+        "sakana/fugu-max",
+        "inclusionai/ling-3.0-flash-vl",
+        "deepseek/deepseek-v4.1-flash",
+        "deepseek/deepseek-v4.1-flash:batch",
+        "inception/mercury-2.5",
+        "nex-agi/nex-n2.5-mini",
+        "nex-agi/nex-n2.5-pro",
+        "openai/gpt-6-astra",
+        "openai/gpt-6-astra:batch",
+        "openai/gpt-6-astra-pro",
+        "openai/gpt-6-astra-pro:batch",
+        "inclusionai/ling-3.0-flash-sante:free",
+        "qwen/qwen3.8-max-0902",
+        "meta/muse-spark-1.3-contributor",
+        "meta/muse-spark-1.3",
+        "google/gemini-3.8-flash",
+        "google/gemini-3.8-flash:batch",
+        "anthropic/claude-fable-5.1",
+        "anthropic/claude-fable-5.1:batch",
+        "ibm-granite/granite-4.2-8b",
+        "tencent/hy4-preview",
+        "inclusionai/ling-3.0-flash-fin",
+        "~z-ai/glm-flash-latest",
+        "qwen/qwen3.8-flash",
+        "z-ai/glm-5.3-flash",
+        "z-ai/glm-5.3-flash:batch",
+        "meta/muse-spark-1.2-contributor",
+        "deepseek/deepseek-v4-flash-vision-exp",
+        "tencent/hy-mt2-1.8b",
+        "tencent/hy-mt2-30b-a3b",
+        "~z-ai/glm-latest",
+        "tencent/hy-mt2-7b",
+        "z-ai/glm-5.3",
+        "z-ai/glm-5.3:batch",
+        "qwen/qwen3.8-27b",
+        "qwen/qwen3.8-27b:free",
+        "dots-studio/dots-3-note-preview:free",
+        "google/gemini-3.7-flash",
+        "google/gemini-3.7-flash:batch",
+        "bytedance-seed/seed-2-1-turbo",
+        "qwen/qwen3.8-2.4t-a95b",
+        "bytedance-seed/seed-2.0-code",
+        "deepseek/deepseek-v4-pro-0813",
+        "x-ai/grok-4.6",
+        "liquid/lfm-2.5-2.6b:free",
+        "nvidia/nemotron-3.5-lightning",
+        "nvidia/nemotron-3.5-lightning:free",
+        "sakana/sakana-namazu",
+        "upstage/solar-pro4",
+        "meta/muse-glimmer-30b",
+        "meta/muse-spark-1.2",
+        "~deepseek/deepseek-v4-flash-latest",
+        "deepseek/deepseek-v4-flash-0731",
+        "thinkingmachines/inkling-small",
+        "thinkingmachines/inkling-small:free",
+        "qwen/qwen3.7-flash",
+        "anthropic/claude-opus-5",
+        "anthropic/claude-opus-5:batch",
+        "inclusionai/ling-3.0-flash",
+        "poolside/laguna-s-2.1",
+        "poolside/laguna-s-2.1:free",
+        "google/gemini-3.6-flash",
+        "google/gemini-3.6-flash:batch",
+        "google/gemini-3.5-flash-lite",
+        "google/gemini-3.5-flash-lite:batch",
+        "meituan/longcat-2.0",
+        "thinkingmachines/inkling",
+        "thinkingmachines/inkling:free",
+        "openrouter/auto-beta",
+        "moonshotai/kimi-k3",
+        "moonshotai/kimi-k3:batch",
+        "meta/muse-spark-1.1",
+        "kwaipilot/kat-coder-pro-v2.5",
+        "openai/gpt-5.6-luna-pro",
+        "openai/gpt-5.6-luna-pro:batch",
+        "openai/gpt-5.6-luna",
+        "openai/gpt-5.6-luna:batch",
+        "openai/gpt-5.6-terra-pro",
+        "openai/gpt-5.6-terra-pro:batch",
+        "openai/gpt-5.6-terra",
+        "openai/gpt-5.6-terra:batch",
+        "openai/gpt-5.6-sol-pro",
+        "openai/gpt-5.6-sol-pro:batch",
+        "openai/gpt-5.6-sol",
+        "openai/gpt-5.6-sol:batch",
+        "x-ai/grok-4.5",
+        "~x-ai/grok-latest",
+        "aion-labs/aion-3.0-mini",
+        "aion-labs/aion-3.0",
+        "tencent/hy3",
+        "poolside/laguna-xs-2.1",
+        "poolside/laguna-xs-2.1:free",
+        "anthropic/claude-sonnet-5",
+        "anthropic/claude-sonnet-5:batch",
+        "google/gemini-3.1-flash-lite-image",
+        "sakana/fugu-ultra",
+        "google/gemini-3.1-flash-image",
+        "google/gemini-3-pro-image",
+        "cohere/north-mini-code:free",
+        "z-ai/glm-5.2",
+        "openrouter/fusion",
+        "moonshotai/kimi-k2.7-code",
+        "~anthropic/claude-fable-latest",
+        "anthropic/claude-fable-5",
+        "anthropic/claude-fable-5:batch",
+        "nvidia/nemotron-3.5-content-safety",
+        "nvidia/nemotron-3.5-content-safety:free",
+        "nvidia/nemotron-3-ultra-550b-a55b",
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "qwen/qwen3.7-plus",
+        "minimax/minimax-m3",
+        "stepfun/step-3.7-flash",
+        "anthropic/claude-opus-4.8",
+        "anthropic/claude-opus-4.8:batch",
+        "qwen/qwen3.7-max",
+        "x-ai/grok-build-0.1",
+        "google/gemini-3.5-flash",
+        "google/gemini-3.5-flash:batch",
+        "perceptron/perceptron-mk1",
+        "google/gemini-3.1-flash-lite",
+        "google/gemini-3.1-flash-lite:batch",
+        "openai/gpt-chat-latest",
+        "x-ai/grok-4.3",
+        "x-ai/grok-4.3:batch",
+        "mistralai/mistral-medium-3-5",
+        "mistralai/mistral-medium-3-5:batch",
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "~anthropic/claude-haiku-latest",
+        "~openai/gpt-mini-latest",
+        "~google/gemini-pro-latest",
+        "~moonshotai/kimi-latest",
+        "~google/gemini-flash-latest",
+        "~anthropic/claude-sonnet-latest",
+        "qwen/qwen3.5-plus-20260420",
+        "qwen/qwen3.6-flash",
+        "qwen/qwen3.6-35b-a3b",
+        "qwen/qwen3.6-max-preview",
+        "qwen/qwen3.6-27b",
+        "openai/gpt-5.5-pro",
+        "openai/gpt-5.5-pro:batch",
+        "openai/gpt-5.5",
+        "openai/gpt-5.5:batch",
+        "deepseek/deepseek-v4-pro",
+        "deepseek/deepseek-v4-flash",
+        "tencent/hy3-preview",
+        "xiaomi/mimo-v2.5-pro",
+        "xiaomi/mimo-v2.5",
+        "openai/gpt-5.4-image-2",
+        "~anthropic/claude-opus-latest",
+        "openrouter/pareto-code",
+        "moonshotai/kimi-k2.6",
+        "anthropic/claude-opus-4.7",
+        "anthropic/claude-opus-4.7:batch",
+        "z-ai/glm-5.1",
+        "google/gemma-4-26b-a4b-it",
+        "google/gemma-4-26b-a4b-it:free",
+        "google/gemma-4-31b-it",
+        "google/gemma-4-31b-it:free",
+        "qwen/qwen3.6-plus",
+        "z-ai/glm-5v-turbo",
+        "arcee-ai/trinity-large-thinking",
+        "x-ai/grok-4.20-multi-agent",
+        "x-ai/grok-4.20",
+        "google/lyria-3-pro-preview",
+        "google/lyria-3-clip-preview",
+        "rekaai/reka-edge",
+        "minimax/minimax-m2.7",
+        "openai/gpt-5.4-nano",
+        "openai/gpt-5.4-nano:batch",
+        "openai/gpt-5.4-mini",
+        "openai/gpt-5.4-mini:batch",
+        "mistralai/mistral-small-2603",
+        "mistralai/mistral-small-2603:batch",
+        "z-ai/glm-5-turbo",
+        "nvidia/nemotron-3-super-120b-a12b",
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "bytedance-seed/seed-2.0-lite",
+        "qwen/qwen3.5-9b",
+        "openai/gpt-5.4-pro",
+        "openai/gpt-5.4-pro:batch",
+        "openai/gpt-5.4",
+        "openai/gpt-5.4:batch",
+        "inception/mercury-2",
+        "google/gemini-3.1-flash-lite-preview",
+        "bytedance-seed/seed-2.0-mini",
+        "google/gemini-3.1-flash-image-preview",
+        "qwen/qwen3.5-35b-a3b",
+        "qwen/qwen3.5-27b",
+        "qwen/qwen3.5-122b-a10b",
+        "qwen/qwen3.5-flash-02-23",
+        "google/gemini-3.1-pro-preview-customtools",
+        "openai/gpt-5.3-codex",
+        "aion-labs/aion-2.0",
+        "google/gemini-3.1-pro-preview",
+        "google/gemini-3.1-pro-preview:batch",
+        "anthropic/claude-sonnet-4.6",
+        "anthropic/claude-sonnet-4.6:batch",
+        "qwen/qwen3.5-plus-02-15",
+        "qwen/qwen3.5-397b-a17b",
+        "minimax/minimax-m2.5",
+        "z-ai/glm-5",
+        "qwen/qwen3-max-thinking",
+        "anthropic/claude-opus-4.6",
+        "anthropic/claude-opus-4.6:batch",
+        "qwen/qwen3-coder-next",
+        "openrouter/free",
+        "stepfun/step-3.5-flash",
+        "moonshotai/kimi-k2.5",
+        "upstage/solar-pro-3",
+        "minimax/minimax-m2-her",
+        "writer/palmyra-x5",
+        "openai/gpt-audio",
+        "openai/gpt-audio-mini",
+        "z-ai/glm-4.7-flash",
+        "openai/gpt-5.2-codex",
+        "bytedance-seed/seed-1.6-flash",
+        "bytedance-seed/seed-1.6",
+        "minimax/minimax-m2.1",
+        "z-ai/glm-4.7",
+        "google/gemini-3-flash-preview",
+        "google/gemini-3-flash-preview:batch",
+        "nvidia/nemotron-3-nano-30b-a3b",
+        "openai/gpt-5.2-chat",
+        "openai/gpt-5.2-pro",
+        "openai/gpt-5.2-pro:batch",
+        "openai/gpt-5.2",
+        "openai/gpt-5.2:batch",
+        "mistralai/devstral-2512",
+        "relace/relace-search",
+        "z-ai/glm-4.6v",
+        "openrouter/bodybuilder",
+        "openai/gpt-5.1-codex-max",
+        "amazon/nova-2-lite-v1",
+        "mistralai/ministral-14b-2512",
+        "mistralai/ministral-8b-2512",
+        "mistralai/ministral-8b-2512:batch",
+        "mistralai/ministral-3b-2512",
+        "mistralai/mistral-large-2512",
+        "mistralai/mistral-large-2512:batch",
+        "deepseek/deepseek-v3.2",
+        "anthropic/claude-opus-4.5",
+        "anthropic/claude-opus-4.5:batch",
+        "google/gemini-3-pro-image-preview",
+        "openai/gpt-5.1",
+        "openai/gpt-5.1:batch",
+        "openai/gpt-5.1-codex",
+        "openai/gpt-5.1-codex-mini",
+        "moonshotai/kimi-k2-thinking",
+        "amazon/nova-premier-v1",
+        "perplexity/sonar-pro-search",
+        "mistralai/voxtral-small-24b-2507",
+        "openai/gpt-oss-safeguard-20b",
+        "minimax/minimax-m2",
+        "qwen/qwen3-vl-32b-instruct",
+        "ibm-granite/granite-4.0-h-micro",
+        "openai/gpt-5-image-mini",
+        "anthropic/claude-haiku-4.5",
+        "anthropic/claude-haiku-4.5:batch",
+        "qwen/qwen3-vl-8b-thinking",
+        "qwen/qwen3-vl-8b-instruct",
+        "openai/gpt-5-image",
+        "google/gemini-2.5-flash-image",
+        "qwen/qwen3-vl-30b-a3b-thinking",
+        "qwen/qwen3-vl-30b-a3b-instruct",
+        "openai/gpt-5-pro",
+        "openai/gpt-5-pro:batch",
+        "z-ai/glm-4.6",
+        "anthropic/claude-sonnet-4.5",
+        "anthropic/claude-sonnet-4.5:batch",
+        "deepseek/deepseek-v3.2-exp",
+        "thedrummer/cydonia-24b-v4.1",
+        "relace/relace-apply-3",
+        "qwen/qwen3-vl-235b-a22b-thinking",
+        "qwen/qwen3-vl-235b-a22b-instruct",
+        "qwen/qwen3-max",
+        "qwen/qwen3-coder-plus",
+        "deepseek/deepseek-v3.1-terminus",
+        "qwen/qwen3-coder-flash",
+        "qwen/qwen3-next-80b-a3b-thinking",
+        "qwen/qwen3-next-80b-a3b-instruct",
+        "qwen/qwen-plus-2025-07-28",
+        "moonshotai/kimi-k2-0905",
+        "qwen/qwen3-30b-a3b-thinking-2507",
+        "nousresearch/hermes-4-405b",
+        "deepseek/deepseek-chat-v3.1",
+        "mistralai/mistral-medium-3.1",
+        "mistralai/mistral-medium-3.1:batch",
+        "z-ai/glm-4.5v",
+        "openai/gpt-5",
+        "openai/gpt-5:batch",
+        "openai/gpt-5-mini",
+        "openai/gpt-5-mini:batch",
+        "openai/gpt-5-nano",
+        "openai/gpt-5-nano:batch",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-120b:batch",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-20b:batch",
+        "anthropic/claude-opus-4.1",
+        "anthropic/claude-opus-4.1:batch",
+        "mistralai/codestral-2508",
+        "mistralai/codestral-2508:batch",
+        "qwen/qwen3-coder-30b-a3b-instruct",
+        "qwen/qwen3-30b-a3b-instruct-2507",
+        "z-ai/glm-4.5",
+        "z-ai/glm-4.5-air",
+        "qwen/qwen3-235b-a22b-thinking-2507",
+        "qwen/qwen3-coder",
+        "bytedance/ui-tars-1.5-7b",
+        "google/gemini-2.5-flash-lite",
+        "google/gemini-2.5-flash-lite:batch",
+        "qwen/qwen3-235b-a22b-2507",
+        "moonshotai/kimi-k2",
+        "cognitivecomputations/dolphin-mistral-24b-venice-edition",
+        "tencent/hunyuan-a13b-instruct",
+        "morph/morph-v3-large",
+        "morph/morph-v3-fast",
+        "baidu/ernie-4.5-vl-424b-a47b",
+        "mistralai/mistral-small-3.2-24b-instruct",
+        "minimax/minimax-m1",
+        "google/gemini-2.5-flash",
+        "google/gemini-2.5-flash:batch",
+        "google/gemini-2.5-pro",
+        "google/gemini-2.5-pro:batch",
+        "openai/o3-pro",
+        "google/gemini-2.5-pro-preview",
+        "deepseek/deepseek-r1-0528",
+        "anthropic/claude-sonnet-4",
+        "mistralai/mistral-medium-3",
+        "meta-llama/llama-guard-4-12b",
+        "qwen/qwen3-30b-a3b",
+        "qwen/qwen3-8b",
+        "qwen/qwen3-14b",
+        "qwen/qwen3-32b",
+        "qwen/qwen3-235b-a22b",
+        "openai/o4-mini-high",
+        "openai/o3",
+        "openai/o3:batch",
+        "openai/o4-mini",
+        "openai/o4-mini:batch",
+        "openai/gpt-4.1",
+        "openai/gpt-4.1:batch",
+        "openai/gpt-4.1-mini",
+        "openai/gpt-4.1-mini:batch",
+        "openai/gpt-4.1-nano",
+        "openai/gpt-4.1-nano:batch",
+        "meta-llama/llama-4-maverick",
+        "meta-llama/llama-4-scout",
+        "deepseek/deepseek-chat-v3-0324",
+        "openai/o1-pro",
+        "mistralai/mistral-small-3.1-24b-instruct",
+        "google/gemma-3-4b-it",
+        "google/gemma-3-12b-it",
+        "cohere/command-a",
+        "rekaai/reka-flash-3",
+        "google/gemma-3-27b-it",
+        "thedrummer/skyfall-36b-v2",
+        "perplexity/sonar-reasoning-pro",
+        "perplexity/sonar-pro",
+        "perplexity/sonar-deep-research",
+        "mistralai/mistral-saba",
+        "openai/o3-mini-high",
+        "aion-labs/aion-rp-llama-3.1-8b",
+        "qwen/qwen2.5-vl-72b-instruct",
+        "qwen/qwen-plus",
+        "openai/o3-mini",
+        "openai/o3-mini:batch",
+        "mistralai/mistral-small-24b-instruct-2501",
+        "perplexity/sonar",
+        "deepseek/deepseek-r1",
+        "minimax/minimax-01",
+        "microsoft/phi-4",
+        "deepseek/deepseek-chat",
+        "sao10k/l3.3-euryale-70b",
+        "openai/o1",
+        "cohere/command-r7b-12-2024",
+        "meta-llama/llama-3.3-70b-instruct",
+        "amazon/nova-lite-v1",
+        "amazon/nova-micro-v1",
+        "amazon/nova-pro-v1",
+        "openai/gpt-4o-2024-11-20",
+        "mistralai/mistral-large-2407",
+        "qwen/qwen-2.5-coder-32b-instruct",
+        "thedrummer/unslopnemo-12b",
+        "anthracite-org/magnum-v4-72b",
+        "qwen/qwen-2.5-7b-instruct",
+        "meta-llama/llama-3.2-1b-instruct",
+        "meta-llama/llama-3.2-3b-instruct",
+        "qwen/qwen-2.5-72b-instruct",
+        "cohere/command-r-08-2024",
+        "cohere/command-r-plus-08-2024",
+        "sao10k/l3.1-euryale-70b",
+        "nousresearch/hermes-3-llama-3.1-70b",
+        "nousresearch/hermes-3-llama-3.1-405b",
+        "sao10k/l3-lunaris-8b",
+        "openai/gpt-4o-2024-08-06",
+        "meta-llama/llama-3.1-70b-instruct",
+        "meta-llama/llama-3.1-8b-instruct",
+        "mistralai/mistral-nemo",
+        "openai/gpt-4o-mini",
+        "openai/gpt-4o-mini-2024-07-18",
+        "openai/gpt-4o-mini:batch",
+        "google/gemma-2-27b-it",
+        "openai/gpt-4o",
+        "openai/gpt-4o-2024-05-13",
+        "openai/gpt-4o:batch",
+        "mistralai/mixtral-8x22b-instruct",
+        "microsoft/wizardlm-2-8x22b",
+        "openai/gpt-4-turbo",
+        "openai/gpt-4-turbo:batch",
+        "mistralai/mistral-large",
+        "openai/gpt-3.5-turbo-0613",
+        "openrouter/auto",
+        "openai/gpt-3.5-turbo-instruct",
+        "openai/gpt-3.5-turbo-16k",
+        "mancer/weaver",
+        "undi95/remm-slerp-l2-13b",
+        "gryphe/mythomax-l2-13b",
+        "openai/gpt-3.5-turbo",
+        "openai/gpt-3.5-turbo:batch",
+        "openai/gpt-4"
+      ]
+    },
+    "sut_identity": "LangChain ANI Baseline",
+    "sut_reported_model": "openai/qwen/qwen3.8-27b",
+    "sut_version": "1.0.0",
+    "topology_sha256": "153a9b261ef54e3862630e42c8ab5f9ed71603991e96d98472297fed545e7a9d"
+  },
+  "run_id": "langchain_agent-openai-qwen-qwen3-8-27b-qos-wan_shaping_policy_repair-m1-fault-seed401943731-0680d28abdf4",
+  "scenario": {
+    "domain": "qos",
+    "id": "qos.wan_shaping_policy_repair.m1",
+    "sut_task_id": "sut-f23ea4f5bb1c49f456068aff538640f3",
+    "version": "1.0.0"
+  },
+  "schema_version": "1.0",
+  "status": "completed",
+  "sut_result": {
+    "ani_operations": [
+      {
+        "arguments": {
+          "nodes": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 4.5777000195812434e-05,
+        "error": null,
+        "ok": true,
+        "operation": "get_topology",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "root",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.15114665900000546,
+        "error": "Cannot find device \"root\"",
+        "ok": false,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.17273197499889648,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.11776329999884183,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.11939173900100286,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.37867916399954993,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2 class",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 1.4238999938243069e-05,
+        "error": "get_object.name must be the object's name as the node writes it (letters, digits, '.', '_', ':', '/', '-'; at most 80 characters)",
+        "ok": false,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2 1:",
+          "node": "wan1"
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 6.962998668313958e-06,
+        "error": "get_object.name must be the object's name as the node writes it (letters, digits, '.', '_', ':', '/', '-'; at most 80 characters)",
+        "ok": false,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class show dev eth2",
+                "tc filter show dev eth2 parent 1:"
+              ],
+              "reason": "Need full HTB class tree and classifiers on the shaped WAN uplink eth2 to identify the business class and its configured rates.",
+              "rollback_commands": [],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 5.350699939299375e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "system"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.15801239000029454,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.31248758800029464,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "json",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 3.668232158999672,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "json",
+          "nodes": [
+            "spine1",
+            "spine2"
+          ],
+          "paths": null
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-629f62408932d1bc80d797e800fc4bfd3dc039678858a324373ac59a5dd9229c.json",
+        "category": "read",
+        "duration_seconds": 8.57887312800085,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "forward",
+          "node": "spine2"
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-d39758f8f42b847a8abc87331697650ff020f9858395e861dd1812315bbde968.json",
+        "category": "read",
+        "duration_seconds": 0.6867721569997229,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "forward",
+          "node": "spine1"
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-c51acd70c6e73d11e2491a13a943890130554438d3588cf6cc47f3ba005b49de.json",
+        "category": "read",
+        "duration_seconds": 0.6901466340004845,
+        "error": null,
+        "ok": true,
+        "operation": "get_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "count": 3,
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "source": "user1",
+              "timeout_seconds": 5,
+              "type": "icmp"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 2.1837170029994013,
+        "error": null,
+        "ok": true,
+        "operation": "execute_validation",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": [
+            "interfaces"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.3773680130016146,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "user1",
+            "app1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.7058820710008149,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.9989240570012043,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.16876178299935418,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "json",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": [
+            "interfaces/eth2"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 3.546429985000941,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "leaf1",
+            "leaf2"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 1.5806839910001145,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.3340604760014685,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "text",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": null
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.3355747269997664,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "leaf1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": "reports/manual/results/artifacts/ani-fc2bb01a1ef279f18d496907e81f2fa6838571ddee9b5f77525eb697d0915e6f.json",
+        "category": "read",
+        "duration_seconds": 0.8422020439993503,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc -s class show dev eth2",
+                "tc -s filter show dev eth2 parent 1:"
+              ],
+              "reason": "Read-only inspection of the full HTB class tree and classifier filters on the shaped WAN uplink eth2 to identify the intended business class and its mapping.",
+              "rollback_commands": [],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 5.5204000091180205e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported tc operation",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "HTB tree on the shaped WAN uplink eth2 has only root 1:1 (10Mbit) and 1:20 (prio 0, 10Mbit) with the qdisc default 0x20 and no filters, so business traffic has no dedicated guaranteed class. Add a guaranteed business class 1:10 at 8Mbit (ceil 10Mbit, prio 1) and best-effort 1:30 at 1Mbit (ceil 10Mbit, prio 2), and point the qdisc default at 0x10 so unclassified business traffic receives its >=8Mbit contractual guarantee while other traffic still gets 1Mbit.",
+          "set": {
+            "delete_root": true,
+            "htb": [
+              {
+                "class": "1:1",
+                "rate": "10Mbit"
+              },
+              {
+                "ceil": "10Mbit",
+                "class": "1:10",
+                "parent": "1:1",
+                "prio": 1,
+                "rate": "8Mbit"
+              },
+              {
+                "ceil": "10Mbit",
+                "class": "1:20",
+                "parent": "1:1",
+                "prio": 0,
+                "rate": "10Mbit"
+              },
+              {
+                "ceil": "10Mbit",
+                "class": "1:30",
+                "parent": "1:1",
+                "prio": 2,
+                "rate": "1Mbit"
+              },
+              {
+                "default_class": "1:10"
+              }
+            ]
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 3.5076000131084584e-05,
+        "error": "update_object: htb must be an object",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Rebuild the HTB tree on the shaped WAN uplink eth2 to give business traffic a guaranteed 8Mbit class (1:10) while keeping 1:20 and adding a best-effort class 1:30.",
+          "set": {
+            "delete_root": true,
+            "htb": {
+              "class": {
+                "1:1": {
+                  "rate": "10Mbit"
+                },
+                "1:10": {
+                  "ceil": "10Mbit",
+                  "prio": 1,
+                  "rate": "8Mbit"
+                },
+                "1:20": {
+                  "ceil": "10Mbit",
+                  "prio": 0,
+                  "rate": "10Mbit"
+                },
+                "1:30": {
+                  "ceil": "10Mbit",
+                  "prio": 2,
+                  "rate": "1Mbit"
+                }
+              },
+              "default_class": "1:10"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.40983569099989836,
+        "error": null,
+        "ok": true,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_a976a7d45fd11b50"
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.2855971640001371,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "json",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": [
+            "interfaces/eth2"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 3.584607860999313,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Create root HTB class 1:1 at 10Mbit on eth2.",
+          "set": {
+            "class": "1:1",
+            "rate": "10Mbit"
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 2.4561000827816315e-05,
+        "error": "update_object: qos has no attribute rate; it has delete_root, htb, class, filter, delete_filter",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Create root HTB class 1:1 at 10Mbit on eth2.",
+          "set": {
+            "class": {
+              "1:1": {
+                "rate": "10Mbit"
+              }
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 3.291999928478617e-05,
+        "error": "update_object: a class needs id and rate (ceil, prio, parent optional)",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Create root HTB class 1:1 at 10Mbit on eth2.",
+          "set": {
+            "class": {
+              "id": "1:1",
+              "rate": "10Mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.33450947200071823,
+        "error": null,
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_adb719d68d9c6f42"
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Create the root HTB class 1:1 directly under the root qdisc at 10Mbit.",
+          "set": {
+            "class": {
+              "id": "1:1",
+              "parent": "1:",
+              "rate": "10Mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.16922612599955755,
+        "error": null,
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_300ee814f21d5fda"
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Rebuild full HTB hierarchy on eth2: root class 1:1 at 10Mbit, guaranteed business class 1:10 at 8Mbit (ceil 10Mbit, prio 1), best-effort 1:20 at 1Mbit (ceil 10Mbit, prio 2), and set the qdisc default to 0x10 so unclassified business traffic lands in the guaranteed class.",
+          "set": {
+            "default_class": "1:10",
+            "delete_root": true,
+            "htb": [
+              {
+                "ceil": "10Mbit",
+                "class": "1:1",
+                "rate": "10Mbit"
+              },
+              {
+                "ceil": "10Mbit",
+                "class": "1:10",
+                "parent": "1:1",
+                "prio": 1,
+                "rate": "8Mbit"
+              },
+              {
+                "ceil": "10Mbit",
+                "class": "1:20",
+                "parent": "1:1",
+                "prio": 2,
+                "rate": "1Mbit"
+              }
+            ]
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 2.2924999939277768e-05,
+        "error": "update_object: qos has no attribute default_class; it has delete_root, htb, class, filter, delete_filter",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Rebuild HTB hierarchy: root 1:1 10Mbit, guaranteed business 1:10 8Mbit (ceil 10Mbit), best-effort 1:20 1Mbit (ceil 10Mbit).",
+          "set": {
+            "delete_root": true,
+            "htb": [
+              {
+                "ceil": "10Mbit",
+                "class": "1:1",
+                "rate": "10Mbit"
+              },
+              {
+                "ceil": "10Mbit",
+                "class": "1:10",
+                "parent": "1:1",
+                "prio": 1,
+                "rate": "8Mbit"
+              },
+              {
+                "ceil": "10Mbit",
+                "class": "1:20",
+                "parent": "1:1",
+                "prio": 2,
+                "rate": "1Mbit"
+              }
+            ]
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 4.448999970918521e-05,
+        "error": "update_object: htb must be an object",
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "kind": "qos",
+          "name": "eth2",
+          "node": "wan1",
+          "reason": "Create guaranteed business class 1:10 at 8Mbit (ceil 10Mbit) under root 1:1.",
+          "set": {
+            "class": {
+              "ceil": "10Mbit",
+              "id": "1:10",
+              "parent": "1:1",
+              "prio": 1,
+              "rate": "8Mbit"
+            }
+          }
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.17728206199899432,
+        "error": null,
+        "ok": false,
+        "operation": "update_object",
+        "transaction_id": "ani_tx_a0f2990ac1e63cc4"
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.20074633500007621,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+                "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+                "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 1mbit ceil 10mbit prio 2"
+              ],
+              "reason": "Build the full HTB class tree on eth2 after delete_root: root 1:1 10Mbit, guaranteed business 1:10 8Mbit ceil 10Mbit prio 1, best-effort 1:20 1Mbit ceil 10Mbit prio 2. The qdisc default is already 0x20; we will change it after classes exist.",
+              "rollback_commands": [
+                "tc qdisc del dev eth2 root"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.0001236890002473956,
+        "error": "update_config.change.commands contains 3 commands for Linux target wan1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit"
+              ],
+              "reason": "Create the root HTB class 1:1 at 10Mbit on eth2, parented to the root qdisc.",
+              "rollback_commands": [
+                "tc qdisc del dev eth2 root"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.4974835909997637,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_b1d1b8b9786aea67"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1"
+              ],
+              "reason": "Create the guaranteed business class 1:10 at 8Mbit (ceil 10Mbit, prio 1) under root 1:1.",
+              "rollback_commands": [
+                "tc class del dev eth2 classid 1:10"
+              ],
+              "target": "wan1"
+            },
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 1mbit ceil 10mbit prio 2"
+              ],
+              "reason": "Create the best-effort class 1:20 at 1Mbit (ceil 10Mbit, prio 2) under root 1:1, so that non-business traffic still gets throughput but cannot starve the business class.",
+              "rollback_commands": [
+                "tc class del dev eth2 classid 1:20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.5579725619991223,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_c4efd4de60834949"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc change dev eth2 root handle 1: htb default 10"
+              ],
+              "reason": "Change the HTB qdisc default class from 0x20 (best-effort) to 0x10 (guaranteed business class) so that all unclassified traffic on the WAN uplink is treated as business traffic with its 8Mbit guarantee. This is the contractual behaviour: business is the default class on the shaped uplink.",
+              "rollback_commands": [
+                "tc qdisc change dev eth2 root handle 1: htb default 20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.32447696599956544,
+        "error": null,
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_53ead4198da6f831"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc replace dev eth2 root handle 1: htb default 10"
+              ],
+              "reason": "Replace the HTB root qdisc with default class 0x10 (guaranteed business class 1:10) so unclassified business traffic receives its 8Mbit guarantee.",
+              "rollback_commands": [
+                "tc qdisc replace dev eth2 root handle 1: htb default 20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.16911784300100408,
+        "error": null,
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_f5321ec81d0a053b"
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.1447863920002419,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "json",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": [
+            "interfaces/eth2"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 4.052614729000197,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc change dev eth2 root handle 1: htb default 0x10"
+              ],
+              "reason": "Change the HTB default class to 0x10 (guaranteed business) using explicit hex classid.",
+              "rollback_commands": [
+                "tc qdisc change dev eth2 root handle 1: htb default 0x20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 6.46780008537462e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; default class must be an unsigned integer",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc replace dev eth2 root handle 1: htb default 10 r2q 10"
+              ],
+              "reason": "Replace HTB root qdisc with default class 10 (business 1:10), matching the existing r2q 10 parameter.",
+              "rollback_commands": [
+                "tc qdisc replace dev eth2 root handle 1: htb default 20 r2q 10"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 6.16470006207237e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported qdisc hierarchy or netem form",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc change dev eth2 root handle 1: htb r2q 10 default 10"
+              ],
+              "reason": "Change the HTB default class to 10 (business class 1:10), keeping the existing r2q 10 parameter.",
+              "rollback_commands": [
+                "tc qdisc change dev eth2 root handle 1: htb r2q 10 default 20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 6.631299947912339e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported qdisc hierarchy or netem form",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc change dev eth2 root handle 1: htb default 10"
+              ],
+              "reason": "Change the HTB default class to 10 (business class 1:10).",
+              "rollback_commands": [
+                "tc qdisc change dev eth2 root handle 1: htb default 20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.16322216300068249,
+        "error": null,
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_0bdce7eb2f709423"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc del dev eth2 root"
+              ],
+              "reason": "Delete the HTB root qdisc (and its class tree) so it can be recreated with default class 1:10.",
+              "rollback_commands": [],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.19127403200036497,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_858393c33e83c2f5"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc add dev eth2 root handle 1: htb default 10 r2q 10"
+              ],
+              "reason": "Recreate the HTB root qdisc with default class 10 (guaranteed business class 1:10) and r2q 10.",
+              "rollback_commands": [],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 5.997399966872763e-05,
+        "error": "update_config.change.commands failed backend safety preflight: unsupported Linux configuration grammar; unsupported qdisc hierarchy or netem form",
+        "ok": false,
+        "operation": "update_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc qdisc add dev eth2 root handle 1: htb default 10"
+              ],
+              "reason": "Recreate the HTB root qdisc with default class 10 (guaranteed business class 1:10).",
+              "rollback_commands": [],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.15356760099894018,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_19d3854b818ac605"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit"
+              ],
+              "reason": "Recreate the root HTB class 1:1 at 10Mbit on eth2.",
+              "rollback_commands": [
+                "tc qdisc del dev eth2 root"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.1741949659990496,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_5d683558901d432c"
+      },
+      {
+        "arguments": {
+          "changes": [
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1"
+              ],
+              "reason": "Recreate the guaranteed business class 1:10 at 8Mbit (ceil 10Mbit, prio 1).",
+              "rollback_commands": [
+                "tc class del dev eth2 classid 1:10"
+              ],
+              "target": "wan1"
+            },
+            {
+              "commands": [
+                "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 1mbit ceil 10mbit prio 2"
+              ],
+              "reason": "Recreate the best-effort class 1:20 at 1Mbit (ceil 10Mbit, prio 2) for non-business traffic.",
+              "rollback_commands": [
+                "tc class del dev eth2 classid 1:20"
+              ],
+              "target": "wan1"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "mutation",
+        "duration_seconds": 0.4718527589993755,
+        "error": null,
+        "ok": true,
+        "operation": "update_config",
+        "transaction_id": "ani_tx_29af89ad87996ba9"
+      },
+      {
+        "arguments": {
+          "nodes": [
+            "wan1"
+          ],
+          "views": [
+            "qdisc"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 0.31997735500044655,
+        "error": null,
+        "ok": true,
+        "operation": "get_state",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "format": "json",
+          "nodes": [
+            "wan1"
+          ],
+          "paths": [
+            "interfaces/eth2"
+          ]
+        },
+        "artifact_ref": null,
+        "category": "read",
+        "duration_seconds": 3.894520857998941,
+        "error": null,
+        "ok": true,
+        "operation": "get_running_config",
+        "transaction_id": null
+      },
+      {
+        "arguments": {
+          "checks": [
+            {
+              "type": "public_success_criteria"
+            }
+          ]
+        },
+        "artifact_ref": null,
+        "category": "validation",
+        "duration_seconds": 82.75282531999983,
+        "error": null,
+        "ok": false,
+        "operation": "execute_validation",
+        "transaction_id": null
+      }
+    ],
+    "device_changes": [
+      {
+        "action": {
+          "command": "tc qdisc del dev eth2 root",
+          "machine": "wan1",
+          "reason": "Rebuild the HTB tree on the shaped WAN uplink eth2 to give business traffic a guaranteed 8Mbit class (1:10) while keeping 1:20 and adding a best-effort class 1:30."
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc qdisc del dev eth2 root",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_a976a7d45fd11b50",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc qdisc replace dev eth2 root handle 1: htb default 20",
+          "machine": "wan1",
+          "reason": "Rebuild the HTB tree on the shaped WAN uplink eth2 to give business traffic a guaranteed 8Mbit class (1:10) while keeping 1:20 and adding a best-effort class 1:30."
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc qdisc replace dev eth2 root handle 1: htb default 20",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_a976a7d45fd11b50",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class change dev eth2 parent 1:1 classid 1:1 htb rate 10mbit ceil 10mbit",
+          "machine": "wan1",
+          "reason": "Create root HTB class 1:1 at 10Mbit on eth2."
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc class change dev eth2 parent 1:1 classid 1:1 htb rate 10mbit ceil 10mbit",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: No such file or directory\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_adb719d68d9c6f42",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class change dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+          "machine": "wan1",
+          "reason": "Create the root HTB class 1:1 directly under the root qdisc at 10Mbit."
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc class change dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: No such file or directory\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_300ee814f21d5fda",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class change dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+          "machine": "wan1",
+          "reason": "Create guaranteed business class 1:10 at 8Mbit (ceil 10Mbit) under root 1:1."
+        },
+        "operation": "update_object",
+        "result": {
+          "command": "tc class change dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: No such file or directory\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_a0f2990ac1e63cc4",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+          "machine": "wan1",
+          "reason": "Create the root HTB class 1:1 at 10Mbit on eth2, parented to the root qdisc."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_b1d1b8b9786aea67",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+          "machine": "wan1",
+          "reason": "Create the guaranteed business class 1:10 at 8Mbit (ceil 10Mbit, prio 1) under root 1:1."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_c4efd4de60834949",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 1mbit ceil 10mbit prio 2",
+          "machine": "wan1",
+          "reason": "Create the best-effort class 1:20 at 1Mbit (ceil 10Mbit, prio 2) under root 1:1, so that non-business traffic still gets throughput but cannot starve the business class."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 1mbit ceil 10mbit prio 2",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_c4efd4de60834949",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc qdisc change dev eth2 root handle 1: htb default 10",
+          "machine": "wan1",
+          "reason": "Change the HTB qdisc default class from 0x20 (best-effort) to 0x10 (guaranteed business class) so that all unclassified traffic on the WAN uplink is treated as business traffic with its 8Mbit guarantee. This is the contractual behaviour: business is the default class on the shaped uplink."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc qdisc change dev eth2 root handle 1: htb default 10",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: Invalid argument\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_53ead4198da6f831",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc qdisc replace dev eth2 root handle 1: htb default 10",
+          "machine": "wan1",
+          "reason": "Replace the HTB root qdisc with default class 0x10 (guaranteed business class 1:10) so unclassified business traffic receives its 8Mbit guarantee."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc qdisc replace dev eth2 root handle 1: htb default 10",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: Invalid argument\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_f5321ec81d0a053b",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc qdisc change dev eth2 root handle 1: htb default 10",
+          "machine": "wan1",
+          "reason": "Change the HTB default class to 10 (business class 1:10)."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc qdisc change dev eth2 root handle 1: htb default 10",
+          "ok": false,
+          "reason": null,
+          "returncode": 2,
+          "safe": true,
+          "stderr": "RTNETLINK answers: Invalid argument\n",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_0bdce7eb2f709423",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc qdisc del dev eth2 root",
+          "machine": "wan1",
+          "reason": "Delete the HTB root qdisc (and its class tree) so it can be recreated with default class 1:10."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc qdisc del dev eth2 root",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_858393c33e83c2f5",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc qdisc add dev eth2 root handle 1: htb default 10",
+          "machine": "wan1",
+          "reason": "Recreate the HTB root qdisc with default class 10 (guaranteed business class 1:10)."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc qdisc add dev eth2 root handle 1: htb default 10",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_19d3854b818ac605",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+          "machine": "wan1",
+          "reason": "Recreate the root HTB class 1:1 at 10Mbit on eth2."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_5d683558901d432c",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+          "machine": "wan1",
+          "reason": "Recreate the guaranteed business class 1:10 at 8Mbit (ceil 10Mbit, prio 1)."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_29af89ad87996ba9",
+        "verified_after_action": false
+      },
+      {
+        "action": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 1mbit ceil 10mbit prio 2",
+          "machine": "wan1",
+          "reason": "Recreate the best-effort class 1:20 at 1Mbit (ceil 10Mbit, prio 2) for non-business traffic."
+        },
+        "operation": "update_config",
+        "result": {
+          "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 1mbit ceil 10mbit prio 2",
+          "ok": true,
+          "reason": null,
+          "returncode": 0,
+          "safe": true,
+          "stderr": "",
+          "stdout": "",
+          "target": "wan1"
+        },
+        "transaction_id": "ani_tx_29af89ad87996ba9",
+        "verified_after_action": false
+      }
+    ],
+    "error": "execution budget exceeded",
+    "execution": {
+      "ani_version": "ibn_eval.ani.v0.2",
+      "budget_seconds": 400.0,
+      "conclusion_source": null,
+      "configured_model": "openai/qwen/qwen3.8-27b",
+      "elapsed_seconds": 465.12681693800005,
+      "failed_operations": 22,
+      "interaction_limits": {
+        "ani": {
+          "limit": null,
+          "reached": false,
+          "refused": 0,
+          "used": 57
+        }
+      },
+      "llm_calls": 51,
+      "model_parameters": {
+        "ani_call_limit": null,
+        "context_budget_chars": null,
+        "enable_thinking": null,
+        "max_consecutive_rejections": null,
+        "max_context_chars": 12000,
+        "max_execution_seconds": 400.0,
+        "max_tokens": 8000,
+        "min_retry_tokens": null,
+        "model": "openai/qwen/qwen3.8-27b",
+        "prompt_variant": "default",
+        "recursion_limit": 1000,
+        "request_extra_body": {
+          "provider": {
+            "allow_fallbacks": false,
+            "order": [
+              "deepinfra"
+            ],
+            "quantizations": [
+              "bf16"
+            ]
+          },
+          "reasoning": {
+            "enabled": false
+          }
+        },
+        "temperature": null,
+        "thinking_directive_applied": false,
+        "thinking_effort": null,
+        "thinking_mechanism": "unset",
+        "thinking_request": {},
+        "thinking_style": "auto",
+        "tool_argument_transport": "typed_nullable_schema+json_string_decode",
+        "tool_choice": "auto",
+        "tool_result_chars": null
+      },
+      "model_seconds": 341.505,
+      "model_turns": [
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            1
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.183,
+          "tool_calls": [
+            "get_topology"
+          ],
+          "turn": 1
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            2
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.158,
+          "tool_calls": [
+            "get_object"
+          ],
+          "turn": 2
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            3
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.656,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 3
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            4,
+            5
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.324,
+          "tool_calls": [
+            "get_state",
+            "get_object"
+          ],
+          "turn": 4
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            6
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.23,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 5
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            7,
+            8
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.889,
+          "tool_calls": [
+            "get_object",
+            "get_object"
+          ],
+          "turn": 6
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            9
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.303,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 7
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            10,
+            11
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.992,
+          "tool_calls": [
+            "get_running_config",
+            "get_state"
+          ],
+          "turn": 8
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            12
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.177,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 9
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            13
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.258,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 10
+        },
+        {
+          "content_chars": 324,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            14,
+            15
+          ],
+          "reasoning_chars": 0,
+          "seconds": 8.381,
+          "tool_calls": [
+            "get_object",
+            "get_object"
+          ],
+          "turn": 11
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            16
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.132,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 12
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            17
+          ],
+          "reasoning_chars": 0,
+          "seconds": 17.5,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 13
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            18
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.151,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 14
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            19
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.616,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 15
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            20
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.709,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 16
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            21
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.376,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 17
+        },
+        {
+          "content_chars": 182,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            22
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.275,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 18
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            23,
+            24
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.12,
+          "tool_calls": [
+            "get_running_config",
+            "get_running_config"
+          ],
+          "turn": 19
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            25
+          ],
+          "reasoning_chars": 0,
+          "seconds": 1.626,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 20
+        },
+        {
+          "content_chars": 795,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            26
+          ],
+          "reasoning_chars": 0,
+          "seconds": 12.561,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 21
+        },
+        {
+          "content_chars": 777,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            27
+          ],
+          "reasoning_chars": 0,
+          "seconds": 21.201,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 22
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            28
+          ],
+          "reasoning_chars": 0,
+          "seconds": 10.646,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 23
+        },
+        {
+          "content_chars": 464,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            29
+          ],
+          "reasoning_chars": 0,
+          "seconds": 6.825,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 24
+        },
+        {
+          "content_chars": 333,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            30
+          ],
+          "reasoning_chars": 0,
+          "seconds": 6.792,
+          "tool_calls": [
+            "get_running_config"
+          ],
+          "turn": 25
+        },
+        {
+          "content_chars": 360,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            31
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.594,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 26
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            32
+          ],
+          "reasoning_chars": 0,
+          "seconds": 2.833,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 27
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            33
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.052,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 28
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            34
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.594,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 29
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            35
+          ],
+          "reasoning_chars": 0,
+          "seconds": 6.937,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 30
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            36
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.893,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 31
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            37
+          ],
+          "reasoning_chars": 0,
+          "seconds": 6.134,
+          "tool_calls": [
+            "update_object"
+          ],
+          "turn": 32
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            38
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.038,
+          "tool_calls": [
+            "get_state"
+          ],
+          "turn": 33
+        },
+        {
+          "content_chars": 300,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [],
+          "reasoning_chars": 0,
+          "seconds": 9.38,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 34
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            39
+          ],
+          "reasoning_chars": 0,
+          "seconds": 11.814,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 35
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            40
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.125,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 36
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            41
+          ],
+          "reasoning_chars": 0,
+          "seconds": 8.965,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 37
+        },
+        {
+          "content_chars": 147,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            42
+          ],
+          "reasoning_chars": 0,
+          "seconds": 9.075,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 38
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            43
+          ],
+          "reasoning_chars": 0,
+          "seconds": 6.966,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 39
+        },
+        {
+          "content_chars": 143,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            44,
+            45
+          ],
+          "reasoning_chars": 0,
+          "seconds": 33.513,
+          "tool_calls": [
+            "get_state",
+            "get_running_config"
+          ],
+          "turn": 40
+        },
+        {
+          "content_chars": 1348,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            46
+          ],
+          "reasoning_chars": 0,
+          "seconds": 22.547,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 41
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            47
+          ],
+          "reasoning_chars": 0,
+          "seconds": 5.951,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 42
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            48
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.569,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 43
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            49
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.607,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 44
+        },
+        {
+          "content_chars": 329,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            50
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.867,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 45
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            51
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.213,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 46
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            52
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.587,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 47
+        },
+        {
+          "content_chars": 25,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            53
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.357,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 48
+        },
+        {
+          "content_chars": 0,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            54
+          ],
+          "reasoning_chars": 0,
+          "seconds": 7.564,
+          "tool_calls": [
+            "update_config"
+          ],
+          "turn": 49
+        },
+        {
+          "content_chars": 59,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            55,
+            56
+          ],
+          "reasoning_chars": 0,
+          "seconds": 3.298,
+          "tool_calls": [
+            "get_state",
+            "get_running_config"
+          ],
+          "turn": 50
+        },
+        {
+          "content_chars": 243,
+          "error": null,
+          "kind": "tool_calls",
+          "operations": [
+            57
+          ],
+          "reasoning_chars": 0,
+          "seconds": 4.951,
+          "tool_calls": [
+            "execute_validation"
+          ],
+          "turn": 51
+        }
+      ],
+      "mutations": 25,
+      "provider_model": "openai/qwen/qwen3.8-27b",
+      "reads": 30,
+      "serving": {
+        "served_model_names": [
+          "anthropic/claude-sonnet-5.5",
+          "anthropic/claude-sonnet-5.5:batch",
+          "typesafe/jev-router",
+          "perceptron/perceptron-mk1.5",
+          "fireworks/ember-1",
+          "z-ai/glm-5.3-prime",
+          "qwen/qwen3.8-max-prime",
+          "stealth/space-bunny-alpha",
+          "aion-labs/aion-3.5-mini",
+          "aion-labs/aion-3.5",
+          "upstage/solar-mini4",
+          "cohere/command-a-plus",
+          "openai/gpt-6-luna-pro",
+          "openai/gpt-6-luna-pro:batch",
+          "openai/gpt-6-luna",
+          "openai/gpt-6-luna:batch",
+          "openai/gpt-6-sol-pro",
+          "openai/gpt-6-sol-pro:batch",
+          "openai/gpt-6-sol",
+          "openai/gpt-6-sol:batch",
+          "anthropic/claude-opus-5.5",
+          "anthropic/claude-opus-5.5:batch",
+          "xiaomi/mimo-v2.6-pro-ultraspeed",
+          "xiaomi/mimo-v2.6-flash",
+          "xiaomi/mimo-v2.6-pro",
+          "x-ai/grok-4.7",
+          "qwen/qwen3.8-omni-flash",
+          "prism-ml/ternary-bonsai-2-27b",
+          "z-ai/glm-5.3-flashx",
+          "unbiased/pareto",
+          "~deepseek/deepseek-pro-latest",
+          "~deepseek/deepseek-flash-latest",
+          "inference-net/schematron-v2-turbo",
+          "inference-net/schematron-v2-small",
+          "~openai/gpt-astra-latest",
+          "~openai/gpt-sol-latest",
+          "~openai/gpt-terra-latest",
+          "~openai/gpt-luna-latest",
+          "sakana/fugu-ultra-v2",
+          "sakana/fugu-max",
+          "inclusionai/ling-3.0-flash-vl",
+          "deepseek/deepseek-v4.1-flash",
+          "deepseek/deepseek-v4.1-flash:batch",
+          "inception/mercury-2.5",
+          "nex-agi/nex-n2.5-mini",
+          "nex-agi/nex-n2.5-pro",
+          "openai/gpt-6-astra",
+          "openai/gpt-6-astra:batch",
+          "openai/gpt-6-astra-pro",
+          "openai/gpt-6-astra-pro:batch",
+          "inclusionai/ling-3.0-flash-sante:free",
+          "qwen/qwen3.8-max-0902",
+          "meta/muse-spark-1.3-contributor",
+          "meta/muse-spark-1.3",
+          "google/gemini-3.8-flash",
+          "google/gemini-3.8-flash:batch",
+          "anthropic/claude-fable-5.1",
+          "anthropic/claude-fable-5.1:batch",
+          "ibm-granite/granite-4.2-8b",
+          "tencent/hy4-preview",
+          "inclusionai/ling-3.0-flash-fin",
+          "~z-ai/glm-flash-latest",
+          "qwen/qwen3.8-flash",
+          "z-ai/glm-5.3-flash",
+          "z-ai/glm-5.3-flash:batch",
+          "meta/muse-spark-1.2-contributor",
+          "deepseek/deepseek-v4-flash-vision-exp",
+          "tencent/hy-mt2-1.8b",
+          "tencent/hy-mt2-30b-a3b",
+          "~z-ai/glm-latest",
+          "tencent/hy-mt2-7b",
+          "z-ai/glm-5.3",
+          "z-ai/glm-5.3:batch",
+          "qwen/qwen3.8-27b",
+          "qwen/qwen3.8-27b:free",
+          "dots-studio/dots-3-note-preview:free",
+          "google/gemini-3.7-flash",
+          "google/gemini-3.7-flash:batch",
+          "bytedance-seed/seed-2-1-turbo",
+          "qwen/qwen3.8-2.4t-a95b",
+          "bytedance-seed/seed-2.0-code",
+          "deepseek/deepseek-v4-pro-0813",
+          "x-ai/grok-4.6",
+          "liquid/lfm-2.5-2.6b:free",
+          "nvidia/nemotron-3.5-lightning",
+          "nvidia/nemotron-3.5-lightning:free",
+          "sakana/sakana-namazu",
+          "upstage/solar-pro4",
+          "meta/muse-glimmer-30b",
+          "meta/muse-spark-1.2",
+          "~deepseek/deepseek-v4-flash-latest",
+          "deepseek/deepseek-v4-flash-0731",
+          "thinkingmachines/inkling-small",
+          "thinkingmachines/inkling-small:free",
+          "qwen/qwen3.7-flash",
+          "anthropic/claude-opus-5",
+          "anthropic/claude-opus-5:batch",
+          "inclusionai/ling-3.0-flash",
+          "poolside/laguna-s-2.1",
+          "poolside/laguna-s-2.1:free",
+          "google/gemini-3.6-flash",
+          "google/gemini-3.6-flash:batch",
+          "google/gemini-3.5-flash-lite",
+          "google/gemini-3.5-flash-lite:batch",
+          "meituan/longcat-2.0",
+          "thinkingmachines/inkling",
+          "thinkingmachines/inkling:free",
+          "openrouter/auto-beta",
+          "moonshotai/kimi-k3",
+          "moonshotai/kimi-k3:batch",
+          "meta/muse-spark-1.1",
+          "kwaipilot/kat-coder-pro-v2.5",
+          "openai/gpt-5.6-luna-pro",
+          "openai/gpt-5.6-luna-pro:batch",
+          "openai/gpt-5.6-luna",
+          "openai/gpt-5.6-luna:batch",
+          "openai/gpt-5.6-terra-pro",
+          "openai/gpt-5.6-terra-pro:batch",
+          "openai/gpt-5.6-terra",
+          "openai/gpt-5.6-terra:batch",
+          "openai/gpt-5.6-sol-pro",
+          "openai/gpt-5.6-sol-pro:batch",
+          "openai/gpt-5.6-sol",
+          "openai/gpt-5.6-sol:batch",
+          "x-ai/grok-4.5",
+          "~x-ai/grok-latest",
+          "aion-labs/aion-3.0-mini",
+          "aion-labs/aion-3.0",
+          "tencent/hy3",
+          "poolside/laguna-xs-2.1",
+          "poolside/laguna-xs-2.1:free",
+          "anthropic/claude-sonnet-5",
+          "anthropic/claude-sonnet-5:batch",
+          "google/gemini-3.1-flash-lite-image",
+          "sakana/fugu-ultra",
+          "google/gemini-3.1-flash-image",
+          "google/gemini-3-pro-image",
+          "cohere/north-mini-code:free",
+          "z-ai/glm-5.2",
+          "openrouter/fusion",
+          "moonshotai/kimi-k2.7-code",
+          "~anthropic/claude-fable-latest",
+          "anthropic/claude-fable-5",
+          "anthropic/claude-fable-5:batch",
+          "nvidia/nemotron-3.5-content-safety",
+          "nvidia/nemotron-3.5-content-safety:free",
+          "nvidia/nemotron-3-ultra-550b-a55b",
+          "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "qwen/qwen3.7-plus",
+          "minimax/minimax-m3",
+          "stepfun/step-3.7-flash",
+          "anthropic/claude-opus-4.8",
+          "anthropic/claude-opus-4.8:batch",
+          "qwen/qwen3.7-max",
+          "x-ai/grok-build-0.1",
+          "google/gemini-3.5-flash",
+          "google/gemini-3.5-flash:batch",
+          "perceptron/perceptron-mk1",
+          "google/gemini-3.1-flash-lite",
+          "google/gemini-3.1-flash-lite:batch",
+          "openai/gpt-chat-latest",
+          "x-ai/grok-4.3",
+          "x-ai/grok-4.3:batch",
+          "mistralai/mistral-medium-3-5",
+          "mistralai/mistral-medium-3-5:batch",
+          "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+          "~anthropic/claude-haiku-latest",
+          "~openai/gpt-mini-latest",
+          "~google/gemini-pro-latest",
+          "~moonshotai/kimi-latest",
+          "~google/gemini-flash-latest",
+          "~anthropic/claude-sonnet-latest",
+          "qwen/qwen3.5-plus-20260420",
+          "qwen/qwen3.6-flash",
+          "qwen/qwen3.6-35b-a3b",
+          "qwen/qwen3.6-max-preview",
+          "qwen/qwen3.6-27b",
+          "openai/gpt-5.5-pro",
+          "openai/gpt-5.5-pro:batch",
+          "openai/gpt-5.5",
+          "openai/gpt-5.5:batch",
+          "deepseek/deepseek-v4-pro",
+          "deepseek/deepseek-v4-flash",
+          "tencent/hy3-preview",
+          "xiaomi/mimo-v2.5-pro",
+          "xiaomi/mimo-v2.5",
+          "openai/gpt-5.4-image-2",
+          "~anthropic/claude-opus-latest",
+          "openrouter/pareto-code",
+          "moonshotai/kimi-k2.6",
+          "anthropic/claude-opus-4.7",
+          "anthropic/claude-opus-4.7:batch",
+          "z-ai/glm-5.1",
+          "google/gemma-4-26b-a4b-it",
+          "google/gemma-4-26b-a4b-it:free",
+          "google/gemma-4-31b-it",
+          "google/gemma-4-31b-it:free",
+          "qwen/qwen3.6-plus",
+          "z-ai/glm-5v-turbo",
+          "arcee-ai/trinity-large-thinking",
+          "x-ai/grok-4.20-multi-agent",
+          "x-ai/grok-4.20",
+          "google/lyria-3-pro-preview",
+          "google/lyria-3-clip-preview",
+          "rekaai/reka-edge",
+          "minimax/minimax-m2.7",
+          "openai/gpt-5.4-nano",
+          "openai/gpt-5.4-nano:batch",
+          "openai/gpt-5.4-mini",
+          "openai/gpt-5.4-mini:batch",
+          "mistralai/mistral-small-2603",
+          "mistralai/mistral-small-2603:batch",
+          "z-ai/glm-5-turbo",
+          "nvidia/nemotron-3-super-120b-a12b",
+          "nvidia/nemotron-3-super-120b-a12b:free",
+          "bytedance-seed/seed-2.0-lite",
+          "qwen/qwen3.5-9b",
+          "openai/gpt-5.4-pro",
+          "openai/gpt-5.4-pro:batch",
+          "openai/gpt-5.4",
+          "openai/gpt-5.4:batch",
+          "inception/mercury-2",
+          "google/gemini-3.1-flash-lite-preview",
+          "bytedance-seed/seed-2.0-mini",
+          "google/gemini-3.1-flash-image-preview",
+          "qwen/qwen3.5-35b-a3b",
+          "qwen/qwen3.5-27b",
+          "qwen/qwen3.5-122b-a10b",
+          "qwen/qwen3.5-flash-02-23",
+          "google/gemini-3.1-pro-preview-customtools",
+          "openai/gpt-5.3-codex",
+          "aion-labs/aion-2.0",
+          "google/gemini-3.1-pro-preview",
+          "google/gemini-3.1-pro-preview:batch",
+          "anthropic/claude-sonnet-4.6",
+          "anthropic/claude-sonnet-4.6:batch",
+          "qwen/qwen3.5-plus-02-15",
+          "qwen/qwen3.5-397b-a17b",
+          "minimax/minimax-m2.5",
+          "z-ai/glm-5",
+          "qwen/qwen3-max-thinking",
+          "anthropic/claude-opus-4.6",
+          "anthropic/claude-opus-4.6:batch",
+          "qwen/qwen3-coder-next",
+          "openrouter/free",
+          "stepfun/step-3.5-flash",
+          "moonshotai/kimi-k2.5",
+          "upstage/solar-pro-3",
+          "minimax/minimax-m2-her",
+          "writer/palmyra-x5",
+          "openai/gpt-audio",
+          "openai/gpt-audio-mini",
+          "z-ai/glm-4.7-flash",
+          "openai/gpt-5.2-codex",
+          "bytedance-seed/seed-1.6-flash",
+          "bytedance-seed/seed-1.6",
+          "minimax/minimax-m2.1",
+          "z-ai/glm-4.7",
+          "google/gemini-3-flash-preview",
+          "google/gemini-3-flash-preview:batch",
+          "nvidia/nemotron-3-nano-30b-a3b",
+          "openai/gpt-5.2-chat",
+          "openai/gpt-5.2-pro",
+          "openai/gpt-5.2-pro:batch",
+          "openai/gpt-5.2",
+          "openai/gpt-5.2:batch",
+          "mistralai/devstral-2512",
+          "relace/relace-search",
+          "z-ai/glm-4.6v",
+          "openrouter/bodybuilder",
+          "openai/gpt-5.1-codex-max",
+          "amazon/nova-2-lite-v1",
+          "mistralai/ministral-14b-2512",
+          "mistralai/ministral-8b-2512",
+          "mistralai/ministral-8b-2512:batch",
+          "mistralai/ministral-3b-2512",
+          "mistralai/mistral-large-2512",
+          "mistralai/mistral-large-2512:batch",
+          "deepseek/deepseek-v3.2",
+          "anthropic/claude-opus-4.5",
+          "anthropic/claude-opus-4.5:batch",
+          "google/gemini-3-pro-image-preview",
+          "openai/gpt-5.1",
+          "openai/gpt-5.1:batch",
+          "openai/gpt-5.1-codex",
+          "openai/gpt-5.1-codex-mini",
+          "moonshotai/kimi-k2-thinking",
+          "amazon/nova-premier-v1",
+          "perplexity/sonar-pro-search",
+          "mistralai/voxtral-small-24b-2507",
+          "openai/gpt-oss-safeguard-20b",
+          "minimax/minimax-m2",
+          "qwen/qwen3-vl-32b-instruct",
+          "ibm-granite/granite-4.0-h-micro",
+          "openai/gpt-5-image-mini",
+          "anthropic/claude-haiku-4.5",
+          "anthropic/claude-haiku-4.5:batch",
+          "qwen/qwen3-vl-8b-thinking",
+          "qwen/qwen3-vl-8b-instruct",
+          "openai/gpt-5-image",
+          "google/gemini-2.5-flash-image",
+          "qwen/qwen3-vl-30b-a3b-thinking",
+          "qwen/qwen3-vl-30b-a3b-instruct",
+          "openai/gpt-5-pro",
+          "openai/gpt-5-pro:batch",
+          "z-ai/glm-4.6",
+          "anthropic/claude-sonnet-4.5",
+          "anthropic/claude-sonnet-4.5:batch",
+          "deepseek/deepseek-v3.2-exp",
+          "thedrummer/cydonia-24b-v4.1",
+          "relace/relace-apply-3",
+          "qwen/qwen3-vl-235b-a22b-thinking",
+          "qwen/qwen3-vl-235b-a22b-instruct",
+          "qwen/qwen3-max",
+          "qwen/qwen3-coder-plus",
+          "deepseek/deepseek-v3.1-terminus",
+          "qwen/qwen3-coder-flash",
+          "qwen/qwen3-next-80b-a3b-thinking",
+          "qwen/qwen3-next-80b-a3b-instruct",
+          "qwen/qwen-plus-2025-07-28",
+          "moonshotai/kimi-k2-0905",
+          "qwen/qwen3-30b-a3b-thinking-2507",
+          "nousresearch/hermes-4-405b",
+          "deepseek/deepseek-chat-v3.1",
+          "mistralai/mistral-medium-3.1",
+          "mistralai/mistral-medium-3.1:batch",
+          "z-ai/glm-4.5v",
+          "openai/gpt-5",
+          "openai/gpt-5:batch",
+          "openai/gpt-5-mini",
+          "openai/gpt-5-mini:batch",
+          "openai/gpt-5-nano",
+          "openai/gpt-5-nano:batch",
+          "openai/gpt-oss-120b",
+          "openai/gpt-oss-120b:batch",
+          "openai/gpt-oss-20b",
+          "openai/gpt-oss-20b:batch",
+          "anthropic/claude-opus-4.1",
+          "anthropic/claude-opus-4.1:batch",
+          "mistralai/codestral-2508",
+          "mistralai/codestral-2508:batch",
+          "qwen/qwen3-coder-30b-a3b-instruct",
+          "qwen/qwen3-30b-a3b-instruct-2507",
+          "z-ai/glm-4.5",
+          "z-ai/glm-4.5-air",
+          "qwen/qwen3-235b-a22b-thinking-2507",
+          "qwen/qwen3-coder",
+          "bytedance/ui-tars-1.5-7b",
+          "google/gemini-2.5-flash-lite",
+          "google/gemini-2.5-flash-lite:batch",
+          "qwen/qwen3-235b-a22b-2507",
+          "moonshotai/kimi-k2",
+          "cognitivecomputations/dolphin-mistral-24b-venice-edition",
+          "tencent/hunyuan-a13b-instruct",
+          "morph/morph-v3-large",
+          "morph/morph-v3-fast",
+          "baidu/ernie-4.5-vl-424b-a47b",
+          "mistralai/mistral-small-3.2-24b-instruct",
+          "minimax/minimax-m1",
+          "google/gemini-2.5-flash",
+          "google/gemini-2.5-flash:batch",
+          "google/gemini-2.5-pro",
+          "google/gemini-2.5-pro:batch",
+          "openai/o3-pro",
+          "google/gemini-2.5-pro-preview",
+          "deepseek/deepseek-r1-0528",
+          "anthropic/claude-sonnet-4",
+          "mistralai/mistral-medium-3",
+          "meta-llama/llama-guard-4-12b",
+          "qwen/qwen3-30b-a3b",
+          "qwen/qwen3-8b",
+          "qwen/qwen3-14b",
+          "qwen/qwen3-32b",
+          "qwen/qwen3-235b-a22b",
+          "openai/o4-mini-high",
+          "openai/o3",
+          "openai/o3:batch",
+          "openai/o4-mini",
+          "openai/o4-mini:batch",
+          "openai/gpt-4.1",
+          "openai/gpt-4.1:batch",
+          "openai/gpt-4.1-mini",
+          "openai/gpt-4.1-mini:batch",
+          "openai/gpt-4.1-nano",
+          "openai/gpt-4.1-nano:batch",
+          "meta-llama/llama-4-maverick",
+          "meta-llama/llama-4-scout",
+          "deepseek/deepseek-chat-v3-0324",
+          "openai/o1-pro",
+          "mistralai/mistral-small-3.1-24b-instruct",
+          "google/gemma-3-4b-it",
+          "google/gemma-3-12b-it",
+          "cohere/command-a",
+          "rekaai/reka-flash-3",
+          "google/gemma-3-27b-it",
+          "thedrummer/skyfall-36b-v2",
+          "perplexity/sonar-reasoning-pro",
+          "perplexity/sonar-pro",
+          "perplexity/sonar-deep-research",
+          "mistralai/mistral-saba",
+          "openai/o3-mini-high",
+          "aion-labs/aion-rp-llama-3.1-8b",
+          "qwen/qwen2.5-vl-72b-instruct",
+          "qwen/qwen-plus",
+          "openai/o3-mini",
+          "openai/o3-mini:batch",
+          "mistralai/mistral-small-24b-instruct-2501",
+          "perplexity/sonar",
+          "deepseek/deepseek-r1",
+          "minimax/minimax-01",
+          "microsoft/phi-4",
+          "deepseek/deepseek-chat",
+          "sao10k/l3.3-euryale-70b",
+          "openai/o1",
+          "cohere/command-r7b-12-2024",
+          "meta-llama/llama-3.3-70b-instruct",
+          "amazon/nova-lite-v1",
+          "amazon/nova-micro-v1",
+          "amazon/nova-pro-v1",
+          "openai/gpt-4o-2024-11-20",
+          "mistralai/mistral-large-2407",
+          "qwen/qwen-2.5-coder-32b-instruct",
+          "thedrummer/unslopnemo-12b",
+          "anthracite-org/magnum-v4-72b",
+          "qwen/qwen-2.5-7b-instruct",
+          "meta-llama/llama-3.2-1b-instruct",
+          "meta-llama/llama-3.2-3b-instruct",
+          "qwen/qwen-2.5-72b-instruct",
+          "cohere/command-r-08-2024",
+          "cohere/command-r-plus-08-2024",
+          "sao10k/l3.1-euryale-70b",
+          "nousresearch/hermes-3-llama-3.1-70b",
+          "nousresearch/hermes-3-llama-3.1-405b",
+          "sao10k/l3-lunaris-8b",
+          "openai/gpt-4o-2024-08-06",
+          "meta-llama/llama-3.1-70b-instruct",
+          "meta-llama/llama-3.1-8b-instruct",
+          "mistralai/mistral-nemo",
+          "openai/gpt-4o-mini",
+          "openai/gpt-4o-mini-2024-07-18",
+          "openai/gpt-4o-mini:batch",
+          "google/gemma-2-27b-it",
+          "openai/gpt-4o",
+          "openai/gpt-4o-2024-05-13",
+          "openai/gpt-4o:batch",
+          "mistralai/mixtral-8x22b-instruct",
+          "microsoft/wizardlm-2-8x22b",
+          "openai/gpt-4-turbo",
+          "openai/gpt-4-turbo:batch",
+          "mistralai/mistral-large",
+          "openai/gpt-3.5-turbo-0613",
+          "openrouter/auto",
+          "openai/gpt-3.5-turbo-instruct",
+          "openai/gpt-3.5-turbo-16k",
+          "mancer/weaver",
+          "undi95/remm-slerp-l2-13b",
+          "gryphe/mythomax-l2-13b",
+          "openai/gpt-3.5-turbo",
+          "openai/gpt-3.5-turbo:batch",
+          "openai/gpt-4"
+        ]
+      },
+      "successful_mutations": 7,
+      "termination": {
+        "cause": "budget",
+        "detail": "execution budget exceeded",
+        "turn": 51
+      },
+      "token_usage": {
+        "input_tokens": 1527421,
+        "output_tokens": 7469,
+        "total_tokens": 1534890
+      },
+      "tool_call_count": 57,
+      "trace_ref": null,
+      "unsafe_operations": 0,
+      "validations": 2
+    },
+    "final_observation": {
+      "checks": [
+        {
+          "connectivity": [
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=3.43 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.683 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.692 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2025ms\nrtt min/avg/max/mdev = 0.683/1.602/3.432/1.293 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.633 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.694 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.790 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2034ms\nrtt min/avg/max/mdev = 0.633/0.705/0.790/0.064 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=61 time=2.75 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=61 time=0.737 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=61 time=0.773 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2017ms\nrtt min/avg/max/mdev = 0.737/1.421/2.754/0.942 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=0.883 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.777 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=0.755 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.755/0.805/0.883/0.055 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=2.25 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.715 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.820 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2012ms\nrtt min/avg/max/mdev = 0.715/1.261/2.250/0.700 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.907 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.810 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.695 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2047ms\nrtt min/avg/max/mdev = 0.695/0.804/0.907/0.086 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "app1",
+              "destination_ip": "10.10.50.10",
+              "hostname": null,
+              "output": "PING 10.10.50.10 (10.10.50.10) 56(84) bytes of data.\n64 bytes from 10.10.50.10: icmp_seq=1 ttl=63 time=1.48 ms\n64 bytes from 10.10.50.10: icmp_seq=2 ttl=63 time=0.262 ms\n64 bytes from 10.10.50.10: icmp_seq=3 ttl=63 time=0.260 ms\n\n--- 10.10.50.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2011ms\nrtt min/avg/max/mdev = 0.260/0.667/1.481/0.575 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "finance1",
+              "success": true
+            },
+            {
+              "destination": "finance1",
+              "destination_ip": "10.10.30.10",
+              "hostname": null,
+              "output": "PING 10.10.30.10 (10.10.30.10) 56(84) bytes of data.\n64 bytes from 10.10.30.10: icmp_seq=1 ttl=63 time=0.301 ms\n64 bytes from 10.10.30.10: icmp_seq=2 ttl=63 time=0.251 ms\n64 bytes from 10.10.30.10: icmp_seq=3 ttl=63 time=0.298 ms\n\n--- 10.10.30.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2053ms\nrtt min/avg/max/mdev = 0.251/0.283/0.301/0.022 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "app1",
+              "success": true
+            },
+            {
+              "destination": "web1",
+              "destination_ip": "10.10.40.10",
+              "hostname": null,
+              "output": "PING 10.10.40.10 (10.10.40.10) 56(84) bytes of data.\n64 bytes from 10.10.40.10: icmp_seq=1 ttl=61 time=1.50 ms\n64 bytes from 10.10.40.10: icmp_seq=2 ttl=61 time=0.570 ms\n64 bytes from 10.10.40.10: icmp_seq=3 ttl=61 time=0.445 ms\n\n--- 10.10.40.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2017ms\nrtt min/avg/max/mdev = 0.445/0.837/1.496/0.468 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.528 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.462 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.794 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2036ms\nrtt min/avg/max/mdev = 0.462/0.594/0.794/0.143 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "web1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.659 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.526 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.574 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2044ms\nrtt min/avg/max/mdev = 0.526/0.586/0.659/0.055 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "user1",
+              "success": true
+            },
+            {
+              "destination": "user1",
+              "destination_ip": "10.10.10.10",
+              "hostname": null,
+              "output": "PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.\n64 bytes from 10.10.10.10: icmp_seq=1 ttl=61 time=1.04 ms\n64 bytes from 10.10.10.10: icmp_seq=2 ttl=61 time=0.628 ms\n64 bytes from 10.10.10.10: icmp_seq=3 ttl=61 time=5.11 ms\n\n--- 10.10.10.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2008ms\nrtt min/avg/max/mdev = 0.628/2.260/5.111/2.022 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            },
+            {
+              "destination": "external1",
+              "destination_ip": "203.0.113.10",
+              "hostname": null,
+              "output": "PING 203.0.113.10 (203.0.113.10) 56(84) bytes of data.\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=61 time=0.671 ms\n64 bytes from 203.0.113.10: icmp_seq=2 ttl=61 time=0.623 ms\n64 bytes from 203.0.113.10: icmp_seq=3 ttl=61 time=0.559 ms\n\n--- 203.0.113.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2042ms\nrtt min/avg/max/mdev = 0.559/0.617/0.671/0.045 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "guest1",
+              "success": true
+            },
+            {
+              "destination": "guest1",
+              "destination_ip": "10.10.20.10",
+              "hostname": null,
+              "output": "PING 10.10.20.10 (10.10.20.10) 56(84) bytes of data.\n64 bytes from 10.10.20.10: icmp_seq=1 ttl=61 time=0.602 ms\n64 bytes from 10.10.20.10: icmp_seq=2 ttl=61 time=0.576 ms\n64 bytes from 10.10.20.10: icmp_seq=3 ttl=61 time=0.568 ms\n\n--- 10.10.20.10 ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2049ms\nrtt min/avg/max/mdev = 0.568/0.582/0.602/0.014 ms",
+              "packet_loss_percent": 0.0,
+              "resolved_ip": null,
+              "source": "external1",
+              "success": true
+            }
+          ],
+          "passed": true,
+          "type": "lab_connectivity"
+        },
+        {
+          "limits": {
+            "enforced_floor_mbps": 6.8,
+            "min_mbps": 8.0,
+            "tolerance": 0.85
+          },
+          "measurement": {
+            "contended": true,
+            "contention_attempts": 1,
+            "contention_checks": {
+              "after_measurement": 1,
+              "after_start": 1
+            },
+            "contention_observed": true,
+            "destination": "external1",
+            "destination_ip": "203.0.113.10",
+            "error": null,
+            "passed": true,
+            "seconds": 10,
+            "source": "user1",
+            "throughput_mbps": 0.0,
+            "timed_out": true,
+            "unverified_throughput_mbps": null
+          },
+          "passed": false,
+          "type": "observed_throughput"
+        }
+      ],
+      "passed": false,
+      "type": "public_success_criteria"
+    },
+    "final_response": null,
+    "mode": "self_execute",
+    "model_reported_by_sut": "openai/qwen/qwen3.8-27b",
+    "provider_reported_model": "openai/qwen/qwen3.8-27b",
+    "status": "failed",
+    "summary": null,
+    "sut_identity": "langchain_agent",
+    "sut_version": "1.0.0",
+    "verified": false
+  }
+}

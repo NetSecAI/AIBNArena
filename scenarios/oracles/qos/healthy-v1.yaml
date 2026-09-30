@@ -1,0 +1,34 @@
+schema_version: "1.0"
+oracle_id: qos.path.healthy
+version: 1.0.0
+description: The selected path has no loss and low average latency at baseline.
+domain: qos
+phase: healthy
+probes:
+  - id: primary_path_quality
+    type: icmp
+    source: "${bindings.source}"
+    destination: "${bindings.destination_ip}"
+    protocol: icmp
+    attempts: 5
+    timeout_seconds: 2
+    metrics: [packet_loss_percent, rtt_avg_ms]
+    thresholds:
+      - {metric: packet_loss_percent, operator: lte, value: 0}
+      - {metric: rtt_avg_ms, operator: lte, value: 10}
+    aggregation: {method: mean}
+    success: {mode: all}
+  - id: required_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: required_paths
+    protocol: icmp
+    scope: all
+    attempts: 3
+    timeout_seconds: 2
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: mean}
+    success: {mode: all}
+success: {mode: all}

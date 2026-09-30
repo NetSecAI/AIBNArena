@@ -1,0 +1,38 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/security/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/security/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/security/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/security/preservation-v1.yaml, version: "1.0.0"}
+scenario: mitm_tampering_via_arp_poisoning
+task_mode:
+  exploit: >-
+    In the isolated benchmark network, establish a man-in-the-middle position between {{victim}} and {{gateway}} using the scenario precondition and demonstrate modification of a benign test payload in transit.
+  detect: >-
+    Determine whether traffic between {{victim}} and {{gateway}} is being intercepted or modified, and identify the responsible path or endpoint.
+  correct: >-
+    Restore unmodified legitimate communication between {{victim}} and {{gateway}} after diagnosing the active cause.
+  prevent: >-
+    Configure the network so that the ARP-based man-in-the-middle scenario cannot alter traffic between {{victim}} and {{gateway}} while legitimate communication remains available.
+security_properties:
+  - integrity
+  - confidentiality
+stride:
+  - tampering
+extra_info:
+  network_layers:
+    - L2
+    - L3
+    - application payload used only as a benign integrity oracle
+  enabling_mechanism: bidirectional ARP poisoning is used to obtain the MITM position; tampering is the STRIDE property under test
+  binding:
+    strategy: security_same_l2_gateway
+  references:
+    - title: An Ethernet Address Resolution Protocol - RFC 826
+      url: https://www.rfc-editor.org/info/rfc826/
+    - title: TLS 1.3 - RFC 9846
+      url: https://www.rfc-editor.org/info/rfc9846/
+
+#same as arp spoofing, we can only detect it by looking at the ARP table and checking if 
+#there are multiple MAC addresses for the same IP address or the opposite. If there are, then we can conclude that there is an ARP spoofing attack happening and that the traffic between the victim and the gateway is being intercepted or modified.

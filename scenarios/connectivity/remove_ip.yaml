@@ -1,0 +1,42 @@
+schema_version: "0.1"
+version: "1.0.0"
+oracles:
+  healthy: {path: scenarios/oracles/connectivity/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/connectivity/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/connectivity/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/connectivity/preservation-v1.yaml, version: "1.0.0"}
+scenario: remove_ip
+task:
+  low: >-
+    Something on this network is not working the way it should. Put it back.
+  medium: >-
+    Restore the intended IPv4 connectivity between affected endpoints without disrupting healthy
+    paths.
+  high: >-
+    {{affected_nodes}} lost IPv4 connectivity that the rest of the network still has. Restore the
+    intended connectivity for those endpoints without disrupting the paths that still work.
+base_variant: medium
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+methods:
+  - id: 1
+    name: router_interface_address_removed
+    selector: {node: gateway, interface: data}
+    operation: {name: set_interface_ipv4_presence, present: false}
+  - id: 2
+    name: endpoint_interface_address_removed
+    selector: {node: endpoint, interface: data}
+    operation: {name: set_interface_ipv4_presence, present: false}
+  - id: 3
+    name: endpoint_wrong_ip
+    selector: {node: endpoint, interface: data}
+    operation: {name: set_interface_ipv4_address, value_source: wrong_subnet}
+  - id: 4
+    name: endpoint_wrong_prefix_length
+    selector: {node: endpoint, interface: data}
+    operation: {name: set_interface_ipv4_address, value_source: wrong_prefix, prefix_length: 32}
+  - id: 5
+    name: endpoint_duplicate_ip
+    selector: {node: endpoint, interface: data}
+    operation: {name: set_interface_ipv4_address, value_source: duplicate_other_subnet}

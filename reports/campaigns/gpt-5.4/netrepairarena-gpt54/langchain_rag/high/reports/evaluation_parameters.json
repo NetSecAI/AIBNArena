@@ -1,0 +1,323 @@
+{
+  "parameters_version": "1.0",
+  "kind": "evaluation_parameters",
+  "runs_dir": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-gpt54",
+  "by": [
+    "subject",
+    "intent"
+  ],
+  "source": {
+    "files": 1,
+    "scored": 1,
+    "broken": 0,
+    "sha256": "9e13f01035c3924509f1173dc24e2fc83ca955a8d1458a33eb20f4484078cd64",
+    "compiler_imported": true,
+    "compiler_import_error": null
+  },
+  "cells": [
+    {
+      "subject": "LangChain RAG ANI Agent",
+      "intent": "high",
+      "n": 1,
+      "scored": 1,
+      "parameters": {
+        "pass_rate": {
+          "status": "measured",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 1,
+          "definition": "episodes whose repair oracle passed, over episodes it judged"
+        },
+        "tool_call_success_rate": {
+          "status": "measured",
+          "value": 0.9047619047619048,
+          "numerator": 19,
+          "denominator": 21,
+          "definition": "calls the surface accepted (no error), over calls the subject made; a validation that honestly failed is an accepted call"
+        },
+        "interaction_limit_rate": {
+          "status": "no_denominator",
+          "value": null,
+          "numerator": 0,
+          "denominator": 0,
+          "reason": "no episode ran under an interaction cap",
+          "definition": "episodes that reached an interaction cap, over episodes that ran under one"
+        },
+        "time_limit_rate": {
+          "status": "measured",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 1,
+          "definition": "episodes the wall clock ended"
+        },
+        "repeat_action_rate": {
+          "status": "measured",
+          "value": 0.19047619047619047,
+          "numerator": 4,
+          "denominator": 21,
+          "definition": "calls repeating an earlier operation with identical arguments; a call, not a device change"
+        },
+        "early_submission_rate": {
+          "status": "measured",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 1,
+          "definition": "submissions made without the subject ever running a validation, over submissions whose episode recorded an operation log"
+        },
+        "error_submission_rate": {
+          "status": "measured",
+          "value": 1.0,
+          "numerator": 1,
+          "denominator": 1,
+          "definition": "submissions the repair oracle did not pass, over submissions it judged"
+        },
+        "ani_call_type_ratio": {
+          "search": {
+            "status": "structurally_zero",
+            "value": 0.0,
+            "numerator": 0,
+            "denominator": 21,
+            "reason": "no search operation exists on the ANI, so this can never be nonzero",
+            "definition": "share of the subject's calls that searched"
+          },
+          "check_config": {
+            "status": "measured",
+            "value": 0.7142857142857143,
+            "numerator": 15,
+            "denominator": 21,
+            "definition": "share of the subject's calls in the check_config bucket"
+          },
+          "apply_config": {
+            "status": "measured",
+            "value": 0.14285714285714285,
+            "numerator": 3,
+            "denominator": 21,
+            "definition": "share of the subject's calls in the apply_config bucket"
+          },
+          "wait": {
+            "status": "structurally_zero",
+            "value": 0.0,
+            "numerator": 0,
+            "denominator": 21,
+            "reason": "no wait, sleep or pause operation exists on the ANI, so the agent cannot wait and this can never be nonzero",
+            "definition": "share of the subject's calls that waited"
+          },
+          "validate": {
+            "status": "measured",
+            "value": 0.14285714285714285,
+            "numerator": 3,
+            "denominator": 21,
+            "definition": "share of the subject's calls in the validate bucket"
+          },
+          "unknown": {
+            "status": "measured",
+            "value": 0.0,
+            "numerator": 0,
+            "denominator": 21,
+            "definition": "share of the subject's calls in the unknown bucket"
+          }
+        },
+        "score": {
+          "status": "measured",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 1,
+          "definition": "episodes whose repair oracle passed, over episodes it judged",
+          "same_as": "pass_rate"
+        },
+        "false_negative_rate": {
+          "status": "unavailable",
+          "value": null,
+          "numerator": null,
+          "denominator": null,
+          "reason": "no subject states a detection verdict: the record carries whether the repair passed, never whether the subject reported finding a problem. The intermediate step that would say so is the one evaluation parameter 13 is waiting on",
+          "definition": "fault episodes where the subject reported finding no problem",
+          "see": [
+            "llm_found_problem_rate"
+          ]
+        },
+        "false_positive_rate": {
+          "status": "no_denominator",
+          "value": null,
+          "numerator": 0,
+          "denominator": 0,
+          "reason": "no false-positive episode was run: every episode of this cell injected a fault, so nothing here could be a false alarm. `benchmarks/run.py --no-fault` is what creates the population this rate is over",
+          "definition": "no-fault episodes where the subject successfully changed a lab that needed no change"
+        },
+        "llm_found_problem_rate": {
+          "status": "measured",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 1,
+          "definition": "episodes whose stated diagnosis the judge found to name the injected fault (ParaPLUIE score above zero), over fault episodes the judge assessed; an episode that stated no diagnosis is assessed as not having found it",
+          "method": "ParaPLUIE judge over the subject's stated diagnosis and the injected fault in words (benchmarks/core/diagnosis.py)",
+          "hypothesis_sources": {
+            "summary": 1
+          },
+          "unjudged": 0,
+          "proxy": {
+            "status": "measured",
+            "value": 0.0,
+            "numerator": 0,
+            "denominator": 1,
+            "definition": "episodes where the agent went to the device the fault was injected on -- in the graph or on the device itself -- over scored episodes; one that changed nothing located nothing and counts against, while one whose fault binding could not be replayed leaves the denominator because that is our blindness, not its",
+            "proxy_for": "the LLM's own explanation of the fault, compared against the scenario's methods",
+            "device_write_numerator": 0,
+            "compiler_imported": true
+          }
+        }
+      }
+    }
+  ],
+  "totals": {
+    "n": 1,
+    "parameters": {
+      "pass_rate": {
+        "status": "measured",
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 1,
+        "definition": "episodes whose repair oracle passed, over episodes it judged"
+      },
+      "tool_call_success_rate": {
+        "status": "measured",
+        "value": 0.9047619047619048,
+        "numerator": 19,
+        "denominator": 21,
+        "definition": "calls the surface accepted (no error), over calls the subject made; a validation that honestly failed is an accepted call"
+      },
+      "interaction_limit_rate": {
+        "status": "no_denominator",
+        "value": null,
+        "numerator": 0,
+        "denominator": 0,
+        "reason": "no episode ran under an interaction cap",
+        "definition": "episodes that reached an interaction cap, over episodes that ran under one"
+      },
+      "time_limit_rate": {
+        "status": "measured",
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 1,
+        "definition": "episodes the wall clock ended"
+      },
+      "repeat_action_rate": {
+        "status": "measured",
+        "value": 0.19047619047619047,
+        "numerator": 4,
+        "denominator": 21,
+        "definition": "calls repeating an earlier operation with identical arguments; a call, not a device change"
+      },
+      "early_submission_rate": {
+        "status": "measured",
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 1,
+        "definition": "submissions made without the subject ever running a validation, over submissions whose episode recorded an operation log"
+      },
+      "error_submission_rate": {
+        "status": "measured",
+        "value": 1.0,
+        "numerator": 1,
+        "denominator": 1,
+        "definition": "submissions the repair oracle did not pass, over submissions it judged"
+      },
+      "ani_call_type_ratio": {
+        "search": {
+          "status": "structurally_zero",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 21,
+          "reason": "no search operation exists on the ANI, so this can never be nonzero",
+          "definition": "share of the subject's calls that searched"
+        },
+        "check_config": {
+          "status": "measured",
+          "value": 0.7142857142857143,
+          "numerator": 15,
+          "denominator": 21,
+          "definition": "share of the subject's calls in the check_config bucket"
+        },
+        "apply_config": {
+          "status": "measured",
+          "value": 0.14285714285714285,
+          "numerator": 3,
+          "denominator": 21,
+          "definition": "share of the subject's calls in the apply_config bucket"
+        },
+        "wait": {
+          "status": "structurally_zero",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 21,
+          "reason": "no wait, sleep or pause operation exists on the ANI, so the agent cannot wait and this can never be nonzero",
+          "definition": "share of the subject's calls that waited"
+        },
+        "validate": {
+          "status": "measured",
+          "value": 0.14285714285714285,
+          "numerator": 3,
+          "denominator": 21,
+          "definition": "share of the subject's calls in the validate bucket"
+        },
+        "unknown": {
+          "status": "measured",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 21,
+          "definition": "share of the subject's calls in the unknown bucket"
+        }
+      },
+      "score": {
+        "status": "measured",
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 1,
+        "definition": "episodes whose repair oracle passed, over episodes it judged",
+        "same_as": "pass_rate"
+      },
+      "false_negative_rate": {
+        "status": "unavailable",
+        "value": null,
+        "numerator": null,
+        "denominator": null,
+        "reason": "no subject states a detection verdict: the record carries whether the repair passed, never whether the subject reported finding a problem. The intermediate step that would say so is the one evaluation parameter 13 is waiting on",
+        "definition": "fault episodes where the subject reported finding no problem",
+        "see": [
+          "llm_found_problem_rate"
+        ]
+      },
+      "false_positive_rate": {
+        "status": "no_denominator",
+        "value": null,
+        "numerator": 0,
+        "denominator": 0,
+        "reason": "no false-positive episode was run: every episode of this cell injected a fault, so nothing here could be a false alarm. `benchmarks/run.py --no-fault` is what creates the population this rate is over",
+        "definition": "no-fault episodes where the subject successfully changed a lab that needed no change"
+      },
+      "llm_found_problem_rate": {
+        "status": "measured",
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 1,
+        "definition": "episodes whose stated diagnosis the judge found to name the injected fault (ParaPLUIE score above zero), over fault episodes the judge assessed; an episode that stated no diagnosis is assessed as not having found it",
+        "method": "ParaPLUIE judge over the subject's stated diagnosis and the injected fault in words (benchmarks/core/diagnosis.py)",
+        "hypothesis_sources": {
+          "summary": 1
+        },
+        "unjudged": 0,
+        "proxy": {
+          "status": "measured",
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 1,
+          "definition": "episodes where the agent went to the device the fault was injected on -- in the graph or on the device itself -- over scored episodes; one that changed nothing located nothing and counts against, while one whose fault binding could not be replayed leaves the denominator because that is our blindness, not its",
+          "proxy_for": "the LLM's own explanation of the fault, compared against the scenario's methods",
+          "device_write_numerator": 0,
+          "compiler_imported": true
+        }
+      }
+    }
+  },
+  "broken": []
+}

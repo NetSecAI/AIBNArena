@@ -1,0 +1,75 @@
+schema_version: "0.1"
+version: "1.1.0"
+# The shaped families never break reachability: an ICMP oracle passes them whether
+# or not the policy was ever repaired. They are judged on the rate the protected
+# class keeps under contention instead.
+oracles:
+  healthy: {path: scenarios/oracles/qos/assured-bandwidth/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/qos/assured-bandwidth/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/qos/assured-bandwidth/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/qos/assured-bandwidth/preservation-v1.yaml, version: "1.0.0"}
+scenario: assured_bandwidth
+task:
+  low: >-
+    The important traffic is not getting its share of the WAN uplink while the link is busy. Fix
+    that, without cutting off the other traffic.
+  medium: >-
+    Ensure the protected application flow keeps its contractual bandwidth guarantee while a
+    competing flow saturates the same uplink, and keep that competing flow connected.
+  high: >-
+    Ensure that traffic from {{protected_source}} to {{destination}} receives at least
+    {{assured_bandwidth_mbps}} Mbps while the competing flow from {{background_source}} saturates
+    the same uplink, and keep that competing flow connected.
+base_variant: high
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+    # The competing flow is the fault here, so the link is already disputed when
+    # the check runs: offering a second load would measure a contention nobody
+    # promised anything under.
+    - type: observed_throughput
+      min_mbps: "{{assured_bandwidth_mbps}}"
+      under_contention: false
+extra_info:
+  origin: project-defined IBN task family; protocol behavior grounded in DiffServ
+  initial_condition: >-
+    the WAN edge forwards correctly but carries no shaping policy at all; the agent
+    designs one from scratch
+  network_layers:
+    - L3
+    - QoS / forwarding queues
+  intent_semantics: >-
+    quantitative minimum-throughput SLO; the implementation mechanism is deliberately
+    unspecified
+  workload_model: >-
+    controlled competing traffic creates contention on a shared bottleneck; the runtime
+    oracle measures achieved throughput rather than configuration syntax
+  references:
+    - title: An Architecture for Differentiated Services - RFC 2475
+      url: https://www.rfc-editor.org/info/rfc2475/
+    - title: Assured Forwarding PHB Group - RFC 2597
+      url: https://www.rfc-editor.org/info/rfc2597/
+  oracle_hint: >-
+    measured throughput of the protected flow is >= the SLO during controlled cross
+    traffic; competing traffic remains connected
+methods:
+  - id: 1
+    name: sustained_udp_cross_traffic
+    selector: {node: endpoint, interface: data}
+    operation:
+      name: start_background_traffic
+      # iperf3 applies -b per stream, so the offered load is
+      # background_mbps x streams. It has to comfortably saturate the 10 Mbps
+      # uplink without saturating the fabric that carries it there: the leaf-spine
+      # path tops out around 65 Mbps, and a flood beyond that starves the
+      # protected flow upstream of the shaper, which no QoS policy could fix.
+      background_mbps_range: [15, 25]
+      # Long enough to outlive the subject's budget. The repair oracle measures the
+      # protected flow under the same contention the degradation was measured
+      # under, and a flood that ends before the subject does lets an untouched
+      # network pass: 1800 s of budget plus the degradation probe, convergence and
+      # the repair probe fit inside 2700 s. The restore path kills iperf3 whatever
+      # is left. 900 was sized for the 400 s budget of the smoke experiment.
+      duration_seconds: 2700
+      streams: 1
+      sink_port: 5202

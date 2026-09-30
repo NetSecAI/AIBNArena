@@ -1,0 +1,186 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 4.74159999157564e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 33.11238082199998,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth1",
+        "node": "web1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1264467590001459,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "interface",
+        "name": "eth2",
+        "node": "fw-ext"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.35151435200009473,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "web1"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.09408290100009253,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "arp",
+        "name": "10.10.40.1",
+        "node": "web1"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.09568212499993933,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-6cb33a223bb5e57c61b9e358ed8e5931ca467ce0a82c6ae94bc378d2a66202dc.json",
+      "category": "read",
+      "duration_seconds": 0.18817682899998545,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "fw-ext"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-6cb33a223bb5e57c61b9e358ed8e5931ca467ce0a82c6ae94bc378d2a66202dc.json",
+      "category": "read",
+      "duration_seconds": 0.166910838999911,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "firewall zone DMZ interface eth2"
+            ],
+            "reason": "Zone DMZ on fw-ext lists only 'interface eth3' (dmz_app); eth2 (10.10.40.1/24, the web1 gateway, description dmz-web-gateway) is not a member of any zone, so all traffic to/from web1 bypasses zone filtering and is dropped. All failing pairs involve web1 (10.10.40.10) while app1 (10.10.50.10, on eth3) works. The rulesets INTERNAL-TO-DMZ / DMZ-TO-INTERNAL / OUTSIDE-TO-DMZ / DMZ-TO-OUTSIDE already contain the intended allow rules for web1; the only missing element is eth2's zone membership. Restoring it reopens the intended flows without loosening segmentation.",
+            "rollback_commands": [
+              "no firewall zone DMZ interface eth2"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 4.9614999852565234e-05,
+      "error": "update_config.change.commands failed backend safety preflight: VyOS configuration commands must start with 'set' or 'delete'",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set firewall zone DMZ interface eth2"
+            ],
+            "reason": "Zone DMZ on fw-ext lists only 'interface eth3' (dmz_app); eth2 (10.10.40.1/24, the web1 gateway, description dmz-web-gateway) is not a member of any zone, so all traffic to/from web1 bypasses zone filtering and is dropped. All failing pairs involve web1 (10.10.40.10) while app1 (10.10.50.10, on eth3) works. The rulesets INTERNAL-TO-DMZ / DMZ-TO-INTERNAL / OUTSIDE-TO-DMZ / DMZ-TO-OUTSIDE already contain the intended allow rules for web1; the only missing element is eth2's zone membership. Restoring it reopens the intended flows without loosening segmentation.",
+            "rollback_commands": [
+              "delete firewall zone DMZ interface eth2"
+            ],
+            "target": "fw-ext"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 2.858650651999824,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_f2984ec9f69c9e45"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 33.305035314999714,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

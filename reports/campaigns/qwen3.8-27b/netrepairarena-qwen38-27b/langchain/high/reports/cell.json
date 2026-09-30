@@ -1,0 +1,28 @@
+{
+  "model": "qwen3.8-27b",
+  "experiment": "netrepairarena-qwen38-27b",
+  "subject": "langchain",
+  "intent": "high",
+  "source": "/home/jongmin/ibn-integration-test/bench-gui/reports/campaigns/runs/netrepairarena-qwen38-27b",
+  "records": 1,
+  "traces": 0,
+  "thinking_audit": "records 1, lying 0, warnings 1, trace gaps 1",
+  "layout": {
+    "index.md": "plate -> report, record, trace, judge log, repair, termination",
+    "records/": "one judge record per episode, named by plate, unchanged",
+    "logs/traces/<plate>/": "the episode's trace split by kind (task.jsonl, prompts.jsonl, model_messages.jsonl, ani_operations.jsonl; index.json says the counts; seq orders them)",
+    "logs/judge/": "the judge's console output per episode, named by plate",
+    "logs/devices/<plate>/": "records from 2026-09-16 on: the judge's per-device running configuration at healthy, before_sut and after_sut (one text file per device and moment) and the diffs between them; manifest.json lists what changed",
+    "reports/tasks/<plate>/": {
+      "report.html": "the per-task report of scripts/generate_report.py, readable",
+      "report.json": "the same report as data (report_version 1.0 plus time_by_phase, tokens, validation, evaluation_parameters, report_information, files); the record's own sections are pointers to the record instead of copies",
+      "summary.json": "the numbers: run, evaluations, metrics, operation counts, time by phase, tokens, validation, how the episode counts in the evaluation parameters, the sheet items",
+      "timeline.json": "the model's turns and every call in order, with the reasoning spans from the trace",
+      "tool_calls.json": "every ANI operation with its arguments and result status",
+      "evaluation_parameters.json": "how this episode counts in each of the evaluation parameters",
+      "provenance.json": "what ran: model, subject, prompt, thinking, git commit, scenario version",
+      "summary.md": "the short Markdown report: verdict, outcome, execution, operations, the subject's conclusion"
+    },
+    "reports/": "summary.txt/json per scenario, evaluation_parameters.json for the whole cell, this file"
+  }
+}

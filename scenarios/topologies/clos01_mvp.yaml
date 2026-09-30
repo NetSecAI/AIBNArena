@@ -1,0 +1,52 @@
+schema_version: "0.1"
+topology:
+  id: clos01_mvp
+  name: Abstract descriptor for the existing clos01 integration lab
+  size: mvp
+  profile: integration
+  environment:
+    type: containerlab
+    lab_name: clos01
+    topology_path: benchmarks/testbeds/containerlab/clos01.clab.yml
+  nodes:
+    spine:
+      kind: nokia_srlinux
+      roles: [spine, router, transit]
+      capabilities: [ipv4_forwarding, static_routing]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l1_s, ipv4: 10.0.0.0/31}
+        "ethernet-1/2": {segment: fabric_l2_s, ipv4: 10.0.0.2/31}
+    leaf1:
+      kind: nokia_srlinux
+      roles: [leaf, router, gateway]
+      capabilities: [ipv4_forwarding, static_routing, acl]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l1_s, ipv4: 10.0.0.1/31}
+        "ethernet-1/2": {segment: client1_lan, ipv4: 192.168.10.1/24}
+    leaf2:
+      kind: nokia_srlinux
+      roles: [leaf, router, gateway]
+      capabilities: [ipv4_forwarding, static_routing, acl]
+      interfaces:
+        "ethernet-1/1": {segment: fabric_l2_s, ipv4: 10.0.0.3/31}
+        "ethernet-1/2": {segment: client2_lan, ipv4: 192.168.20.1/24}
+    client1:
+      kind: linux
+      roles: [client]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: client1_lan, ipv4: 192.168.10.10/24}
+    client2:
+      kind: linux
+      roles: [client]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: client2_lan, ipv4: 192.168.20.10/24}
+  connectivity_requirements:
+    - {source: client1, destination: client2, bidirectional: true}
+  segments:
+    fabric_l1_s: {type: p2p, cidr: 10.0.0.0/31, members: [leaf1, spine], capacity_mbps: 1000}
+    fabric_l2_s: {type: p2p, cidr: 10.0.0.2/31, members: [leaf2, spine], capacity_mbps: 1000}
+    client1_lan: {type: lan, cidr: 192.168.10.0/24, members: [leaf1, client1], security_zone: users, capacity_mbps: 1000}
+    client2_lan: {type: lan, cidr: 192.168.20.0/24, members: [leaf2, client2], security_zone: users, capacity_mbps: 1000}
+  services: {}

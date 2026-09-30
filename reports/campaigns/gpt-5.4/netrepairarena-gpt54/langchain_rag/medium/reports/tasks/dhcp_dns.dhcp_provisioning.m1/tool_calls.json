@@ -1,0 +1,130 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 5.223398329690099e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-266f004e52d51aaf0afc28ab3a8f32748944edc09ef11652cf948c885a5e6cda.json",
+      "category": "validation",
+      "duration_seconds": 64.14991929600365,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "firewall"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-620586b727db9d915dbecabe90fd975a24d2b24f920b07c13562f686a6f4ca7a.json",
+      "category": "read",
+      "duration_seconds": 0.15321306299301796,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "firewall"
+        ],
+        "paths": null
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-620586b727db9d915dbecabe90fd975a24d2b24f920b07c13562f686a6f4ca7a.json",
+      "category": "read",
+      "duration_seconds": 0.2030744899821002,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "firewall"
+        ],
+        "paths": [
+          "/service/dhcp-server"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.1557364689942915,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 subnet-id 20",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 lease 3600",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option default-router 10.10.20.1",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-name sme01.internal",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.internal",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option domain-search sme01.example",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 option name-server 10.10.60.10",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 ip-address 10.10.20.10",
+              "set service dhcp-server shared-network-name GUEST1 subnet 10.10.20.0/24 static-mapping guest1 mac 02:c1:ab:0a:14:0a"
+            ],
+            "reason": "Public validation shows only guest1 lacks connectivity and reports network unreachable while other DHCP-served subnets work; firewall DHCP server config has scopes for ADMIN1, FINANCE1, and USER1 but no guest subnet scope.",
+            "rollback_commands": [
+              "delete service dhcp-server shared-network-name GUEST1"
+            ],
+            "target": "firewall"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 3.3069462540152017,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_122ffc4da013b510"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-b281447935fe4889e7b6a7fbf19d2fc5af25b74f173a4031fda249a115aaf73a.json",
+      "category": "validation",
+      "duration_seconds": 82.19482882498414,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

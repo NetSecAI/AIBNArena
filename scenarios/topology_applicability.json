@@ -1,0 +1,255 @@
+{
+  "schema_version": "0.1",
+  "description": "Which abstract topologies each scenario definition can be compiled against. compile_scenarios() reads this file and skips any scenario whose entry does not list the topology being compiled. A scenario absent from 'scenarios' is compiled against every topology, so a scenario that only binds on some of them MUST be listed here -- otherwise the catalog raises on the first topology it cannot bind against. Entries that list every topology are kept on purpose: they record that the coverage was verified rather than assumed.",
+  "topologies": {
+    "clos01_mvp": {
+      "forwarding_model": "routed",
+      "note": "MVP Clos fabric, routed interfaces end to end."
+    },
+    "sme_leaf_spine_dmz_small": {
+      "forwarding_model": "routed",
+      "note": "SME leaf-spine. Routed access interfaces on the leaves, static routes with ECMP."
+    },
+    "sme_leaf_spine_dmz_vlan": {
+      "forwarding_model": "switched",
+      "note": "SME leaf-spine. Layer-2 leaves with one bridge domain per VLAN, inter-VLAN routing centralised on the spine IRBs. spine1 holds the 'gateway' role and spine2 'standby_gateway', which is what keeps a fault off the spine that forwards no traffic."
+    },
+    "sme_leaf_firewall_dmz": {
+      "forwarding_model": "switched_firewall",
+      "note": "Layer-2 leaves and a layer-2 aggregation spine behind two back-to-back VyOS firewalls. fw-int is the inter-VLAN gateway for every internal VLAN (eth1 vif 10/20/30/99) and holds the internal segmentation policy; fw-ext holds the DMZ, the Internet, the service-level policy and the only NAT. The spine holds no address on purpose: a spine that routed would be a way around fw-int."
+    },
+    "sme_leaf_spine_dmz_dns": {
+      "forwarding_model": "routed_firewall",
+      "note": "Routed leaves behind a single VyOS firewall that replaces the spine pair: fabric transit, the DHCP server the leaves relay to, and the INTERNAL/DMZ/OUTSIDE policy enforcement point. Access stays routed, one /24 per endpoint behind a leaf; the DMZ servers, the public nameserver and the outside client are cabled straight to the firewall. Adds an internal resolver behind leaf1."
+    },
+    "sme_wan_edge_qos": {
+      "forwarding_model": "routed_wan_edge",
+      "note": "Same routed leaf-spine fabric as sme_leaf_spine_dmz_small, plus a Linux WAN edge dual-homed to both spines, between the fabric and the simulated Internet. Its egress interface carries the topology's qos_policy: a two-class HTB hierarchy on a 10 Mbps link, which is what every QoS scenario here shapes, breaks, or contends for."
+    }
+  },
+  "scenarios": {
+    "connectivity/disable_interface.yaml": {
+      "scenario": "disable_interface",
+      "topologies": [
+        "clos01_mvp",
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "absorbed": [
+        "connectivity/vlan_disable_interface.yaml",
+        "connectivity/fw_disable_interface.yaml"
+      ],
+      "note": "One scenario for every forwarding model since m1 binds {node: gateway} instead of {node: router}: the renderer resolves the bound interface per node kind -- SR Linux ethernet interfaces on the routed fabrics, irb0 subinterfaces on the VLAN spines, VyOS 'ethernet ethX' and 'vif' paths on the firewalls. The gateway selector is also what keeps spine2 of sme_leaf_spine_dmz_vlan out of the draw: it holds standby_gateway, and cutting the standby changes no traffic. Caveat carried over from the routed fabrics: m1 can still draw a redundant fabric uplink whose blast radius is empty, which is the redundancy-versus-blast-radius question tracked in notes.txt, not a binding defect."
+    },
+    "connectivity/remove_ip.yaml": {
+      "scenario": "remove_ip",
+      "topologies": [
+        "clos01_mvp",
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "absorbed": [
+        "connectivity/vlan_remove_ip.yaml",
+        "connectivity/fw_remove_ip.yaml"
+      ],
+      "note": "Same fold-in as disable_interface: m1 binds {node: gateway}, so it lands on the IRB that answers the endpoint default gateway on the switched fabric and on the VyOS address on the firewalls, never on a standby spine. The four endpoint methods are unchanged everywhere. On sme_wan_edge_qos m1 may bind wan1, a multi-homed Linux forwarder: its restore re-adds the address only, since a WAN edge has no endpoint default route to put back."
+    },
+    "connectivity/disable_routing.yaml": {
+      "scenario": "disable_routing",
+      "topologies": [
+        "clos01_mvp",
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "absorbed": [
+        "connectivity/vlan_disable_routing.yaml",
+        "connectivity/fw_disable_routing.yaml"
+      ],
+      "note": "The gateway selector carries the scenario across the families: 'network-instance default admin-state disable' plus an ACL guard on SR Linux, 'set system ip disable-forwarding' plus the global ipv4 forward filter on VyOS. On the centralised designs -- VLAN spines, firewalls -- disabling the gateway removes inter-VLAN routing for the whole site, which is the defining property of those designs rather than an oversized blast radius."
+    },
+    "connectivity/drop_traffic_to_from_subnet.yaml": {
+      "scenario": "drop_traffic_to_from_subnet",
+      "topologies": [
+        "clos01_mvp",
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "absorbed": [
+        "connectivity/vlan_drop_traffic_to_from_subnet.yaml",
+        "connectivity/fw_drop_traffic_to_from_subnet.yaml"
+      ],
+      "note": "The same four variants everywhere, bound to {node: gateway} so the filter lands on the device that actually forwards the subnet: an ibn-subnet-guard ACL on SR Linux, an IBN-SUBNET-GUARD ruleset jumped to from the global forward filter on VyOS."
+    },
+    "connectivity/wrong_routing_table.yaml": {
+      "scenario": "wrong_routing_table",
+      "topologies": [
+        "clos01_mvp",
+        "sme_leaf_spine_dmz_small"
+      ],
+      "excluded": {
+        "sme_leaf_spine_dmz_vlan": "Structurally inexpressible: every VLAN prefix is directly connected on the spine IRBs, so m1-m4 find no required remote route to corrupt. Only m5 (endpoint_wrong_default_gateway) would bind.",
+        "sme_leaf_firewall_dmz": "One method short: m1-m3 and m5 bind and render as VyOS static routes, but m4 (create_static_route_loop) finds no deterministic loop peer, since a loop needs a second router peer and each node here has one. Splitting m4 into its own file would make the rest of the family applicable.",
+        "sme_leaf_spine_dmz_dns": "Same single blocker as sme_leaf_firewall_dmz, for the same structural reason since the spine pair became one firewall: m4 needs a router peer of the target that is not itself the destination's gateway, and each leaf now has exactly one router peer -- the firewall, which is also the gateway of every DMZ and outside destination. m1-m3 and m5 bind.",
+        "sme_wan_edge_qos": "m1-m4 find no required remote route: the WAN edge deliberately carries neither the 'router' role nor an ACL capability, and the two WAN flows give every internal endpoint peers behind two different gateways, which the remote-route binder rejects."
+      }
+    },
+    "filtering/zone_policy_enforcement.yaml": {
+      "scenario": "zone_policy_enforcement",
+      "topologies": [
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns"
+      ],
+      "note": "Filtering faults act on the zone model itself rather than on an address list: a ruleset unbound from its pair, a deny placed ahead of the permits, or an interface that leaves its zone. Each binds only to a pair the topology declares it accepts and that a required flow actually crosses -- a pair absent from zone_policies has no ruleset and is denied by the zone model, so there is nothing there to break. Requires a topology declaring zone_policies and a node with the zone_policy capability, which today means a VyOS enforcer.",
+      "excluded": {
+        "clos01_mvp": "Declares no zone_policies and no node applying a zone policy.",
+        "sme_leaf_spine_dmz_small": "Declares no zone_policies and no node applying a zone policy.",
+        "sme_leaf_spine_dmz_vlan": "Declares no zone_policies: the VLAN spines filter with SR Linux ACLs, which the connectivity family already covers.",
+        "sme_wan_edge_qos": "Declares no zone_policies and no node applying a zone policy."
+      }
+    },
+    "dhcp_dns/dhcp_provisioning.yaml": {
+      "scenario": "dhcp_provisioning",
+      "topologies": [
+        "sme_leaf_spine_dmz_dns"
+      ],
+      "note": "Configuration-level DHCP faults on one reservation pool of the server: the pool deleted so its subnet is no longer served, the default-router option pointed at an address nobody holds, or the name-server option dropped or pointed at a host that runs no resolver. Requires a topology declaring a dhcp service with per-client pools and endpoints whose address_assignment is dhcp.",
+      "excluded": {
+        "clos01_mvp": "No DHCP server declared in this topology.",
+        "sme_leaf_spine_dmz_small": "No DHCP server declared in this topology.",
+        "sme_leaf_spine_dmz_vlan": "No DHCP server declared in this topology.",
+        "sme_leaf_firewall_dmz": "No DHCP server declared in this topology.",
+        "sme_wan_edge_qos": "No DHCP server declared in this topology."
+      }
+    },
+    "qos/assured_bandwidth.yaml": {
+      "scenario": "assured_bandwidth",
+      "topologies": [
+        "sme_wan_edge_qos"
+      ],
+      "excluded": {
+        "clos01_mvp": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_spine_dmz_small": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_spine_dmz_vlan": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_firewall_dmz": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_spine_dmz_dns": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect."
+      },
+      "note": "Greenfield: the WAN edge starts with no shaping policy at all and the fault is the contention itself, so the agent designs the policy rather than repairing one. Pair it with states/healthy_greenfield.json."
+    },
+    "qos/wan_shaping_policy_repair.yaml": {
+      "scenario": "wan_shaping_policy_repair",
+      "topologies": [
+        "sme_wan_edge_qos"
+      ],
+      "excluded": {
+        "clos01_mvp": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_spine_dmz_small": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_spine_dmz_vlan": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_firewall_dmz": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
+        "sme_leaf_spine_dmz_dns": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect."
+      },
+      "note": "Brownfield counterpart of assured_bandwidth: the reference policy is already in the healthy state and each method degrades exactly one of its objects."
+    },
+    "qos/link_impairment.yaml": {
+      "scenario": "link_impairment",
+      "topologies": [
+        "clos01_mvp",
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "note": "Applies, but binds narrowly here: _bind_qos_link_context() needs an endpoint with exactly one required peer, and the two WAN flows give user1, guest1, web1 and app1 more than one, leaving finance1 as the only candidate."
+    },
+    "security/arp_spoofing.yaml": {
+      "scenario": "arp_spoofing",
+      "topologies": [
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "excluded": {
+        "clos01_mvp": "Pre-existing: the MVP topology declares no services, no security zones, and no attachable attacker, so no security scenario can bind against it. Recorded here rather than fixed, so the catalog compiles against every topology it ships with."
+      }
+    },
+    "security/cleartext_http_disclosure.yaml": {
+      "scenario": "cleartext_http_disclosure",
+      "topologies": [
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "excluded": {
+        "clos01_mvp": "Pre-existing: the MVP topology declares no services, no security zones, and no attachable attacker, so no security scenario can bind against it. Recorded here rather than fixed, so the catalog compiles against every topology it ships with."
+      }
+    },
+    "security/management_repudiation.yaml": {
+      "scenario": "management_repudiation",
+      "topologies": [
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "excluded": {
+        "clos01_mvp": "Pre-existing: the MVP topology declares no services, no security zones, and no attachable attacker, so no security scenario can bind against it. Recorded here rather than fixed, so the catalog compiles against every topology it ships with."
+      }
+    },
+    "security/mitm_tampering.yaml": {
+      "scenario": "mitm_tampering",
+      "topologies": [
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "excluded": {
+        "clos01_mvp": "Pre-existing: the MVP topology declares no services, no security zones, and no attachable attacker, so no security scenario can bind against it. Recorded here rather than fixed, so the catalog compiles against every topology it ships with."
+      }
+    },
+    "security/vlan_isolation_bypass.yaml": {
+      "scenario": "vlan_isolation_bypass",
+      "topologies": [
+        "sme_leaf_spine_dmz_small",
+        "sme_leaf_spine_dmz_vlan",
+        "sme_leaf_firewall_dmz",
+        "sme_leaf_spine_dmz_dns",
+        "sme_wan_edge_qos"
+      ],
+      "excluded": {
+        "clos01_mvp": "Pre-existing: the MVP topology declares no services, no security zones, and no attachable attacker, so no security scenario can bind against it. Recorded here rather than fixed, so the catalog compiles against every topology it ships with."
+      }
+    },
+    "security/tcp_syn_flood.yaml": {
+      "scenario": "tcp_syn_flood",
+      "topologies": [
+        "sme_leaf_spine_dmz_small"
+      ],
+      "excluded": {
+        "clos01_mvp": "Pre-existing: the MVP topology declares no services, no security zones, and no attachable attacker, so no security scenario can bind against it. Recorded here rather than fixed, so the catalog compiles against every topology it ships with.",
+        "sme_leaf_spine_dmz_vlan": "Needs an attacker attachable to a segment in the 'external' security zone. attacker1 is cabled to leaf1, and the external VLAN 60 lives on leaf2, so no bridge-domain reassignment can put the attacker there. Adding a second attacker port on leaf2 would make this scenario applicable.",
+        "sme_leaf_firewall_dmz": "Needs an attacker attachable to a segment in the 'external' security zone. attacker1 is cabled to leaf1 in the GUEST VLAN, and the internet segment hangs off fw-ext in the OUTSIDE zone, so no bridge-domain reassignment on the leaves can place it there. An attacker port on the fw-ext internet segment would make it applicable.",
+        "sme_leaf_spine_dmz_dns": "Needs an attacker attachable to a segment in the 'external' security zone. attacker1 is cabled to leaf1, and the internet segment is now a point-to-point cable between the firewall and external1, so no reattachment can place it there. An attacker port on the firewall OUTSIDE segment would make it applicable.",
+        "sme_wan_edge_qos": "Needs an attacker attachable to a segment in the 'external' security zone. attacker1 is cabled to leaf1, and the external segment hangs off the WAN edge on the spines, so no reattachment can place it there."
+      }
+    }
+  }
+}

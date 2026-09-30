@@ -1,0 +1,47 @@
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0@if1831: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 76:51:d7:04:39:5f brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 172.26.0.2/24 brd 172.26.0.255 scope global eth0
+       valid_lft forever preferred_lft forever
+1837: eth1@if1836: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether aa:c1:ab:b0:a6:a8 brd ff:ff:ff:ff:ff:ff link-netnsid 3
+    altname clab-o-3c36f4571eb5dc2b
+    inet 10.255.1.1/31 scope global eth1
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a8c1:abff:feb0:a6a8/64 scope link 
+       valid_lft forever preferred_lft forever
+1844: eth3@if1843: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether aa:c1:ab:70:42:c1 brd ff:ff:ff:ff:ff:ff link-netnsid 2
+    altname clab-o-2d63b55cbf40a7b9
+    inet 10.255.1.3/31 scope global eth3
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a8c1:abff:fe70:42c1/64 scope link 
+       valid_lft forever preferred_lft forever
+1849: eth2@if1848: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc htb state UP group default qlen 1000
+    link/ether aa:c1:ab:0f:f5:aa brd ff:ff:ff:ff:ff:ff link-netnsid 1
+    altname clab-o-0bb69e58941c9c19
+    inet 203.0.113.1/24 scope global eth2
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a8c1:abff:fe0f:f5aa/64 scope link 
+       valid_lft forever preferred_lft forever
+default via 172.26.0.1 dev eth0 
+10.10.0.0/16 
+	nexthop via 10.255.1.0 dev eth1 weight 1 
+	nexthop via 10.255.1.2 dev eth3 weight 1 
+10.255.1.0/31 dev eth1 proto kernel scope link src 10.255.1.1 
+10.255.1.2/31 dev eth3 proto kernel scope link src 10.255.1.3 
+172.26.0.0/24 dev eth0 proto kernel scope link src 172.26.0.2 
+203.0.113.0/24 dev eth2 proto kernel scope link src 203.0.113.1 
+qdisc noqueue 0: root refcnt 2 
+qdisc noqueue 0: root refcnt 2 
+qdisc htb 1: root refcnt 25 r2q 10 default 0x20 direct_packets_stat 0 direct_qlen 1000
+class htb 1:10 parent 1:1 prio 1 rate 8Mbit ceil 10Mbit burst 1600b cburst 1600b 
+class htb 1:1 root rate 10Mbit ceil 10Mbit burst 1600b cburst 1600b 
+class htb 1:20 parent 1:1 prio 2 rate 2Mbit ceil 10Mbit burst 1600b cburst 1600b 
+qdisc noqueue 0: root refcnt 2 
+qdisc noqueue 0: root refcnt 2 

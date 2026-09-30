@@ -1,0 +1,285 @@
+{
+  "note": "ani_operations is the subject's own log of every call it made through the ANI, in order, with the arguments it sent",
+  "ani_operations": [
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 25.119269604998408,
+      "error": null,
+      "ok": false,
+      "operation": "execute_validation",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": null
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 7.675401866436005e-05,
+      "error": null,
+      "ok": true,
+      "operation": "get_topology",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "web1"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.6544363700086251,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/interface ethernet-1/40",
+          "/network-instance"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.2996400329866447,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "interfaces",
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-6f75ffb412a5bf32ce14e2367ec65f951fc540cb4d6ea142071846c3b5b65bd0.json",
+      "category": "read",
+      "duration_seconds": 1.3155923480226193,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-4f61ef69c8f93998a89741ef1f04ad3cbd91cf84554150e3d54692bb002b3af8.json",
+      "category": "read",
+      "duration_seconds": 0.5563485769962426,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "kind": "arp",
+        "name": "10.10.40.10",
+        "node": "leaf2"
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5251124640053604,
+      "error": null,
+      "ok": true,
+      "operation": "get_object",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "system"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.8146306980052032,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/acl",
+          "/interface ethernet-1/40 subinterface 0",
+          "/network-instance default interface"
+        ]
+      },
+      "artifact_ref": "reports/manual/results/artifacts/ani-5a294cdc2d8ff51ec37ab9db83c4a44236e17c62f1fd933dc356eac6ffa4681e.json",
+      "category": "read",
+      "duration_seconds": 1.8601180770201609,
+      "error": null,
+      "ok": false,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "leaf2"
+        ],
+        "paths": [
+          "/interface ethernet-1/40 subinterface 0",
+          "/network-instance default interface ethernet-1/40.0"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 1.0045499989937525,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "nodes": [
+          "leaf2"
+        ],
+        "views": [
+          "routes"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.5725851570023224,
+      "error": null,
+      "ok": true,
+      "operation": "get_state",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "format": "text",
+        "nodes": [
+          "web1"
+        ],
+        "paths": [
+          "/etc/network/interfaces",
+          "/etc/netplan"
+        ]
+      },
+      "artifact_ref": null,
+      "category": "read",
+      "duration_seconds": 0.9579267679946497,
+      "error": null,
+      "ok": true,
+      "operation": "get_running_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip addr add 10.10.40.10/24 dev eth1",
+              "ip route add default via 10.10.40.1 dev eth1"
+            ],
+            "reason": "web1 fails all connectivity checks; eth1 is link-up but has no IPv4 address and no default route, while leaf2 DMZ gateway 10.10.40.1/24 is configured and has ARP reachability to web1 MAC.",
+            "rollback_commands": [
+              "ip route del default via 10.10.40.1 dev eth1",
+              "ip addr del 10.10.40.10/24 dev eth1"
+            ],
+            "target": "web1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.00018674001330509782,
+      "error": "update_config.change.commands contains 2 commands for Linux target web1; Linux has no native multi-command transaction, so submit one exactly compensable command per change",
+      "ok": false,
+      "operation": "update_config",
+      "transaction_id": null
+    },
+    {
+      "arguments": {
+        "changes": [
+          {
+            "commands": [
+              "ip addr add 10.10.40.10/24 dev eth1"
+            ],
+            "reason": "web1 fails all connectivity checks; eth1 is link-up but has no IPv4 address, while leaf2 DMZ gateway 10.10.40.1/24 is configured and has ARP reachability to web1 MAC.",
+            "rollback_commands": [
+              "ip addr del 10.10.40.10/24 dev eth1"
+            ],
+            "target": "web1"
+          },
+          {
+            "commands": [
+              "ip route add default via 10.10.40.1 dev eth1"
+            ],
+            "reason": "web1 has no route back to remote subnets after confirming missing IPv4 on eth1 and existing DMZ gateway on leaf2.",
+            "rollback_commands": [
+              "ip route del default via 10.10.40.1 dev eth1"
+            ],
+            "target": "web1"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "mutation",
+      "duration_seconds": 0.6818707630154677,
+      "error": null,
+      "ok": true,
+      "operation": "update_config",
+      "transaction_id": "ani_tx_ffe77559d3bb9c1d"
+    },
+    {
+      "arguments": {
+        "checks": [
+          {
+            "type": "public_success_criteria"
+          }
+        ]
+      },
+      "artifact_ref": null,
+      "category": "validation",
+      "duration_seconds": 36.354129848012235,
+      "error": null,
+      "ok": true,
+      "operation": "execute_validation",
+      "transaction_id": null
+    }
+  ]
+}

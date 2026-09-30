@@ -1,0 +1,20 @@
+$TTL 300
+@       IN      SOA     dns-int.sme01.internal. admin.sme01.internal. (
+                        2026082501 ; serial
+                        3600       ; refresh
+                        600        ; retry
+                        86400      ; expire
+                        300 )      ; negative cache TTL
+
+@               IN      NS      dns-int.sme01.internal.
+
+; Internal endpoints only. The DMZ applications are deliberately absent: they
+; are served by dns-dmz, and this resolver reaches them by forwarding
+; sme01.example rather than holding a second copy of their addresses. Adding
+; web1 or app1 back here would answer authoritatively and short-circuit the
+; forward -- which is exactly what the split-horizon design exists to avoid.
+dns-int         IN      A       10.10.60.10
+user1           IN      A       10.10.10.10
+guest1          IN      A       10.10.20.10
+finance1        IN      A       10.10.30.10
+admin1          IN      A       10.10.99.100

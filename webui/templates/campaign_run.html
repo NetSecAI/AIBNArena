@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ campaign.campaign_id }} — AIBNArena{% endblock %}
+{% block subtitle %}one campaign: a matrix of episodes, judged one after another, then compared{% endblock %}
+
+{% block content %}
+<section class="run-header">
+  <h2>{{ campaign.campaign_id }}</h2>
+  <span class="state" id="state">{{ campaign.state }}</span>
+  <dl>
+    <dt>Subjects</dt><dd>{{ campaign.request.architectures | join(", ") }}</dd>
+    <dt>Models</dt><dd>{{ campaign.request.models | join(", ") }}</dd>
+    <dt>Seeds</dt><dd>{{ campaign.request.seeds | join(", ") }}</dd>
+    <dt>Budget</dt><dd>{{ campaign.request.execution_budget_seconds }}s</dd>
+    <dt>Writing to</dt><dd>{{ campaign.result_dir }}/</dd>
+    <dt>Report</dt><dd id="campaign-report">the subjects compared and every episode's interactions, written when the campaign ends</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Cells <span class="stream-note" id="counts"></span></h2>
+  <table id="cells">
+    <thead>
+      <tr>
+        <th>#</th><th>Subject</th><th>Model</th><th>Scenario</th>
+        <th>Seed</th><th>Fault</th><th>State</th><th>Verdict</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div class="actions" id="resume" hidden>
+    <button type="button" id="resume-button" title="Runs again, in this campaign and on the same seeds, every cell that did not end done: the ones skipped and the ones the judge could not finish. Cells done are kept, including those whose subject did not repair.">Resume</button>
+    <small class="note" id="resume-note">the cells not done run again on the faults the other subjects faced</small>
+  </div>
+  <p class="note" id="export" hidden></p>
+</section>
+
+<section>
+  <h2>Launcher <span class="stream-note">what this tool did between the cells</span></h2>
+  <pre id="log-launcher" class="launcher-log"></pre>
+</section>
+
+<div class="streams">
+  <section>
+    <h2>Judge <span class="stream-note">benchmarks/run.py</span></h2>
+    <pre id="log-benchmark"></pre>
+  </section>
+  <section>
+    <h2>Subject <span class="stream-note">the server of the cell running</span></h2>
+    <pre id="log-sut"></pre>
+  </section>
+</div>
+
+<section id="results" hidden>
+  <h2>Results <span class="stream-note">each subject's evaluation parameters, from the campaign's report</span></h2>
+  <div id="charts" class="charts"><p class="note">Reading the campaign's report…</p></div>
+</section>
+
+<p><a href="/campaigns">Back to the matrix form</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script>window.CAMPAIGN = {{ campaign | tojson }};</script>
+<script src="/static/campaign_charts.js"></script>
+<script src="/static/campaign_run.js"></script>
+{% endblock %}
