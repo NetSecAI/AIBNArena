@@ -15,6 +15,10 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
+#: The output-token ceiling a subject is started with when the form leaves it empty.
+DEFAULT_MAX_TOKENS = 2048
+
+
 class EpisodeRequest(BaseModel):
     # What is being measured.
     architecture: str
@@ -40,13 +44,21 @@ class EpisodeRequest(BaseModel):
     #: How that judge reads the Yes/No log-probabilities: `prompt_logprobs` (vLLM,
     #: exact) or `top_logprobs` (OpenAI API: the candidates of the generated token).
     diagnosis_judge_reading: Literal["prompt_logprobs", "top_logprobs"] | None = None
+    #: Make one scoring call to the diagnosis judge before anything starts -- at Validate, and
+    #: before the subject (`webui/judge_check.py`) -- and stop when it does not score. Without
+    #: it, a judge its endpoint refuses is found after the episode, which is then unjudged.
+    check_diagnosis_judge: bool = True
 
     # Where the subject is served.
     host: str = "127.0.0.1"
     port: int | None = None
 
     # Model and loop settings the subject's server accepts as flags.
-    max_tokens: int | None = None
+    #: Sent to the subject as --max-tokens unless set otherwise. The subjects' own default,
+    #: 400 (sut/common/agent_config.py), cut gpt-4o-mini's replies mid-text, which ended an
+    #: episode with no tool call (reports/manual, 2026-11-17). A recorded request that
+    #: stated null keeps it.
+    max_tokens: int | None = DEFAULT_MAX_TOKENS
     temperature: float | None = None
     prompt_variant: str | None = None
     enable_thinking: bool | None = None
@@ -61,7 +73,9 @@ class EpisodeRequest(BaseModel):
     artifact_directory: str | None = None
     dry_run: bool = False
 
-    # Read by the subject from its environment, never from a flag.
+    # Read by the subject from its environment, never from a flag. The page does not set
+    # thinking: it is chosen when the model is declared (Models page) and written here at
+    # launch from that declaration (`endpoints.with_thinking`), so the record states it.
     thinking_style: Literal["auto", "chat_template", "system_prompt"] | None = None
     thinking_effort: Literal["minimal", "low", "medium", "high"] | None = None
 
@@ -79,6 +93,11 @@ def run_id() -> str:
     return f"{stamp}-{secrets.token_hex(2)}"
 
 
-def experiment_id(request: EpisodeRequest, identifier: str) -> str:
-    """What the judge records this episode as, and how its result file is found."""
-    return f"webui-{slug(request.scenario_id)}-seed{request.seed}-{identifier}"
+def experiment_id(request: EpisodeRequest) -> str:
+    """What the judge records this episode as: the scenario instance and its seed.
+
+    Also the folder the episode is written to, under the manual directory; each run
+    of it gets its own subfolder there, named by the run id, so a seed run again does
+    not overwrite the first.
+    """
+    return f"{slug(request.scenario_id)}-seed{request.seed}"

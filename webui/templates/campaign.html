@@ -41,7 +41,7 @@
         Host
         <input id="host" type="text" value="127.0.0.1" />
       </label>
-      <label title="Port every subject listens on. Empty uses each subject's own default. The port is freed before each server starts.">
+      <label title="Port every subject listens on. Empty uses each subject's own default. If something already listens there, a subject takes the next free port and the launcher log says which; nothing is stopped.">
         Port
         <input id="port" type="number" />
       </label>
@@ -60,20 +60,25 @@
       Unregistered model ids
       <input id="extra-models" type="text" placeholder="openai/gpt-4o-mini, fr-gpt-5.4" />
     </label>
-    <label title="The model that judges each cell's stated diagnosis against the injected fault (evaluation parameter 13, the ParaPLUIE score). A model a registered endpoint serves. None keeps the diagnosis in every record, unjudged.">
+    <label title="Who judges the subject's stated diagnosis against the injected fault (evaluation parameter 13, the ParaPLUIE score). vLLM reads the prompt's own log-probabilities of Yes and No, the exact reading (prompt_logprobs); the OpenAI API only lists the candidates of one generated token (top_logprobs). None keeps the diagnosis in the record, unjudged.">
       Diagnosis judge
+      <select id="judge-kind">
+        <option value="">none (diagnosis recorded, not judged)</option>
+        <option value="vllm">vLLM (exact reading: prompt_logprobs)</option>
+        <option value="openai">OpenAI API (top_logprobs)</option>
+      </select>
+      <small id="judge-note"></small>
+    </label>
+    <label id="judge-model-field" title="A model a registered endpoint of that kind serves: its base URL is named to the judge, its key travels in the environment. An endpoint is OpenAI's when it was registered as such or its URL is api.openai.com.">
+      Judge model
       <select id="diagnosis-judge"></select>
     </label>
     <label id="diagnosis-judge-custom" title="A judge model id no registered endpoint serves. It runs on each cell's subject endpoint with that key.">
       Judge model id
       <input id="diagnosis_judge_model" type="text" />
     </label>
-    <label title="How the judge reads the Yes/No log-probabilities. prompt_logprobs is the exact reading a vLLM endpoint gives; top_logprobs reads them from the candidates the OpenAI API lists for the generated token (gpt-4.1, gpt-4o).">
-      Judge reading
-      <select id="diagnosis_judge_reading">
-        <option value="">prompt_logprobs (vLLM, exact)</option>
-        <option value="top_logprobs">top_logprobs (OpenAI API)</option>
-      </select>
+    <label class="checkbox" title="One scoring call to the chosen judge, with its model, endpoint, key and reading, at Validate and before anything is deployed: a judge its endpoint refuses (an unknown model id, a rejected key, a reading it cannot serve) stops the run there instead of leaving the episode unjudged. Costs one request.">
+      <input id="check_diagnosis_judge" type="checkbox" checked /> Check the judge before the run
     </label>
   </section>
 
@@ -88,10 +93,18 @@
       resolved to, so the same scenario added twice is two different faults — which is how
       a scenario is measured on more than one.
     </p>
+    <div class="grid">
+      <label title="A campaign already run, from reports/seed-registry.json. Picking one fills the rows below with its scenario rows, each on the seed it ran — the same faults — and leaves the subjects, the models and the settings as they are chosen on this page. The rows it replaces are dropped. The Seed above restores a whole campaign instead.">
+        Seed
+        <select id="scenario-source"></select>
+        <small id="scenario-source-note"></small>
+      </label>
+    </div>
     <div id="selections"></div>
     <div class="actions">
       <button type="button" id="add-selection" title="Add one row, started the way the Episode page starts, to choose a scenario in.">Add a scenario</button>
       <select id="bulk-domain" title="The domain the button fills from: every scenario of it and every method, each on the topology and reference state it was written for."></select>
+      <select id="bulk-topology" title="The topology every added row runs on, from the reference state its scenario was written for there. A scenario this topology cannot run is left out. With none chosen, each scenario runs on the first topology it can."></select>
       <select id="bulk-task" title="The wording every added row puts its task in. A scenario without that wording keeps its default."></select>
       <button type="button" id="add-every" title="Add one row per scenario and method of this domain. Rows already in the table are left alone rather than repeated."></button>
     </div>
@@ -105,35 +118,8 @@
       before it.
     </p>
     <div class="grid">
-      <label title="Ceiling on output tokens per model call.">Max tokens<input id="max_tokens" type="number" /></label>
+      <label title="Ceiling on output tokens per model call. 2048 unless another value is typed here; the subjects' own default, 400, cut gpt-4o-mini's replies before their tool call.">Max tokens<input id="max_tokens" type="number" value="2048" placeholder="2048" /></label>
       <label title="Sampling temperature. Empty leaves the model's own supported default.">Temperature<input id="temperature" type="number" step="0.1" /></label>
-      <label title="Whether each subject asks its model to reason. A model family with no reasoning switch is refused at startup rather than run as if the setting had held.">
-        Thinking
-        <select id="enable_thinking">
-          <option value="">model default</option>
-          <option value="true">on</option>
-          <option value="false">off</option>
-        </select>
-      </label>
-      <label title="The mechanism used to ask for it: auto reads it from the model family, chat_template sends the vLLM/Qwen flag, system_prompt puts a directive in front of the prompt.">
-        Thinking style
-        <select id="thinking_style">
-          <option value="">unset</option>
-          <option value="auto">auto</option>
-          <option value="chat_template">chat_template</option>
-          <option value="system_prompt">system_prompt</option>
-        </select>
-      </label>
-      <label title="Effort level, for the families that take one instead of a flag. Only meaningful with thinking on.">
-        Thinking effort
-        <select id="thinking_effort">
-          <option value="">unset</option>
-          <option value="minimal">minimal</option>
-          <option value="low">low</option>
-          <option value="medium">medium</option>
-          <option value="high">high</option>
-        </select>
-      </label>
       <label title="How much of each subject's audit trace is printed to its own server log. Never returned over A2A and never saved in the benchmark JSON.">
         Debug trace
         <select id="debug_trace">
@@ -184,7 +170,8 @@
 {% block scripts %}
 <script>window.CATALOG = {{ catalog | safe }};
 window.SEEDS = {{ seeds | safe }};</script>
-<script src="/static/endpoint_sync.js"></script>
-<script src="/static/scenario_picker.js"></script>
-<script src="/static/campaign.js"></script>
+<script src="{{ asset('endpoint_sync.js') }}"></script>
+<script src="{{ asset('scenario_picker.js') }}"></script>
+<script src="{{ asset('judge_picker.js') }}"></script>
+<script src="{{ asset('campaign.js') }}"></script>
 {% endblock %}

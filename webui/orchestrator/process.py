@@ -1,10 +1,11 @@
 """Starting, streaming and stopping the processes one episode needs.
 
-The port is released before a subject is started and the subject is stopped after
-the judge returns, both the way `experiments/run_langchain_baseline.sh` does it:
-a listener left behind from an earlier run answers the judge and the episode is
-then measured against a subject nobody chose. What is terminated is named in the
-run log, so a process this tool killed is never a silent one.
+A subject is started on a port nothing listens on, and stopped after the judge
+returns. A port another process holds -- a subject left from an earlier run, the
+other checkout's interface, anything else -- is left to it: the next free one is
+taken, and what held each busy port is named in the run log. Nothing is killed to
+make room, and a listener that is not the subject just started is never judged,
+since the readiness check holds the runtime document to that process id.
 """
 from __future__ import annotations
 
@@ -17,6 +18,9 @@ from typing import Callable, Sequence
 import psutil
 
 LineSink = Callable[[str], None]
+
+#: How many ports, from the one asked for, are tried before giving up.
+PORT_SEARCH_LIMIT = 100
 
 
 def listening_pids(port: int) -> list[int]:
@@ -42,34 +46,32 @@ def describe(pid: int) -> str:
         return f"pid {pid}: (no longer readable)"
 
 
-def terminate(pid: int, *, timeout: float) -> None:
-    """Ask a process to stop, and insist if it does not."""
-    try:
-        process = psutil.Process(pid)
-    except psutil.NoSuchProcess:
-        return
-    process.terminate()
-    _, alive = psutil.wait_procs([process], timeout=timeout)
-    if alive:
-        process.kill()
-        psutil.wait_procs([process], timeout=2)
+def listening_ports() -> set[int]:
+    """Every port something listens on, on any local address and for any user.
+
+    Unlike `listening_pids`, a socket whose owner cannot be read (another user's
+    process) still counts: the port is taken whoever holds it.
+    """
+    return {
+        connection.laddr.port
+        for connection in psutil.net_connections(kind="inet")
+        if connection.status == psutil.CONN_LISTEN and connection.laddr
+    }
 
 
-def release_port(port: int, *, timeout: float, sink: LineSink) -> None:
-    """Leave this port free, or say who is still holding it."""
-    holders = listening_pids(port)
-    if not holders:
-        sink(f"port {port} is free")
-        return
-    for pid in holders:
-        sink(f"port {port} is busy, stopping {describe(pid)}")
-        terminate(pid, timeout=timeout)
-    remaining = listening_pids(port)
-    if remaining:
-        raise RuntimeError(
-            f"port {port} is still held by {', '.join(str(pid) for pid in remaining)}"
-        )
-    sink(f"port {port} released")
+def next_free_port(port: int, *, sink: LineSink, limit: int = PORT_SEARCH_LIMIT) -> int:
+    """This port if nothing listens on it, else the first free one after it.
+
+    What holds each busy port is named and left running.
+    """
+    busy = listening_ports()
+    for candidate in range(port, min(port + limit, 65536)):
+        if candidate not in busy:
+            sink(f"port {candidate} is free")
+            return candidate
+        holders = ", ".join(describe(pid) for pid in listening_pids(candidate))
+        sink(f"port {candidate} is busy ({holders or 'held by another user'}), trying {candidate + 1}")
+    raise RuntimeError(f"no free port from {port} to {min(port + limit, 65536) - 1}")
 
 
 class StreamedProcess:

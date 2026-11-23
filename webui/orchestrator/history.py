@@ -77,12 +77,15 @@ def save(record: RunRecord, directory: Path) -> bool:
 def restore(manager: RunManager, root: Path, limit: int = RESTORED_RUNS) -> int:
     """Read the runs a previous server left under `root` back into the registry.
 
-    Run ids begin with their UTC start time, so the directories sort oldest
-    first and the registry keeps its order. A record this version cannot read is
-    skipped rather than stopping the server. Returns how many were read.
+    A run is `<run id>/run.json` or, since each manual test has a folder of its own,
+    `<scenario instance>-seed<seed>/<run id>/run.json`; both are read. Run ids begin
+    with their UTC start time, so ordered by id they come oldest first and the
+    registry keeps its order. A record this version cannot read is skipped rather
+    than stopping the server. Returns how many were read.
     """
     restored = 0
-    for path in sorted(root.glob(f"*/{RECORD}"))[-limit:]:
+    paths = [*root.glob(f"*/{RECORD}"), *root.glob(f"*/*/{RECORD}")]
+    for path in sorted(paths, key=lambda path: path.parent.name)[-limit:]:
         try:
             record = _record(json.loads(path.read_text(encoding="utf-8")), path.parent)
         except (OSError, ValueError, KeyError, TypeError, ValidationError):

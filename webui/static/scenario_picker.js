@@ -36,15 +36,19 @@ function writtenFor(item, key) {
   return item.default_scenario_id.startsWith(`${key}.`);
 }
 
-// Where and from what state this scenario can run: the files written for it,
-// or every file that runs it when none is. A file pins one topology and one
-// reference state, so this bounds both lists -- qos.assured_bandwidth is
-// written for sme01-qos-greenfield alone, qos.wan_shaping_policy_repair for
-// sme01-qos alone, as scripts/export_results.py records it too.
+// Where and from what state this scenario can run. A file pins one topology and
+// one reference state. On a topology where a file is written for the scenario
+// (the scenario is its default), only such files are offered -- on
+// sme_wan_edge_qos, qos.assured_bandwidth was written for sme01-qos-greenfield
+// alone, qos.wan_shaping_policy_repair for sme01-qos alone, as
+// scripts/export_results.py records it too. A topology where none is keeps
+// every file that runs it: a file written for the scenario on one topology does
+// not take the others away (combined.disable_interface__disable_routing is the
+// default of the SME and clos01 files, not of the campus ones, which run it too).
 function possibleFiles(key) {
   const pool = runners(key);
-  const written = pool.filter((item) => writtenFor(item, key));
-  return written.length ? written : pool;
+  const written = new Set(pool.filter((item) => writtenFor(item, key)).map((item) => item.topology));
+  return pool.filter((item) => !written.has(item.topology) || writtenFor(item, key));
 }
 
 // A server started before the catalog carried the state names hands none; each

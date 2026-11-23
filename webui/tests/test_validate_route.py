@@ -177,7 +177,7 @@ def test_a_run_id_is_not_a_campaign_id():
 def test_validating_a_matrix_compiles_every_cell_without_starting_it():
     response = client.post("/api/campaigns/validate", json={
         **CAMPAIGN,
-        "models": ["openai/gpt-4o-mini", "openai/fr-gpt-5.4"],
+        "architectures": ["langchain_agent", "langchain_rag_agent"],
         "scenarios": [
             {"experiment": "connectivity-smoke",
              "scenario_id": "connectivity.disable_interface.m1", "seed": 9},
@@ -273,3 +273,23 @@ def test_a_task_wording_other_than_the_base_compiles_under_its_own_id():
         response = client.post("/api/validate", json={**EPISODE, "scenario_id": scenario_id})
         assert response.status_code == 200, response.text
         assert response.json()["scenario"]["id"] == scenario_id
+
+
+def test_every_page_names_its_scripts_with_the_version_written():
+    """A cached app.js under a new index.html stopped every launch on 2026-11-17."""
+    import re
+
+    for path in ("/", "/campaigns", "/models"):
+        page = client.get(path).text
+        links = re.findall(r'(?:src|href)="(/static/[^"]+)"', page)
+        assert links and all(re.fullmatch(r"/static/[\w.-]+\?v=\d+", link) for link in links), links
+        for link in links:
+            assert client.get(link).status_code == 200, link
+
+
+def test_recent_runs_name_the_subject(monkeypatch):
+    record = RunRecord(id="20261117T000000Z-test", request=EpisodeRequest(**{**EPISODE, "architecture": "langchain_rag_agent"}),
+                       experiment_id="x")
+    monkeypatch.setattr(MANAGER, "history", lambda: [record])
+    page = client.get("/").text
+    assert "<th>Subject</th>" in page and "<td>langchain_rag_agent</td>" in page

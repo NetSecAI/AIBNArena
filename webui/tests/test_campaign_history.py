@@ -110,7 +110,7 @@ def test_a_record_this_version_cannot_read_is_skipped(tmp_path):
 def test_a_restarted_server_lists_the_campaign_and_serves_its_page(tmp_path, monkeypatch):
     campaign = _campaign(tmp_path / "listed")
     (campaign / "launcher.log").write_text("campaign listed: 5 cells\n", encoding="utf-8")
-    moved = replace(routes.config, campaign_dir=str(tmp_path), log_dir=str(tmp_path / "episodes"))
+    moved = replace(routes.config, campaign_dir=str(tmp_path), manual_dir=str(tmp_path / "episodes"))
     fresh = RunManager()
     for module in (routes, app_module):
         monkeypatch.setattr(module, "config", moved)

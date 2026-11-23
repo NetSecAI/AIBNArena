@@ -8,7 +8,10 @@ const $ = (id) => document.getElementById(id);
 const NUMBERS = [
   "max_tokens", "temperature", "ani_call_limit", "recursion_limit",
 ];
-const TEXTS = ["debug_trace", "thinking_style", "thinking_effort"];
+const TEXTS = ["debug_trace"];
+// Thinking is not chosen on this page: each model's comes from its declaration on the
+// Models page, shown next to it below, and the server records it into the campaign.
+const THINKING = ["enable_thinking", "thinking_style", "thinking_effort"];
 
 function fill(select, options, selected) {
   select.innerHTML = "";
@@ -116,12 +119,29 @@ function rowKey(row) {
 }
 
 // Every scenario and method of one domain, in one click, each on the topology
-// and reference state it was written for, in the wording chosen beside the
-// button (a scenario without that wording keeps its default). Twenty-one rows
-// for connectivity, and each one is a cell per subject, model and seed --
-// which is why the matrix size sits next to the launch button.
+// chosen beside the button -- or, with none chosen, on the first one it can run
+// on -- and the reference state it was written for there, in the wording chosen
+// (a scenario without that wording keeps its default). Twenty-one rows for
+// connectivity, and each one is a cell per subject, model and seed -- which is
+// why the matrix size sits next to the launch button.
 function domains() {
   return [...new Set(scenarioChoices().map((item) => item.domain))];
+}
+
+function topologies() {
+  return [...new Set(catalog.experiments.filter((item) => item.fault_applicable)
+    .map((item) => item.topology))].sort();
+}
+
+// The file a bulk-added row of this scenario runs from, or null when the chosen
+// topology cannot run it.
+function bulkFile(scenario) {
+  const key = scenarioKey(scenario);
+  const files = possibleFiles(key);
+  const topology = $("bulk-topology").value;
+  if (!topology) return files[0];
+  const there = files.filter((item) => item.topology === topology);
+  return there.find((item) => writtenFor(item, key)) || there[0] || null;
 }
 
 function addEveryMethod() {
@@ -132,7 +152,8 @@ function addEveryMethod() {
     const tasks = scenario.tasks || [];
     const task = tasks.find((item) => wording && wordingOf(item) === wording)
       || tasks.find((item) => item.base) || null;
-    const file = possibleFiles(scenarioKey(scenario))[0];
+    const file = bulkFile(scenario);
+    if (!file) continue;
     for (const method of scenario.methods) {
       const row = {
         experiment: file.key,
@@ -149,8 +170,12 @@ function addEveryMethod() {
 
 function describeBulk() {
   const rows = scenarioChoices().filter((item) => item.domain === $("bulk-domain").value)
+    .filter((item) => bulkFile(item))
     .reduce((total, item) => total + item.methods.length, 0);
-  $("add-every").textContent = `Add all ${rows} method${rows === 1 ? "" : "s"} of this domain`;
+  const topology = $("bulk-topology").value;
+  $("add-every").textContent = `Add all ${rows} method${rows === 1 ? "" : "s"} of this domain`
+    + (topology ? ` on ${topology}` : "");
+  $("add-every").disabled = rows === 0;
 }
 
 function selections() {
@@ -227,7 +252,7 @@ function registeredModels() {
   return catalog.endpoints.flatMap((endpoint) =>
     endpoint.models.map((model) => ({
       value: model,
-      label: `${model} — ${endpoint.name}`,
+      label: `${model} — ${endpoint.name} · ${describeThinking(thinkingOf(endpoint, model))}`,
       title: endpoint.has_key ? endpoint.api_base : `${endpoint.api_base} · no key stored`,
     })));
 }
@@ -236,29 +261,12 @@ function registeredModels() {
 // Models page changes them. A model still offered stays ticked. One ticked that
 // no endpoint offers any more is unticked and named, and a recorded campaign's
 // seed is released: the matrix on screen is no longer the one it stood for.
-// The judge of every cell's diagnosis (evaluation parameter 13): none, or a
-// model a registered endpoint serves. Kept while its endpoint still offers it.
-const JUDGE_CUSTOM = "\u0000custom";
+// The judge of every cell's diagnosis (evaluation parameter 13): none, vLLM or the
+// OpenAI API, then a model of that kind (judge_picker.js).
+const JUDGE_OTHER_LABEL = "other model id, on each subject's endpoint…";
 
 function fillJudges() {
-  const previous = $("diagnosis-judge").value;
-  const registered = registeredModels();
-  fill($("diagnosis-judge"), [
-    { value: "", label: "none (diagnosis recorded, not judged)" },
-    ...registered.map((item) => ({ value: item.value, label: item.label })),
-    { value: JUDGE_CUSTOM, label: "other model id, on each subject's endpoint…" },
-  ]);
-  if (previous === JUDGE_CUSTOM || registered.some((item) => item.value === previous)) $("diagnosis-judge").value = previous;
-  onJudgeChoiceChange();
-}
-
-function onJudgeChoiceChange() {
-  $("diagnosis-judge-custom").hidden = $("diagnosis-judge").value !== JUDGE_CUSTOM;
-}
-
-function chosenJudge() {
-  const choice = $("diagnosis-judge").value;
-  return choice === JUDGE_CUSTOM ? $("diagnosis_judge_model").value.trim() : choice;
+  fillJudgeModels(JUDGE_OTHER_LABEL);
 }
 
 function fillModels() {
@@ -328,14 +336,10 @@ function onSeedChoice() {
   $("name").value = request.name || "campaign";
   tick($("architectures"), request.architectures || []);
   $("extra-models").value = tick($("models"), request.models || []).join(", ");
-  if (request.diagnosis_judge_model && !registeredModels().some((item) => item.value === request.diagnosis_judge_model)) {
-    $("diagnosis-judge").value = JUDGE_CUSTOM;
-    $("diagnosis_judge_model").value = request.diagnosis_judge_model;
-  } else {
-    $("diagnosis-judge").value = request.diagnosis_judge_model || "";
-  }
-  onJudgeChoiceChange();
-  $("diagnosis_judge_reading").value = request.diagnosis_judge_reading || "";
+  // Its kind from its reading: a recorded top_logprobs judge ran on the OpenAI API.
+  restoreJudge(request.diagnosis_judge_model, request.diagnosis_judge_reading, JUDGE_OTHER_LABEL);
+  // The check measures nothing: a campaign recorded before it existed is checked too.
+  $("check_diagnosis_judge").checked = request.check_diagnosis_judge ?? true;
 
   // The seeds of the recorded cells, not fresh ones: replaying a campaign that
   // drew new seeds would run a different set of faults under its name.
@@ -347,8 +351,6 @@ function onSeedChoice() {
   for (const name of [...NUMBERS, ...TEXTS]) {
     $(name).value = request[name] ?? "";
   }
-  $("enable_thinking").value = request.enable_thinking === undefined
-    || request.enable_thinking === null ? "" : String(request.enable_thinking);
 
   $("selections").replaceChildren();
   restoredSeeds = (request.scenarios || []).map((row) => row.seed).filter(Boolean);
@@ -359,6 +361,56 @@ function onSeedChoice() {
   refreshSize();
   note.textContent = `${entry.campaign_id} · recorded ${displayTime(entry.recorded_at)}`
     + ` · seeds ${restoredSeeds.join(", ")}`;
+  // The rows are that campaign's: the Scenarios panel says so too.
+  if ([...$("scenario-source").options].some((option) => option.value === String(entry.seed))) {
+    $("scenario-source").value = String(entry.seed);
+    $("scenario-source-note").textContent = "";
+  }
+}
+
+// --- the rows of a campaign already run ---------------------------------------
+// The Seed of the Scenarios panel: a campaign of the register, whose scenario rows,
+// each on the seed it ran, replace the rows below -- the same faults, put to the
+// subjects and models chosen on this page. The Seed of the Campaign panel restores a
+// whole campaign instead. Each row's seed is checked by the server against what it
+// stood for, as any replayed seed is.
+function recordedRows(entry) {
+  return ((entry && entry.request && entry.request.scenarios) || []).map((row) => ({ ...row }));
+}
+
+function fillScenarioSources() {
+  fill($("scenario-source"), [
+    { value: "", label: "choose the rows by hand" },
+    ...(window.SEEDS.campaigns || []).filter((entry) => recordedRows(entry).length).map((entry) => {
+      const rows = recordedRows(entry);
+      return {
+        value: String(entry.seed),
+        label: `${entry.seed} — ${entry.campaign_id} · ${rows.length} row${rows.length === 1 ? "" : "s"}`,
+      };
+    }),
+  ]);
+}
+
+function onScenarioSource() {
+  const entry = (window.SEEDS.campaigns || [])
+    .find((item) => String(item.seed) === $("scenario-source").value);
+  const note = $("scenario-source-note");
+  if (!entry) {
+    note.textContent = "";
+    return;
+  }
+  const rows = recordedRows(entry);
+  // Filled as a restore is, so that drawing the rows does not read as editing them;
+  // the change of this select itself still releases a campaign chosen above, since
+  // the matrix is no longer the one it stood for.
+  restoring = true;
+  $("selections").replaceChildren();
+  for (const row of rows) addSelection(row);
+  restoring = false;
+  refreshSize();
+  note.textContent = `${rows.length} row${rows.length === 1 ? "" : "s"} of ${entry.campaign_id}, `
+    + `each on the seed it ran (${rows.map((row) => row.seed).filter(Boolean).join(", ")}): the same `
+    + "faults, for the subjects and models chosen above.";
 }
 
 // A campaign seed stands for one matrix. Editing any axis means the choice no
@@ -388,11 +440,19 @@ function payload() {
   };
   if ($("port").value) body.port = Number($("port").value);
   if ($("cleanup").value) body.cleanup = $("cleanup").value;
-  if (chosenJudge()) body.diagnosis_judge_model = chosenJudge();
-  if (chosenJudge() && $("diagnosis_judge_reading").value) body.diagnosis_judge_reading = $("diagnosis_judge_reading").value;
-  if ($("enable_thinking").value) body.enable_thinking = $("enable_thinking").value === "true";
+  Object.assign(body, judgeRequest());
+  body.check_diagnosis_judge = $("check_diagnosis_judge").checked;
   for (const name of NUMBERS) if ($(name).value !== "") body[name] = Number($(name).value);
   for (const name of TEXTS) if ($(name).value !== "") body[name] = $(name).value.trim();
+  // A restored campaign replays how its models were asked to think, recorded at its
+  // launch, not how they are declared today. Any edit of the matrix releases the seed,
+  // and with it this record.
+  const recorded = recordedCampaign();
+  if (recorded) {
+    const request = recorded.request || {};
+    for (const name of THINKING) if (request[name] !== undefined && request[name] !== null) body[name] = request[name];
+    if (request.model_thinking) body.model_thinking = request.model_thinking;
+  }
   return body;
 }
 
@@ -417,8 +477,11 @@ function report(result) {
 $("add-selection").addEventListener("click", () => { addSelection(); refreshSize(); });
 $("add-every").addEventListener("click", addEveryMethod);
 $("bulk-domain").addEventListener("change", describeBulk);
-$("diagnosis-judge").addEventListener("change", onJudgeChoiceChange);
+$("bulk-topology").addEventListener("change", describeBulk);
+$("judge-kind").addEventListener("change", fillJudges);
+$("diagnosis-judge").addEventListener("change", showJudgeFields);
 $("seed-choice").addEventListener("change", onSeedChoice);
+$("scenario-source").addEventListener("change", onScenarioSource);
 // Every axis of the matrix lives in this form, so one listener covers them all.
 // The seed select is skipped: choosing a campaign is not editing one.
 for (const event of ["change", "input"]) {
@@ -458,6 +521,10 @@ checkboxes($("architectures"), catalog.architectures.map((item) => ({
 fillModels();
 
 fill($("bulk-domain"), domains().map((domain) => ({ value: domain, label: domain })));
+fill($("bulk-topology"), [
+  { value: "", label: "each scenario on the first topology it runs on" },
+  ...topologies().map((name) => ({ value: name, label: `on ${name}` })),
+]);
 fill($("bulk-task"), [
   { value: "", label: "each scenario's default wording" },
   ...BY_DIFFICULTY.map((variant) => ({
@@ -472,6 +539,7 @@ fill($("seed-choice"), [
       + ` · ${(entry.episode_seeds || []).length} seeds`,
   })),
 ]);
+fillScenarioSources();
 describeBulk();
 addSelection();
 onSeedChoice();

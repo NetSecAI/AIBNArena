@@ -18,7 +18,7 @@ EXPERIMENTS_DIR = "benchmarks/configs/experiments"
 #: Domains whose scenarios this interface can launch. `security` is left out on
 #: purpose: no experiment file pins it to a testbed, and its scenarios carry a
 #: task mode (exploit/detect/correct/prevent) where the others carry a method.
-LAUNCHABLE_DOMAINS = frozenset({"connectivity", "dhcp_dns", "filtering", "qos"})
+LAUNCHABLE_DOMAINS = frozenset({"connectivity", "dhcp_dns", "filtering", "qos", "vlan", "combined"})
 
 
 @dataclass(frozen=True)

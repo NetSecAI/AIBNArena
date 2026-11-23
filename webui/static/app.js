@@ -11,7 +11,7 @@ const NUMBERS = [
   "max_context_chars", "max_consecutive_rejections", "recursion_limit",
 ];
 const TEXTS = [
-  "prompt_variant", "debug_trace", "artifact_directory", "thinking_style", "thinking_effort",
+  "prompt_variant", "debug_trace", "artifact_directory",
 ];
 
 function architecture() {
@@ -42,41 +42,25 @@ function onModelChoiceChange() {
   const custom = $("model-choice").value === CUSTOM;
   $("model-custom").hidden = !custom;
   const chosen = registeredModels().find((item) => item.model === $("model-choice").value);
+  // Thinking is the model's declaration (Models page), stated here because nothing
+  // on this page changes it.
   $("model-note").textContent = chosen
     ? `${chosen.endpoint.name} · ${chosen.endpoint.api_base}` +
-      (chosen.endpoint.has_key ? "" : " · no key stored")
-    : "";
+      (chosen.endpoint.has_key ? "" : " · no key stored") +
+      ` · ${describeThinking(thinkingOf(chosen.endpoint, chosen.model))}`
+    : custom ? "thinking: model default (a model no endpoint declares)" : "";
 }
 
 // The model select, drawn from catalog.endpoints and drawn again when the Models
 // page changes them. The model chosen here stays chosen while an endpoint still
 // offers it. One that went away is replaced by the first offered, and the note
 // names it, so the launcher never switches models without a word.
-// The judge of the subject's diagnosis (evaluation parameter 13): none, or a
-// model a registered endpoint serves. Drawn with the model list and kept while
-// its endpoint still offers it.
+// The judge of the subject's diagnosis (evaluation parameter 13): none, vLLM or the
+// OpenAI API, then a model of that kind (judge_picker.js). Drawn with the model list.
+const JUDGE_OTHER_LABEL = "other model id, on the subject's endpoint…";
+
 function fillJudges() {
-  const previous = $("diagnosis-judge").value;
-  const offered = registeredModels();
-  fill($("diagnosis-judge"), [
-    { value: "", label: "none (diagnosis recorded, not judged)" },
-    ...offered.map((item) => ({
-      value: item.model,
-      label: `${item.model} — ${item.endpoint.name}`,
-    })),
-    { value: CUSTOM, label: "other model id, on the subject's endpoint…" },
-  ]);
-  if (previous === CUSTOM || offered.some((item) => item.model === previous)) $("diagnosis-judge").value = previous;
-  onJudgeChoiceChange();
-}
-
-function onJudgeChoiceChange() {
-  $("diagnosis-judge-custom").hidden = $("diagnosis-judge").value !== CUSTOM;
-}
-
-function chosenJudge() {
-  const choice = $("diagnosis-judge").value;
-  return choice === CUSTOM ? $("diagnosis_judge_model").value.trim() : choice;
+  fillJudgeModels(JUDGE_OTHER_LABEL);
 }
 
 function fillModels() {
@@ -86,7 +70,7 @@ function fillModels() {
   fill($("model-choice"), [
     ...offered.map((item) => ({
       value: item.model,
-      label: `${item.model} — ${item.endpoint.name}`,
+      label: `${item.model} — ${item.endpoint.name} · ${describeThinking(thinkingOf(item.endpoint, item.model))}`,
     })),
     { value: CUSTOM, label: "other model id…" },
   ]);
@@ -187,9 +171,8 @@ function payload() {
   };
   if ($("port").value) body.port = Number($("port").value);
   if ($("cleanup").value) body.cleanup = $("cleanup").value;
-  if (chosenJudge()) body.diagnosis_judge_model = chosenJudge();
-  if (chosenJudge() && $("diagnosis_judge_reading").value) body.diagnosis_judge_reading = $("diagnosis_judge_reading").value;
-  if ($("enable_thinking").value) body.enable_thinking = $("enable_thinking").value === "true";
+  Object.assign(body, judgeRequest());
+  body.check_diagnosis_judge = $("check_diagnosis_judge").checked;
   for (const name of NUMBERS) if ($(name).value !== "") body[name] = Number($(name).value);
   for (const name of TEXTS) if ($(name).value !== "") body[name] = $(name).value.trim();
   return body;
@@ -216,7 +199,8 @@ function report(result) {
 $("seed-choice").addEventListener("change", onSeedChoice);
 $("architecture").addEventListener("change", onArchitectureChange);
 $("model-choice").addEventListener("change", onModelChoiceChange);
-$("diagnosis-judge").addEventListener("change", onJudgeChoiceChange);
+$("judge-kind").addEventListener("change", fillJudges);
+$("diagnosis-judge").addEventListener("change", showJudgeFields);
 
 $("validate").addEventListener("click", async () => {
   $("validate").disabled = true;

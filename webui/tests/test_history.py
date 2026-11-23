@@ -5,8 +5,9 @@ from fastapi.testclient import TestClient
 
 import webui.app as app_module
 from webui import routes
-from webui.form import EpisodeRequest
+from webui.form import EpisodeRequest, experiment_id
 from webui.orchestrator import LogSource, RunManager, RunRecord, RunState, history
+from webui.orchestrator.episode_runner import run_directory
 from webui.orchestrator.run_state import EVENT_HISTORY
 
 EPISODE = {
@@ -38,6 +39,28 @@ def _restored(root, identifier):
     manager = RunManager()
     history.restore(manager, root)
     return manager, manager.get(identifier)
+
+
+def test_a_manual_test_writes_to_its_scenario_and_seed_folder():
+    request = EpisodeRequest(**EPISODE)
+    folder = experiment_id(request)
+    assert folder == f"{request.scenario_id.replace('.', '-')}-seed{request.seed}"
+    assert not folder.startswith("webui")
+    record = RunRecord(id="20261002T095358Z-7d18", request=request, experiment_id=folder)
+    assert run_directory(routes.config, record) == (
+        routes.config.absolute(routes.config.manual_dir) / folder / "20261002T095358Z-7d18")
+
+
+def test_runs_are_read_back_from_both_layouts_oldest_first(tmp_path):
+    # A run of the flat layout and two of the per-test folders, mixed on disk.
+    _finished_run("20260923T120000Z-flat", tmp_path)
+    _finished_run("20261002T080000Z-aaaa", tmp_path / "connectivity-x-m1-seed9")
+    _finished_run("20260924T080000Z-bbbb", tmp_path / "dhcp_dns-y-m1-seed4")
+    manager = RunManager()
+    assert history.restore(manager, tmp_path) == 3
+    # Ordered by run id, its UTC start, whatever folder holds it: newest first.
+    assert [record.id for record in manager.history()] == [
+        "20261002T080000Z-aaaa", "20260924T080000Z-bbbb", "20260923T120000Z-flat"]
 
 
 def test_a_finished_run_is_read_back_as_it_ended(tmp_path):
@@ -102,7 +125,7 @@ def test_a_restarted_server_lists_the_run_and_serves_its_page(tmp_path, monkeypa
     original = _finished_run("20260923T120000Z-eeee", tmp_path)
     (tmp_path / original.id / "sut.log").write_text("INFO: a subject line\n")
     fresh = RunManager()
-    moved = replace(routes.config, log_dir=str(tmp_path))
+    moved = replace(routes.config, manual_dir=str(tmp_path))
     for module in (routes, app_module):
         monkeypatch.setattr(module, "config", moved)
         monkeypatch.setattr(module, "MANAGER", fresh)

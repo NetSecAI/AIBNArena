@@ -41,9 +41,10 @@ from webui.config import REPOSITORY, WebUIConfig
 from webui.campaign import Cell, CampaignRequest, episode, plan, server_key
 
 from .history import CAMPAIGN_LAUNCHER_LOG
-from .process import StreamedProcess, release_port
+from .process import StreamedProcess, next_free_port
 from .readiness import wait_for_runtime_identity
 from .episode_runner import diagnosis_judge
+from webui.judge_check import check_judge
 from .results import collect, provenance_mismatch, repository_relative, results_of
 from .seed_guard import check, settle
 from .run_state import CellRecord, CampaignRecord, LogSource, RunManager, RunState
@@ -185,6 +186,11 @@ async def run_campaign(
         launcher(f"seed_campaign {request.seed_campaign}: replays this whole matrix")
         await asyncio.to_thread(preflight, request, walked, run=record.id)
         launcher(f"every cell compiles; writing to {record.result_dir}")
+        judge = diagnosis_judge(episode(request, walked[0])) if walked else None
+        if judge is not None and request.check_diagnosis_judge:
+            # Once for the matrix: every cell is judged by the same model on the same endpoint.
+            launcher(await asyncio.to_thread(
+                check_judge, request.diagnosis_judge_model, request.diagnosis_judge_reading, judge))
         seeds.record_campaign(
             request.seed_campaign,
             campaign_id=record.campaign_id,
@@ -202,11 +208,15 @@ async def run_campaign(
             cells = list(group)
             architecture = catalog.architecture(key[0])
             model = key[1]
-            port = resolved_port(episode(request, cells[0]), architecture)
             subject: StreamedProcess | None = None
             try:
                 manager.set_state(record, RunState.STARTING_SUT)
                 launcher(f"subject {architecture.label} on {model}: {len(cells)} cells")
+                # A busy port is left to whatever holds it: this subject takes the next
+                # free one, and every cell it serves is judged there.
+                port = await asyncio.to_thread(
+                    next_free_port, resolved_port(episode(request, cells[0]), architecture),
+                    sink=launcher)
                 subject = await _start_subject(
                     manager, config, record, request, cells[0], architecture,
                     port=port, log_path=server_logs / f"{cells[0].experiment_id}.log",
@@ -252,9 +262,7 @@ async def _start_subject(
     port: int, log_path: Path, launcher, sink,
 ) -> StreamedProcess:
     """One server for every cell that can share it, proved before it is used."""
-    await asyncio.to_thread(
-        release_port, port, timeout=config.port_release_timeout_seconds, sink=launcher)
-    episode_request = episode(request, cell)
+    episode_request = episode(request, cell).model_copy(update={"port": port})
     preset = catalog.preset(cell.selection.experiment)
     argv = [config.python, "-u", "-m", architecture.module,
             *build_sut_argv(episode_request, architecture, preset)]
