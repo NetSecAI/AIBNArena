@@ -1,7 +1,7 @@
 """Shared metrics derived consistently across benchmark domains."""
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from .contracts import OperationCounts, OracleEvaluation
 
@@ -20,6 +20,32 @@ def preservation_vacuous(evaluation: OracleEvaluation | None) -> bool | None:
     if evaluation is None:
         return None
     return all(probe.metrics.get("vacuous") is True for probe in evaluation.probes)
+
+
+def repair_without_change(
+    evaluation: OracleEvaluation | None,
+    changed_by_sut: Sequence[str] | None,
+    *,
+    fault_applicable: bool,
+) -> bool | None:
+    """Whether the repair oracle passed on a lab the subject left as it found it.
+
+    Whatever the probe saw, the subject repaired nothing: a QoS path still corrupting
+    31 % of its packets answered the five pings of qos.path.repair 1.0.0 without
+    loss in 3 of 18 such episodes (E12-E16). The device snapshots
+    read everything the ANI can write (SR Linux and VyOS configuration, Linux
+    addresses, routes and traffic control), so an unchanged snapshot means the
+    subject changed nothing. An audit marker, like `preservation_vacuous`: the
+    verdict stands, and aggregates over repairs must filter on it.
+
+    True when the repair passed and no device changed between the `before_sut` and
+    `after_sut` snapshots; False when the repair failed or something changed; None
+    on a no-fault episode, when the repair oracle did not run, or when a snapshot is
+    missing or incomplete.
+    """
+    if not fault_applicable or evaluation is None or changed_by_sut is None:
+        return None
+    return evaluation.passed and not changed_by_sut
 
 
 def calculate_shared_metrics(

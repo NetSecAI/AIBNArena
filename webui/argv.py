@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from webui.catalog.architectures import Architecture
 from webui.catalog.experiments import ExperimentPreset
-from webui.endpoints import Endpoint
+from webui.endpoints import Endpoint, served_name
 from webui.form import EpisodeRequest
 
 #: Subject flags whose value is written out as `--flag value`, by request field.
@@ -134,7 +134,10 @@ def build_benchmark_argv(
             raise ValueError(
                 f"no registered endpoint serves the diagnosis judge "
                 f"{request.diagnosis_judge_model!r}; register it on the Models page")
-        argv += ["--diagnosis-judge-model", request.diagnosis_judge_model,
+        # Named as the endpoint receives it, as the subject's model is (LiteLLM strips
+        # `openai/`): the judge posts the name as given, and OpenAI refused
+        # `openai/gpt-4o-mini` as an invalid model ID (reports/manual, 2026-11-17).
+        argv += ["--diagnosis-judge-model", served_name(request.diagnosis_judge_model),
                  "--diagnosis-judge-api-base", judge.api_base]
         if request.diagnosis_judge_reading:
             argv += ["--diagnosis-judge-reading", request.diagnosis_judge_reading]

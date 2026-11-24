@@ -4,11 +4,13 @@ The [LangChain baseline](../langchain_agent/) with retrieval-augmented generatio
 over a corpus of reference documents.
 
 `LangChainRAGAgent` subclasses `LangChainRepairAgent` rather than copying it: the
-model binding, the eight ANI tools, the budget, the stop rules and the report are
-the baseline's. A difference between the two subjects in a campaign is therefore
-the retrieval and nothing else. The system prompt
+model binding, the eight ANI tools, the budget, the send-backs, the note on a repeated
+failed request and the report are the baseline's. A difference between the two subjects in
+a campaign is therefore the retrieval and nothing else. The system prompt
 ([`prompts/default.txt`](prompts/default.txt)) is the baseline's, with a
-*Documentation* section added and one sentence saying that excerpts may follow the task.
+*Documentation* section added and one sentence saying that excerpts may follow the task;
+since 2026-10-30 that includes the baseline's new method and its paragraph on the management
+port ([the baseline's README](../langchain_agent/README.md#the-method)).
 
 ## The documents: `rag_document/`
 

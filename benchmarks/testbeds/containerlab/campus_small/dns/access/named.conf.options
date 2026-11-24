@@ -1,0 +1,25 @@
+options {
+	directory "/var/cache/bind";
+
+	// Resolver for the whole LAN. It lives in VLAN 130, the infrastructure
+	// VLAN, so that no user group has to host the resolver the other groups
+	// depend on.
+	//
+	// The original lab forwarded everything to Google Public DNS
+	// (forwarders { 8.8.8.8; }; forward only;). That forward is dropped here:
+	// this lab's Internet is external1, which runs no resolver, and a global
+	// forwarder makes BIND skip its built-in empty RFC 1918 reverse zones. Every
+	// reverse lookup -- ping makes one per reply when given a name -- then
+	// waited on a forwarder that never answers, and the client's retries on
+	// SERVFAIL tripled the time of each name check. Without it the reverse
+	// zones answer NXDOMAIN at once; dmz.lab is still forwarded
+	// (named.conf.local), and other names simply do not resolve.
+	recursion yes;
+	allow-query { any; };
+	allow-recursion { any; };
+
+	dnssec-validation no;
+
+	listen-on { any; };
+	listen-on-v6 { none; };
+};

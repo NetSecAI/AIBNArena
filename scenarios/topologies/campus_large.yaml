@@ -1,0 +1,559 @@
+schema_version: "0.1"
+topology:
+  id: campus_large
+  name: Large campus network with three buildings of layer-2 access and aggregation switches behind a single firewall holding the LAN, DMZ and Internet zones, and a remote site over a shaped WAN
+  size: large
+  profile: enterprise_campus
+  defaults:
+    endpoint_interface_mtu: 1500
+    # How the zone rulesets are named on the enforcer. The healthy state renders
+    # this spelling -- the original lab's names, TRUST-DMZ and the
+    # like -- and every filtering fault addresses a ruleset by it.
+    zone_ruleset_template: "{from_zone}-{to_zone}"
+  # The remote site's circuit: wan-edge's eth2, toward srv-site. The healthy-state
+  # generator renders it through the same function the shaping faults restore
+  # with, so nothing else may spell it out. CORP is the class it protects.
+  qos_policy:
+    node: wan-edge
+    interface: eth2
+    link_mbps: 10
+    handle: 1
+    root_class: 1
+    default_class: 20
+    classes:
+      - {id: 10, name: assured, rate_mbps: 8, ceil_mbps: 10, prio: 1, match_src: 10.0.0.0/24}
+      - {id: 20, name: default, rate_mbps: 2, ceil_mbps: 10, prio: 2}
+  environment:
+    type: containerlab
+    lab_name: campus_large
+    topology_path: benchmarks/testbeds/containerlab/campus_large/topology.clab.yml
+  nodes:
+    # campus_medium's firewall with a third LAN trunk: the gateway of every VLAN,
+    # the only filter between the user groups (intra-zone filtering, the ten VLANs
+    # share TRUST), the DMZ and Internet policy, the only NAT, and both DHCP
+    # services. The original's two firewalls merged (2026-10-28).
+    firewall:
+      kind: vyos
+      roles: [firewall, gateway, router, inter_vlan_router, dhcp_server]
+      capabilities: [ipv4_forwarding, inter_vlan_routing, security_zones, zone_policy, vlan, trunk, acl, nat, static_routing, dhcp_server, qos]
+      interfaces:
+        # bond0 is eth1 + eth2, an LACP bundle over the MLAG pair of buildings A and
+        # B (the original's ae0); every one of their VLANs is a vif of it. The
+        # bundle itself is not declared: it holds no address, and cutting it would
+        # be seven VLANs at once. Building C's standalone aggregate is a plain
+        # trunk, eth8.
+        "bond0.100": {segment: corp_vlan, ipv4: 10.0.0.1/24, zone: TRUST}
+        "bond0.110": {segment: voip_vlan, ipv4: 10.0.1.1/24, zone: TRUST}
+        "bond0.120": {segment: bms_vlan, ipv4: 10.0.2.1/24, zone: TRUST}
+        "bond0.130": {segment: infra_vlan, ipv4: 10.0.3.1/24, zone: TRUST}
+        "bond0.140": {segment: guests_vlan, ipv4: 10.0.4.1/24, zone: TRUST}
+        "bond0.150": {segment: finance_vlan, ipv4: 10.0.5.1/24, zone: TRUST}
+        "bond0.160": {segment: servers_vlan, ipv4: 10.0.6.1/24, zone: TRUST}
+        "eth8.200": {segment: corp_c_vlan, ipv4: 10.0.10.1/24, zone: TRUST}
+        "eth8.210": {segment: voip_c_vlan, ipv4: 10.0.11.1/24, zone: TRUST}
+        "eth8.240": {segment: guests_c_vlan, ipv4: 10.0.14.1/24, zone: TRUST}
+        # eth3 to eth7 as on campus_medium; building C's trunk takes eth8 so that
+        # medium stays a subset of this lab port for port.
+        "eth3": {segment: dmz_web, ipv4: 172.16.2.254/24, zone: DMZ}
+        "eth4": {segment: dmz_sftp, ipv4: 172.16.1.254/24, zone: DMZ}
+        "eth5": {segment: dmz_dns, ipv4: 172.16.3.254/24, zone: DMZ}
+        "eth6": {segment: untrust, ipv4: 192.168.122.202/24, zone: UNTRUST}
+        "eth7": {segment: site_wan, ipv4: 10.255.254.0/31, zone: SITE}
+      # What `protocols static route` holds; the healthy-state generator renders
+      # it from here, and the route faults bind to it. The site's prefix is routed
+      # explicitly, so a fault has a route to rewrite, and the default leads to the
+      # Internet, which drops the site's traffic once that route is unusable.
+      static_routes:
+        0.0.0.0/0: {next_hops: [192.168.122.1]}
+        10.1.0.0/24: {next_hops: [10.255.254.1]}
+    # Layer-2 aggregation. Buildings A and B share one MLAG domain over a
+    # peer-link: the pair answers every bundle below as a single switch. Building C
+    # has a single aggregate, cabled to the firewall's eth8 by a plain trunk.
+    # No address but the peer SVIs' on VLAN 4094: the firewall is the gateway
+    # of every VLAN, and an aggregate that routed would be a way around it.
+    # benchmarks/testbeds/campus_fabric.py renders every switch from here.
+    switch-aggregate-1:
+      kind: arista_ceos
+      roles: [spine, switch, aggregation_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, mlag, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_agg_fw, members: [Ethernet1], mlag: 1}
+        "Port-Channel2": {segment: trunk_acc1_agg, members: [Ethernet2], mlag: 2}
+        "Port-Channel3": {segment: trunk_acc2_agg, members: [Ethernet3], mlag: 3}
+        "Port-Channel4": {segment: trunk_acc3_agg, members: [Ethernet4], mlag: 4}
+        "Port-Channel5": {segment: trunk_acc4_agg, members: [Ethernet5], mlag: 5}
+        "Port-Channel6": {segment: trunk_acc5_agg, members: [Ethernet6], mlag: 6}
+        "Port-Channel7": {segment: trunk_acc6_agg, members: [Ethernet7], mlag: 7}
+        "Port-Channel999": {segment: agg_peer_link, members: [Ethernet8, Ethernet9]}
+    switch-aggregate-2:
+      kind: arista_ceos
+      roles: [spine, switch, aggregation_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, mlag, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_agg_fw, members: [Ethernet1], mlag: 1}
+        "Port-Channel2": {segment: trunk_acc1_agg, members: [Ethernet2], mlag: 2}
+        "Port-Channel3": {segment: trunk_acc2_agg, members: [Ethernet3], mlag: 3}
+        "Port-Channel4": {segment: trunk_acc3_agg, members: [Ethernet4], mlag: 4}
+        "Port-Channel5": {segment: trunk_acc4_agg, members: [Ethernet5], mlag: 5}
+        "Port-Channel6": {segment: trunk_acc5_agg, members: [Ethernet6], mlag: 6}
+        "Port-Channel7": {segment: trunk_acc6_agg, members: [Ethernet7], mlag: 7}
+        "Port-Channel999": {segment: agg_peer_link, members: [Ethernet8, Ethernet9]}
+    switch-aggregate-3:
+      kind: arista_ceos
+      roles: [spine, switch, aggregation_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, acl, qos]
+      interfaces:
+        "Ethernet1": {segment: trunk_agg3_fw}
+        "Ethernet2": {segment: trunk_acc7_agg3}
+        "Ethernet3": {segment: trunk_acc8_agg3}
+    # Buildings A and B: each access switch bundles one uplink to each aggregate,
+    # Ethernet1 to aggregate-1 and Ethernet2 to aggregate-2.
+    switch-access-1:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_acc1_agg, members: [Ethernet1, Ethernet2]}
+        "Ethernet3": {segment: corp_vlan, attached_endpoint: host-access-1}
+    switch-access-2:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_acc2_agg, members: [Ethernet1, Ethernet2]}
+        "Ethernet3": {segment: voip_vlan, attached_endpoint: host-access-2}
+    switch-access-3:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_acc3_agg, members: [Ethernet1, Ethernet2]}
+        "Ethernet3": {segment: bms_vlan, attached_endpoint: host-access-3}
+    switch-access-4:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_acc4_agg, members: [Ethernet1, Ethernet2]}
+        "Ethernet3": {segment: guests_vlan, attached_endpoint: host-access-4}
+        # The resolver is consumed, not evaluated: cutting this port yields no
+        # expectation the connectivity checks can observe, so it is never drawn.
+        "Ethernet4": {segment: infra_vlan, attached_endpoint: dns-access-4}
+    switch-access-5:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_acc5_agg, members: [Ethernet1, Ethernet2]}
+        "Ethernet3": {segment: finance_vlan, attached_endpoint: host-access-5}
+    switch-access-6:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, lacp, acl, qos]
+      interfaces:
+        "Port-Channel1": {segment: trunk_acc6_agg, members: [Ethernet1, Ethernet2]}
+        "Ethernet3": {segment: servers_vlan, attached_endpoint: app-access-6}
+    # Building C: single-homed to switch-aggregate-3, on Ethernet1.
+    switch-access-7:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, acl, qos]
+      interfaces:
+        "Ethernet1": {segment: trunk_acc7_agg3}
+        "Ethernet3": {segment: corp_c_vlan, attached_endpoint: host-access-7}
+        "Ethernet4": {segment: voip_c_vlan, attached_endpoint: phone-access-7}
+    switch-access-8:
+      kind: arista_ceos
+      roles: [leaf, switch, access_switch, bridge]
+      capabilities: [layer2_switching, vlan, trunk, acl, qos]
+      interfaces:
+        "Ethernet1": {segment: trunk_acc8_agg3}
+        "Ethernet3": {segment: guests_c_vlan, attached_endpoint: host-access-8}
+    host-access-1:
+      kind: linux
+      # Nothing here is configured on the host: the resolver and the address
+      # below are what the DHCP reservation hands out. The MAC is the key the
+      # reservation is looked up by, so it is pinned in topology.clab.yml, and it
+      # spells the address (0a.00.0X.96 = 10.0.X.150).
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:00:96
+      roles: [client, employee]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: corp_vlan, ipv4: 10.0.0.150/24}
+    host-access-2:
+      kind: linux
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:01:96
+      roles: [client, voip_endpoint]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: voip_vlan, ipv4: 10.0.1.150/24}
+    host-access-3:
+      kind: linux
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:02:96
+      roles: [client, bms_device]
+      # The second flow on the site's circuit, the one a shaped scenario floods
+      # it with while the CORP flow is measured.
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: bms_vlan, ipv4: 10.0.2.150/24}
+    host-access-4:
+      kind: linux
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:04:96
+      roles: [client, guest]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: guests_vlan, ipv4: 10.0.4.150/24}
+    host-access-5:
+      kind: linux
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:05:96
+      roles: [client, restricted_endpoint]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: finance_vlan, ipv4: 10.0.5.150/24}
+    # The internal application server, at a static address: servers are not
+    # leased, and it is what CORP and FINANCE reach in SERVERS.
+    app-access-6:
+      kind: linux
+      roles: [server, application_server]
+      capabilities: [ipv4, http_server]
+      interfaces:
+        eth1: {segment: servers_vlan, ipv4: 10.0.6.10/24}
+    host-access-7:
+      kind: linux
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:0a:96
+      roles: [client, employee]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: corp_c_vlan, ipv4: 10.0.10.150/24}
+    phone-access-7:
+      kind: linux
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:0b:96
+      roles: [client, voip_endpoint]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: voip_c_vlan, ipv4: 10.0.11.150/24}
+    host-access-8:
+      kind: linux
+      resolver: 10.0.3.53
+      address_assignment: dhcp
+      mac: 02:00:0a:00:0e:96
+      roles: [client, guest]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: guests_c_vlan, ipv4: 10.0.14.150/24}
+    web-dmz:
+      kind: linux
+      resolver: 172.16.3.53
+      roles: [server, dmz_server]
+      capabilities: [ipv4, http_server]
+      interfaces:
+        eth1: {segment: dmz_web, ipv4: 172.16.2.10/24}
+    sftp-dmz:
+      kind: linux
+      # The SRV-FTP address the TRUST-DMZ rules name. No SFTP daemon runs here:
+      # see campus_medium's lab README.
+      resolver: 172.16.3.53
+      roles: [server, dmz_server]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: dmz_sftp, ipv4: 172.16.1.10/24}
+    dns-access-4:
+      kind: linux
+      # A nameserver is infrastructure that endpoints consume, not an endpoint
+      # of its own: the `service` role keeps it out of endpoint_nodes().
+      roles: [service, server, dns_resolver, infrastructure]
+      capabilities: [ipv4, dns_server, dns_recursion]
+      interfaces:
+        eth1: {segment: infra_vlan, ipv4: 10.0.3.53/24}
+    dns-dmz:
+      kind: linux
+      roles: [service, server, dns_authoritative, dmz_server]
+      capabilities: [ipv4, dns_server, dns_authoritative]
+      interfaces:
+        eth1: {segment: dmz_dns, ipv4: 172.16.3.53/24}
+    # The Internet, standing in for the original's br-untrust upstream: it holds
+    # the gateway address the firewall routes its default to.
+    external1:
+      kind: linux
+      roles: [client, external_client]
+      capabilities: [ipv4, traffic_generation]
+      interfaces:
+        eth1: {segment: untrust, ipv4: 192.168.122.1/24}
+    # The remote site (benchmarks/testbeds/campus_site.py), off the firewall's eth7,
+    # campus_medium's. router-wan is the second router on the way, so a route
+    # toward the site can be made to loop.
+    router-wan:
+      kind: vyos
+      roles: [router, transit]
+      capabilities: [ipv4_forwarding, static_routing]
+      interfaces:
+        eth1: {segment: site_wan, ipv4: 10.255.254.1/31}
+        eth2: {segment: site_edge, ipv4: 10.255.254.2/31}
+      static_routes:
+        10.0.0.0/16: {next_hops: [10.255.254.0]}
+        10.1.0.0/24: {next_hops: [10.255.254.3]}
+    # A Linux router, which is what carries `tc`. No `router` role: that would
+    # hand it to the routed families, which render SR Linux or VyOS CLI. `transit`
+    # keeps it out of every blast radius it merely forwards for.
+    wan-edge:
+      kind: linux
+      roles: [wan_edge, transit, gateway]
+      capabilities: [ipv4, ipv4_forwarding, static_routing, traffic_shaping]
+      interfaces:
+        eth1: {segment: site_edge, ipv4: 10.255.254.3/31}
+        # The shaped port, named by qos_policy.
+        eth2: {segment: site_lan, ipv4: 10.1.0.1/24}
+      static_routes:
+        10.0.0.0/16: {next_hops: [10.255.254.2]}
+    srv-site:
+      kind: linux
+      roles: [server, application_server]
+      capabilities: [ipv4, traffic_sink]
+      interfaces:
+        eth1: {segment: site_lan, ipv4: 10.1.0.10/24}
+  # One-way, every one of them, as on campus_medium: the policy opens no session
+  # from the DMZ, the Internet or the site toward the LAN -- ICMP included -- so a
+  # reverse ping would fail on the healthy lab. medium's flows come first, then
+  # building C's and the business VLANs': a group reaching its other building,
+  # CORP and FINANCE reaching SERVERS, a guest of building C reaching the Internet
+  # and the resolver.
+  connectivity_requirements:
+    - {source: host-access-1, destination: web-dmz, bidirectional: false}
+    - {source: host-access-1, destination: sftp-dmz, bidirectional: false}
+    - {source: host-access-2, destination: web-dmz, bidirectional: false}
+    - {source: host-access-3, destination: sftp-dmz, bidirectional: false}
+    - {source: host-access-4, destination: web-dmz, bidirectional: false}
+    - {source: host-access-1, destination: host-access-2, bidirectional: false}
+    - {source: host-access-1, destination: host-access-3, bidirectional: false}
+    - {source: host-access-4, destination: dns-access-4, bidirectional: false}
+    - {source: host-access-1, destination: external1, bidirectional: false}
+    - {source: host-access-4, destination: external1, bidirectional: false}
+    - {source: web-dmz, destination: external1, bidirectional: false}
+    # The two flows that contend for the site's circuit.
+    - {source: host-access-1, destination: srv-site, bidirectional: false}
+    - {source: host-access-3, destination: srv-site, bidirectional: false}
+    - {source: host-access-1, destination: app-access-6, bidirectional: false}
+    - {source: host-access-5, destination: app-access-6, bidirectional: false}
+    - {source: host-access-7, destination: host-access-1, bidirectional: false}
+    - {source: host-access-7, destination: web-dmz, bidirectional: false}
+    - {source: phone-access-7, destination: host-access-2, bidirectional: false}
+    - {source: host-access-8, destination: external1, bidirectional: false}
+    - {source: host-access-8, destination: dns-access-4, bidirectional: false}
+  # What the zone model is there to stop, as on campus_medium. The intra-LAN
+  # isolation is not listed: the original's TRUST-INTRA rule 40 accepted every ICMP
+  # packet; its ping rules now follow the matrix, which would make it listable.
+  isolation_requirements:
+    - {source: external1, destination: host-access-1}   # UNTRUST -> TRUST has no ruleset
+    - {source: external1, destination: web-dmz}         # UNTRUST -> DMZ has no ruleset, nothing is published
+    - {source: web-dmz, destination: host-access-1}     # DMZ -> TRUST has no ruleset
+    - {source: sftp-dmz, destination: host-access-3}    # DMZ -> TRUST has no ruleset
+    - {source: srv-site, destination: host-access-1}    # SITE -> TRUST has no ruleset
+    - {source: external1, destination: host-access-7}   # UNTRUST -> TRUST, building C
+    - {source: web-dmz, destination: host-access-5}     # DMZ -> TRUST, FINANCE
+  segments:
+    # Buildings A and B: one LACP bundle per access switch up to the MLAG pair, and
+    # one from the pair to the firewall's bond0. Each has a cable to either
+    # aggregate: one cable, or one aggregate, can go without the VLANs it carries
+    # losing their path.
+    trunk_acc1_agg: {type: trunk, members: [switch-access-1, switch-aggregate-1, switch-aggregate-2], tagged_vlans: [100], zone: TRUST, capacity_mbps: 2000}
+    trunk_acc2_agg: {type: trunk, members: [switch-access-2, switch-aggregate-1, switch-aggregate-2], tagged_vlans: [110], zone: TRUST, capacity_mbps: 2000}
+    trunk_acc3_agg: {type: trunk, members: [switch-access-3, switch-aggregate-1, switch-aggregate-2], tagged_vlans: [120], zone: TRUST, capacity_mbps: 2000}
+    trunk_acc4_agg: {type: trunk, members: [switch-access-4, switch-aggregate-1, switch-aggregate-2], tagged_vlans: [130, 140], zone: TRUST, capacity_mbps: 2000}
+    trunk_acc5_agg: {type: trunk, members: [switch-access-5, switch-aggregate-1, switch-aggregate-2], tagged_vlans: [150], zone: TRUST, capacity_mbps: 2000}
+    trunk_acc6_agg: {type: trunk, members: [switch-access-6, switch-aggregate-1, switch-aggregate-2], tagged_vlans: [160], zone: TRUST, capacity_mbps: 2000}
+    trunk_agg_fw: {type: trunk, members: [switch-aggregate-1, switch-aggregate-2, firewall], tagged_vlans: [100, 110, 120, 130, 140, 150, 160], zone: TRUST, capacity_mbps: 2000}
+    # The peer-link: what makes the two aggregates one switch. It carries every
+    # VLAN and VLAN 4094, the peers' keepalives, which no other port carries.
+    agg_peer_link:
+      type: mlag_peer_link
+      members: [switch-aggregate-1, switch-aggregate-2]
+      domain_id: CAMPUS_MLAG
+      vlan_id: 4094
+      peer_addresses: {switch-aggregate-1: 172.31.0.1/30, switch-aggregate-2: 172.31.0.2/30}
+      capacity_mbps: 2000
+    # Building C: a plain 802.1Q trunk per switch, each a single point of failure
+    # for what it carries.
+    trunk_acc7_agg3: {type: trunk, members: [switch-access-7, switch-aggregate-3], tagged_vlans: [200, 210], zone: TRUST, capacity_mbps: 1000}
+    trunk_acc8_agg3: {type: trunk, members: [switch-access-8, switch-aggregate-3], tagged_vlans: [240], zone: TRUST, capacity_mbps: 1000}
+    trunk_agg3_fw: {type: trunk, members: [switch-aggregate-3, firewall], tagged_vlans: [200, 210, 240], zone: TRUST, capacity_mbps: 1000}
+    corp_vlan:
+      type: vlan
+      vlan_id: 100
+      cidr: 10.0.0.0/24
+      zone: TRUST
+      members: [switch-access-1, switch-aggregate-1, switch-aggregate-2, firewall, host-access-1]
+      security_zone: corp
+      capacity_mbps: 1000
+    voip_vlan:
+      type: vlan
+      vlan_id: 110
+      cidr: 10.0.1.0/24
+      zone: TRUST
+      members: [switch-access-2, switch-aggregate-1, switch-aggregate-2, firewall, host-access-2]
+      security_zone: voip
+      capacity_mbps: 1000
+    bms_vlan:
+      type: vlan
+      vlan_id: 120
+      cidr: 10.0.2.0/24
+      zone: TRUST
+      members: [switch-access-3, switch-aggregate-1, switch-aggregate-2, firewall, host-access-3]
+      security_zone: bms
+      capacity_mbps: 1000
+    infra_vlan:
+      type: vlan
+      vlan_id: 130
+      cidr: 10.0.3.0/24
+      zone: TRUST
+      members: [switch-access-4, switch-aggregate-1, switch-aggregate-2, firewall, dns-access-4]
+      security_zone: infrastructure
+      capacity_mbps: 1000
+    guests_vlan:
+      type: vlan
+      vlan_id: 140
+      cidr: 10.0.4.0/24
+      zone: TRUST
+      members: [switch-access-4, switch-aggregate-1, switch-aggregate-2, firewall, host-access-4]
+      security_zone: guest
+      capacity_mbps: 1000
+    finance_vlan:
+      type: vlan
+      vlan_id: 150
+      cidr: 10.0.5.0/24
+      zone: TRUST
+      members: [switch-access-5, switch-aggregate-1, switch-aggregate-2, firewall, host-access-5]
+      security_zone: finance
+      capacity_mbps: 1000
+    servers_vlan:
+      type: vlan
+      vlan_id: 160
+      cidr: 10.0.6.0/24
+      zone: TRUST
+      members: [switch-access-6, switch-aggregate-1, switch-aggregate-2, firewall, app-access-6]
+      security_zone: servers
+      capacity_mbps: 1000
+    corp_c_vlan:
+      type: vlan
+      vlan_id: 200
+      cidr: 10.0.10.0/24
+      zone: TRUST
+      members: [switch-access-7, switch-aggregate-3, firewall, host-access-7]
+      security_zone: corp
+      capacity_mbps: 1000
+    voip_c_vlan:
+      type: vlan
+      vlan_id: 210
+      cidr: 10.0.11.0/24
+      zone: TRUST
+      members: [switch-access-7, switch-aggregate-3, firewall, phone-access-7]
+      security_zone: voip
+      capacity_mbps: 1000
+    guests_c_vlan:
+      type: vlan
+      vlan_id: 240
+      cidr: 10.0.14.0/24
+      zone: TRUST
+      members: [switch-access-8, switch-aggregate-3, firewall, host-access-8]
+      security_zone: guest
+      capacity_mbps: 1000
+    dmz_web: {type: lan, cidr: 172.16.2.0/24, zone: DMZ, members: [firewall, web-dmz], security_zone: dmz, capacity_mbps: 1000}
+    dmz_sftp: {type: lan, cidr: 172.16.1.0/24, zone: DMZ, members: [firewall, sftp-dmz], security_zone: dmz, capacity_mbps: 1000}
+    dmz_dns: {type: lan, cidr: 172.16.3.0/24, zone: DMZ, members: [firewall, dns-dmz], security_zone: dmz, capacity_mbps: 1000}
+    untrust: {type: external, cidr: 192.168.122.0/24, zone: UNTRUST, members: [firewall, external1], security_zone: external, capacity_mbps: 1000}
+    site_wan: {type: p2p, cidr: 10.255.254.0/31, zone: SITE, members: [firewall, router-wan], security_zone: site, capacity_mbps: 1000}
+    site_edge: {type: p2p, cidr: 10.255.254.2/31, zone: SITE, members: [router-wan, wan-edge], security_zone: site, capacity_mbps: 1000}
+    site_lan: {type: lan, cidr: 10.1.0.0/24, zone: SITE, members: [wan-edge, srv-site], security_zone: site, capacity_mbps: 10}
+  zone_policies:
+    # Forwarded traffic only, as on campus_medium; TRUST -> TRUST is TRUST-INTRA
+    # and DMZ -> DMZ is DMZ-INTRA, intra-zone-filtering rulesets rather than zone
+    # pairs, so they are not listed.
+    - {node: firewall, from: TRUST, to: DMZ, action: accept}
+    - {node: firewall, from: TRUST, to: UNTRUST, action: accept}
+    - {node: firewall, from: DMZ, to: UNTRUST, action: accept}
+    - {node: firewall, from: DMZ, to: TRUST, action: drop}
+    - {node: firewall, from: UNTRUST, to: TRUST, action: drop}
+    - {node: firewall, from: UNTRUST, to: DMZ, action: drop}
+    - {node: firewall, from: TRUST, to: SITE, action: accept}
+    - {node: firewall, from: SITE, to: TRUST, action: drop}
+  services:
+    # The DHCP service DHCP faults bind to, for the desks alone: every server is
+    # addressed statically. One reservation pool per desk, named and numbered as
+    # the running configuration has them -- each LAN VLAN is its own shared-network,
+    # and holds one desk.
+    dhcp_campus:
+      node: firewall
+      transport: udp
+      port: 67
+      application: dhcp
+      dns_servers: [10.0.3.53]
+      domain_name: campus.lab
+      lease_seconds: 86400
+      pools:
+        host-access-1: {name: VLAN_100, subnet_id: 100}
+        host-access-2: {name: VLAN_110, subnet_id: 110}
+        host-access-3: {name: VLAN_120, subnet_id: 120}
+        host-access-4: {name: VLAN_140, subnet_id: 140}
+        host-access-5: {name: VLAN_150, subnet_id: 150}
+        host-access-7: {name: VLAN_200, subnet_id: 200}
+        phone-access-7: {name: VLAN_210, subnet_id: 210}
+        host-access-8: {name: VLAN_240, subnet_id: 240}
+    web_http:
+      node: web-dmz
+      transport: tcp
+      port: 80
+      application: http
+      security: cleartext
+    # Authoritative for the LAN's names; it forwards dmz.lab to dns-dmz.
+    dns_lan_resolver:
+      node: dns-access-4
+      transport: udp
+      port: 53
+      application: dns
+      forwarders: [172.16.3.53]
+      # The LAN's own names: one record per endpoint in campus.lab, the domain the
+      # pools hand out (dns/access/db.campus.lab). A leased desk resolving its own
+      # name, fully qualified, is how the DHCP oracle proves its lease.
+      zone: campus.lab
+      zone_file: db.campus.lab
+      probe_record: host-access-1
+      hosts: [dns-access-4, app-access-6, host-access-1, host-access-2, host-access-3, host-access-4, host-access-5, host-access-7, host-access-8, phone-access-7]
+    # The DMZ service names, resolved by every LAN desk through dns-access-4's
+    # forward: the oracle's name checks exercise both resolvers and the policy.
+    dns_dmz_authoritative:
+      node: dns-dmz
+      transport: udp
+      port: 53
+      application: dns
+      zone: dmz.lab
+      zone_file: db.dmz.lab
+      probe_record: web-dmz
+      hosts: [web-dmz, sftp-dmz]
+    # The site's two sinks: the throughput oracle measures the protected flow
+    # against one while it floods the other, since one iperf3 server runs one test
+    # at a time.
+    site_test:
+      node: srv-site
+      transport: tcp
+      port: 5201
+      application: iperf3
+      role: measurement
+    site_load:
+      node: srv-site
+      transport: tcp
+      port: 5202
+      application: iperf3
+      role: load

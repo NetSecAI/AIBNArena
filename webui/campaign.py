@@ -16,13 +16,13 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
 from webui import catalog
 from webui.catalog.experiments import ExperimentPreset
-from webui.form import EpisodeRequest, slug
+from webui.form import DEFAULT_MAX_TOKENS, EpisodeRequest, slug
 
 
 class ScenarioSelection(BaseModel):
@@ -67,6 +67,9 @@ class CampaignRequest(BaseModel):
     #: its scores are comparable across the cells.
     diagnosis_judge_model: str | None = None
     diagnosis_judge_reading: Literal["prompt_logprobs", "top_logprobs"] | None = None
+    #: One scoring call to the judge at Validate and before the first cell, as for an
+    #: episode (`EpisodeRequest.check_diagnosis_judge`).
+    check_diagnosis_judge: bool = True
 
     # Where each subject is served. One port for the whole matrix: the subjects
     # run one at a time, so they never need one each.
@@ -77,11 +80,19 @@ class CampaignRequest(BaseModel):
     # offered here: a matrix that refused its third subject over a flag the
     # first two took would have wasted the two runs before it.
     dry_run: bool = False
-    max_tokens: int | None = None
+    #: As an episode's (`form.DEFAULT_MAX_TOKENS`).
+    max_tokens: int | None = DEFAULT_MAX_TOKENS
     temperature: float | None = None
+    #: Applied to every cell when set. The page no longer sets them -- thinking is chosen
+    #: per model when it is declared (`model_thinking`) -- but a campaign recorded with
+    #: them resumes as it ran.
     enable_thinking: bool | None = None
     thinking_style: Literal["auto", "chat_template", "system_prompt"] | None = None
-    thinking_effort: Literal["minimal", "low", "medium", "high"] | None = None
+    thinking_effort: Literal["none", "minimal", "low", "medium", "high", "xhigh"] | None = None
+    #: How each model of the matrix is asked to think, as its declaration (Models page)
+    #: stated it at launch, by model id. Written into the request when the campaign
+    #: starts, so a resume runs what the launch ran even if the declaration changed.
+    model_thinking: dict[str, dict[str, Any]] = Field(default_factory=dict)
     debug_trace: Literal["off", "summary", "full"] | None = None
     ani_call_limit: int | None = None
     recursion_limit: int | None = None
@@ -214,6 +225,14 @@ def plan(request: CampaignRequest) -> list[Cell]:
     return cells
 
 
+def cell_thinking(request: CampaignRequest, model: str) -> dict[str, Any]:
+    """How a cell's model is asked to think: the campaign's own setting where it states
+    one, else the model's declaration the campaign recorded at launch."""
+    declared = request.model_thinking.get(model) or {}
+    return {name: (getattr(request, name) if getattr(request, name) is not None else declared.get(name))
+            for name in ("enable_thinking", "thinking_style", "thinking_effort")}
+
+
 def episode(request: CampaignRequest, cell: Cell) -> EpisodeRequest:
     """The cell as one ordinary episode.
 
@@ -238,9 +257,7 @@ def episode(request: CampaignRequest, cell: Cell) -> EpisodeRequest:
         dry_run=request.dry_run,
         max_tokens=request.max_tokens,
         temperature=request.temperature,
-        enable_thinking=request.enable_thinking,
-        thinking_style=request.thinking_style,
-        thinking_effort=request.thinking_effort,
+        **cell_thinking(request, cell.model),
         debug_trace=request.debug_trace,
         ani_call_limit=request.ani_call_limit,
         recursion_limit=request.recursion_limit,

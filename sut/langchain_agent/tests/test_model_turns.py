@@ -36,6 +36,21 @@ def test_turns_are_measured_and_their_operations_attributed():
     assert snapshot["llm_calls"] == 2
 
 
+def test_turns_record_the_provider_finish_reason():
+    callback = RunUsageCallback(None)
+    for finish_reason in ("length", None):
+        response = _response([])
+        if finish_reason:
+            response.generations[0][0].generation_info = {"finish_reason": finish_reason, "logprobs": None}
+        callback.on_llm_start({}, ["prompt"])
+        callback.on_llm_end(response)
+    # A chat model that reports it on the message rather than the generation.
+    message = AIMessage(content="hello", response_metadata={"finish_reason": "stop"})
+    callback.on_llm_start({}, ["prompt"])
+    callback.on_llm_end(LLMResult(generations=[[ChatGeneration(message=message)]]))
+    assert [turn["finish_reason"] for turn in callback.snapshot()["model_turns"]] == ["length", None, "stop"]
+
+
 def test_a_call_refused_before_the_ani_leaves_no_operation_on_the_turn():
     operations: list[int] = []
     callback = RunUsageCallback(None, operations=lambda: len(operations))

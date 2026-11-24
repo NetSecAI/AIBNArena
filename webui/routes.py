@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
@@ -15,7 +15,9 @@ from webui import catalog, endpoints, seeds
 from webui.argv import build_sut_argv
 from webui.config import REPOSITORY, WebUIConfig
 from webui.endpoints import Endpoint
-from webui.campaign import CampaignRequest, plan
+from webui.campaign import CampaignRequest, cell_thinking, plan
+from webui.campaign import episode as campaign_episode
+from webui.judge_check import check_judge
 from webui.form import EpisodeRequest, experiment_id, run_id
 from webui.orchestrator import (
     MANAGER,
@@ -32,9 +34,28 @@ from webui.orchestrator import (
     validate,
 )
 from webui.orchestrator import history
+from webui.orchestrator.episode_runner import diagnosis_judge
 from webui.orchestrator.seed_guard import context
 
 templates = Jinja2Templates(directory=str(REPOSITORY / "webui" / "templates"))
+
+
+def _asset(name: str) -> str:
+    """A static file's URL, versioned by when it was last written.
+
+    The pages are rendered on each request, the scripts are cached by the browser: on
+    2026-11-17 a new index.html with a cached app.js from before it stopped every launch
+    (the old script looked for a field the new page no longer has). A page now names the
+    scripts written with it.
+    """
+    path = REPOSITORY / "webui" / "static" / name
+    try:
+        return f"/static/{name}?v={path.stat().st_mtime_ns}"
+    except OSError:
+        return f"/static/{name}"
+
+
+templates.env.globals["asset"] = _asset
 router = APIRouter()
 config = WebUIConfig.from_env()
 
@@ -49,19 +70,63 @@ def _prepared(request: EpisodeRequest):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+def _thinking_settings(request: Any) -> dict[str, Any]:
+    return {name: getattr(request, name) for name in endpoints.THINKING_FIELDS}
+
+
+def _declared_thinking(episode: EpisodeRequest) -> EpisodeRequest:
+    """The episode with its model's declared thinking written in, refused by name when the
+    model's family cannot be asked for it -- before anything starts, not at the subject's
+    startup."""
+    episode = endpoints.with_thinking(episode, endpoints.thinking_of(episode.model))
+    try:
+        endpoints.check_thinking(episode.model, _thinking_settings(episode))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return episode
+
+
+def _declared_campaign_thinking(campaign: CampaignRequest) -> CampaignRequest:
+    """The campaign with each model's declared thinking recorded (`model_thinking`), as it
+    stands at launch; a model the request already carries keeps its recorded setting."""
+    declared = {model: endpoints.thinking_of(model) for model in campaign.models}
+    campaign.model_thinking = {
+        **{model: settings for model, settings in declared.items() if settings},
+        **campaign.model_thinking,
+    }
+    try:
+        for model in campaign.models:
+            endpoints.check_thinking(model, cell_thinking(campaign, model))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return campaign
+
+
 class EndpointRequest(BaseModel):
     """An endpoint as the page submits it.
 
     `api_key` omitted means the stored one stays; an empty one clears it. The
     page cannot send back a key it was never given, so editing a name must not
-    be the same thing as deleting a credential.
+    be the same thing as deleting a credential. An `openai` or `openrouter` endpoint
+    takes no URL: the provider's is fixed (`endpoints.FIXED_API_BASES`).
     """
 
     id: str | None = None
-    name: str
-    api_base: str
+    provider: Literal["openai", "openrouter", "custom"] = "custom"
+    name: str = ""
+    api_base: str = ""
     models: list[str] = []
     api_key: str | None = None
+    #: How each model is asked to think, by model id as typed: `enable_thinking`,
+    #: `thinking_effort`, `thinking_style`. Chosen here and nowhere else.
+    thinking: dict[str, dict[str, Any]] = {}
+
+
+class ModelListRequest(BaseModel):
+    """The key whose models the page lists: one just typed, or a stored endpoint's (`id`)."""
+
+    api_key: str | None = None
+    id: str | None = None
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -86,18 +151,62 @@ async def list_endpoints() -> dict[str, Any]:
 
 @router.put("/api/endpoints")
 async def put_endpoint(entry: EndpointRequest) -> dict[str, Any]:
-    name = entry.name.strip()
-    api_base = entry.api_base.strip()
-    if not name or not api_base:
-        raise HTTPException(status_code=400, detail="an endpoint needs a name and a base URL")
-    stored = endpoints.put(Endpoint(
-        id=entry.id or endpoints.identifier(name),
-        name=name,
-        api_base=api_base,
-        models=tuple(model.strip() for model in entry.models if model.strip()),
-        api_key=entry.api_key,
-    ))
-    return stored.public()
+    models = tuple(model.strip() for model in entry.models if model.strip())
+    try:
+        thinking = {model.strip(): endpoints.clean_thinking(settings)
+                    for model, settings in entry.thinking.items() if model.strip()}
+        for model, settings in thinking.items():
+            # Checked under the name the subject is given (`endpoints.stored_model`): an
+            # OpenAI or OpenRouter model as openai/<id>.
+            endpoints.check_thinking(endpoints.stored_model(entry.provider, model), settings)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if entry.provider in endpoints.FIXED_API_BASES:
+        label = endpoints.PROVIDER_NAMES[entry.provider]
+        name = entry.name.strip() or label
+        identifier = entry.id or endpoints.identifier(name)
+        stored_key = next((item.api_key for item in endpoints.load() if item.id == identifier), None)
+        if not (entry.api_key or (entry.api_key is None and stored_key)):
+            raise HTTPException(status_code=400, detail=f"an {label} endpoint needs its API key")
+        candidate = endpoints.provider_endpoint(entry.provider, identifier, name, models, entry.api_key, thinking)
+    else:
+        name = entry.name.strip()
+        api_base = entry.api_base.strip()
+        if not name or not api_base:
+            raise HTTPException(status_code=400, detail="an endpoint needs a name and a base URL")
+        candidate = Endpoint(id=entry.id or endpoints.identifier(name), name=name, api_base=api_base,
+                             models=models, api_key=entry.api_key,
+                             thinking=endpoints.declared_thinking(models, thinking))
+    return endpoints.put(candidate).public()
+
+
+@router.post("/api/openai/models")
+async def list_openai_models(request: ModelListRequest) -> dict[str, Any]:
+    """The chat models an OpenAI key can use. The key is read, never sent back."""
+    key = request.api_key
+    if not key and request.id:
+        key = next((item.api_key for item in endpoints.load() if item.id == request.id), None)
+    if not key:
+        raise HTTPException(status_code=400, detail="type the OpenAI API key to list its models")
+    try:
+        models = await asyncio.to_thread(endpoints.openai_models, key)
+    except endpoints.ModelListUnavailable as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {"models": models}
+
+
+@router.post("/api/openrouter/models")
+async def list_openrouter_models(request: ModelListRequest) -> dict[str, Any]:
+    """The OpenRouter models a subject can run on: those taking tools. The key, typed or
+    stored, goes with the request and is never sent back."""
+    key = request.api_key
+    if not key and request.id:
+        key = next((item.api_key for item in endpoints.load() if item.id == request.id), None)
+    try:
+        models = await asyncio.to_thread(endpoints.openrouter_models, key)
+    except endpoints.ModelListUnavailable as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {"models": models}
 
 
 @router.delete("/api/endpoints/{identifier}")
@@ -135,6 +244,7 @@ async def catalog_document() -> dict[str, Any]:
 async def validate_request(episode: EpisodeRequest) -> dict[str, Any]:
     """Compile what this form would run, without starting anything."""
     architecture, preset = _prepared(episode)
+    episode = _declared_thinking(episode)
     try:
         preview = await asyncio.to_thread(validate, episode, preset)
         preview["sut_argv"] = build_sut_argv(episode, architecture, preset)
@@ -161,6 +271,7 @@ async def seed_register() -> dict[str, Any]:
 @router.post("/api/runs", status_code=201)
 async def start_run(episode: EpisodeRequest) -> dict[str, Any]:
     architecture, preset = _prepared(episode)
+    episode = _declared_thinking(episode)
     if episode.new_seed:
         # Drawn here rather than in the runner: the record carries the request,
         # and a request whose seed was settled later would not say what ran.
@@ -170,7 +281,7 @@ async def start_run(episode: EpisodeRequest) -> dict[str, Any]:
     record = RunRecord(
         id=identifier,
         request=episode,
-        experiment_id=experiment_id(episode, identifier),
+        experiment_id=experiment_id(episode),
     )
     # Checked and started without awaiting in between, so a second submission
     # cannot slip past the check while this one is being set up.
@@ -293,12 +404,18 @@ async def validate_campaign(campaign: CampaignRequest) -> dict[str, Any]:
     # stands would compile the wrong instance. Free numbers stand in: reserving
     # reads the register and writes nothing, so a preview costs no seed.
     _settle_seeds(campaign)
+    campaign = _declared_campaign_thinking(campaign)
     cells = _planned(campaign)
     try:
         await asyncio.to_thread(preflight, campaign, cells)
+        judge = diagnosis_judge(campaign_episode(campaign, cells[0])) if cells else None
+        checked = (await asyncio.to_thread(check_judge, campaign.diagnosis_judge_model,
+                                           campaign.diagnosis_judge_reading, judge)
+                   if judge is not None and campaign.check_diagnosis_judge else None)
     except Exception as exc:  # noqa: BLE001 - a bad matrix is a 400, not a 500
         raise HTTPException(status_code=400, detail=f"{type(exc).__name__}: {exc}") from exc
     return {
+        "diagnosis_judge_check": checked,
         "campaign_id": campaign.campaign_id(),
         "result_dir": f"{config.campaign_dir}/{campaign.campaign_id()}",
         "cells": [cell.summary() for cell in cells],
@@ -310,6 +427,7 @@ async def start_campaign(campaign: CampaignRequest) -> dict[str, Any]:
     document = _settle_seeds(campaign)
     if campaign.seed_campaign is None:
         campaign.seed_campaign = seeds.reserve(document, "campaign")
+    campaign = _declared_campaign_thinking(campaign)
     cells = _planned(campaign)
     # Named apart from the request: the record carries both, and a request rebound to
     # its own id reached the runner as a string, which failed every launch.

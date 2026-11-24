@@ -39,8 +39,8 @@ _TC_PERCENT = re.compile(r"[0-9]+(?:\.[0-9]+)?%\Z")
 _ROUTE_TIME = re.compile(r"[0-9]+(?:ms|s)?\Z")
 _ROUTE_NAME = re.compile(r"[A-Za-z0-9_.:@-]{1,64}\Z")
 
-# The Linux route grammar the adapter authorizes, token by token. Widening it is a
-# reviewed change: every word added here is a word a subject may send to a device.
+# The Linux route vocabulary this screen authorizes. Widening it is a reviewed
+# change: tests/test_safety.py pins the forms it accepts and the ones it refuses.
 _LINUX_ROUTE_TYPES = frozenset({
     "blackhole", "unreachable", "prohibit", "throw", "unicast", "local",
     "broadcast", "multicast", "nat",

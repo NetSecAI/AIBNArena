@@ -9,15 +9,18 @@ ACLs, DHCP pools, firewall rule sets, zones, traffic shaping) and refuses the re
 name, so that a request the ANI cannot form is answered before a device sees it.
 
 Every step carries its own compensating command where one can be derived without
-reading the device (a toggle, an address added or removed); where it cannot (a route
-that replaced an unknown one, a deleted pool), the step has none and the transaction
-reports rollback_available false, exactly as a raw update_config without
-rollback_commands would.
+reading the device (a toggle, an address added or removed). Where it cannot (a route
+that replaced an unknown one, a deleted pool), the step has none here, and the ANI reads
+the object's state just before the write and derives the compensation from it
+(`object_rollback`). Where even that cannot be done exactly - a traffic-control tree on
+Linux, a read that does not look like the node's own - the transaction reports
+rollback_available false, exactly as a raw update_config without rollback_commands would.
 """
 from __future__ import annotations
 
 import ipaddress
 import re
+import shlex
 from dataclasses import dataclass
 from typing import Any, Mapping
 
@@ -36,7 +39,8 @@ ATTRIBUTES: dict[str, dict[str, str]] = {
         "address_action": "add | delete (with address); there is no replace: delete the old address, add the new one",
     },
     "route": {
-        "next_hop": "IPv4 next-hop address (SR Linux: a next-hop group is created for it)",
+        "next_hop": "IPv4 next-hop address; it becomes the route's next hop, and any other next hop, interface or "
+                    "blackhole the route had is removed (SR Linux: through a next-hop group created for it)",
         "next_hop_group": "SR Linux only: an existing next-hop group name",
         "delete": "true removes the static route",
     },
@@ -58,7 +62,8 @@ ATTRIBUTES: dict[str, dict[str, str]] = {
     "firewall_rule": {
         "rule": "rule number (with action or delete), in the rule set the name gives, or in the base "
                 "forward filter when the name is forward",
-        "action": "accept | drop | reject",
+        "action": "accept | drop | reject; a rule number the rule set does not have yet is created with this "
+                  "action and no match criterion, so it matches every packet",
         "delete": "true with rule removes that rule",
         "default_action": "accept | drop | reject (the forward filter: accept | drop)",
     },
@@ -68,14 +73,21 @@ ATTRIBUTES: dict[str, dict[str, str]] = {
         "add_interface": "interface to put in the zone", "delete_interface": "interface to take out of the zone",
     },
     "qos": {
-        "delete_root": "true removes the root qdisc (Linux, name = interface)",
-        "htb": "{default: class number, rate, ceil, classes: [{id, rate, ceil, prio}], filters: [{src|dst: prefix, flowid, prio}]} "
+        "delete_root": "true removes the root qdisc (Linux, name = interface); alone it is refused on an HTB root, "
+                       "whose root class is the circuit: send it with htb to rebuild the hierarchy in one write",
+        "htb": "{default: class number, rate: the circuit's link rate (root class 1:1), ceil, classes: [{id, rate, ceil, prio}] "
+               "including the default class 1:<default>, filters: [{src|dst: prefix, flowid, prio}]} "
                "builds the whole hierarchy on an interface without an HTB root; send delete_root: true in the same set to rebuild one",
         "class": "{id, rate, ceil, prio, parent} changes one HTB class",
         "filter": "{src|dst: prefix, flowid, prio} adds one classifier under the root 1:",
         "delete_filter": "{prio} removes the classifiers of that priority under the root 1:",
     },
 }
+
+#: What an `htb` object may hold. A key outside it was ignored until 2026-10-29, and the
+#: root was built anyway: E19 LangChain wan_shaping m1 and m4 sent {"root": ...},
+#: {"class": ...} and {"handle", "quantum"}, and got an HTB root with no class.
+HTB_KEYS = ("default", "rate", "ceil", "classes", "filters")
 
 _NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}$")
 _RATE = re.compile(r"^\d+(k|m|g)?bit$", re.I)
@@ -384,6 +396,53 @@ def _route_vyos(name: str, changes: dict[str, Any]) -> list[Step]:
                  Probe("route", prefix, next_hop))]
 
 
+#: What a VyOS static route forwards to. A `next_hop` request makes its next hop the only one
+#: (`replace_vyos_next_hops`), as `ip route replace` does on Linux.
+_VYOS_ROUTE_TARGETS = ("next-hop", "interface", "blackhole", "reject")
+
+
+def replace_vyos_next_hops(compiled: CompiledUpdate, configured: str) -> CompiledUpdate:
+    """A VyOS route's `next_hop` as a replacement, from the node's `show configuration commands`
+    read just before the write.
+
+    `set protocols static route <prefix> next-hop <hop>` alone adds a hop beside the ones the
+    route has, where Linux replaces it. In main04 three langchain_v2 episodes ended with the
+    fault's hop beside the repaired one, and all three failed. So the route's other targets
+    (next hops, interfaces, blackhole, reject) are deleted in the same commit, and the hop is
+    set unless it is already there. A route whose only target is that hop needs no step.
+
+    These steps carry no compensation of their own: the ANI derives one from the same read
+    (`object_rollback.vyos_compensation`), which puts each deleted target back whole, distance
+    included. A route with no other target keeps the single step the request compiled to.
+    """
+    if len(compiled.steps) != 1:
+        return compiled
+    words = compiled.steps[0].command.split()
+    if words[:4] != ["set", "protocols", "static", "route"] or words[5:6] != ["next-hop"] or len(words) != 7:
+        return compiled
+    prefix, hop = words[4], words[6]
+    others: list[str] = []
+    present = False
+    for line in configured.splitlines():
+        try:
+            path = shlex.split(line.strip())
+        except ValueError:
+            continue
+        if path[:5] != ["set", "protocols", "static", "route", prefix] or len(path) < 6 or path[5] not in _VYOS_ROUTE_TARGETS:
+            continue
+        target = " ".join(path[5:7] if path[5] in ("next-hop", "interface") else path[5:6])
+        if target == f"next-hop {hop}":
+            present = True
+        elif target not in others:
+            others.append(target)
+    if not others:
+        return CompiledUpdate((), compiled.summary) if present else compiled
+    steps = [Step(f"delete protocols static route {prefix} {target}", None) for target in others]
+    if not present:
+        steps.append(Step(f"set protocols static route {prefix} next-hop {hop}", None))
+    return CompiledUpdate(tuple(steps), compiled.summary)
+
+
 # -- routing instance, acl (SR Linux) ---------------------------------------------
 
 def _routing_srl(name: str, changes: dict[str, Any]) -> list[Step]:
@@ -522,18 +581,31 @@ def _qos_linux(name: str, changes: dict[str, Any]) -> list[Step]:
         htb = changes["htb"]
         if not isinstance(htb, Mapping):
             raise UnsupportedUpdate("htb must be an object")
+        unknown = sorted(set(htb) - set(HTB_KEYS))
+        if unknown:
+            raise UnsupportedUpdate(f"htb has no key {', '.join(unknown)}; it has {', '.join(HTB_KEYS)}")
         default = _number(htb.get("default") or 20, "htb.default", 1, 65535)
         steps.append(Step(f"tc qdisc replace dev {name} root handle 1: htb default {default}", None))
         if "rate" in htb:
             rate = _rate(htb["rate"], "htb.rate")
             ceil = _rate(htb.get("ceil") or htb["rate"], "htb.ceil")
             steps.append(Step(f"tc class replace dev {name} parent 1: classid 1:1 htb rate {rate} ceil {ceil}", None))
-        for klass in _listed(htb.get("classes") or []):
-            steps.append(Step(_class_command(name, klass, "replace"), None))
+        classes = _listed(htb.get("classes") or [])
+        for klass in classes:
+            steps.append(Step(_class_command(name, klass, "replace", "htb.classes"), None))
         for index, flt in enumerate(_listed(htb.get("filters") or []), start=1):
             steps.append(Step(_filter_command(name, flt, index, "filters"), None))
+        # After every value is read, so a malformed one is still refused by its own name.
+        # A hierarchy missing either shapes nothing: E19 LangChain wan_shaping m1 and m4
+        # left the 10 Mbit circuit carrying 180 to 195 Mbit/s.
+        if "rate" not in htb:
+            raise UnsupportedUpdate("htb needs rate: the circuit's link rate, the root class 1:1 every "
+                                    "class hangs under (a class's parent is 1:1 unless it says otherwise)")
+        if f"1:{default}" not in {str(klass.get("id")) for klass in classes if isinstance(klass, Mapping)}:
+            raise UnsupportedUpdate(f"htb.classes must create the default class 1:{default}: traffic no filter "
+                                    "matches goes to it, and with no such class it leaves unshaped")
     if "class" in changes:
-        steps.append(Step(_class_command(name, changes["class"], "change"), None))
+        steps.append(Step(_class_command(name, changes["class"], "change", "class"), None))
     if "delete_filter" in changes:
         spec = changes["delete_filter"]
         if not isinstance(spec, Mapping) or "prio" not in spec:
@@ -561,9 +633,20 @@ def _filter_command(name: str, flt: Any, default_prio: int, key: str) -> str:
             f"match ip {side} {prefix} flowid {_token(flt['flowid'], f'{key}.flowid')}")
 
 
-def _class_command(name: str, klass: Any, verb: str) -> str:
+def _class_command(name: str, klass: Any, verb: str, key: str) -> str:
+    """One HTB class, from `htb.classes` (a list of such objects) or from `class`.
+
+    The refusal says what the entry holds: in E20 LangChain's wan_shaping m1 to m3 sent
+    `htb.classes` as an object keyed by a name, `{"default": {"id": 20, "rate": ...}}`,
+    and 30 refusals said the class needed id and rate, which the model had given.
+    """
     if not isinstance(klass, Mapping) or "id" not in klass or "rate" not in klass:
-        raise UnsupportedUpdate("a class needs id and rate (ceil, prio, parent optional)")
+        held = (f"this one has {', '.join(sorted(map(str, klass))) or 'no key'}"
+                if isinstance(klass, Mapping) else f"this one is a {type(klass).__name__}")
+        shape = ("htb.classes is a list of class objects, such as "
+                 '[{"id": "1:10", "rate": "8mbit"}, {"id": "1:20", "rate": "2mbit"}]'
+                 if key == "htb.classes" else 'class is one object, such as {"id": "1:10", "rate": "8mbit"}')
+        raise UnsupportedUpdate(f"a class needs id and rate (ceil, prio, parent optional), and {held}: {shape}")
     rate = _rate(klass["rate"], "class.rate")
     ceil = _rate(klass.get("ceil") or klass["rate"], "class.ceil")
     parent = _token(klass.get("parent") or "1:1", "class.parent")
@@ -588,3 +671,17 @@ _HANDLERS = {
     ("zone", "vyos"): _zone_vyos,
     ("qos", "linux"): _qos_linux,
 }
+
+
+#: The platforms by the name their descriptions use.
+PLATFORM_LABELS = {"vyos": "VyOS", "linux": "Linux", "nokia_srlinux": "SR Linux", "arista_ceos": "Arista EOS"}
+
+
+def kinds_by_platform() -> dict[str, list[str]]:
+    """The kinds each platform has, from the compilers above: what `update_object`'s
+    description states, so the two cannot drift apart. A platform with none (Arista EOS)
+    is listed with none."""
+    kinds: dict[str, list[str]] = {platform: [] for platform in PLATFORM_LABELS}
+    for kind, platform in _HANDLERS:
+        kinds.setdefault(platform, []).append(kind)
+    return kinds

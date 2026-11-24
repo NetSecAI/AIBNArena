@@ -13,21 +13,26 @@ Local pages over the same machinery, each named in the header under the title:
 
 It automates nothing the command line cannot do. It runs the same two commands
 `experiments/run_langchain_baseline.sh` runs, in the same order. One episode
-writes to `reports/manual/` — results under `reports/manual/results/`, reports
-in `reports/manual/`, the two process logs under
-`reports/manual/webui-logs/<run>/`. A campaign writes a campaign directory
+gets a folder of its own, `reports/manual/<scenario instance>-seed<seed>/<run>/`
+(e.g. `connectivity-disable_interface-m1-seed926318096/20261002T095358Z-7d18/`),
+holding everything it wrote: the judge's record and its report, the device
+snapshots, the subject's artifacts, the two process logs and the run's
+`run.json`. The run id keeps a seed run twice from overwriting itself. A campaign
+writes a campaign directory
 under `reports/campaigns/runs/`, where the shell script already writes
 its own.
 
 ## Install and run
 
 ```bash
-.venv/bin/python -m pip install -r requirements-webui.txt
-.venv/bin/python -m webui.main          # http://127.0.0.1:8080
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m webui.main          # http://127.0.0.1:8080, or the next free port
 ```
 
 `IBN_WEBUI_HOST`, `IBN_WEBUI_PORT` and `IBN_WEBUI_PYTHON` override where it
-listens and which interpreter it starts the subject and the judge with. It binds
+listens and which interpreter it starts the subject and the judge with. When that
+port is already taken (another checkout's interface, say), it serves on the next
+free one and says which before uvicorn names it. It binds
 to the loopback address because it starts processes and drives a lab: it is a
 local tool, not a service to publish.
 
@@ -37,7 +42,10 @@ local tool, not a service to publish.
    `benchmarks/run.py`'s own `validate_bundle()`. Nothing is started, so a bad
    combination costs a second rather than a lab deployment. The **Validate**
    button stops here and shows what would run.
-2. **Frees the subject's port**, naming in the log any process it had to stop.
+2. **Finds the subject a free port**: the subject's default (8003, 8004) or the one
+   the form names, else the first free one after it. Whatever holds a busy port is
+   named in the log and left running; the port taken is written into the request,
+   so the record says where the subject was served.
 3. **Starts the subject** (`python -m sut.<subject>.a2a_server ...`).
 4. **Proves it**: polls `/.well-known/sut-runtime.json` until the process id,
    the subject identity and the configured model are the ones just started. A
@@ -53,7 +61,7 @@ local tool, not a service to publish.
 The run page follows three streams. The judge and the subject each get a column
 of their own, side by side, because they run at the same time and the question
 being watched is usually what one did while the other was doing something. Above
-them sits what the launcher itself did between the two: the port it freed, the
+them sits what the launcher itself did between the two: the port it took, the
 subject it proved, the result it collected. Each pane scrolls on its own and
 sticks to the bottom only while it is already there, so reading back through the
 subject's output does not fight the judge's next line.
@@ -309,6 +317,26 @@ server's real argparse by `webui/catalog/tests/`), topologies and testbeds from
 YAMLs filtered through `scenarios/topology_applicability.json`, and prompt
 variants from each subject's `prompts/` directory.
 
+Besides the two LangChain subjects, `langchain_agent_v2` (port 8010) and the step-back
+subjects of `sut/step-back/` are offered: `dumb_baseline` (8015),
+`object_baseline` (8016) and `full_baseline` (8017). Each takes `langchain_agent_v2`'s
+settings and is started as `python -m sut.step-back.<subject>.a2a_server`.
+
+Every topology in `scenarios/topologies/` can be chosen -- the SME labs, `clos01` and the three
+campus labs (`campus_small`, `campus_medium`, `campus_large`) -- in every domain that has a
+scenario applicable to it, through an experiment file pinning it to a testbed
+(`webui/catalog/tests/test_experiments.py` holds it).
+
+Scenario files are parsed once and kept between page loads; a file is read again
+only when it changes, so an edited scenario still shows on the next load.
+
+A scenario whose default an experiment file is written for keeps that file alone
+**on that topology** — the reference state it was written for there. Its other
+topologies stay offered. On the Campaign page, the topology beside **Add all
+methods of this domain** puts every added row on that topology, leaving out the
+scenarios it cannot run; with none chosen, each scenario goes on the first
+topology it runs on.
+
 ## The diagnosis judge
 
 Evaluation parameter 13, "LLM found the problem rate", needs a second model: a judge
@@ -316,13 +344,24 @@ scores whether the subject's statement of the fault (its `diagnosis`, or its fin
 summary when its prompt asks for no diagnosis, as the prompts on this branch do)
 names the fault the scenario injected (the ParaPLUIE score, see
 `docs/diagnosis_judge.md`). The **Diagnosis judge** menu on the episode and campaign
-forms offers the models registered on the Models page, none, or a model id typed by
-hand, which then runs on the subject's endpoint with the subject's key, so a judge on
-the same provider as the generator needs no second secret. **Judge reading** says how
-the log-probabilities are read: `prompt_logprobs` (a vLLM endpoint, the exact reading)
-or `top_logprobs` (the OpenAI API, which lists the candidates of the generated token;
-gpt-4.1 and gpt-4o). A chosen judge is named to `benchmarks/run.py` with its endpoint's
-base URL; its key reaches the judge through the environment. Every judge call is also
+forms offers three choices: none, **vLLM** or the **OpenAI API**. The kind decides how the
+judge's log-probabilities are read, and is sent as the reading: vLLM gives the prompt's
+own log-probabilities of Yes and No, the exact reading (`prompt_logprobs`); the OpenAI API
+only lists the candidates of one generated token (`top_logprobs`; gpt-4.1, gpt-4o,
+gpt-4o-mini). **Judge model** then offers the models registered on the Models page for
+that kind -- an endpoint is read as the OpenAI API when it was registered as OpenAI or
+OpenRouter or when its URL is theirs (OpenRouter takes `top_logprobs`, not vLLM's
+`prompt_logprobs`), any other is taken for vLLM -- or a model id typed by hand, which runs
+on the subject's endpoint with the subject's key, so a judge on the same provider as the
+generator needs no second secret (`webui/static/judge_picker.js`). A recorded campaign's
+judge comes back under the kind its reading names. A chosen judge is named to `benchmarks/run.py` with its endpoint's
+base URL; its key reaches the judge through the environment, and the model under the name
+the endpoint knows it by (`gpt-4o-mini`, not `openai/gpt-4o-mini`, which OpenAI refuses).
+**Check the judge before the run**, checked by default, makes the judge score one test pair
+with exactly those settings at Validate, before an episode's subject starts and before a
+campaign's first cell: a judge its endpoint refuses (an unknown model id, a rejected key, a
+reading it cannot serve) stops the run there, instead of leaving every episode unjudged
+(`webui/judge_check.py`). It costs one request. Every judge call is also
 appended, with its raw candidates, to `diagnosis-audit.jsonl` beside the reports. The verdict table then shows `root_cause_identified`,
 `diagnosis_score`, `sut_diagnosis` and `diagnosis_judge` (the model that judged) under
 the model rows, and a campaign cell carries `root cause` beside its other letters. With no judge, the diagnosis is still recorded and the
@@ -330,23 +369,57 @@ rows say it was not judged.
 
 ## Models and their keys
 
-The **Models** page registers endpoints: a provider's base URL, the key it
-takes, and the model ids it serves — one entry covers every model behind a
-LiteLLM or vLLM proxy. The launcher's model field then lists those models, and
-keeps an "other model id…" entry for anything not registered, which runs on
-whatever `.env` already defines.
+The **Models** page registers endpoints of three types:
+
+- **OpenAI** — OpenAI's own API. No URL is asked for: it is
+  `https://api.openai.com/v1`. Type the key, then **List the models of this key**:
+  the server asks OpenAI (`GET /v1/models`) with that key, or with the stored one when
+  an endpoint is edited, and offers the chat models it can use as boxes to tick
+  (embedding, audio, image, moderation and search models are left out). Ticked or
+  typed, a model is stored as litellm takes it, `openai/<id>`. An OpenAI endpoint is
+  refused without a key.
+- **OpenRouter** — OpenRouter's API. No URL is asked for either: it is
+  `https://openrouter.ai/api/v1`. **List the models** offers OpenRouter's catalog, the
+  models that take tools only (a subject repairs through tool calls), with a filter box;
+  the catalog is public, so it lists without a key, and with the key when one is typed or
+  stored. A model is typed or ticked by its OpenRouter id (`qwen/qwen3-8b`,
+  `openai/gpt-4o`) and always stored under litellm's prefix, `openai/qwen/qwen3-8b` and
+  `openai/openai/gpt-4o`, so that OpenRouter receives its own id. An OpenRouter endpoint
+  is refused without a key.
+- **OpenAI-compatible endpoint** — a LiteLLM or vLLM proxy, or another provider, at
+  the base URL given, with the model ids it serves typed — one entry covers every
+  model behind a proxy. Entries stored before the type existed are of this type.
+
+The launcher's model field then lists those models, and keeps an "other model id…"
+entry for anything not registered, which runs on whatever `.env` already defines.
+
+**Thinking is declared with the model, and nowhere else** (since 2026-11-18; the
+Advanced sections of the Episode and Campaign pages no longer offer it). Each model of
+an endpoint gets a row under *Thinking*: on, off or the model's default, an effort level
+and a style. The declaration is stored with the endpoint in `models.json` (`thinking`, by
+model id), and checked when the endpoint is saved by the rule the subjects apply at
+startup (`sut/common/thinking.py`): a model that does not reason (gpt-4o, gpt-4o-mini,
+gpt-4.1) cannot be turned on, and each family takes its own effort levels — gpt-5,
+gpt-5-mini and gpt-5-nano `minimal` to `high` (off sends `minimal`), gpt-5.2 and gpt-5.4
+`none` to `xhigh` (off sends `none`), the o-series and the other gpt-5.x `low` to `high`
+with no off. The launch pages show each model's declaration next to it. A launch writes
+it into the request it records: an episode's `enable_thinking`, `thinking_effort` and
+`thinking_style`, a campaign's `model_thinking`, as the declaration stood at launch, so a
+resumed or replayed campaign runs what it ran even if the declaration changed since. An
+unregistered model runs with its subject's default.
 
 Three rules the code holds to:
 
 - **The key is never put on a command line.** The run log prints the subject's
   argv and `ps` shows it to every local user. Credentials reach the subject
   through its environment instead, under its own prefix
-  (`LANGCHAIN_AGENT_API_*`),
+  (`LANGCHAIN_AGENT_API_*`, `LANGCHAIN_RAG_AGENT_API_*`),
   which its `from_env()` reads before the repository-wide `LLM_API_*` — so the
   endpoint chosen here wins over what `.env` names.
 - **The key is never sent back to the browser.** A listing says whether one is
   stored, never what it is, and editing an endpoint without retyping the key
-  keeps the stored one.
+  keeps the stored one. Listing an OpenAI key's models answers with the model ids
+  alone.
 - **The store is `webui/models.json`**, written `0600` and listed in
   `.gitignore`. It is the only file this tool writes a secret to. Nothing stops
   you from using `.env` as before instead: an unregistered model behaves exactly

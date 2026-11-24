@@ -14,6 +14,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from sut.common import build_a2a_application, build_ani, optional_bool, resolve_endpoint  # noqa: E402
+from sut.common.agent_config import parse_max_tokens  # noqa: E402
 from sut.langchain_agent import LangChainAgentConfig, LangChainRepairAgent  # noqa: E402
 
 
@@ -26,7 +27,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--api-base")
     parser.add_argument("--api-key")
     parser.add_argument("--temperature", type=float)
-    parser.add_argument("--max-tokens", type=int)
+    parser.add_argument("--max-tokens", type=parse_max_tokens,
+                        help="Maximum output tokens of a model call. 0, none or unlimited sends no limit.")
     parser.add_argument("--max-context-chars", type=int)
     parser.add_argument("--artifact-directory")
     parser.add_argument("--max-execution-seconds", type=float)
@@ -100,9 +102,9 @@ def main() -> None:
         max_tokens=args.max_tokens if args.max_tokens is not None else env_config.max_tokens,
         dry_run=args.dry_run or env_config.dry_run,
         self_execute=env_config.self_execute,
-        # The command line wins and LANGCHAIN_AGENT_ENABLE_THINKING is the fallback,
-        # and nothing else: a second path nobody sends is how a run file's condition
-        # and the record come to disagree.
+        # The command line wins and LANGCHAIN_AGENT_ENABLE_THINKING is the fallback:
+        # the one path the other servers use. A second path nobody sends is
+        # how a run file's condition and the record come to disagree.
         enable_thinking=(optional_bool(args.enable_thinking) if args.enable_thinking is not None
                          else env_config.enable_thinking),
         # Read from the environment the launcher exports: without these three the
@@ -126,6 +128,10 @@ def main() -> None:
         max_consecutive_rejections=(args.max_consecutive_rejections
                                     if args.max_consecutive_rejections is not None
                                     else env_config.max_consecutive_rejections),
+        # From the environment only (IBN_SUT_KEEP_RECENT_READS, IBN_SUT_KEEP_RECENT_READ_CHARS or the subject's prefix);
+        # the subject's config gives the default, and only a runtime wired to it uses it.
+        keep_recent_reads=env_config.keep_recent_reads,
+        keep_recent_read_chars=env_config.keep_recent_read_chars,
         max_execution_seconds=args.max_execution_seconds if args.max_execution_seconds is not None else env_config.max_execution_seconds,
         max_context_chars=args.max_context_chars if args.max_context_chars is not None else env_config.max_context_chars,
         artifact_directory=args.artifact_directory or env_config.artifact_directory,

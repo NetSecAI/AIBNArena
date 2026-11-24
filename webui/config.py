@@ -20,9 +20,11 @@ class WebUIConfig:
     readiness_timeout_seconds: float = 60.0
     readiness_interval_seconds: float = 1.0
     port_release_timeout_seconds: float = 10.0
-    #: The directories the command line already writes to, so an episode run from
-    #: here lands in the same place as one run by hand.
-    result_dir: str = "reports/manual/results"
+    #: Where each episode run from here gets its own folder,
+    #: `<scenario instance>-seed<seed>/<run id>/`, holding everything it wrote:
+    #: the record, the report, the device snapshots, the subject's artifacts and
+    #: the two process logs beside the run's own run.json.
+    manual_dir: str = "reports/manual"
     #: Where a campaign's campaign directory goes. The same place
     #: `experiments/run_langchain_baseline.sh` writes its campaigns, and the
     #: directory `scripts/export_results.py` is pointed at afterwards; it is
@@ -31,8 +33,6 @@ class WebUIConfig:
     #: Where a campaign's records are laid out when it ends, one folder per
     #: model, campaign, subject and intent, by `scripts/export_results.py`.
     export_dir: str = "reports/campaigns"
-    report_dir: str = "reports/manual"
-    log_dir: str = "reports/manual/webui-logs"
 
     @classmethod
     def from_env(cls) -> "WebUIConfig":

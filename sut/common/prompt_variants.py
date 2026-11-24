@@ -108,3 +108,21 @@ def resolve_system_prompt(
         f"unknown prompt variant {name!r}; this subject ships "
         f"{available_variants(subject_dir)}"
     )
+
+
+def with_prompt_section(prompt: str, token: str, heading: str, body: str) -> str:
+    """The prompt with `body` written where the shipped text puts `token`.
+
+    For what a subject reads at the start of an episode and hands the model with
+    its instructions, such as the lab topology. A plain token, not one of the
+    `PLACEHOLDERS`: it is filled per episode, so it cannot be substituted when the
+    file is loaded. A variant that does not carry the token gets the body under its
+    own heading before `# Finish`, so the terminal stanza the loop parses stays last.
+    """
+    if token in prompt:
+        return prompt.replace(token, body)
+    head, marker, tail = prompt.partition("# Finish")
+    section = f"# {heading}\n\n{body}\n\n"
+    if marker:
+        return f"{head}{section}{marker}{tail}"
+    return f"{prompt.rstrip()}\n\n{section}"

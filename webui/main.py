@@ -12,6 +12,7 @@ if str(REPOSITORY) not in sys.path:
 import uvicorn  # noqa: E402
 
 from webui.config import WebUIConfig  # noqa: E402
+from webui.orchestrator.process import next_free_port  # noqa: E402
 
 
 def main() -> None:
@@ -22,9 +23,16 @@ def main() -> None:
     except ImportError:
         pass
     config = WebUIConfig.from_env()
+    # A busy port (the other checkout's interface, say) is left to its holder: the
+    # interface takes the next free one, and says so before uvicorn names it.
+    searched: list[str] = []
+    port = next_free_port(config.port, sink=searched.append)
+    if port != config.port:
+        for line in searched:
+            print(f"webui: {line}", file=sys.stderr)
     # Bound to the loopback address by default: this starts processes and drives
     # a lab, so it is a local tool, not a service to publish.
-    uvicorn.run("webui.app:app", host=config.host, port=config.port, workers=1)
+    uvicorn.run("webui.app:app", host=config.host, port=port, workers=1)
 
 
 if __name__ == "__main__":

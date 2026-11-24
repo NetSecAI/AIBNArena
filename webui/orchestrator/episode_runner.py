@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from pathlib import Path
 from typing import Any
 
 from benchmarks.run import validate_bundle
@@ -26,10 +27,11 @@ from webui.catalog.experiments import ExperimentPreset
 from webui.config import REPOSITORY, WebUIConfig
 from webui.bundle import compile_bundle
 from webui.form import EpisodeRequest
+from webui.judge_check import check_judge
 
 from . import history
-from .process import StreamedProcess, release_port
-from .results import collect
+from .process import StreamedProcess, next_free_port
+from .results import collect, repository_relative
 from .seed_guard import settle
 from .readiness import wait_for_runtime_identity
 from .run_state import LogSource, RunManager, RunRecord, RunState
@@ -57,12 +59,16 @@ def diagnosis_judge(request: EpisodeRequest) -> endpoints.Endpoint | None:
 
 
 def validate(request: EpisodeRequest, preset: ExperimentPreset) -> dict[str, Any]:
-    """Compile the configuration, the scenario and its oracles. Touches nothing live."""
+    """Compile the configuration, the scenario and its oracles. Touches no lab. With
+    `check_diagnosis_judge`, the judge is asked to score a test pair, and a judge that
+    does not is refused here (`webui/judge_check.py`)."""
     config, scenario, oracles = compile_bundle(request, preset)
     judge = diagnosis_judge(request)
+    checked = (check_judge(request.diagnosis_judge_model, request.diagnosis_judge_reading, judge)
+               if judge is not None and request.check_diagnosis_judge else None)
     return {
         "diagnosis_judge": (
-            {"model": request.diagnosis_judge_model, "api_base": judge.api_base}
+            {"model": request.diagnosis_judge_model, "api_base": judge.api_base, "check": checked}
             if judge is not None else None),
         "experiment": config.experiment_id,
         "testbed": config.testbed.get("id"),
@@ -85,8 +91,13 @@ async def run_episode(manager: RunManager, config: WebUIConfig, record: RunRecor
     request = record.request
     architecture = catalog.architecture(request.architecture)
     preset = catalog.preset(request.experiment)
-    port = resolved_port(request, architecture)
-    logs = config.absolute(config.log_dir) / record.id
+    # Everything this test writes, in one folder: the record and the report, the
+    # judge's device snapshots, the subject's artifacts and the logs.
+    logs = run_directory(config, record)
+    folder = repository_relative(logs)
+    if request.artifact_directory is None and architecture.accepts("artifact_directory"):
+        # Written into the request, which the run records, so it says where they went.
+        request.artifact_directory = f"{folder}/artifacts"
 
     def voice(source: LogSource):
         """A sink that says who is speaking, so the page can follow each apart."""
@@ -110,8 +121,10 @@ async def run_episode(manager: RunManager, config: WebUIConfig, record: RunRecor
         sink(f"seed {request.seed}: {_instance(entry)}")
 
         manager.set_state(record, RunState.STARTING_SUT)
-        await asyncio.to_thread(
-            release_port, port, timeout=config.port_release_timeout_seconds, sink=sink)
+        # A busy port is left to whatever holds it: the subject takes the next free
+        # one, written into the request so its argv and the record both say it.
+        port = request.port = await asyncio.to_thread(
+            next_free_port, resolved_port(request, architecture), sink=sink)
         argv = [config.python, "-u", "-m", architecture.module,
                 *build_sut_argv(request, architecture, preset)]
         endpoint = endpoints.credentials(request.model)
@@ -119,6 +132,12 @@ async def run_episode(manager: RunManager, config: WebUIConfig, record: RunRecor
         # call, after the testbed is deployed; asking now costs one request.
         if endpoint is not None:
             sink(await asyncio.to_thread(endpoints.probe_model, request.model, endpoint))
+        # The judge runs after the episode: one it cannot reach is found now, before
+        # the lab is deployed, rather than in an unjudged record.
+        judge_endpoint = diagnosis_judge(request)
+        if judge_endpoint is not None and request.check_diagnosis_judge:
+            sink(await asyncio.to_thread(
+                check_judge, request.diagnosis_judge_model, request.diagnosis_judge_reading, judge_endpoint))
         subject = StreamedProcess(
             "sut", argv,
             cwd=REPOSITORY,
@@ -154,8 +173,8 @@ async def run_episode(manager: RunManager, config: WebUIConfig, record: RunRecor
             request, preset,
             experiment_id=record.experiment_id,
             sut_url=request.sut_url(port),
-            result_dir=config.result_dir,
-            report_dir=config.report_dir,
+            result_dir=folder,
+            report_dir=folder,
             judge=judge_endpoint,
         )]
         sink(f"diagnosis judge: {request.diagnosis_judge_model} at {judge_endpoint.api_base}"
@@ -190,13 +209,14 @@ async def run_episode(manager: RunManager, config: WebUIConfig, record: RunRecor
     history.save(record, logs)
 
 
+def run_directory(config: WebUIConfig, record: RunRecord) -> Path:
+    """`<manual dir>/<scenario instance>-seed<seed>/<run id>/`: one manual test's folder."""
+    return config.absolute(config.manual_dir) / record.experiment_id / record.id
+
+
 def _collect(config: WebUIConfig, record: RunRecord, sink) -> None:
-    found = collect(
-        config.absolute(config.result_dir),
-        config.absolute(config.report_dir),
-        record.experiment_id,
-        sink,
-    )
+    directory = run_directory(config, record)
+    found = collect(directory, directory, record.experiment_id, sink)
     record.result_path = found["result_path"]
     record.verdict = found["verdict"]
     record.report_path = found["report_path"]

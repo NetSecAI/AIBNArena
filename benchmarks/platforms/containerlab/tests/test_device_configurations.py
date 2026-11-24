@@ -1,6 +1,7 @@
 """The platform reads every device's running configuration the way the ANI does."""
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
@@ -42,7 +43,7 @@ class _ByContainerRunner:
 def _platform(runner) -> ContainerlabPlatform:
     platform = ContainerlabPlatform()
     platform.env = SimpleNamespace(
-        config=SimpleNamespace(nodes={"leaf1": LEAF, "fw1": FW, "host1": HOST}),
+        config=SimpleNamespace(lab_name="test", nodes={"leaf1": LEAF, "fw1": FW, "host1": HOST}),
         executor=ContainerLabExecutor(Path("unused.yaml"), runner=runner),
     )
     return platform
@@ -76,4 +77,60 @@ def test_a_device_that_fails_keeps_its_error_and_the_others_stand():
 
 def test_without_a_testbed_there_is_nothing_to_read():
     result = ContainerlabPlatform().collect_device_configurations()
+    assert result["ok"] is False and result["devices"] == {}
+
+
+class _StructuredRunner:
+    """Answers the structured reads: JSON where the device has it, text for Linux."""
+
+    def __init__(self, fail: str | None = None) -> None:
+        self.calls: list[str] = []
+        self.fail = fail
+
+    def run(self, args, timeout_seconds=None, input_text=None):
+        joined = " ".join(str(item) for item in args) + " " + (input_text or "")
+        self.calls.append(joined)
+        if self.fail and self.fail in joined:
+            return subprocess.CompletedProcess(args, 1, stdout="", stderr="device unreachable\n")
+        if "clab-test-leaf1" in joined:
+            out = json.dumps({"interface": [{"name": "ethernet-1/1", "admin-state": "enable"}]}
+                             if "info from running" in joined else {"view": "state"})
+        elif "clab-test-fw1" in joined:
+            out = json.dumps({"firewall": {"zone": {"dmz": {}}}}) if "configuration json" in joined else "VyOS 1.4\n"
+        elif "link show" in joined:
+            out = "2: eth1@if7: <BROADCAST,UP> mtu 1500 qdisc noqueue\n"
+        else:
+            out = ""
+        return subprocess.CompletedProcess(args, 0, stdout=out, stderr="")
+
+
+def test_every_device_is_read_as_get_running_config_json_answers_a_subject():
+    runner = _StructuredRunner()
+    platform = _platform(runner)
+    platform.topology_document = {"topology": {"nodes": {"host1": {"roles": ["dmz_server"]}}}}
+    result = platform.collect_structured_device_data()
+    assert result["ok"] is True and result["format"] == "json"
+    assert list(result["devices"]) == ["fw1", "host1", "leaf1"]          # name order
+    leaf = result["devices"]["leaf1"]
+    assert leaf["running"]["interface"][0]["admin-state"] == "enable" and leaf["state"]["system"] == {"view": "state"}
+    assert result["devices"]["fw1"]["running"] == {"firewall": {"zone": {"dmz": {}}}}
+    assert set(result["devices"]["fw1"]["documents"]) == {"version_data.json", "routes_data.json", "arp_data.json"}
+    host = result["devices"]["host1"]
+    assert list(host["running"]["interfaces"]) == ["eth1"]
+    # What a graph built after the run needs beside the read: the container and the roles.
+    assert (host["host"], host["roles"]) == ("clab-test-host1", ["dmz_server"])
+    assert result["devices"]["leaf1"]["roles"] == [] and leaf["seconds"] >= 0.0
+    assert not any("commit" in call or " set " in call for call in runner.calls), "read-only"
+
+
+def test_a_device_whose_structured_read_fails_keeps_its_error_and_the_others_stand():
+    result = _platform(_StructuredRunner(fail="clab-test-fw1")).collect_structured_device_data()
+    assert result["ok"] is False
+    assert result["devices"]["fw1"]["ok"] is False and "unreachable" in result["devices"]["fw1"]["error"]
+    assert result["devices"]["leaf1"]["ok"] is True and result["devices"]["host1"]["ok"] is True
+    assert result["devices"]["fw1"]["host"] == "clab-test-fw1"
+
+
+def test_without_a_testbed_there_is_no_structured_read():
+    result = ContainerlabPlatform().collect_structured_device_data()
     assert result["ok"] is False and result["devices"] == {}

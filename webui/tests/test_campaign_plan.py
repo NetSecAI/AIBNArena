@@ -20,7 +20,7 @@ from webui.campaign import (
 
 CONNECTIVITY = {"experiment": "connectivity-smoke",
                 "scenario_id": "connectivity.disable_interface.m1"}
-QOS = {"experiment": "qos-smoke", "scenario_id": "qos.link_impairment.m1"}
+QOS = {"experiment": "qos-shaping-repair", "scenario_id": "qos.wan_shaping_policy_repair.m1"}
 FILTERING = {"experiment": "filtering-smoke",
              "scenario_id": "filtering.zone_policy_enforcement.m1"}
 
@@ -38,14 +38,14 @@ def request(**overrides) -> CampaignRequest:
 def test_the_matrix_is_the_cross_product():
     """Subjects x models x rows. The seed is not an axis: it belongs to the row."""
     cells = plan(request(
-        architectures=["langchain_agent"],
+        architectures=["langchain_agent", "langchain_rag_agent"],
         models=["a-model", "another-model"],
         scenarios=[ScenarioSelection(**CONNECTIVITY, seed=9),
                    ScenarioSelection(**CONNECTIVITY, seed=17),
                    ScenarioSelection(**QOS, seed=29)],
     ))
-    assert len(cells) == 1 * 2 * 3
-    assert [cell.index for cell in cells] == list(range(6))
+    assert len(cells) == 2 * 2 * 3
+    assert [cell.index for cell in cells] == list(range(12))
 
 
 def test_a_scenario_on_two_seeds_is_two_rows_and_two_cells():
@@ -70,14 +70,14 @@ def test_a_repeated_choice_is_one_cell():
 
 
 def test_every_cell_of_a_row_shares_its_seed():
-    """What a row is run against is compared on one fault, or not compared at all."""
+    """Subjects are compared on one fault, or they are not compared at all."""
     cells = plan(request(
-        architectures=["langchain_agent"],
+        architectures=["langchain_agent", "langchain_rag_agent"],
         models=["a-model", "another-model"],
         scenarios=[ScenarioSelection(**CONNECTIVITY, seed=9)],
     ))
     assert {cell.seed for cell in cells} == {9}
-    assert len(cells) == 2
+    assert len(cells) == 4
 
 
 def test_a_scenario_selected_both_ways_is_two_cells():
@@ -93,7 +93,7 @@ def test_a_scenario_selected_both_ways_is_two_cells():
 def test_the_order_restarts_the_subject_as_rarely_as_it_can():
     """Every cell sharing a server key is consecutive, so each key is entered once."""
     cells = plan(request(
-        architectures=["langchain_agent"],
+        architectures=["langchain_agent", "langchain_rag_agent"],
         models=["a-model", "another-model"],
         scenarios=[ScenarioSelection(**FILTERING, seed=9),
                    ScenarioSelection(**CONNECTIVITY, seed=17),
@@ -105,11 +105,14 @@ def test_the_order_restarts_the_subject_as_rarely_as_it_can():
 
 
 def test_two_experiments_over_one_topology_share_a_server():
-    """connectivity and qos are judged from different files over the same lab."""
-    connectivity, qos = (catalog.preset(key) for key in ("connectivity-smoke", "qos-smoke"))
-    assert connectivity.topology_descriptor == qos.topology_descriptor
-    cells = plan(request(scenarios=[ScenarioSelection(**CONNECTIVITY, seed=9),
-                                    ScenarioSelection(**QOS, seed=17)]))
+    """The fault and the false-positive plates are judged from different files over
+    the same lab."""
+    smoke, healthy = (catalog.preset(key) for key in ("connectivity-smoke", "connectivity-false-positive"))
+    assert smoke.topology_descriptor == healthy.topology_descriptor
+    cells = plan(request(scenarios=[
+        ScenarioSelection(**CONNECTIVITY, seed=9),
+        ScenarioSelection(experiment="connectivity-false-positive",
+                          scenario_id="connectivity.disable_interface.m1", seed=17)]))
     keys = {server_key(cell, catalog.preset(cell.selection.experiment)) for cell in cells}
     assert len(keys) == 1
 

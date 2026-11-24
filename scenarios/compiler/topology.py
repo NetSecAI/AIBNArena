@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from ipaddress import ip_interface, ip_network
+from ipaddress import IPv4Address, ip_address, ip_interface, ip_network
 from typing import Any
 
 
@@ -24,6 +24,12 @@ class TopologyIndex:
     #: Reachability to a service is still checked, but through an explicit
     #: connectivity requirement rather than by counting it as an endpoint.
     NON_ENDPOINT_ROLES = frozenset({"admin_client", "transit", "service"})
+
+    #: Roles of the hosts a `node: service` selector may put a fault on: the servers
+    #: that provide the network's services. The user endpoints are never chosen.
+    #: Deliberately not the plain `server` role: `external1` carries it in sme01-qos as
+    #: a stand-in for a cloud service outside the lab.
+    SERVICE_ROLES = frozenset({"dmz_server", "application_server", "dns_resolver", "dns_authoritative"})
 
     def __init__(self, document: dict[str, Any]):
         if "topology" not in document:
@@ -70,6 +76,7 @@ class TopologyIndex:
                             f"duplicate IPv4 address {key} on {addresses[key]} and {node_name}:{interface_name}"
                         )
                     addresses[key] = f"{node_name}:{interface_name}"
+            self._validate_static_routes(node_name, node.get("static_routes"))
 
         known_nodes = set(self.nodes).union(self.optional_nodes)
         for segment_name, segment in self.segments.items():
@@ -84,6 +91,118 @@ class TopologyIndex:
                 raise ValueError(
                     f"service '{service_name}' references unknown node '{service.get('node')}'"
                 )
+
+        # A pair both required and isolated would make the repair and isolation
+        # oracles contradict each other: no network could pass both.
+        isolated = self.isolated_endpoint_pairs()
+        required = set(self.required_endpoint_pairs()) if isolated else set()
+        for pair in isolated:
+            if pair in required:
+                raise ValueError(f"isolation requirement {pair} is also a connectivity requirement")
+
+    @staticmethod
+    def _validate_static_routes(node: str, declared: Any) -> None:
+        if declared is None:
+            return
+        if not isinstance(declared, dict):
+            raise ValueError(f"{node}: static_routes must map a prefix to its route")
+        for prefix, spec in declared.items():
+            try:
+                ip_network(str(prefix))
+            except ValueError as exc:
+                raise ValueError(f"{node}: static route {prefix!r} is not an IPv4 network: {exc}") from exc
+            if not isinstance(spec, dict):
+                raise ValueError(f"{node}: static route {prefix} must be a mapping")
+            next_hops = spec.get("next_hops") or []
+            if not isinstance(next_hops, list):
+                raise ValueError(f"{node}: static route {prefix} next_hops must be a list")
+            if bool(next_hops) == bool(spec.get("blackhole")):
+                raise ValueError(
+                    f"{node}: static route {prefix} must give either next_hops or blackhole: true"
+                )
+            for hop in next_hops:
+                if not isinstance(ip_address(str(hop)), IPv4Address):
+                    raise ValueError(f"{node}: static route {prefix} next hop {hop} is not IPv4")
+
+    def static_routes(self, node: str) -> dict[str, dict[str, Any]] | None:
+        """The static routes ``node`` declares, by prefix; None when it declares none.
+
+        A declaration is what the reference state holds (`protocols static route`
+        on VyOS, `ip route` on Linux), so a route fault binds to a route the node
+        really has and restores it to what it had. A node that declares nothing is
+        left to the convention the SR Linux fabrics follow: one `to-<gateway>`
+        next-hop group per remote gateway, derived from the topology.
+        """
+        declared = self.nodes[node].get("static_routes")
+        if declared is None:
+            return None
+        return {
+            str(ip_network(str(prefix))): {
+                "next_hops": [str(ip_address(str(hop))) for hop in spec.get("next_hops") or []],
+                "blackhole": bool(spec.get("blackhole")),
+            }
+            for prefix, spec in declared.items()
+        }
+
+    def delivers(
+        self,
+        node: str,
+        destination: str,
+        *,
+        withdrawn: tuple[str, str] | None = None,
+    ) -> bool | None:
+        """Whether traffic ``node`` forwards toward ``destination`` reaches it, by declared routes.
+
+        Hop by hop: delivered on a segment the destination sits on; otherwise by
+        the longest declared route whose next hop is on an attached segment -- a
+        router installs no route it cannot resolve, and the traffic falls to a
+        shorter one. ``withdrawn`` is a ``(node, prefix)`` route left out, as a
+        fault that makes it unusable leaves it. False when the traffic dies (no
+        route, a blackhole, a loop, a host that forwards for nobody); None when it
+        reaches a router that declares no routes, whose forwarding the descriptor
+        does not say.
+        """
+        owners = {
+            str(ip_interface(ref.ipv4).ip): ref
+            for name in self.nodes
+            for ref in self.interfaces(name, exclude_management=False)
+            if ref.ipv4
+        }
+        segments = {ref.segment for ref in self.interfaces(destination) if ref.ipv4}
+        address = ip_address(self.node_ipv4(destination))
+        return self._delivers(node, address, segments, owners, withdrawn, frozenset())
+
+    def _delivers(self, node, address, segments, owners, withdrawn, visited) -> bool | None:
+        if node in visited:
+            return False
+        visited = visited | {node}
+        attached = {ref.segment for ref in self.interfaces(node) if ref.ipv4}
+        if attached & segments:
+            return True
+        routes = self.static_routes(node)
+        if routes is None:
+            spec = self.nodes[node]
+            forwards_for_nobody = self._is_evaluated_endpoint(spec) or "service" in spec.get("roles", [])
+            return False if forwards_for_nobody else None
+        for prefix in sorted(routes, key=lambda item: ip_network(item).prefixlen, reverse=True):
+            if address not in ip_network(prefix) or (node, prefix) == withdrawn:
+                continue
+            if routes[prefix]["blackhole"]:
+                return False
+            hops = [
+                owners[hop].node for hop in routes[prefix]["next_hops"]
+                if hop in owners and owners[hop].segment in attached
+            ]
+            if not hops:
+                continue
+            results = [
+                self._delivers(hop, address, segments, owners, withdrawn, visited)
+                for hop in hops
+            ]
+            if True in results:
+                return True
+            return None if None in results else False
+        return False
 
     def nodes_with_role(self, *roles: str, include_optional: bool = False) -> list[str]:
         pool = dict(self.nodes)
@@ -131,6 +250,14 @@ class TopologyIndex:
             if self._is_evaluated_endpoint(spec)
         )
 
+    def service_nodes(self) -> list[str]:
+        """The Linux hosts a `node: service` fault may land on (SERVICE_ROLES)."""
+        return sorted(
+            name for name, spec in self.nodes.items()
+            if spec.get("kind") in {"host", "linux"}
+            and self.SERVICE_ROLES.intersection(spec.get("roles", []))
+        )
+
     def required_endpoint_pairs(self) -> list[str]:
         requirements = self.topology.get("connectivity_requirements", [])
         if requirements:
@@ -149,6 +276,21 @@ class TopologyIndex:
 
         endpoints = self.endpoint_nodes()
         return [f"{a}->{b}" for a in endpoints for b in endpoints if a != b]
+
+    def isolated_endpoint_pairs(self) -> list[str]:
+        """The pairs the reference policy keeps apart, as `source->destination`."""
+        pairs: list[str] = []
+        for item in self.topology.get("isolation_requirements", []):
+            source = str(item["source"])
+            destination = str(item["destination"])
+            if source not in self.nodes or destination not in self.nodes:
+                raise ValueError(
+                    f"isolation requirement references unknown pair {source}->{destination}"
+                )
+            pairs.append(f"{source}->{destination}")
+            if item.get("bidirectional", False):
+                pairs.append(f"{destination}->{source}")
+        return sorted(set(pairs))
 
     def segment_hosts(self, segment: str) -> list[str]:
         return sorted(
@@ -306,6 +448,17 @@ class TopologyIndex:
 
     def dns_forwarders(self, node: str) -> list[str]:
         return [str(item) for item in self._dns_service(node).get("forwarders", [])]
+
+    def dns_hosts(self, node: str) -> list[str]:
+        """The nodes this nameserver's zone answers for, as its `hosts` lists them."""
+        return [str(item) for item in self._dns_service(node).get("hosts", [])]
+
+    def node_with_address(self, address: str) -> str | None:
+        for name in self.nodes:
+            for ref in self.interfaces(name, exclude_management=False):
+                if ref.ipv4 and str(ip_interface(ref.ipv4).ip) == address:
+                    return name
+        return None
 
     def dns_clients(self, node: str) -> list[str]:
         """Endpoints that resolve through this server.

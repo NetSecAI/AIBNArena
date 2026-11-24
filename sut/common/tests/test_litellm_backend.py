@@ -67,6 +67,19 @@ def test_context_overflow_retries_same_messages_with_smaller_reservation(
     assert result["_ibn_reservation"] == {"reductions": 1, "min_max_tokens": 4_000}
 
 
+def test_the_provider_finish_reason_travels_with_the_message(
+        monkeypatch: pytest.MonkeyPatch) -> None:
+    replies = iter([
+        SimpleNamespace(choices=[SimpleNamespace(message={"content": "cut mid-"}, finish_reason="length")]),
+        SimpleNamespace(choices=[SimpleNamespace(message={"content": "ok"})]),
+    ])
+    _fake_litellm(monkeypatch, lambda **kwargs: next(replies))
+
+    assert _caller()([{"role": "user", "content": "x"}], 10.0)["_ibn_finish_reason"] == "length"
+    # A provider that does not say leaves it empty rather than guessed.
+    assert _caller()([{"role": "user", "content": "x"}], 10.0)["_ibn_finish_reason"] is None
+
+
 def test_non_context_provider_error_is_not_retried(
         monkeypatch: pytest.MonkeyPatch) -> None:
     calls = []

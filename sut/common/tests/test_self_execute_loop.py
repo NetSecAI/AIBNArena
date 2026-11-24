@@ -136,7 +136,7 @@ TASK = {
 
 
 # --------------------------------------------------------------------------- #
-# The agent under test
+# Agents under test
 # --------------------------------------------------------------------------- #
 
 class LoopAgent:
@@ -173,12 +173,16 @@ class LoopAgent:
             sut_identity="shared_loop",
             configured_model=self.config.model,
             model_parameters={"model": self.config.model,
-                              "ani_call_limit": self.config.ani_call_limit},
+                              "ani_call_limit": self.config.ani_call_limit,
+                              "keep_recent_reads": self.config.keep_recent_reads,
+                              "keep_recent_read_chars": self.config.keep_recent_read_chars},
             ani_call_limit=self.config.ani_call_limit,
             tool_result_chars=self.config.tool_result_chars,
             context_budget_chars=self.config.context_budget_chars,
             artifact_directory=self.config.artifact_directory,
             max_consecutive_rejections=self.config.max_consecutive_rejections,
+            keep_recent_reads=self.config.keep_recent_reads,
+            keep_recent_read_chars=self.config.keep_recent_read_chars,
         )
 
 
@@ -292,7 +296,6 @@ def test_any_later_network_mutation_consumes_a_passing_validation():
     """Completion needs a validation of the final state, not an earlier state."""
     for operation in (
         "update_config",
-        "update_object",
         "rollback_config",
     ):
         for name, builder in AGENTS:
@@ -334,6 +337,28 @@ def test_validation_after_the_last_mutation_can_complete():
         assert report["status"] == "completed", name
         assert report["verified"] is True, name
         assert report["final_observation"]["passed"] is True, name
+
+
+def test_a_call_refused_before_any_tool_keeps_a_passing_validation():
+    """It reaches no device, so the validation still describes the network the episode
+    ends on. Until 2026-11-15 it consumed it here, where langchain_agent's adapter never
+    sees a call refused before any tool."""
+    refused = {"ok": False, "operation": "update_config", "dispatched": False, "error": "refused"}
+    for operation, arguments, answer in (
+        ("update_config", {"changes": []}, refused),
+    ):
+        for name, builder in AGENTS:
+            ani = FakeANI({"execute_validation": validation_result(True), operation: answer})
+            model = ScriptedModel([
+                tool_message("execute_validation"),
+                tool_message(operation, arguments),
+                final_message("completed"),
+            ])
+            report = scrub(run_invoke(builder, config={}, ani=ani, model=model))
+
+            assert report["status"] == "completed", (operation, arguments, name)
+            assert report["verified"] is True, (operation, arguments, name)
+            assert report["final_observation"]["passed"] is True, (operation, arguments, name)
 
 
 def test_a_failed_action_is_never_credited_with_a_passing_validation():
@@ -436,6 +461,25 @@ def test_model_exception_fails_the_episode():
         assert report["error"] == "provider exploded", name
         assert report["device_changes"] == [], name
         assert report["execution"]["tool_call_count"] == 0, name
+
+
+def test_a_tool_call_with_an_empty_argument_string_is_a_call_with_no_argument():
+    """A provider serialises a call of a tool that takes no argument as an empty string
+    (vLLM does). That is the empty object, not broken JSON: in main04 an episode ended at
+    turn 60 on such a call, after the same tool had run 112 times with `{}`. Broken JSON
+    is still refused."""
+    from sut.common.messages import ModelActionError, tool_call_parts
+
+    for blank in ("", "   ", "\n"):
+        call = {"id": "c1", "type": "function",
+                "function": {"name": "get_topology", "arguments": blank}}
+        assert tool_call_parts(call) == ("get_topology", {}, "c1"), repr(blank)
+    try:
+        tool_call_parts({"id": "c2", "function": {"name": "get_state", "arguments": "{"}})
+    except ModelActionError as exc:
+        assert "invalid JSON arguments" in str(exc)
+    else:
+        raise AssertionError("broken JSON arguments must still be refused")
 
 
 def test_malformed_tool_call_is_rejected_inside_the_loop():
@@ -638,6 +682,48 @@ def test_model_and_provider_telemetry_are_reported():
         }
 
 
+def test_each_turn_records_the_provider_finish_reason():
+    """A reply cut at max_tokens and a reply that chose to make no call both arrive as
+    content alone; only the provider's finish_reason tells them apart in the record."""
+    for name, builder in AGENTS:
+        ani = FakeANI({"execute_validation": validation_result(True)})
+        cut = {"content": "Let me think about the shaper on eth2 and its ceil", "tool_calls": None,
+               "_ibn_finish_reason": "length"}
+        validation_message = tool_message("execute_validation")
+        validation_message["_ibn_finish_reason"] = "tool_calls"
+        final = final_message("completed")
+        model = ScriptedModel([cut, validation_message, final])
+        report = run_invoke(builder, config={}, ani=ani, model=model)
+
+        turns = report["execution"]["model_turns"]
+        assert [turn["kind"] for turn in turns] == ["no_action", "tool_calls", "final"], name
+        assert [turn["finish_reason"] for turn in turns] == ["length", "tool_calls", None], name
+        assert not any("_ibn_finish_reason" in message for message in model.seen_messages
+                       if isinstance(message, dict)), f"{name}: telemetry was sent back to the model"
+
+
+def test_a_tool_call_written_as_text_is_named_in_the_nudge():
+    """E20 wrong_routing_table.m3: 343 turns of `<tool_call>` markup the
+    provider's parser did not read, each answered with the generic nudge."""
+    from sut.common.messages import UNPARSED_TOOL_CALL_NOTE
+
+    for name, builder in AGENTS:
+        ani = FakeANI({"execute_validation": validation_result(True)})
+        written = {"content": "<tool_call>\n<function=execute_validation(checks=[])\n</function>\n</tool_call>",
+                   "tool_calls": None}
+        prose = {"content": "Let me look at the routes first.", "tool_calls": None}
+        model = ScriptedModel([written, prose, tool_message("execute_validation"), final_message("completed")])
+        report = run_invoke(builder, config={}, ani=ani, model=model)
+
+        turns = report["execution"]["model_turns"]
+        assert [turn["error"] for turn in turns[:2]] == [
+            "a tool call written as text, not made", "neither ANI tool calls nor a final status object"], name
+        nudges = [message["content"] for message in model.seen_messages
+                  if isinstance(message, dict) and message.get("role") == "user"
+                  and str(message.get("content")).startswith(("Use an ANI tool next", UNPARSED_TOOL_CALL_NOTE))]
+        assert [nudge.startswith(UNPARSED_TOOL_CALL_NOTE) for nudge in nudges] == [True, False], name
+
+
 def test_a_context_rejection_is_recorded_as_the_cause_of_termination():
     """The provider's context error and a model's own failure both end as "failed".
 
@@ -758,6 +844,73 @@ def test_a_reservation_carried_on_the_exception_is_still_recorded():
             "reductions": 12, "min_max_tokens": 1, "calls_reduced": 1}, name
 
 
+# --- submit_result: the agent's own end, through the ANI -------------------------------
+
+def submission_result(status: str, summary: str = "done", diagnosis: str | None = None) -> dict[str, Any]:
+    """What the platform's ANI answers an accepted `submit_result`."""
+    return {"ok": True, "operation": "submit_result", "submitted": True,
+            "status": status, "summary": summary, "diagnosis": diagnosis}
+
+
+def test_submit_result_ends_the_episode_as_its_own_conclusion():
+    for name, builder in AGENTS:
+        ani = FakeANI({"execute_validation": validation_result(True),
+                       "submit_result": submission_result("completed", "enabled e1-40", "leaf2 e1-40 down")})
+        model = ScriptedModel([tool_message("execute_validation"), tool_message("submit_result"),
+                               tool_message("get_state")])
+        report = run_invoke(builder, config={}, ani=ani, model=model)
+        assert model.call_count == 2, f"{name}: no model call after the submission"
+        assert [call[0] for call in ani.calls] == ["execute_validation", "submit_result"], name
+        assert report["status"] == "completed" and report["verified"] is True, name
+        assert report["error"] is None, name
+        assert report["execution"]["termination"] == {
+            "cause": "own_conclusion", "detail": "completed", "turn": 2, "via": "submit_result"}, name
+        assert report["final_response"] == {"status": "completed", "summary": "enabled e1-40",
+                                            "diagnosis": "leaf2 e1-40 down"}, name
+        assert report["diagnosis"]["text"] == "leaf2 e1-40 down", name
+        assert report["ani_operations"][-1]["category"] == "submission", name
+
+
+def test_a_submitted_completion_without_validation_is_kept_and_not_verified():
+    """No gate on submit_result: the claim is recorded, `verified` says what held."""
+    for name, builder in AGENTS:
+        ani = FakeANI({"submit_result": submission_result("completed")})
+        model = ScriptedModel([tool_message("submit_result")])
+        report = run_invoke(builder, config={}, ani=ani, model=model)
+        assert model.call_count == 1, name
+        assert report["status"] == "completed", name
+        assert report["verified"] is False, name
+        assert report["execution"]["termination"]["via"] == "submit_result", name
+
+
+def test_a_submitted_failure_files_its_summary_as_the_error():
+    for name, builder in AGENTS:
+        ani = FakeANI({"submit_result": submission_result("failed", "no safe repair")})
+        report = run_invoke(builder, config={}, ani=ani, model=ScriptedModel([tool_message("submit_result")]))
+        assert report["status"] == "failed", name
+        assert report["error"] == "no safe repair", name
+
+
+def test_calls_after_a_submission_in_the_same_turn_are_not_sent():
+    for name, builder in AGENTS:
+        ani = FakeANI({"submit_result": submission_result("failed", "no safe repair")})
+        turn = {"content": None, "tool_calls": [
+            *tool_message("submit_result", call_id="c1")["tool_calls"],
+            *tool_message("get_state", call_id="c2")["tool_calls"]]}
+        report = run_invoke(builder, config={}, ani=ani, model=ScriptedModel([turn]))
+        assert [call[0] for call in ani.calls] == ["submit_result"], name
+        assert report["execution"]["termination"]["via"] == "submit_result", name
+
+
+def test_a_refused_submission_does_not_end_the_episode():
+    for name, builder in AGENTS:
+        ani = FakeANI(raises={"submit_result": ANIRequestError("submit_result.summary must state ...")})
+        model = ScriptedModel([tool_message("submit_result"), final_message("failed", "no safe repair")])
+        report = run_invoke(builder, config={}, ani=ani, model=model)
+        assert model.call_count == 2, name
+        assert report["execution"]["termination"] == {
+            "cause": "own_conclusion", "detail": "failed", "turn": 2}, name
+
 
 # --------------------------------------------------------------------------- #
 
@@ -808,8 +961,7 @@ def test_the_loop_reports_the_ani_cap_it_was_given(monkeypatch):
 
 def test_without_limits_every_call_is_dispatched_and_the_record_says_so():
     for name, builder in AGENTS:
-        ani = FakeANI({"get_state": GET_STATE_RESULT,
-                       "get_topology": {"ok": True, "operation": "get_topology"}})
+        ani = FakeANI({"get_state": GET_STATE_RESULT, "get_topology": {"ok": True, "operation": "get_topology"}})
         model = ScriptedModel([
             tool_message("get_state"),
             tool_message("get_topology"),
@@ -818,7 +970,7 @@ def test_without_limits_every_call_is_dispatched_and_the_record_says_so():
         report = scrub(run_invoke(builder, config={}, ani=ani, model=model))
 
         assert [call[0] for call in ani.calls] == ["get_state", "get_topology"], name
-        assert set(report["execution"]["interaction_limits"]) == {"ani"}, name
+        assert list(report["execution"]["interaction_limits"]) == ["ani"], name
         assert report["execution"]["interaction_limits"]["ani"]["limit"] is None, name
 
 
@@ -908,25 +1060,33 @@ def test_a_tool_result_over_the_limit_is_cut_and_spilled_whole(tmp_path: Path):
         assert report["ani_operations"][0]["operation"] == "get_state", name
 
 
-def test_the_context_budget_elides_superseded_reads_before_the_call():
+def test_the_context_budget_elides_superseded_reads_before_the_call(monkeypatch):
     """Six identical reads under a budget that holds two of them. Every tool call
     keeps its answer, the newest answer stays whole, and the call is never made
     over budget."""
     import hashlib
 
     for name, builder in AGENTS:
+        # Sized on this subject's own prompt: what it sends before any read, plus one read
+        # and a half, so one read fits and two do not. One figure for every subject had to
+        # sit above the longest prompt plus one read and below the shortest plus two, a
+        # window of 1 000 characters that closed when the configuration compliance section
+        # added 4 088 to every active prompt but not to the archived ones (2026-10-28).
+        bare = run_invoke(builder, config={}, ani=FakeANI({"get_state": BIG_STATE}),
+                          model=ScriptedModel([final_message("failed")]))
+        budget = bare["execution"]["context"]["peak_prompt_chars"] + 3 * len(json.dumps(BIG_STATE)) // 2
         reads = [tool_message("get_state", {"scope": "all"}, call_id=f"read_{index}")
                  for index in range(6)]
         model = ScriptedModel([*reads, final_message("failed")])
         report = run_invoke(
-            builder, config={"context_budget_chars": 30_000},
+            builder, config={"context_budget_chars": budget},
             ani=FakeANI({"get_state": BIG_STATE}), model=model,
         )
 
         assert report["status"] == "failed" and report["execution"]["termination"]["cause"] == "own_conclusion", name
         context = report["execution"]["context"]
-        assert context["budget_chars"] == 30_000, name
-        assert context["peak_prompt_chars"] <= 30_000, name
+        assert context["budget_chars"] == budget, name
+        assert context["peak_prompt_chars"] <= budget, name
         # One elision before each call from the third on, the final call included: the
         # stub names the read that superseded it at the time, not the last one made.
         assert context["elided_results"] == 5, name
@@ -943,6 +1103,104 @@ def test_the_context_budget_elides_superseded_reads_before_the_call():
         assert stub["superseded_by_call"] == "read_1", name
         assert stub["sha256"] == hashlib.sha256(json.dumps(BIG_STATE).encode("utf-8")).hexdigest(), name
         assert json.loads(answered["read_4"])["superseded_by_call"] == "read_5", name
+
+
+def test_older_reads_become_stubs_and_the_most_recent_stay_whole(monkeypatch):
+    """keep_recent_reads: the model is called with the most recent read results whole and
+    every older one as a stub naming its call; a validation is never touched. The loop runs
+    without it unless the subject sets it (the v2 subjects ship it at 10)."""
+    state = {"ok": True, "nodes": ["x" * 400]}
+    for name, builder in AGENTS:
+        default = run_invoke(builder, config={}, ani=FakeANI({"get_state": state}),
+                             model=ScriptedModel([final_message("failed")]))
+        assert default["execution"]["context"]["keep_recent_reads"] is None, name
+        calls = [tool_message("get_state", {"scope": f"node{index}"}, call_id=f"read_{index}")
+                 for index in range(4)]
+        calls.insert(2, tool_message("execute_validation", {"checks": [{"type": "public_success_criteria"}]},
+                                     call_id="check"))
+        model = ScriptedModel([*calls, final_message("failed")])
+        report = run_invoke(builder, config={"keep_recent_reads": 2},
+                            ani=FakeANI({"get_state": state}), model=model)
+
+        answered = {message["tool_call_id"]: json.loads(message["content"])
+                    for message in model.seen_messages if message.get("role") == "tool"}
+        for index in (0, 1):
+            stub = answered[f"read_{index}"]
+            assert stub["elided"] is True and stub["operation"] == "get_state", name
+            assert json.loads(stub["arguments"]) == {"scope": f"node{index}"}, "it names its call"
+            assert "Call it again" in stub["note"], name
+        assert answered["read_2"] == state and answered["read_3"] == state, name
+        assert "elided" not in answered["check"], "a validation is never touched"
+        context = report["execution"]["context"]
+        assert context["elided_results"] == 2 and context["keep_recent_reads"] == 2, name
+        assert {event["kind"] for event in context["events"]} == {"elided_older_reads"}, name
+
+
+def test_older_reads_past_a_character_budget_become_stubs(monkeypatch):
+    """keep_recent_read_chars: the most recent read results stay whole as long as they hold
+    no more than the budget together, and every older one becomes a stub; a validation is
+    neither touched nor counted."""
+    state = {"ok": True, "nodes": ["x" * 400]}
+    for name, builder in AGENTS:
+        calls = [tool_message("get_state", {"scope": f"node{index}"}, call_id=f"read_{index}")
+                 for index in range(4)]
+        calls.insert(2, tool_message("execute_validation", {"checks": [{"type": "public_success_criteria"}]},
+                                     call_id="check"))
+        whole = ScriptedModel([*calls, final_message("failed")])
+        run_invoke(builder, config={"keep_recent_reads": None}, ani=FakeANI({"get_state": state}), model=whole)
+        size = max(len(message["content"]) for message in whole.seen_messages
+                   if message.get("role") == "tool" and message["tool_call_id"].startswith("read_"))
+        budget = 2 * size + size // 2
+        model = ScriptedModel([*calls, final_message("failed")])
+        report = run_invoke(builder, config={"keep_recent_reads": None, "keep_recent_read_chars": budget},
+                            ani=FakeANI({"get_state": state}), model=model)
+
+        answered = {message["tool_call_id"]: json.loads(message["content"])
+                    for message in model.seen_messages if message.get("role") == "tool"}
+        for index in (0, 1):
+            stub = answered[f"read_{index}"]
+            assert stub["elided"] is True and stub["operation"] == "get_state", name
+            assert f"up to {budget} characters together" in stub["note"], name
+        assert answered["read_2"] == state and answered["read_3"] == state, name
+        assert "elided" not in answered["check"], "a validation is never touched"
+        context = report["execution"]["context"]
+        assert context["elided_results"] == 2, name
+        assert (context["keep_recent_reads"], context["keep_recent_read_chars"]) == (None, budget), name
+        assert report["execution"]["model_parameters"]["keep_recent_read_chars"] == budget, name
+
+
+def test_the_character_budget_walks_back_from_the_last_answer_and_never_restores_a_stub():
+    from sut.common.self_execute import _elide_older_reads
+
+    def answer(call_id: str, size: int) -> list[dict[str, Any]]:
+        return [{"role": "assistant", "tool_calls": [{"id": call_id, "function": {"name": "get_state",
+                                                                                   "arguments": "{}"}}]},
+                {"role": "tool", "tool_call_id": call_id, "content": "x" * size}]
+
+    def stubbed(messages: list[dict[str, Any]]) -> list[bool]:
+        return ['"elided": true' in message["content"] for message in messages if message["role"] == "tool"]
+
+    messages = [{"role": "system", "content": "s"}]
+    for index in range(4):
+        messages += answer(f"c{index}", 100)
+    elided: set[int] = set()
+    assert _elide_older_reads(messages, elided, None, keep_chars=250) == (2, 200)
+    assert stubbed(messages) == [True, True, False, False]
+    # A newer, smaller answer leaves room the older stubs do not get back.
+    messages += answer("c4", 10)
+    assert _elide_older_reads(messages, elided, None, keep_chars=250) == (0, 0)
+    assert stubbed(messages) == [True, True, False, False, False]
+    # The answer to the last turn stays whole above the budget; the next turn stubs it.
+    large = [{"role": "system", "content": "s"}, *answer("c0", 100), *answer("c1", 500)]
+    assert _elide_older_reads(large, set(), None, keep_chars=250) == (1, 100)
+    assert stubbed(large) == [True, False]
+    large += [{"role": "assistant", "content": "thinking"}]
+    assert _elide_older_reads(large, {2}, None, keep_chars=250) == (1, 500)
+    # With both rules a result stays whole only if each keeps it.
+    small = [{"role": "system", "content": "s"}]
+    for index in range(5):
+        small += answer(f"c{index}", 10)
+    assert _elide_older_reads(small, set(), 2, keep_chars=1000) == (3, 30)
 
 
 def test_a_budget_below_the_prompt_ends_the_episode_without_calling_the_provider():
@@ -1036,3 +1294,136 @@ def test_a_failed_re_read_does_not_elide_the_older_good_answer():
     assert _elide_superseded_reads(messages, elided) == 2
     assert json.loads(messages[1]["content"])["superseded_by_call"] == "r3"
     assert json.loads(messages[3]["content"])["superseded_by_call"] == "r3"
+
+
+class RecordingModel(ScriptedModel):
+    """A scripted model that keeps every transcript it was sent, not only the last."""
+
+    def __init__(self, messages: list[dict[str, Any]]):
+        super().__init__(messages)
+        self.transcripts: list[list[dict[str, Any]]] = []
+
+    def __call__(self, messages: list[dict[str, Any]], remaining_seconds: float) -> Any:
+        self.transcripts.append([dict(message) for message in messages])
+        return super().__call__(messages, remaining_seconds)
+
+
+def test_past_turns_go_back_with_their_reasoning_and_only_the_recent_ones():
+    """A reply's reasoning goes back under `reasoning`, the key vLLM hands to the chat
+    template, on the last REASONING_TURNS_SENT_BACK assistant turns. Without it every past
+    turn rendered as an empty think block and the model stopped reasoning after the first
+    reply (E12 to E16). The plain-text turn and a turn with no reasoning are covered too."""
+    from sut.common.messages import REASONING_KEY, REASONING_TURNS_SENT_BACK
+
+    assert (REASONING_KEY, REASONING_TURNS_SENT_BACK) == ("reasoning", 3)
+    replies = [
+        {**tool_message("get_state", call_id="r1"), "reasoning_content": "think 1"},
+        {"content": "I will read the state.", "tool_calls": None, "reasoning_content": "think 2"},
+        tool_message("get_state", call_id="r3"),
+        {**tool_message("get_state", call_id="r4"), "reasoning_content": "think 4"},
+        {**tool_message("get_state", call_id="r5"), "reasoning_content": "think 5"},
+        {**final_message("failed"), "reasoning_content": "think 6"},
+    ]
+    for name, builder in AGENTS:
+        model = RecordingModel(replies)
+        report = run_invoke(builder, config={}, ani=FakeANI({"get_state": GET_STATE_RESULT}), model=model)
+
+        assert report["execution"]["termination"]["cause"] == "own_conclusion", name
+        assert len(model.transcripts) == 6, name
+        sent = [[message.get(REASONING_KEY) for message in call if message.get("role") == "assistant"]
+                for call in model.transcripts]
+        assert sent == [
+            [],
+            ["think 1"],
+            ["think 1", "think 2"],
+            ["think 1", "think 2", None],
+            ["think 1", "think 2", None, "think 4"],
+            [None, "think 2", None, "think 4", "think 5"],
+        ], name
+        assert not any("reasoning_content" in message for call in model.transcripts for message in call), \
+            f"{name}: vLLM ignores reasoning_content on a request message"
+        assert [turn["reasoning_chars"] for turn in report["execution"]["model_turns"]] == [7, 7, 0, 7, 7, 7], name
+        context = report["execution"]["context"]
+        assert context["reasoning_turns_sent_back"] == 3 and context["reasoning_dropped"] == 1, name
+
+
+def test_the_task_names_the_tools_the_model_is_handed():
+    """`tools` names the subject's surface, not the platform's whole list: a subject's own
+    tools are tools all the same (2026-10-28)."""
+    from benchmarks.platforms.containerlab import ANI_OPERATIONS
+
+    for name, builder in AGENTS:
+        model = ScriptedModel([final_message("failed")])
+        surface = {"update_config": UPDATE_CONFIG_RESULT, "search_documents": {"ok": True}, "submit_result": {"ok": True}}
+        run_invoke(builder, config={}, ani=FakeANI(surface), model=model,
+                   task={**TASK, "tools": list(ANI_OPERATIONS)})
+        task = json.loads(next(m["content"] for m in model.seen_messages if m.get("role") == "user"))
+        assert task["tools"] == ["search_documents", "submit_result", "update_config"], name
+        # A platform operation the judge did not declare stays out, whatever the surface.
+        model = ScriptedModel([final_message("failed")])
+        run_invoke(builder, config={}, ani=FakeANI(surface), model=model,
+                   task={**TASK, "tools": ["submit_result"]})
+        task = json.loads(next(m["content"] for m in model.seen_messages if m.get("role") == "user"))
+        assert task["tools"] == ["search_documents", "submit_result"], name
+
+
+def test_the_model_reads_the_task_without_the_rate_the_ani_holds_the_flow_to(monkeypatch):
+    """The judge hands the subject the rate the protected flow measured on the healthy network
+    (`healthy_throughput_mbps`), for its ANI's throughput check. In main04 the model, which read it
+    under `observation`, took it for the rate under the fault in turn 1 of all 8 QoS episodes; it now
+    reads the task without it, and the ANI still gets the whole task."""
+    service = {"source": "host-access-1", "destination": "srv-site", "destination_ip": "10.1.0.10",
+               "healthy_throughput_mbps": 7.651}
+    task = {**TASK, "observation": {"service_measurement": service}}
+
+    class RecordingANI(FakeANI):
+        handed: list[tuple[str, Any]]
+
+        def dispatch(self, operation, arguments, *, task=None):
+            self.handed.append((operation, task))
+            return super().dispatch(operation, arguments, task=task)
+
+    for name, builder in AGENTS:
+        ani = RecordingANI({"execute_validation": {"ok": False, "operation": "execute_validation", "checks": []}})
+        ani.handed = []
+        model = ScriptedModel([tool_message("execute_validation", {"checks": [{"type": "public_success_criteria"}]}),
+                               final_message("failed")])
+        run_invoke(builder, config={}, ani=ani, model=model, task=task)
+        shown = next(m["content"] for m in model.seen_messages if m.get("role") == "user")
+        assert "10.1.0.10" in shown and "healthy_throughput_mbps" not in shown, name
+        handed = [given for operation, given in ani.handed if operation == "execute_validation"]
+        assert handed and handed[0]["observation"]["service_measurement"]["healthy_throughput_mbps"] == 7.651, name
+
+
+def test_a_subject_may_add_to_the_transcript_before_each_model_call():
+    """`before_model_call`, when the ANI the loop holds has one:
+    what it appends reaches the model at that call, and the rows it returns are filed with
+    their source, inside the turn before them, and counted as no call of the model's."""
+
+    class Hooked(FakeANI):
+        def before_model_call(self, messages, *, task=None):
+            self.hooked = getattr(self, "hooked", 0) + 1
+            messages.append({"role": "user", "content": f"context {self.hooked}"})
+            return [{"operation": "get_topology", "category": "read", "ok": True,
+                     "duration_seconds": 0.0, "transaction_id": None, "error": None, "source": "own"}]
+
+    for name, builder in AGENTS:
+        ani = Hooked({"execute_validation": validation_result(False)})
+        model = ScriptedModel([tool_message("execute_validation", {"checks": [{"type": "public_success_criteria"}]}),
+                               final_message("failed")])
+        report = run_invoke(builder, config={}, ani=ani, model=model)
+        users = [m["content"] for m in model.seen_messages if m.get("role") == "user"]
+        assert users[1:] == ["context 1", "context 2"], name
+        rows = [(op["operation"], op.get("source")) for op in report["ani_operations"]]
+        assert rows == [("get_topology", "own"), ("execute_validation", None),
+                        ("get_topology", "own")], name
+        assert [turn["operations"] for turn in report["execution"]["model_turns"]] == [[2, 3], []], name
+        assert report["execution"]["tool_call_count"] == 1, name
+
+
+def test_a_subject_without_the_hook_gets_the_transcript_it_always_had():
+    for name, builder in AGENTS:
+        ani = FakeANI({"execute_validation": validation_result(False)})
+        model = ScriptedModel([final_message("failed")])
+        run_invoke(builder, config={}, ani=ani, model=model)
+        assert [m["role"] for m in model.seen_messages] == ["system", "user"], name

@@ -141,7 +141,7 @@ def test_a_campaign_read_back_after_a_restart_resumes_at_its_address(tmp_path, m
     record = _stopped(["done", "done", "failed", "skipped"], result_dir=str(tmp_path / "demo"))
     (tmp_path / "demo").mkdir()
     (tmp_path / "demo" / "campaign.json").write_text(json.dumps(_manifest(record)), encoding="utf-8")
-    moved = replace(routes.config, campaign_dir=str(tmp_path), log_dir=str(tmp_path / "episodes"))
+    moved = replace(routes.config, campaign_dir=str(tmp_path), manual_dir=str(tmp_path / "episodes"))
     fresh = RunManager()
     for module in (routes, app_module):
         monkeypatch.setattr(module, "config", moved)

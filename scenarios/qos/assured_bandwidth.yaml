@@ -1,25 +1,32 @@
 schema_version: "0.1"
-version: "1.1.0"
+version: "1.4.0"
 # The shaped families never break reachability: an ICMP oracle passes them whether
 # or not the policy was ever repaired. They are judged on the rate the protected
 # class keeps under contention instead.
 oracles:
-  healthy: {path: scenarios/oracles/qos/assured-bandwidth/healthy-v1.yaml, version: "1.0.0"}
-  expected_degradation: {path: scenarios/oracles/qos/assured-bandwidth/expected-degradation-v1.yaml, version: "1.0.0"}
-  repair: {path: scenarios/oracles/qos/assured-bandwidth/repair-v1.yaml, version: "1.0.0"}
+  healthy: {path: scenarios/oracles/qos/assured-bandwidth/healthy-v1.yaml, version: "1.1.0"}
+  expected_degradation: {path: scenarios/oracles/qos/assured-bandwidth/expected-degradation-v1.yaml, version: "1.1.0"}
+  repair: {path: scenarios/oracles/qos/assured-bandwidth/repair-v1.yaml, version: "1.2.0"}
   preservation: {path: scenarios/oracles/qos/assured-bandwidth/preservation-v1.yaml, version: "1.0.0"}
 scenario: assured_bandwidth
 task:
+  # Each variant says the circuit is fixed: the judge caps what leaves the shaped
+  # interface at the link rate, and an agent cannot be failed for widening a
+  # circuit the task never said it may not widen.
   low: >-
     The important traffic is not getting its share of the WAN uplink while the link is busy. Fix
-    that, without cutting off the other traffic.
+    that, without cutting off the other traffic. The uplink is a {{link_mbps}} Mbps line, and it
+    cannot be made faster.
   medium: >-
     Ensure the protected application flow keeps its contractual bandwidth guarantee while a
-    competing flow saturates the same uplink, and keep that competing flow connected.
+    competing flow saturates the same uplink, and keep that competing flow connected. The uplink
+    is a {{link_mbps}} Mbps circuit: the root rate of its shaper models that circuit and must stay
+    at {{link_mbps}} Mbps.
   high: >-
     Ensure that traffic from {{protected_source}} to {{destination}} receives at least
     {{assured_bandwidth_mbps}} Mbps while the competing flow from {{background_source}} saturates
-    the same uplink, and keep that competing flow connected.
+    the same uplink, and keep that competing flow connected. The uplink is a {{link_mbps}} Mbps
+    circuit: the root rate of its shaper models that circuit and must stay at {{link_mbps}} Mbps.
 base_variant: high
 success_criteria:
   all_of:
@@ -30,6 +37,10 @@ success_criteria:
     - type: observed_throughput
       min_mbps: "{{assured_bandwidth_mbps}}"
       under_contention: false
+      # The circuit the task says must stay at the link rate, capped as the judge
+      # caps it: the protected flow alone also clears its floor on an uplink whose
+      # shaper was widened or removed.
+      max_circuit_mbps: "{{link_mbps}}"
 extra_info:
   origin: project-defined IBN task family; protocol behavior grounded in DiffServ
   initial_condition: >-
@@ -67,9 +78,12 @@ methods:
       # Long enough to outlive the subject's budget. The repair oracle measures the
       # protected flow under the same contention the degradation was measured
       # under, and a flood that ends before the subject does lets an untouched
-      # network pass: 1800 s of budget plus the degradation probe, convergence and
-      # the repair probe fit inside 2700 s. The restore path kills iperf3 whatever
-      # is left. 900 was sized for the 400 s budget of the smoke experiment.
-      duration_seconds: 2700
+      # network pass: 3600 s of budget plus the degradation probe, convergence and
+      # the repair probe fit inside 4500 s. The restore path kills iperf3 whatever
+      # is left. 900 was sized for the 400 s budget of the smoke experiment, 2700
+      # for 1800 s; the 3600 s campaigns E12 to E18 ran on 2700, which stopped
+      # about 2650 s into the episode (pistes_e19, B5). A longer budget needs a
+      # longer flood again.
+      duration_seconds: 4500
       streams: 1
       sink_port: 5202

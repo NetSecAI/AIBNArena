@@ -1,4 +1,5 @@
 from pathlib import Path
+import copy
 import json
 from types import SimpleNamespace
 import sys
@@ -13,14 +14,15 @@ ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parent
 SCENARIO_PATHS = [
     path
-    for domain in ("connectivity", "dhcp_dns", "filtering", "qos", "security")
-    for path in sorted((ROOT / domain).glob("*.yaml"))
+    for domain in ("connectivity", "dhcp_dns", "filtering", "qos", "security", "vlan", "combined")
+    for path in sorted((ROOT / domain).rglob("*.yaml"))
 ]
 sys.path.insert(0, str(REPO_ROOT))
 
 from benchmarks.platforms.containerlab import ContainerLabEnv
 from benchmarks.platforms.containerlab.compiled_topology import (
     CompiledContainerLabTopology,
+    UnsupportedScenarioError,
     acl_interface_key,
     split_interface,
     vyos_interface_path,
@@ -48,11 +50,17 @@ from benchmarks.core import (
 )
 
 
-def _suite(topology="sme_leaf_spine_dmz_small.yaml", seed=7, domains=None):
+def _suite(topology="sme_leaf_spine_dmz_small.yaml", seed=7, domains=None, root=ROOT):
     compiler = ScenarioCompiler.from_topology_file(ROOT / "topologies" / topology, seed=seed)
     return CompiledScenarioSuite(
-        compiler.compile_scenarios(ROOT, domains=domains)
+        compiler.compile_scenarios(root, domains=domains)
     )
+
+
+def _archived_suite(topology="sme_leaf_spine_dmz_small.yaml", seed=7, domains=None):
+    """The scenarios the source repository archived (qos.assured_bandwidth and
+    qos.link_impairment), which this repository keeps active under scenarios/."""
+    return _suite(topology=topology, seed=seed, domains=domains, root=ROOT)
 
 
 def test_catalog_documents_use_schema_version_0_1():
@@ -95,25 +103,26 @@ def test_catalog_documents_validate_against_json_schemas():
 def test_catalog_compiles_all_three_domains():
     suite = _suite()
     assert suite.topology_id == "sme_leaf_spine_dmz_small"
-    instances = suite.instances()
-    # 47 faults and exploits, not the 51 this once counted: assured_bandwidth needs a
-    # shaped WAN edge to bind against and compiles only on sme_wan_edge_qos, and
-    # routing_setup's three variants left with its scenario file. Each fault is now
-    # stated at three precisions, which is why the total is not 47 any more.
+    # The counts below are the hand-written families'. The vlan family does not bind
+    # here, and the combined scenarios are generated (scenarios/generator), so their
+    # number moves whenever they are regenerated: test_vlan_and_combined.py checks them.
+    instances = [item for item in suite.instances() if item.domain not in {"vlan", "combined"}]
+    # assured_bandwidth needs a shaped WAN edge to bind against and compiles only on
+    # sme_wan_edge_qos, and routing_setup's three variants left with its scenario file.
+    # link_impairment, archived in the source repository (2026-10-21), is active here:
+    # its two methods bind on this topology. Each fault is stated at three precisions.
     faults = [item for item in instances if item.domain != "security"]
     exploits = [item for item in instances if item.domain == "security"]
-    assert len(faults) == 23 * 3
+    assert len(faults) == (21 + 2) * 3
     assert len(exploits) == 24
     assert len(instances) == 93
     ids = {task.id for task in instances}
     assert "security.arp_spoofing.exploit" in ids
     assert "security.unaudited_network_configuration_change.prevent" in ids
     assert "connectivity.disable_routing.m1" in ids
-    # assured_bandwidth moved to the shaped WAN edge; what is left of the qos
-    # domain on a topology with no bottleneck is the link-impairment family.
-    assert "qos.link_impairment.m1" in ids
-    assert "qos.link_impairment.m1" in ids
-    assert "qos.link_impairment.m2" in ids
+    # Every shaped qos family needs a shaped WAN edge: on this topology the qos domain
+    # compiles link_impairment alone, the one that does not.
+    assert {task_id.split(".")[1] for task_id in ids if task_id.startswith("qos.")} == {"link_impairment"}
 
 
 def test_public_view_does_not_contain_private_injection_or_oracle():
@@ -252,16 +261,16 @@ def test_sme_topology_materializes_all_disable_routing_methods():
     prohibited_fault = topology.materialize(prohibited)
     assert prohibited_fault.commands == [
         StateCommand(
-            target="external1",
+            target="web1",
             mode="shell",
             command="ip route replace prohibit default",
         )
     ]
     assert prohibited_fault.restore_commands == [
         StateCommand(
-            target="external1",
+            target="web1",
             mode="shell",
-            command="ip route replace default via 203.0.113.1",
+            command="ip route replace default via 10.10.40.1",
         )
     ]
 
@@ -336,31 +345,36 @@ def test_sme_topology_materializes_all_disable_interface_methods():
     endpoint_fault = topology.materialize(endpoint_instance)
     assert endpoint_fault.commands == [
         StateCommand(
-            target="user1",
+            target="app1",
             mode="shell",
             command="ip link set dev eth1 down",
         )
     ]
     assert endpoint_fault.restore_commands == [
         StateCommand(
-            target="user1",
+            target="app1",
             mode="shell",
             command="ip link set dev eth1 up",
-        )
+        ),
+        StateCommand(
+            target="app1",
+            mode="shell",
+            command="ip route replace default via 10.10.50.1",
+        ),
     ]
 
     mtu_instance = suite.select(["connectivity.disable_interface.m3"])[0]
     mtu_fault = topology.materialize(mtu_instance)
     assert mtu_fault.commands == [
         StateCommand(
-            target="finance1",
+            target="app1",
             mode="shell",
             command="ip link set dev eth1 mtu 68",
         )
     ]
     assert mtu_fault.restore_commands == [
         StateCommand(
-            target="finance1",
+            target="app1",
             mode="shell",
             command="ip link set dev eth1 mtu 1500",
         )
@@ -417,68 +431,68 @@ def test_sme_topology_materializes_all_remove_ip_methods_without_leakage():
         },
         "connectivity.remove_ip.m2": {
             "bindings": {
-                "target": "guest1",
+                "target": "web1",
                 "interface": "eth1",
-                "segment": "guest_vlan",
-                "affected_nodes": ["guest1"],
-                "healthy_ipv4": "10.10.20.10/24",
+                "segment": "dmz_vlan",
+                "affected_nodes": ["web1"],
+                "healthy_ipv4": "10.10.40.10/24",
             },
             "commands": [
                 StateCommand(
-                    "guest1",
+                    "web1",
                     "shell",
-                    "ip address del 10.10.20.10/24 dev eth1",
+                    "ip address del 10.10.40.10/24 dev eth1",
                 )
             ],
             "restore": [
                 StateCommand(
-                    "guest1",
+                    "web1",
                     "shell",
-                    "ip address replace 10.10.20.10/24 dev eth1",
+                    "ip address replace 10.10.40.10/24 dev eth1",
                 ),
                 StateCommand(
-                    "guest1",
+                    "web1",
                     "shell",
-                    "ip route replace default via 10.10.20.1",
+                    "ip route replace default via 10.10.40.1",
                 ),
             ],
         },
         "connectivity.remove_ip.m3": {
             "bindings": {
-                "target": "user1",
+                "target": "app1",
                 "interface": "eth1",
-                "segment": "users_vlan",
-                "affected_nodes": ["user1"],
-                "healthy_ipv4": "10.10.10.10/24",
+                "segment": "server_vlan",
+                "affected_nodes": ["app1"],
+                "healthy_ipv4": "10.10.50.10/24",
                 "fault_ipv4": "192.0.2.10/24",
             },
             "commands": [
                 StateCommand(
-                    "user1",
+                    "app1",
                     "shell",
-                    "ip address del 10.10.10.10/24 dev eth1",
+                    "ip address del 10.10.50.10/24 dev eth1",
                 ),
                 StateCommand(
-                    "user1",
+                    "app1",
                     "shell",
                     "ip address add 192.0.2.10/24 dev eth1",
                 ),
             ],
             "restore": [
                 StateCommand(
-                    "user1",
+                    "app1",
                     "shell",
                     "ip address del 192.0.2.10/24 dev eth1",
                 ),
                 StateCommand(
-                    "user1",
+                    "app1",
                     "shell",
-                    "ip address replace 10.10.10.10/24 dev eth1",
+                    "ip address replace 10.10.50.10/24 dev eth1",
                 ),
                 StateCommand(
-                    "user1",
+                    "app1",
                     "shell",
-                    "ip route replace default via 10.10.10.1",
+                    "ip route replace default via 10.10.50.1",
                 ),
             ],
         },
@@ -523,41 +537,41 @@ def test_sme_topology_materializes_all_remove_ip_methods_without_leakage():
         },
         "connectivity.remove_ip.m5": {
             "bindings": {
-                "target": "finance1",
+                "target": "app1",
                 "interface": "eth1",
-                "segment": "finance_vlan",
-                "affected_nodes": ["finance1"],
-                "healthy_ipv4": "10.10.30.10/24",
+                "segment": "server_vlan",
+                "affected_nodes": ["app1"],
+                "healthy_ipv4": "10.10.50.10/24",
                 "fault_ipv4": "203.0.113.10/24",
                 "duplicate_source": "external1",
             },
             "commands": [
                 StateCommand(
-                    "finance1",
+                    "app1",
                     "shell",
-                    "ip address del 10.10.30.10/24 dev eth1",
+                    "ip address del 10.10.50.10/24 dev eth1",
                 ),
                 StateCommand(
-                    "finance1",
+                    "app1",
                     "shell",
                     "ip address add 203.0.113.10/24 dev eth1",
                 ),
             ],
             "restore": [
                 StateCommand(
-                    "finance1",
+                    "app1",
                     "shell",
                     "ip address del 203.0.113.10/24 dev eth1",
                 ),
                 StateCommand(
-                    "finance1",
+                    "app1",
                     "shell",
-                    "ip address replace 10.10.30.10/24 dev eth1",
+                    "ip address replace 10.10.50.10/24 dev eth1",
                 ),
                 StateCommand(
-                    "finance1",
+                    "app1",
                     "shell",
-                    "ip route replace default via 10.10.30.1",
+                    "ip route replace default via 10.10.50.1",
                 ),
             ],
         },
@@ -688,6 +702,7 @@ def test_sme_topology_materializes_wrong_routing_table_methods_without_leakage()
                 "destination_segment": "guest_vlan",
                 "destination_gateway": "leaf1",
                 "canonical_next_hop_group": "to-leaf1",
+                "canonical_next_hops": ["10.255.0.4", "10.255.0.6"],
                 "temporary_next_hop_group": "ibn-wrt-m1",
                 "affected_nodes": ["guest1"],
                 "fault_next_hop": "10.10.50.10",
@@ -896,8 +911,363 @@ def test_sme_topology_materializes_wrong_routing_table_methods_without_leakage()
             assert private_value not in public
 
 
+@pytest.mark.parametrize(
+    "topology", sorted(path.name for path in (ROOT / "topologies").glob("*.yaml")))
+def test_a_router_interface_fault_always_cuts_a_path_the_oracle_observes(topology):
+    """`node: gateway, interface: data` used to draw links between two routers and
+    segments whose only host is a resolver: no endpoint beside them, so the
+    expected-degradation oracle selected no required path and the episode stopped
+    before the subject was called -- up to half the seeds on some topologies. Such
+    a draw is folded onto an observable interface."""
+    document = yaml.safe_load((ROOT / "topologies" / topology).read_text(encoding="utf-8"))
+    required = {
+        str(requirement[key])
+        for requirement in document["topology"]["connectivity_requirements"]
+        for key in ("source", "destination")
+    }
+    drawn = 0
+    for seed in range(1, 21):
+        for instance in _suite(topology=topology, seed=seed, domains={"connectivity"}).instances():
+            if instance.id.split(".")[1] in {"disable_interface", "remove_ip"} and instance.id.endswith(".m1"):
+                assert required & set(instance.private["bindings"]["affected_nodes"]), (seed, instance.id)
+                drawn += 1
+    assert drawn
+
+
+@pytest.mark.parametrize(
+    "topology", sorted(path.name for path in (ROOT / "topologies").glob("*.yaml")))
+def test_a_subnet_drop_family_always_targets_a_subnet_some_flow_reaches_and_leaves(topology):
+    """drop_traffic_to_from_subnet shares one subnet across its four directions. m2
+    only stops the sessions opened toward it and m1 those it opens: on a stateful
+    enforcer the replies to the others still come back. With one-way requirements a
+    subnet that only opens sessions lost nothing to m2 (campus_medium, seed 9, CORP)
+    and one that only receives them nothing to m1 (campus_large, seed 9, sftp-dmz),
+    so the shared draw is folded onto a subnet that does both."""
+    document = yaml.safe_load((ROOT / "topologies" / topology).read_text(encoding="utf-8"))
+    destinations, sources = set(), set()
+    for requirement in document["topology"]["connectivity_requirements"]:
+        destinations.add(str(requirement["destination"]))
+        sources.add(str(requirement["source"]))
+        if requirement.get("bidirectional"):
+            destinations.add(str(requirement["source"]))
+            sources.add(str(requirement["destination"]))
+    drawn = 0
+    for seed in range(1, 21):
+        for instance in _suite(topology=topology, seed=seed, domains={"connectivity"}).instances():
+            if instance.id.split(".")[1] == "drop_traffic_to_from_subnet":
+                affected = set(instance.private["bindings"]["affected_nodes"])
+                assert destinations & affected and sources & affected, (seed, instance.id)
+                drawn += 1
+    assert drawn
+
+
+def test_canonical_next_hops_are_the_healthy_next_hop_groups():
+    """SR Linux restores a route by group name and VyOS by address. Both must
+    land on the route the reference state holds, so the addresses the binder
+    derives from the topology are the members of the healthy `to-<gateway>`
+    group, on the target and on the loop peer."""
+    state = json.loads(
+        (REPO_ROOT / "benchmarks/testbeds/containerlab/sme01-small/states/healthy.json")
+        .read_text(encoding="utf-8")
+    )
+    groups: dict[tuple[str, str], set[str]] = {}
+    for command in state["commands"]:
+        words = command["command"].split()
+        if "next-hop-groups" in words and "ip-address" in words:
+            group = words[words.index("group") + 1]
+            address = words[words.index("ip-address") + 1]
+            groups.setdefault((command["target"], group), set()).add(address)
+
+    checked = 0
+    for seed in range(1, 13):
+        suite = _suite(seed=seed, domains={"connectivity"})
+        for instance in suite.instances():
+            bindings = instance.private["bindings"]
+            if "canonical_next_hops" not in bindings:
+                continue
+            group = bindings["canonical_next_hop_group"]
+            assert set(bindings["canonical_next_hops"]) == groups[(bindings["target"], group)]
+            if "loop_peer" in bindings:
+                assert set(bindings["loop_peer_canonical_next_hops"]) == groups[
+                    (bindings["loop_peer"], bindings["loop_peer_canonical_next_hop_group"])
+                ]
+            checked += 1
+    assert checked
+
+
+# A firewall that routes toward a remote site through a second router, beside a
+# DMZ firewall it reaches directly and sends its default to: the shape the campus
+# labs' site leg takes. srv-site can be made to loop between fw and router-wan;
+# dmz1 cannot, since nothing but its own gateway stands between it and fw. And
+# dmz1 survives an unusable route, because fw's default leads there too.
+_VYOS_ROUTED_SITE = yaml.safe_load("""
+schema_version: "0.1"
+topology:
+  id: vyos_routed_site
+  environment: {type: containerlab, lab_name: vyos-routed-site, topology_path: vyos-routed-site.clab.yml}
+  nodes:
+    fw:
+      kind: vyos
+      roles: [firewall, gateway, router]
+      capabilities: [ipv4_forwarding, static_routing]
+      interfaces:
+        eth1: {segment: lan, ipv4: 10.0.0.1/24}
+        eth2: {segment: fw_transit, ipv4: 10.255.255.2/30}
+        eth3: {segment: site_wan, ipv4: 10.255.254.0/31}
+      static_routes:
+        0.0.0.0/0: {next_hops: [10.255.255.1]}
+        172.16.1.0/24: {next_hops: [10.255.255.1]}
+        10.1.0.0/24: {next_hops: [10.255.254.1]}
+    fw-dmz:
+      kind: vyos
+      roles: [firewall, gateway, router]
+      capabilities: [ipv4_forwarding, static_routing]
+      interfaces:
+        eth1: {segment: fw_transit, ipv4: 10.255.255.1/30}
+        eth2: {segment: dmz, ipv4: 172.16.1.254/24}
+      static_routes:
+        10.0.0.0/24: {next_hops: [10.255.255.2]}
+    router-wan:
+      kind: vyos
+      roles: [router, transit]
+      capabilities: [ipv4_forwarding, static_routing]
+      interfaces:
+        eth1: {segment: site_wan, ipv4: 10.255.254.1/31}
+        eth2: {segment: site_edge, ipv4: 10.255.254.2/31}
+      static_routes:
+        10.0.0.0/24: {next_hops: [10.255.254.0]}
+        10.1.0.0/24: {next_hops: [10.255.254.3]}
+    wan-edge:
+      kind: linux
+      roles: [wan_edge, transit, gateway]
+      capabilities: [ipv4, ipv4_forwarding, static_routing]
+      interfaces:
+        eth1: {segment: site_edge, ipv4: 10.255.254.3/31}
+        eth2: {segment: site_lan, ipv4: 10.1.0.1/24}
+      static_routes:
+        10.0.0.0/24: {next_hops: [10.255.254.2]}
+    host1:
+      kind: linux
+      roles: [client]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: lan, ipv4: 10.0.0.10/24}
+    host2:
+      kind: linux
+      roles: [client]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: lan, ipv4: 10.0.0.20/24}
+    dmz1:
+      kind: linux
+      roles: [server]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: dmz, ipv4: 172.16.1.10/24}
+    srv-site:
+      kind: linux
+      roles: [server]
+      capabilities: [ipv4]
+      interfaces:
+        eth1: {segment: site_lan, ipv4: 10.1.0.10/24}
+  connectivity_requirements:
+    - {source: host1, destination: srv-site, bidirectional: false}
+    - {source: host2, destination: srv-site, bidirectional: false}
+    - {source: host1, destination: dmz1, bidirectional: false}
+    - {source: host2, destination: dmz1, bidirectional: false}
+  segments:
+    lan: {type: lan, cidr: 10.0.0.0/24, members: [fw, host1, host2]}
+    fw_transit: {type: p2p, cidr: 10.255.255.0/30, members: [fw, fw-dmz]}
+    dmz: {type: lan, cidr: 172.16.1.0/24, members: [fw-dmz, dmz1]}
+    site_wan: {type: p2p, cidr: 10.255.254.0/31, members: [fw, router-wan]}
+    site_edge: {type: p2p, cidr: 10.255.254.2/31, members: [router-wan, wan-edge]}
+    site_lan: {type: lan, cidr: 10.1.0.0/24, members: [wan-edge, srv-site]}
+""")
+
+
+def _vyos_route_suite(seed: int, document: dict | None = None) -> CompiledScenarioSuite:
+    document = document or _VYOS_ROUTED_SITE
+    path = ROOT / "connectivity" / "wrong_routing_table.yaml"
+    scenario = yaml.safe_load(path.read_text(encoding="utf-8"))
+    compiler = ScenarioCompiler(document, seed=seed)
+    return CompiledScenarioSuite({
+        "schema_version": "0.1",
+        "generator": {"seed": seed},
+        "topology": document["topology"],
+        "tasks": compiler.compile_scenario("connectivity", scenario, source_path=path),
+    })
+
+
+def test_vyos_router_materializes_wrong_routing_table_methods_by_address():
+    """VyOS names a next hop by its address and balances over every one set on a
+    route, so each fault rewrites the route whole rather than adding beside it."""
+    suite = _vyos_route_suite(seed=5)
+    topology = CompiledContainerLabTopology(_VYOS_ROUTED_SITE)
+
+    def vyos(target, command):
+        return StateCommand(target, "vyos_cli", command)
+
+    expected = {
+        "connectivity.wrong_routing_table.m1": {
+            "commands": [
+                vyos("fw", "delete protocols static route 10.1.0.0/24"),
+                vyos("fw", "set protocols static route 10.1.0.0/24 next-hop 10.0.0.10"),
+            ],
+            "restore": [
+                vyos("fw", "delete protocols static route 10.1.0.0/24"),
+                vyos("fw", "set protocols static route 10.1.0.0/24 next-hop 10.255.254.1"),
+            ],
+            "affected": ["srv-site"],
+        },
+        "connectivity.wrong_routing_table.m2": {
+            "commands": [vyos("fw", "set protocols static route 10.1.0.10/32 blackhole")],
+            "restore": [vyos("fw", "delete protocols static route 10.1.0.10/32")],
+            "affected": ["srv-site"],
+        },
+        "connectivity.wrong_routing_table.m3": {
+            "commands": [
+                vyos("fw", "delete protocols static route 10.1.0.0/24"),
+                vyos("fw", "set protocols static route 10.1.0.0/24 next-hop 192.0.2.1"),
+            ],
+            "restore": [
+                vyos("fw", "delete protocols static route 10.1.0.0/24"),
+                vyos("fw", "set protocols static route 10.1.0.0/24 next-hop 10.255.254.1"),
+            ],
+            "affected": ["srv-site"],
+        },
+        "connectivity.wrong_routing_table.m4": {
+            "commands": [
+                vyos("fw", "delete protocols static route 10.1.0.0/24"),
+                vyos("fw", "set protocols static route 10.1.0.0/24 next-hop 10.255.254.1"),
+                vyos("router-wan", "delete protocols static route 10.1.0.0/24"),
+                vyos("router-wan", "set protocols static route 10.1.0.0/24 next-hop 10.255.254.0"),
+            ],
+            "restore": [
+                vyos("fw", "delete protocols static route 10.1.0.0/24"),
+                vyos("fw", "set protocols static route 10.1.0.0/24 next-hop 10.255.254.1"),
+                vyos("router-wan", "delete protocols static route 10.1.0.0/24"),
+                vyos("router-wan", "set protocols static route 10.1.0.0/24 next-hop 10.255.254.3"),
+            ],
+            "affected": ["srv-site"],
+        },
+    }
+    for instance_id, reference in expected.items():
+        instance = suite.select([instance_id])[0]
+        fault = topology.materialize(instance)
+        assert fault.commands == reference["commands"], instance_id
+        assert fault.restore_commands == reference["restore"], instance_id
+        assert fault.expected_affected_nodes == reference["affected"], instance_id
+
+        public = json.dumps(instance.public_view())
+        for private_value in ("route_prefix", "canonical_next_hops", "10.255.254.", "192.0.2.1",
+                              "router-wan", "protocols static"):
+            assert private_value not in public, (instance_id, private_value)
+
+
+def _drawn_destinations(document: dict | None = None, methods=(1, 2, 3, 4)) -> dict[int, set[str]]:
+    drawn = {method: set() for method in methods}
+    for seed in range(1, 21):
+        suite = _vyos_route_suite(seed=seed, document=document)
+        for method in methods:
+            instance = suite.select([f"connectivity.wrong_routing_table.m{method}"])[0]
+            drawn[method].add(instance.private["bindings"]["destination"])
+    return drawn
+
+
+def test_each_route_fault_is_drawn_only_where_it_changes_forwarding():
+    """dmz1 is a remote route of fw too, but two faults would change nothing there.
+    Its gateway is fw's only router on the way, so no loop can form; and once its
+    route is unusable fw's default still leads to it, so an unresolvable next hop
+    leaves it reachable. Drawing it would make m4 fail with the seed and m3 a
+    fault without effect. The wrong egress and the blackhole break both routes."""
+    drawn = _drawn_destinations()
+    assert drawn[1] == drawn[2] == {"srv-site", "dmz1"}
+    assert drawn[3] == drawn[4] == {"srv-site"}
+    for seed in range(1, 21):
+        instance = _vyos_route_suite(seed=seed).select(["connectivity.wrong_routing_table.m4"])[0]
+        assert instance.private["bindings"]["loop_peer"] == "router-wan"
+
+
+def test_an_undeclared_router_on_the_fallback_path_is_not_assumed_to_drop_it():
+    """Whether fw-dmz would forward srv-site's traffic back cannot be read from a
+    descriptor that does not say what it routes, so m3 claims no destination."""
+    document = copy.deepcopy(_VYOS_ROUTED_SITE)
+    del document["topology"]["nodes"]["fw-dmz"]["static_routes"]
+    with pytest.raises(ValueError, match="whose fallback misses the destination"):
+        _vyos_route_suite(seed=1, document=document)
+
+
+def test_a_router_declaring_its_routes_is_rewritten_only_on_those_it_holds():
+    """A route fw only reaches through its default has nothing to rewrite. A
+    blackhole adds a more specific route instead, and needs none."""
+    document = copy.deepcopy(_VYOS_ROUTED_SITE)
+    del document["topology"]["nodes"]["fw"]["static_routes"]["172.16.1.0/24"]
+    drawn = _drawn_destinations(document, methods=(1, 2))
+    assert drawn[1] == {"srv-site"}
+    assert drawn[2] == {"srv-site", "dmz1"}
+
+
+def test_the_restore_writes_back_the_declared_route_not_a_derived_one():
+    document = copy.deepcopy(_VYOS_ROUTED_SITE)
+    # An odd route, sending the site through the DMZ firewall, but the one the
+    # reference state holds: the restore must put back that, not the obvious path.
+    document["topology"]["nodes"]["fw"]["static_routes"]["10.1.0.0/24"] = {
+        "next_hops": ["10.255.255.1"]
+    }
+    instance = _vyos_route_suite(seed=5, document=document).select(
+        ["connectivity.wrong_routing_table.m1"]
+    )[0]
+    fault = CompiledContainerLabTopology(document).materialize(instance)
+    assert instance.private["bindings"]["canonical_next_hops"] == ["10.255.255.1"]
+    assert fault.restore_commands[-1] == StateCommand(
+        "fw", "vyos_cli", "set protocols static route 10.1.0.0/24 next-hop 10.255.255.1"
+    )
+
+
+def test_a_vyos_route_fault_needs_the_route_declared():
+    """Without the declaration the compiler falls back to the SR Linux convention
+    and binds; the VyOS rendering then refuses, rather than ship a batch that
+    deletes a route the reference state may not hold."""
+    document = copy.deepcopy(_VYOS_ROUTED_SITE)
+    for name in ("fw", "fw-dmz", "router-wan", "wan-edge"):
+        del document["topology"]["nodes"][name]["static_routes"]
+    instance = _vyos_route_suite(seed=5, document=document).select(
+        ["connectivity.wrong_routing_table.m1"]
+    )[0]
+    with pytest.raises(UnsupportedScenarioError, match="declare it in fw's static_routes"):
+        CompiledContainerLabTopology(document).materialize(instance)
+
+
+@pytest.mark.parametrize(
+    "declaration, message",
+    [
+        ({"10.1.0.1/24": {"next_hops": ["10.255.254.1"]}}, "not an IPv4 network"),
+        ({"10.1.0.0/24": {}}, "either next_hops or blackhole"),
+        ({"10.1.0.0/24": {"next_hops": ["10.255.254.1"], "blackhole": True}},
+         "either next_hops or blackhole"),
+        ({"10.1.0.0/24": {"next_hops": ["fe80::1"]}}, "is not IPv4"),
+        (["10.1.0.0/24"], "must map a prefix"),
+    ],
+)
+def test_a_malformed_static_route_declaration_is_refused(declaration, message):
+    document = copy.deepcopy(_VYOS_ROUTED_SITE)
+    document["topology"]["nodes"]["fw"]["static_routes"] = declaration
+    with pytest.raises(ValueError, match=message):
+        ScenarioCompiler(document)
+
+
+def test_a_vyos_route_loop_refuses_a_peer_of_another_kind():
+    document = copy.deepcopy(_VYOS_ROUTED_SITE)
+    document["topology"]["nodes"]["router-wan"]["kind"] = "nokia_srlinux"
+    instance = _vyos_route_suite(seed=5, document=document).select(
+        ["connectivity.wrong_routing_table.m4"]
+    )[0]
+    with pytest.raises(UnsupportedScenarioError, match="loop peer must be vyos"):
+        CompiledContainerLabTopology(document).materialize(instance)
+
+
 def test_sme_topology_materializes_qos_link_impairment_without_leakage():
-    suite = _suite(seed=9, domains={"qos"})
+    suite = _archived_suite(seed=9, domains={"qos"})
     topology = CompiledContainerLabTopology.from_file(
         ROOT / "topologies" / "sme_leaf_spine_dmz_small.yaml"
     )
@@ -959,8 +1329,12 @@ def test_no_topology_specific_names_are_required_by_generic_scenarios():
     for item in suite.instances():
         by_domain[item.domain] = by_domain.get(item.domain, 0) + 1
         assert "{{" not in item.intent and "}}" not in item.intent
-    # connectivity lost routing_setup's three variants with its scenario file, and
-    # every remaining fault is stated at three precisions: 21 and 2 faults, times 3.
+    # connectivity lost routing_setup's three variants with its scenario file, and every
+    # fault is stated at three precisions: 21 faults, times 3. qos keeps link_impairment's
+    # two methods on this topology (archived in the source repository, active here). The
+    # combined scenarios are generated (scenarios/generator), so their count is not pinned
+    # here; their wordings are checked for templates above all the same.
+    by_domain.pop("combined", None)
     assert by_domain == {"connectivity": 63, "qos": 6, "security": 24}
 
 
@@ -993,10 +1367,8 @@ def test_multiple_samples_have_unique_reproducible_ids():
     assert "connectivity.disable_interface.m2.i002" in first_ids
 
 
-
-
 def test_qos_scenario_compiles_public_service_success_criteria():
-    suite = _suite(seed=9, domains={"qos"})
+    suite = _archived_suite(seed=9, domains={"qos"})
     instance = suite.select(["qos.link_impairment.m1"])[0]
     assert instance.public_view()["success_criteria"] == {
         "all_of": [
@@ -1006,6 +1378,7 @@ def test_qos_scenario_compiles_public_service_success_criteria():
                 "source": "finance1",
                 "destination": "app1",
                 "destination_ip": "10.10.50.10",
+                "count": 30,
                 "max_packet_loss_percent": 0,
                 "max_rtt_avg_ms": 10,
             },
@@ -1024,8 +1397,8 @@ def test_every_method_scenario_compiles_a_measurable_public_success_criterion():
     are out of scope here.
     """
     method_scenarios = set()
-    for domain in ("connectivity", "dhcp_dns", "filtering", "qos"):
-        for path in sorted((ROOT / domain).glob("*.yaml")):
+    for domain in ("connectivity", "dhcp_dns", "filtering", "qos", "vlan", "combined"):
+        for path in sorted((ROOT / domain).rglob("*.yaml")):
             payload = yaml.safe_load(path.read_text(encoding="utf-8"))
             if payload.get("methods"):
                 method_scenarios.add((domain, payload["scenario"]))
@@ -1083,7 +1456,7 @@ def test_ani_public_objective_validation_requires_qos_and_connectivity():
     # __new__ skips __init__, so the settle-window stamp evaluate_success_criteria
     # reads has to be set by hand.
     ani._change_applied_at = None
-    ani._icmp_probe = lambda check: {
+    ani._icmp_probe = lambda check, **_: {
         "type": "icmp",
         "source": check["source"],
         "destination": check["destination"],
@@ -1116,7 +1489,7 @@ def test_ani_public_objective_validation_requires_qos_and_connectivity():
     assert failed["checks"][0]["passed"] is True
     assert failed["checks"][1]["passed"] is False
 
-    ani._icmp_probe = lambda check: {
+    ani._icmp_probe = lambda check, **_: {
         "type": "icmp",
         "source": check["source"],
         "destination": check["destination"],
@@ -1285,11 +1658,15 @@ def _qos_suite(seed=7):
     return _suite(topology=QOS_TOPOLOGY, seed=seed, domains={"qos"})
 
 
-def _qos_faults(seed=7):
+def _qos_faults(seed=7, *, archived=False):
+    """The materialised qos faults on the shaped WAN edge; `archived` compiles the ones
+    that the source repository archived instead (assured_bandwidth, active here)."""
     topology = CompiledContainerLabTopology.from_file(ROOT / "topologies" / QOS_TOPOLOGY)
+    suite = (_archived_suite(topology=QOS_TOPOLOGY, seed=seed, domains={"qos"}) if archived
+             else _qos_suite(seed=seed))
     return {
         instance.id: (instance, topology.materialize(instance))
-        for instance in _qos_suite(seed=seed).instances()
+        for instance in suite.instances()
     }
 
 
@@ -1437,7 +1814,7 @@ def test_shaping_commands_are_idempotent():
 
 
 def test_background_traffic_runs_detached_and_stops_without_self_signalling():
-    instance, fault = _qos_faults()["qos.assured_bandwidth.m1"]
+    instance, fault = _qos_faults(archived=True)["qos.assured_bandwidth.m1"]
     bindings = instance.private["bindings"]
     assert bindings["protected_source"] == "user1"
     assert bindings["background_source"] == "guest1"
@@ -1454,6 +1831,10 @@ def test_background_traffic_runs_detached_and_stops_without_self_signalling():
     assert bindings["background_streams"] == 1
     assert 15 <= bindings["background_mbps"] <= 25
     assert bindings["sink_port"] == 5202
+    # The flood must outlive a 3600 s episode and the repair probe after it, or the
+    # judge measures an idle link and an untouched network passes (pistes_e19, B5).
+    assert bindings["background_seconds"] >= 3600 + 900
+    assert f"-t {bindings['background_seconds']} " in command.command
 
     assert [c.command for c in fault.restore_commands] == [
         "sh -c 'pkill -x iperf3 || true'"
@@ -1557,6 +1938,35 @@ def test_dhcp_scenarios_leak_nothing_private():
         blob = json.dumps(public)
         for secret in ("USER1", "shared-network", "10.10.60.10", "udhcpc", "firewall"):
             assert secret not in blob, (instance.id, secret)
+
+
+@pytest.mark.parametrize("topology, zone", [
+    ("sme_leaf_spine_dmz_dns.yaml", "sme01.internal"),
+    ("campus_small.yaml", "campus.lab"),
+    ("campus_medium.yaml", "campus.lab"),
+    ("campus_large.yaml", "campus.lab"),
+])
+def test_the_dhcp_oracles_resolve_a_name_the_lease_s_resolver_answers(topology, zone):
+    """The client's own name, fully qualified in its resolver's zone. A short name
+    is answered by the /etc/hosts containerlab writes into every container, with
+    the management address, whatever DHCP and DNS do -- `web1` was, until 1.2.0."""
+    from scenarios.oracle_loader import load_oracle, resolve_oracle
+
+    references = yaml.safe_load(
+        (ROOT / "dhcp_dns" / "dhcp_provisioning.yaml").read_text(encoding="utf-8"))["oracles"]
+    for seed in (1, 5, 9):
+        suite = _suite(topology=topology, seed=seed, domains={"dhcp_dns"})
+        for instance in suite.instances():
+            bindings = instance.private["bindings"]
+            name = f"{bindings['client']}.{zone}"
+            assert bindings["probe_name"] == name, instance.id
+            for phase in ("healthy", "expected_degradation", "repair"):
+                reference = references[phase]
+                oracle = resolve_oracle(
+                    load_oracle(REPO_ROOT / reference["path"], expected_version=reference["version"]),
+                    bindings)
+                probe = next(p for p in oracle["probes"] if p["id"] == "name_resolution")
+                assert probe["destination"] == name, (instance.id, phase)
 
 
 def test_name_checks_probe_the_resolver_only_where_a_zone_answers():
@@ -1846,12 +2256,30 @@ def test_a_starved_measurement_reads_as_zero_rather_than_crashing_the_run(monkey
     assert not _judge("shaping-repair", "repair", measurement, baseline=baseline)
 
 
+#: Each family's scenario file, under scenarios/. assured_bandwidth is archived
+#: (2026-10-27); its oracles stay where they were, and are tested at its pins.
+_THROUGHPUT_SCENARIOS = {
+    "assured-bandwidth": "qos/assured_bandwidth.yaml",
+    "shaping-repair": "qos/wan_shaping_policy_repair.yaml",
+}
+
+# What leaves the shaped interface with the circuit intact. The floor tests below
+# are about the protected flow, so their canned samples carry this unless they
+# say otherwise; the circuit cap has a test of its own.
+_INTACT_CIRCUIT = {"circuit_egress_mbps": 9.9}
+
+
 def _throughput_oracle(family, phase, *, bindings=None):
-    """One resolved throughput oracle, the way the lifecycle loads it."""
+    """One resolved throughput oracle, the way the lifecycle loads it, at the
+    version its scenario pins."""
     from scenarios.oracle_loader import load_oracle, resolve_oracle
 
+    scenario = yaml.safe_load(
+        (ROOT / _THROUGHPUT_SCENARIOS[family]).read_text(encoding="utf-8")
+    )
+    pinned = scenario["oracles"][phase.replace("-", "_")]["version"]
     path = ROOT / "oracles" / "qos" / family / f"{phase}-v1.yaml"
-    return resolve_oracle(load_oracle(path, expected_version="1.0.0"),
+    return resolve_oracle(load_oracle(path, expected_version=pinned),
                           bindings if bindings is not None else _throughput_bindings())
 
 
@@ -1869,7 +2297,7 @@ def _judge(family, phase, measured, *, baseline=None, bindings=None):
 
     class _Canned:
         def run_probe(self, probe):
-            return dict(measured)
+            return {**_INTACT_CIRCUIT, **measured}
 
     reference = {probe_id: dict(baseline)} if baseline is not None else None
     return OracleEvaluator(_Canned()).evaluate(oracle, baseline=reference).passed
@@ -1901,6 +2329,31 @@ def test_the_shaped_families_are_judged_on_the_assured_rate():
         assert not _judge(family, "repair", starved, baseline=idle)
         # A measurement that never produced a number is not a pass.
         assert not _judge(family, "repair", {"throughput_mbps": None}, baseline=idle)
+
+
+def test_the_shaped_families_cap_the_circuit_as_well_as_the_floor():
+    """Measured in e10: deleting the root qdisc, or raising its rate to 16 or 60
+    Mbps, let the protected flow clear its floor, and both families took that for
+    a repair. What leaves the shaped interface is capped at the link rate plus a
+    fifth, before the fault and after the repair alike; the degradation oracle
+    only asks whether the fault took hold, and is left alone."""
+    idle = {"throughput_mbps": 9.6}
+    for family in ("assured-bandwidth", "shaping-repair"):
+        served = {"throughput_mbps": 8.9}
+        for phase in ("healthy", "repair"):
+            assert _judge(family, phase, {**served, "circuit_egress_mbps": 11.9}, baseline=idle)
+            # Root rate raised to 16 Mbps (e10 wan_shaping m4).
+            assert not _judge(family, phase, {**served, "circuit_egress_mbps": 16.0}, baseline=idle)
+            # Root qdisc deleted (e10 assured_bandwidth m1, wan_shaping m3).
+            assert not _judge(
+                family, phase, {"throughput_mbps": 81.1, "circuit_egress_mbps": 105.0}, baseline=idle
+            )
+            # A counter that could not be read is no evidence the circuit holds.
+            assert not _judge(family, phase, {**served, "circuit_egress_mbps": None}, baseline=idle)
+        assert _judge(
+            family, "expected-degradation",
+            {"throughput_mbps": 0.8, "circuit_egress_mbps": None}, baseline=idle,
+        )
 
 
 def test_assured_floor_never_demands_more_than_the_intact_policy_delivered():
@@ -2029,17 +2482,18 @@ def test_shaped_qos_scenarios_declare_a_throughput_criterion():
             ROOT / "topologies" / "sme_wan_edge_qos.yaml", seed=3
         ).compile_scenarios(ROOT, domains={"qos"})
     )
-    for instance in suite.instances():
+    # link_impairment is not a shaped family: it impairs a link, judged by loss.
+    for instance in (item for item in suite.instances() if ".link_impairment." not in item.id):
         criteria = instance.public_view()["success_criteria"]["all_of"]
         kinds = {item["type"] for item in criteria}
-        if instance.id.startswith("qos.link_impairment"):
-            assert kinds == {"lab_connectivity", "observed_icmp_service"}
-            continue
         assert kinds == {"lab_connectivity", "observed_throughput"}
         throughput = next(c for c in criteria if c["type"] == "observed_throughput")
         # The SLO comes from the topology's own policy, not from a literal
         # duplicated into the scenario.
         assert float(throughput["min_mbps"]) == 8.0
+        # Both families cap the circuit the task says must stay at the link
+        # rate, as their repair oracles do.
+        assert float(throughput["max_circuit_mbps"]) == 10.0
         # The fault is the flood in one family and a broken policy in the other,
         # so only one of them has contention to offer.
         assert throughput["under_contention"] is (
@@ -2160,7 +2614,8 @@ def test_detaching_an_interface_only_claims_what_that_interface_carries():
     """
     from scenarios.compiler.topology import TopologyIndex
 
-    for topology_id in ("sme_leaf_spine_dmz_dns.yaml", "sme_leaf_firewall_dmz.yaml"):
+    for topology_id in ("sme_leaf_spine_dmz_dns.yaml", "sme_leaf_firewall_dmz.yaml", "campus_medium.yaml",
+                        "campus_small.yaml", "campus_large.yaml"):
         index = TopologyIndex(
             yaml.safe_load((ROOT / "topologies" / topology_id).read_text(encoding="utf-8"))
         )
@@ -2189,7 +2644,8 @@ def test_a_zone_never_gives_up_its_last_interface():
     """
     from scenarios.compiler.topology import TopologyIndex
 
-    for topology_id in ("sme_leaf_spine_dmz_dns.yaml", "sme_leaf_firewall_dmz.yaml"):
+    for topology_id in ("sme_leaf_spine_dmz_dns.yaml", "sme_leaf_firewall_dmz.yaml", "campus_medium.yaml",
+                        "campus_small.yaml", "campus_large.yaml"):
         index = TopologyIndex(
             yaml.safe_load((ROOT / "topologies" / topology_id).read_text(encoding="utf-8"))
         )
@@ -2210,7 +2666,10 @@ def test_filtering_is_offered_only_where_a_zone_policy_is_enforced():
         (ROOT / "topology_applicability.json").read_text(encoding="utf-8")
     )
     entry = applicability["scenarios"]["filtering/zone_policy_enforcement.yaml"]
-    assert set(entry["topologies"]) == {"sme_leaf_firewall_dmz", "sme_leaf_spine_dmz_dns"}
+    assert set(entry["topologies"]) == {
+        "sme_leaf_firewall_dmz", "sme_leaf_spine_dmz_dns", "campus_medium", "campus_small",
+        "campus_large",
+    }
 
     for topology_id in entry["topologies"]:
         document = yaml.safe_load(
@@ -2262,7 +2721,9 @@ def test_the_wording_the_corpus_ran_keeps_its_instance_id():
     # These ran in the 32 plate campaigns. A new wording must not rename them.
     assert "connectivity.disable_interface.m1" in ids
     assert "connectivity.wrong_routing_table.m1" in ids
-    assert "qos.link_impairment.m1" in ids
+    # Archived since, and compiled from the archive under the same id.
+    archived = {task["id"] for task in _archived_suite().document["tasks"]}
+    assert "qos.link_impairment.m1" in archived
 
 
 def test_the_base_wording_still_says_which_level_it_is():
@@ -2320,3 +2781,80 @@ def test_a_wording_set_without_a_base_is_refused():
     document["base_variant"] = "middling"
     with pytest.raises(ValueError, match="not one of"):
         validate_scenario("connectivity", document)
+
+
+def test_service_selection_on_the_existing_topologies():
+    """The servers providing the network's services, and only those: external1 carries a
+    `server` role in sme_wan_edge_qos as a cloud stand-in outside the lab."""
+    expected = {
+        "sme_leaf_spine_dmz_small.yaml": ["app1", "web1"],
+        "sme_leaf_spine_dmz_vlan.yaml": ["app1", "web1"],
+        "sme_leaf_firewall_dmz.yaml": ["app1", "web1"],
+        "sme_wan_edge_qos.yaml": ["app1", "web1"],
+        "sme_leaf_spine_dmz_dns.yaml": ["app1", "dns-dmz", "dns-int", "web1"],
+    }
+    for name, services in expected.items():
+        compiler = ScenarioCompiler.from_topology_file(ROOT / "topologies" / name, seed=7)
+        assert compiler.topology.service_nodes() == services, name
+        assert "external1" not in compiler.topology.service_nodes(), name
+
+
+def test_service_faults_land_on_a_service_host_and_only_hit_it():
+    """Every host-configuration fault that used to pick any endpoint now picks a service
+    host, for every seed, with the blast radius of that host alone; the switch faults of
+    the same scenarios are unchanged."""
+    service_methods = {
+        "connectivity.remove_ip.m2", "connectivity.remove_ip.m3",
+        "connectivity.remove_ip.m4", "connectivity.remove_ip.m5",
+        "connectivity.disable_interface.m2", "connectivity.disable_interface.m3",
+        "connectivity.disable_routing.m3", "connectivity.disable_routing.m4",
+        "connectivity.wrong_routing_table.m5",
+    }
+    seen_targets = set()
+    for seed in range(1, 13):
+        suite = _suite(seed=seed, domains={"connectivity"})
+        for instance in suite.select(sorted(service_methods)):
+            bindings = instance.private["bindings"]
+            assert bindings["target"] in {"web1", "app1"}, (seed, instance.instance_id, bindings["target"])
+            assert bindings["affected_nodes"] == [bindings["target"]], (seed, instance.instance_id)
+            selected = instance.private["evaluator"]["selected_method"]
+            assert selected["selector"]["node"] == "service"
+            assert selected["name"].startswith("service_")
+            seen_targets.add(bindings["target"])
+        for instance in suite.select(["connectivity.remove_ip.m1", "connectivity.disable_interface.m1"]):
+            assert instance.private["bindings"]["target"] in {"leaf1", "leaf2"}, (seed, instance.instance_id)
+    assert seen_targets == {"web1", "app1"}
+
+
+def test_the_unchanged_scenarios_still_select_endpoints():
+    """link_impairment and assured_bandwidth keep `node: endpoint`: their binders pick the
+    measured flow's source, which is a client, and were not part of the change."""
+    for path in (ROOT / "qos" / "link_impairment.yaml", ROOT / "qos" / "assured_bandwidth.yaml"):
+        document = yaml.safe_load(path.read_text())
+        assert any(m.get("selector", {}).get("node") == "endpoint" for m in document["methods"]), path.name
+
+
+def test_isolation_requirements_name_real_nodes_and_never_a_required_pair():
+    """The isolated pairs are the other half of the filtering oracle: a pair it
+    cannot ping is a defect, and a pair that is also required would fail every
+    network, repaired or not."""
+    from scenarios.compiler.topology import TopologyIndex
+
+    document = yaml.safe_load(
+        (ROOT / "topologies" / "sme_leaf_firewall_dmz.yaml").read_text(encoding="utf-8")
+    )
+    index = TopologyIndex(document)
+    assert "web1->finance1" in index.isolated_endpoint_pairs()
+    assert not set(index.isolated_endpoint_pairs()) & set(index.required_endpoint_pairs())
+
+    unknown = json.loads(json.dumps(document))
+    unknown["topology"]["isolation_requirements"].append({"source": "web1", "destination": "nowhere1"})
+    with pytest.raises(ValueError, match="unknown pair web1->nowhere1"):
+        TopologyIndex(unknown)
+
+    contradictory = json.loads(json.dumps(document))
+    contradictory["topology"]["isolation_requirements"].append(
+        {"source": "web1", "destination": "user1"}
+    )
+    with pytest.raises(ValueError, match="web1->user1 is also a connectivity requirement"):
+        TopologyIndex(contradictory)

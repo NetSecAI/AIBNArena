@@ -120,3 +120,18 @@ def test_the_false_positive_and_cleanup_overrides_are_only_sent_when_asked_for()
 def test_an_explicit_port_wins_over_the_subject_default():
     assert resolved_port(episode(port=9100), LANGCHAIN) == 9100
     assert resolved_port(episode(), LANGCHAIN) == LANGCHAIN.default_port
+
+
+def test_a_subject_gets_2048_output_tokens_unless_told_otherwise():
+    """The subjects' own 400 cut gpt-4o-mini's replies before their tool call."""
+    from webui.campaign import CampaignRequest, ScenarioSelection, episode as cell_episode, plan
+
+    assert pairs(build_sut_argv(episode(), LANGCHAIN, SMOKE))["--max-tokens"] == "2048"
+    assert pairs(build_sut_argv(episode(max_tokens=600), LANGCHAIN, SMOKE))["--max-tokens"] == "600"
+    # A recorded request that stated null keeps the subject's own default.
+    assert "--max-tokens" not in build_sut_argv(episode(max_tokens=None), LANGCHAIN, SMOKE)
+    campaign = CampaignRequest(
+        name="tokens", architectures=["langchain_agent"], models=["openai/gpt-4o-mini"],
+        scenarios=[ScenarioSelection(experiment="connectivity-smoke", scenario_id="connectivity.disable_interface.m1")],
+        execution_budget_seconds=400)
+    assert cell_episode(campaign, plan(campaign)[0]).max_tokens == 2048

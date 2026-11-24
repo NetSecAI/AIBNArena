@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Collection
 
+from benchmarks.core.reporting import repair_without_change_of
 from webui.config import REPOSITORY
 
 
@@ -43,6 +44,9 @@ def verdict_from_result(payload: dict[str, Any]) -> dict[str, Any]:
         "benchmark_success": metrics.get("success"),
         "environment_success": metrics.get("environment_success"),
         "converged": metrics.get("converged"),
+        # Audit beside the verdict: the repair oracle passed on a lab the subject
+        # left unchanged (`metrics.repair_without_change`, derived for older records).
+        "repair_without_change": repair_without_change_of(payload),
         "lifecycle_status": str(payload.get("status", "unknown")).upper(),
         "sut_status": str(sut_result.get("status", "unknown")).upper(),
         "sut_verified": sut_result.get("verified"),
@@ -82,9 +86,21 @@ def provenance_mismatch(verdict: dict[str, Any], model: str) -> str | None:
     if reported is not None and reported != model:
         mismatches.append(f"sut_reported_model: expected {model!r}, recorded {reported!r}")
     provider = verdict.get("provider_reported_model")
-    if provider is not None and provider != model:
+    if provider is not None and not _provider_names(provider, model):
         mismatches.append(f"provider_reported_model: expected {model!r}, recorded {provider!r}")
     return "; ".join(mismatches) or None
+
+
+def _provider_names(provider: str, model: str) -> bool:
+    """Whether the provider's own name for the model is the model configured.
+
+    LiteLLM routes a model by a provider prefix the provider never names: configured
+    `openai/gpt-5.4-mini`, OpenAI answers `gpt-5.4-mini`. A subject that records the
+    provider's answer as it came (`response.model`) would otherwise stop a campaign on
+    its first cell over that prefix alone. The name without the prefix is the same
+    model; any other name is still another model.
+    """
+    return provider == model or ("/" in model and provider == model.split("/", 1)[1])
 
 
 def collect(

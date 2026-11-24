@@ -44,6 +44,18 @@ def test_a_provider_serving_another_model_is_named():
     assert "provider_reported_model" in mismatch
 
 
+def test_a_provider_naming_the_model_without_its_litellm_prefix_names_the_same_model():
+    """OpenAI answers `gpt-4o-mini` for `openai/gpt-4o-mini`: the prefix is LiteLLM's route."""
+    assert provenance_mismatch(agreeing(provider_reported_model="gpt-4o-mini"), MODEL) is None
+
+
+def test_another_model_without_a_prefix_is_still_another_model():
+    mismatch = provenance_mismatch(agreeing(provider_reported_model="gpt-5.4-mini"), MODEL)
+    assert mismatch is not None and "provider_reported_model" in mismatch
+    # Only the provider's answer drops the route: the subject's own word keeps it.
+    assert provenance_mismatch(agreeing(sut_reported_model="gpt-4o-mini"), MODEL) is not None
+
+
 def test_every_disagreement_is_reported_not_just_the_first():
     mismatch = provenance_mismatch(
         agreeing(configured_model="one", sut_reported_model="two"), MODEL)

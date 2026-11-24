@@ -50,6 +50,16 @@ def test_the_judge_is_named_with_its_endpoint_and_its_key_stays_off_the_command_
     assert build_benchmark_env(JUDGE) == {"IBN_DIAGNOSIS_JUDGE_API_KEY": "secret"}
 
 
+def test_the_judge_is_named_as_its_endpoint_receives_the_model():
+    """An OpenAI endpoint stores `openai/gpt-4o-mini`, as litellm takes it; OpenAI itself knows
+    `gpt-4o-mini` and refused the other as an invalid model ID."""
+    openai = Endpoint(id="openai", name="OpenAI", api_base="https://api.openai.com/v1",
+                      models=("openai/gpt-4o-mini",), api_key="sk-test", provider="openai")
+    values = pairs(judge_argv(episode(diagnosis_judge_model="openai/gpt-4o-mini"), openai))
+    assert values["--diagnosis-judge-model"] == "gpt-4o-mini"
+    assert values["--diagnosis-judge-api-base"] == "https://api.openai.com/v1"
+
+
 def test_no_judge_means_no_judge_flags_and_no_key():
     argv = judge_argv(episode(), None)
     assert "--diagnosis-judge-model" not in argv
@@ -119,10 +129,12 @@ def test_validating_with_an_unregistered_judge_is_refused_before_anything_starts
         "architecture": "langchain_agent", "experiment": "connectivity-smoke",
         "scenario_id": "connectivity.disable_interface.m1", "model": "openai/gpt-4o-mini",
         "seed": 9, "execution_budget_seconds": 400, "diagnosis_judge_model": "ministral-3-8b-instruct",
+        # The endpoint is resolved here, not reached: nothing listens on 18002 (test_judge_check.py).
+        "check_diagnosis_judge": False,
     })
     assert response.status_code == 200, response.text
     assert response.json()["diagnosis_judge"] == {
-        "model": "ministral-3-8b-instruct", "api_base": "http://127.0.0.1:18002/v1"}
+        "model": "ministral-3-8b-instruct", "api_base": "http://127.0.0.1:18002/v1", "check": None}
 
 
 def test_the_reading_is_passed_on_and_defaults_to_the_exact_one():

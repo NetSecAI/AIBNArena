@@ -34,6 +34,11 @@
       "required": [
         "task_mode"
       ]
+    },
+    {
+      "required": [
+        "combination"
+      ]
     }
   ],
   "properties": {
@@ -127,6 +132,46 @@
     "extra_info": {
       "type": "object"
     },
+    "combination": {
+      "description": "A combined scenario: the scenarios whose faults are injected together, each pinned at the version it was combined at. Each method then names one method id per component, in component order. Written by scenarios/generator/combine_scenarios.py.",
+      "type": "object",
+      "required": ["components", "blast_radius"],
+      "properties": {
+        "components": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["source", "scenario", "version"],
+            "properties": {
+              "source": {"type": "string", "pattern": "^[a-z0-9_]+/[a-z0-9_]+\\.yaml$"},
+              "scenario": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+              "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "blast_radius": {"const": "disjoint"},
+        "generator": {"type": "object"},
+        "withdrawn": {
+          "description": "Method tuples taken out of the file after a check refused them. A withdrawn tuple is never proposed again, and its id is never given to another tuple.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "components", "reason"],
+            "properties": {
+              "id": {"type": "integer", "minimum": 1},
+              "name": {"type": "string"},
+              "components": {"type": "array", "minItems": 2, "maxItems": 4, "items": {"type": "integer", "minimum": 1}},
+              "reason": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "methods": {
       "type": "array",
       "minItems": 1,
@@ -134,11 +179,20 @@
         "type": "object",
         "required": [
           "id",
-          "name",
-          "selector",
-          "operation"
+          "name"
+        ],
+        "oneOf": [
+          {"required": ["selector", "operation"], "not": {"required": ["components"]}},
+          {"required": ["components"], "not": {"anyOf": [{"required": ["selector"]}, {"required": ["operation"]}]}}
         ],
         "properties": {
+          "components": {
+            "description": "Combined scenario only: one method id per component of the combination, in component order.",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": {"type": "integer", "minimum": 1}
+          },
           "id": {
             "type": "integer",
             "minimum": 1
@@ -161,6 +215,7 @@
                   "dns_server",
                   "dhcp_server",
                   "endpoint",
+                  "service",
                   "wan_edge",
                   "zone_enforcer"
                 ]
@@ -224,7 +279,7 @@
       "type": "object",
       "required": ["path", "version"],
       "properties": {
-        "path": {"type": "string", "pattern": "^scenarios/oracles/(connectivity|dhcp_dns|filtering|qos|security)/([a-z0-9-]+/)?[a-z0-9-]+-v[0-9]+\\.yaml$"},
+        "path": {"type": "string", "pattern": "^scenarios/oracles/(connectivity|dhcp_dns|filtering|qos|security|vlan|combined)/([a-z0-9-]+/)?[a-z0-9-]+-v[0-9]+\\.yaml$"},
         "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
       },
       "additionalProperties": false

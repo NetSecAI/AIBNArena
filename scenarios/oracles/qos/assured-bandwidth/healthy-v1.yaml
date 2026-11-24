@@ -1,6 +1,6 @@
 schema_version: "1.0"
 oracle_id: qos.assured_bandwidth.healthy
-version: 1.0.0
+version: 1.1.0
 description: >-
   The competing flow is this family's own fault, so the oracle neither starts one
   nor stops the one that is there. The pre-fault measurement therefore lands on an
@@ -11,6 +11,11 @@ description: >-
   rather than all of it: this only has to tell a policy that works from one that was
   already degraded, and the measurement taken here is the reference the repair bar is
   later capped by, so demanding the full contract of it would beg the question.
+
+    The circuit is capped here too, before any fault: what leaves the shaped
+  interface during the sample must stay within the link rate. The repair is held
+  to the same cap, so checking it on the reference first makes an instrument that
+  over-reads fail the episode here rather than fail a correct repair later.
 domain: qos
 phase: healthy
 probes:
@@ -26,16 +31,23 @@ probes:
       destination_ip: "${bindings.destination_ip}"
       assured_bandwidth_mbps: "${bindings.assured_bandwidth_mbps}"
       measurement_port: "${bindings.measurement_port}"
+      link_mbps: "${bindings.link_mbps}"
+      wan_edge: "${bindings.wan_edge}"
+      shaped_interface: "${bindings.shaped_interface}"
       seconds: 10
       contended: false
     attempts: 1
     timeout_seconds: 60
-    metrics: [success, throughput_mbps, timed_out]
+    metrics: [success, throughput_mbps, circuit_egress_mbps, timed_out]
     thresholds:
       - metric: throughput_mbps
         operator: gte
         value: "${bindings.assured_bandwidth_mbps}"
         factor: 0.5
+      - metric: circuit_egress_mbps
+        operator: lte
+        value: "${bindings.link_mbps}"
+        factor: 1.2
     aggregation: {method: mean}
     success: {mode: all}
 success: {mode: all}

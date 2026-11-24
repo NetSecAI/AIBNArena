@@ -45,3 +45,21 @@ function followEndpoints(current, render) {
     if (event.persisted) reload();
   });
 }
+
+// How a declared model is asked to think, in a few words, for every page that names
+// one: "thinking on · medium", "thinking off", or the model's own default when its
+// declaration says nothing. Thinking is chosen on the Models page and nowhere else.
+function thinkingOf(endpoint, model) {
+  return ((endpoint && endpoint.thinking) || {})[model] || {};
+}
+
+function describeThinking(settings) {
+  const declared = settings || {};
+  if (declared.enable_thinking === undefined || declared.enable_thinking === null) {
+    return "thinking: model default";
+  }
+  const parts = [declared.enable_thinking ? "thinking on" : "thinking off"];
+  if (declared.enable_thinking && declared.thinking_effort) parts.push(declared.thinking_effort);
+  if (declared.thinking_style && declared.thinking_style !== "auto") parts.push(declared.thinking_style);
+  return parts.join(" · ");
+}

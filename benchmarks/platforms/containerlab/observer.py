@@ -16,7 +16,7 @@ _RESOLVED_IP_RE = re.compile(r"PING\s+\S+\s+\((?P<ip>[0-9]+(?:\.[0-9]+){3})\)")
 
 
 class ContainerLabObserver:
-    """Collects observations from Linux clients, SR Linux, and VyOS nodes."""
+    """Collects observations from Linux clients, SR Linux, VyOS and Arista EOS nodes."""
 
     def __init__(self, executor: ContainerLabExecutor, lab_name: str, nodes: dict[str, LabNode]):
         self.executor = executor
@@ -86,6 +86,9 @@ class ContainerLabObserver:
             elif node.kind == "vyos":
                 result = self.executor.run_vyos_op(node, "show interfaces")
                 raw[f"{node.name}:show_interfaces"] = result.stdout or result.stderr
+            elif node.kind == "arista_ceos":
+                result = self.executor.run_eos_cli(node, "show version")
+                raw[f"{node.name}:show_version"] = result.stdout or result.stderr
         return raw
 
     @staticmethod

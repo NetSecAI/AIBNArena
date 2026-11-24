@@ -116,6 +116,17 @@ topology:
     - {source: guest1, destination: web1, bidirectional: true}
     - {source: finance1, destination: app1, bidirectional: true}
     - {source: external1, destination: web1, bidirectional: true}
+  # What the policy is there to stop, so a repair that widened it shows up. Each
+  # pair is one the sme01-fw README measured as BLOCKED on the healthy lab, and
+  # the healthy oracle pings them again before the fault. One direction only:
+  # the reverse of several is a permitted flow (user1 -> external1 is allowed).
+  isolation_requirements:
+    - {source: guest1, destination: finance1}    # fw-int, GUEST -> FINANCE has no ruleset
+    - {source: user1, destination: finance1}     # fw-int, USERS -> FINANCE has no ruleset
+    - {source: guest1, destination: user1}       # fw-int, GUEST -> USERS has no ruleset
+    - {source: external1, destination: user1}    # fw-ext, OUTSIDE -> INTERNAL is replies only
+    - {source: external1, destination: finance1} # fw-ext, OUTSIDE -> INTERNAL is replies only
+    - {source: web1, destination: finance1}      # fw-ext, DMZ-TO-INTERNAL lets web1 ping user1 and guest1 only
   optional_nodes:
     attacker1:
       kind: linux

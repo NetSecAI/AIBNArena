@@ -25,6 +25,9 @@ import pytest
 REPO = Path(__file__).resolve().parents[4]
 TESTBEDS = REPO / "benchmarks/testbeds/containerlab"
 GENERATED = [
+    ("campus_large", ("healthy.json", "healthy_greenfield.json")),
+    ("campus_medium", ("healthy.json", "healthy_greenfield.json")),
+    ("campus_small", ("healthy.json", "healthy_greenfield.json")),
     ("sme01-fw", ("healthy.json",)),
     ("sme01-dns", ("healthy.json",)),
     ("sme01-vlan", ("healthy.json",)),

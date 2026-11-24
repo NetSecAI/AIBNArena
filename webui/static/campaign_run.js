@@ -75,8 +75,16 @@ function verdictCell(cell) {
       textContent: found ? "root cause found" : "root cause missed",
     }));
   }
+  // The repair oracle passed on a lab the agent left unchanged: whatever the cell
+  // says, nothing was repaired. Shown in words, like the diagnosis beside it.
+  if (verdict.repair_without_change === true) {
+    holder.append(" ", Object.assign(document.createElement("span"), {
+      className: "value-false",
+      textContent: "repair passed with no change",
+    }));
+  }
   holder.title = ["benchmark_success", "environment_success", "converged", "sut_status", "sut_verified",
-    "root_cause_identified", "diagnosis_score", "diagnosis_judge"]
+    "repair_without_change", "root_cause_identified", "diagnosis_score", "diagnosis_judge"]
     .filter((field) => verdict[field] !== undefined && verdict[field] !== null)
     .map((field) => `${field}: ${verdict[field]}`)
     .join("\n");

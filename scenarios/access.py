@@ -121,7 +121,7 @@ def build_sut_request(
     observation: dict[str, Any] | None,
     success_criteria: dict[str, Any] | None = None,
     execution_budget: dict[str, Any] | None = None,
-    ani: dict[str, Any] | None = None,
+    tools: list[str] | None = None,
     question: str | None = None,
 ) -> dict[str, Any]:
     """Build the SUT envelope from a strict allowlist of public fields."""
@@ -140,8 +140,8 @@ def build_sut_request(
         payload["success_criteria"] = copy.deepcopy(success_criteria)
     if execution_budget is not None:
         payload["execution_budget"] = copy.deepcopy(execution_budget)
-    if ani is not None:
-        payload["ani"] = copy.deepcopy(ani)
+    if tools is not None:
+        payload["tools"] = list(tools)
     if question is not None:
         payload["question"] = question
     assert_no_private_fields(payload)

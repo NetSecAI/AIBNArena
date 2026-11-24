@@ -17,13 +17,15 @@ from .a2a_app import (
     format_result_for_log,
     format_self_execute_report,
 )
-from .agent_config import ModelAgentConfig, optional_bool, optional_int, resolve_endpoint
+from .agent_config import (ModelAgentConfig, optional_bool, optional_int, parse_max_tokens, request_max_tokens,
+                           resolve_endpoint)
 from .thinking import ThinkingUnsupported, thinking_record
 from .prompt_variants import (
     DEFAULT_VARIANT,
     available_variants,
     load_prompt,
     resolve_system_prompt,
+    with_prompt_section,
 )
 from .ani_report import ANI_VERSION, SELF_EXECUTE_MODE
 from .litellm_backend import LiteLLMModelCaller, litellm_model_name
@@ -53,6 +55,7 @@ __all__ = [
     "load_prompt",
     "ThinkingUnsupported",
     "resolve_system_prompt",
+    "with_prompt_section",
     "thinking_record",
     "SELF_EXECUTE_MODE",
     "SelfExecuteAgentExecutor",
@@ -70,6 +73,8 @@ __all__ = [
     "load_task",
     "optional_bool",
     "optional_int",
+    "parse_max_tokens",
+    "request_max_tokens",
     "resolve_endpoint",
     "run_self_execute",
 ]

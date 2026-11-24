@@ -21,12 +21,19 @@ CHAT_TEMPLATE = "chat_template"
 REASONING_EFFORT = "reasoning_effort"
 SYSTEM_PROMPT = "system_prompt"
 NO_SWITCH = "no_switch"
+#: A model that does not reason at all: asking it to is refused, asking it not to
+#: sends nothing, since that is the only mode it has.
+NO_REASONING = "no_reasoning"
 AUTO = "auto"
 
 #: Model family -> how thinking is requested. Matched against the model name with
 #: the provider prefix stripped, first match wins, so the order is the specific
 #: before the general.
 FAMILY_MECHANISMS: tuple[tuple[str, str], ...] = (
+    # OpenAI's GPT-4 and GPT-3.5 generations do not reason (gpt-4o, gpt-4o-mini, gpt-4.1):
+    # before 2026-11-18 they fell under `gpt-\d` below, so a run asking gpt-4o-mini to
+    # think was started and sent a reasoning_effort it has no use for.
+    (r"(?<![a-z0-9])gpt-(?:3\.5|4)(?![0-9])", NO_REASONING),
     # Qwen3 exposes it in its chat template; vLLM forwards chat_template_kwargs.
     (r"qwen", CHAT_TEMPLATE),
     # Hosted reasoning models take an effort level, which LiteLLM translates into
@@ -45,7 +52,26 @@ FAMILY_MECHANISMS: tuple[tuple[str, str], ...] = (
 #: Effort asked for when thinking is on and the run names no level. Deliberately
 #: the provider-neutral middle: a run that cares states its own.
 DEFAULT_EFFORT = "medium"
-EFFORT_LEVELS = ("minimal", "low", "medium", "high")
+#: Every effort level any family below takes, lowest first.
+EFFORT_LEVELS = ("none", "minimal", "low", "medium", "high", "xhigh")
+
+#: The levels a reasoning-effort family takes, and the one that stands for thinking
+#: off (None when the family has none: it always reasons). Matched like
+#: FAMILY_MECHANISMS, specific first. Only what a model page states is listed
+#: (checked 2026-11-18): GPT-5, GPT-5 mini and nano take minimal to high; GPT-5.2 and
+#: GPT-5.4 take none to xhigh, without minimal; the o-series low to high. The other
+#: GPT-5.x get the levels every documented one takes, and no "off": which word turns
+#: their reasoning off is not documented for each, and sending the wrong one fails
+#: the first call of the run.
+EFFORT_FAMILIES: tuple[tuple[str, tuple[str, ...], str | None], ...] = (
+    (r"gpt-5\.[24](?![0-9])", ("none", "low", "medium", "high", "xhigh"), "none"),
+    (r"gpt-5(?![.0-9])", ("minimal", "low", "medium", "high"), "minimal"),
+    (r"gpt-5\.[0-9]", ("low", "medium", "high"), None),
+    (r"^o[0-9]", ("low", "medium", "high"), None),
+)
+#: The other effort families (Claude, Gemini through LiteLLM), and a model whose run
+#: names the reasoning_effort style itself: the levels they took before the table.
+DEFAULT_EFFORT_FAMILY: tuple[tuple[str, ...], str | None] = (("minimal", "low", "medium", "high"), "minimal")
 
 
 class ThinkingUnsupported(ValueError):
@@ -78,6 +104,15 @@ def family_mechanism(model: str) -> str | None:
     return None
 
 
+def effort_family(model: str) -> tuple[tuple[str, ...], str | None]:
+    """The effort levels this model takes, and its level for thinking off (or None)."""
+    name = str(model).rsplit("/", 1)[-1].lower()
+    for pattern, levels, off in EFFORT_FAMILIES:
+        if re.search(pattern, name):
+            return levels, off
+    return DEFAULT_EFFORT_FAMILY
+
+
 def resolve_thinking(
     model: str,
     enable_thinking: bool | None,
@@ -103,6 +138,16 @@ def resolve_thinking(
                 f"no reasoning mechanism is known for model {model!r}; set thinking_style "
                 f"explicitly to one of {CHAT_TEMPLATE!r}, {REASONING_EFFORT!r}, {SYSTEM_PROMPT!r}")
 
+    if mechanism == NO_REASONING:
+        if enable_thinking:
+            raise ThinkingUnsupported(
+                f"model {model!r} does not reason: it has no thinking to turn on. Run a "
+                "reasoning model (gpt-5-mini, say) or leave thinking unset")
+        if effort:
+            raise ThinkingUnsupported(
+                f"model {model!r} does not reason, so it takes no thinking_effort")
+        return ThinkingPlan(mechanism=NO_REASONING)
+
     if mechanism == NO_SWITCH:
         raise ThinkingUnsupported(
             f"model {model!r} has no reasoning switch: its family ships reasoning as a "
@@ -119,16 +164,25 @@ def resolve_thinking(
         )
 
     if mechanism == REASONING_EFFORT:
+        levels, off = effort_family(model)
         if not enable_thinking:
-            # "minimal" is the lowest the shared vocabulary has; there is no level that
-            # turns a reasoning model into a non-reasoning one, and pretending otherwise
-            # would record a condition that did not hold.
-            level = "minimal"
+            # The family's own word for off: "none" where it exists, else "minimal", the
+            # lowest it takes -- no level turns those into non-reasoning models, and
+            # pretending otherwise would record a condition that did not hold. A family
+            # with neither always reasons, and is refused rather than sent a guess.
+            if off is None:
+                raise ThinkingUnsupported(
+                    f"model {model!r} has no documented level that turns its reasoning off; "
+                    f"leave thinking unset, or turn it on with one of {list(levels)}")
+            level = off
         else:
             level = (effort or DEFAULT_EFFORT).lower()
         if level not in EFFORT_LEVELS:
             raise ThinkingUnsupported(
                 f"unknown thinking_effort {level!r}; use one of {list(EFFORT_LEVELS)}")
+        if level not in levels:
+            raise ThinkingUnsupported(
+                f"model {model!r} takes thinking_effort {list(levels)}, not {level!r}")
         return ThinkingPlan(mechanism=REASONING_EFFORT, request_kwargs={"reasoning_effort": level})
 
     if mechanism == SYSTEM_PROMPT:

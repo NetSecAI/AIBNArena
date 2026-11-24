@@ -1,24 +1,28 @@
-# Core dependencies for ibn-agentic-ai-eval.
-# Keep this file focused on the local ContainerLab/A2A evaluation pipeline.
+# AIBNArena: the test bench, the LangChain subjects, the web interface and the tests.
 
-# Official A2A SDK used by the shared benchmark client and all SUT servers.
+# A2A: the benchmark's client and every subject's server.
 a2a-sdk[http-server]>=1.1.2,<2.0.0
-
-# HTTP transport used by the official SDK client.
 httpx>=0.28.1
-
-# ASGI server for local A2A SUTs.
 uvicorn[standard]>=0.40.0
 
-# Structured application logging.
-loguru>=0.7.3
-
-# Provider-agnostic LLM calls used by the retained ANI SUTs.
+# The LangChain subjects and their model calls.
 litellm>=1.80.0
 langchain>=1.0,<2.0
 langchain-litellm>=0.4,<1.0
 python-dotenv>=1.2.0
+loguru>=0.7.3
+# The RAG subject's embedding retrieval (--rag-embedding-model). Reading a PDF
+# corpus also needs pypdf, left out: the shipped corpus has none.
+numpy>=1.26
 
-# Generic scenario catalog, abstract topologies, and runtime profiles.
+# Scenarios, topologies and result schemas.
 PyYAML>=6.0,<7.0
 jsonschema>=4.0,<5.0
+
+# The web interface (webui/).
+fastapi>=0.115
+jinja2>=3.1
+psutil>=5.9
+
+# The tests.
+pytest>=8.0

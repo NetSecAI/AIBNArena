@@ -106,3 +106,50 @@ def test_the_directive_goes_in_front_only_on_the_prompt_route() -> None:
     chat_template = resolve_thinking("openai/qwen3-8b-think", True)
     assert apply_directive("Repair the lab.", chat_template, "Think first.") == "Repair the lab.", \
         "the chat-template route carries thinking in the request, never in the prompt"
+
+
+# --- families that do not reason, and the levels each reasoning family takes -----------
+
+from sut.common.thinking import NO_REASONING, effort_family  # noqa: E402
+
+
+@pytest.mark.parametrize("model", [
+    "openai/gpt-4o-mini", "gpt-4o", "openai/gpt-4.1-mini", "gpt-4", "gpt-3.5-turbo", "fr-gpt-4o"])
+def test_the_gpt_4_and_3_5_generations_do_not_reason(model: str) -> None:
+    """gpt-4o-mini fell under `gpt-\\d` and was sent a reasoning_effort before 2026-11-18."""
+    assert family_mechanism(model) == NO_REASONING
+    with pytest.raises(ThinkingUnsupported, match="does not reason"):
+        resolve_thinking(model, True)
+    with pytest.raises(ThinkingUnsupported, match="takes no thinking_effort"):
+        resolve_thinking(model, False, effort="low")
+    # Off is the only mode it has: accepted, and nothing is sent.
+    plan = resolve_thinking(model, False)
+    assert plan.mechanism == NO_REASONING and plan.request_kwargs == {}
+
+
+@pytest.mark.parametrize("model", ["openai/gpt-5-mini", "gpt-5", "gpt-5-nano", "openai/gpt-5.4-mini", "o4-mini"])
+def test_the_gpt_5_and_o_series_still_reason(model: str) -> None:
+    assert family_mechanism(model) == REASONING_EFFORT
+
+
+def test_each_family_takes_its_own_levels() -> None:
+    # GPT-5, GPT-5 mini and nano: minimal to high; off is minimal.
+    assert effort_family("openai/gpt-5-mini") == (("minimal", "low", "medium", "high"), "minimal")
+    assert resolve_thinking("openai/gpt-5-mini", False).request_kwargs == {"reasoning_effort": "minimal"}
+    with pytest.raises(ThinkingUnsupported, match="not 'xhigh'"):
+        resolve_thinking("openai/gpt-5-mini", True, effort="xhigh")
+    # GPT-5.2 and GPT-5.4: none to xhigh, no minimal; off is none.
+    for model in ("openai/gpt-5.4-mini", "gpt-5.2", "openai/gpt-5.4"):
+        assert resolve_thinking(model, False).request_kwargs == {"reasoning_effort": "none"}
+        assert resolve_thinking(model, True, effort="xhigh").request_kwargs == {"reasoning_effort": "xhigh"}
+        with pytest.raises(ThinkingUnsupported, match="not 'minimal'"):
+            resolve_thinking(model, True, effort="minimal")
+
+
+def test_a_family_with_no_documented_off_level_is_not_sent_a_guess() -> None:
+    for model in ("gpt-5.6-sol", "o4-mini", "o3"):
+        assert resolve_thinking(model, True, effort="high").request_kwargs == {"reasoning_effort": "high"}
+        with pytest.raises(ThinkingUnsupported, match="no documented level that turns its reasoning off"):
+            resolve_thinking(model, False)
+    with pytest.raises(ThinkingUnsupported, match="not 'xhigh'"):
+        resolve_thinking("o4-mini", True, effort="xhigh")

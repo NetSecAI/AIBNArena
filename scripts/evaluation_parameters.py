@@ -58,6 +58,9 @@ VALIDATE_OPERATIONS = ("execute_validation",)
 #: reader sees the absence of the capability rather than an agent that never used it.
 SEARCH_OPERATIONS: tuple[str, ...] = ()
 WAIT_OPERATIONS: tuple[str, ...] = ()
+#: The agent's own end of the episode (ANI v0.4). Not an action on the network: it is
+#: left out of the action counts and the histogram.
+SUBMIT_OPERATIONS = ("submit_result",)
 
 BUCKET_ORDER = ("search", "check_config", "apply_config", "wait", "validate", "unknown")
 
@@ -69,7 +72,11 @@ BUDGET_CAUSES = frozenset({"budget", "completion_rejected_until_budget"})
 
 def action_bucket(operation: str) -> str:
     """Which of the six kinds of action this operation is, by name alone: a refused
-    write is still the agent trying to configure the network."""
+    write is still the agent trying to configure the network. `submit_result` is
+    `submit`, a bucket of its own outside BUCKET_ORDER: it ends the episode and is
+    counted as no action."""
+    if operation in SUBMIT_OPERATIONS:
+        return "submit"
     if operation in CONFIG_WRITES:
         return "apply_config"
     if operation in VALIDATE_OPERATIONS:
@@ -394,6 +401,8 @@ def episode_facts(document: Mapping[str, Any]) -> EpisodeFacts:
     seen: set[str] = set()
     for item in operations or []:
         if not isinstance(item, Mapping) or not is_model_action(item):
+            continue
+        if action_bucket(str(item.get("operation", ""))) == "submit":
             continue
         facts.actions += 1
         facts.accepted += int(call_accepted(item))

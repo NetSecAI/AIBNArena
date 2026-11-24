@@ -8,6 +8,7 @@ from .types import CommandResult, LabNode
 _BATCH_RUNNERS = {
     "srl_cli": ContainerLabExecutor.run_srl_cli_batch,
     "vyos_cli": ContainerLabExecutor.run_vyos_cli_batch,
+    "eos_cli": ContainerLabExecutor.run_eos_cli_batch,
 }
 
 

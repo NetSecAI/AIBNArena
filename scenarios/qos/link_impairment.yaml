@@ -1,9 +1,9 @@
 schema_version: "0.1"
-version: "1.0.0"
+version: "1.1.0"
 oracles:
   healthy: {path: scenarios/oracles/qos/healthy-v1.yaml, version: "1.0.0"}
-  expected_degradation: {path: scenarios/oracles/qos/expected-degradation-v1.yaml, version: "1.0.0"}
-  repair: {path: scenarios/oracles/qos/repair-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/qos/expected-degradation-v1.yaml, version: "1.1.0"}
+  repair: {path: scenarios/oracles/qos/repair-v1.yaml, version: "1.1.0"}
   preservation: {path: scenarios/oracles/qos/preservation-v1.yaml, version: "1.0.0"}
 scenario: link_impairment
 task:
@@ -25,6 +25,9 @@ success_criteria:
       source: "{{target}}"
       destination: "{{destination}}"
       destination_ip: "{{destination_ip}}"
+      # As many pings as the repair oracle sends. Three let a lab still losing
+      # 31 % of its packets through a third of the time (E16 m2).
+      count: 30
       max_packet_loss_percent: 0
       max_rtt_avg_ms: 10
 methods:

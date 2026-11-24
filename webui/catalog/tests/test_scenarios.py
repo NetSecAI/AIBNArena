@@ -28,7 +28,7 @@ def test_every_offered_scenario_is_declared_applicable_to_its_experiment_topolog
     for experiment in presets():
         for scenario in for_experiment(experiment.domain, experiment.topology):
             declared = APPLICABILITY["scenarios"].get(
-                f"{scenario.domain}/{Path(scenario.path).name}")
+                str(Path(scenario.path).relative_to("scenarios")))
             if declared is None:
                 continue
             assert experiment.topology in declared["topologies"], (

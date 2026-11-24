@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
@@ -354,3 +356,87 @@ def test_the_already_in_state_reading_is_narrow() -> None:
     assert not f("ip address del 10.0.0.1/24 dev eth1", 'Cannot find device "eth1"')
     assert not f("ip link set eth1 down", "RTNETLINK answers: File exists")
     assert not f("tc qdisc del dev eth1 root", "RTNETLINK answers: No such file or directory")
+
+
+def test_deploy_waits_long_enough_for_a_lab_of_eleven_ceos_switches() -> None:
+    """campus_large deployed in 331-335 s on its own host (2026-10-26/27): the 300 s the
+    deploy used to be allowed made the Judge's `deploy_or_reset` fail on it."""
+    executor, runner = _executor()
+    executor.deploy()
+    (call,) = runner.calls
+    assert call["args"][:2] == ["containerlab", "deploy"]
+    assert call["timeout_seconds"] >= 600
+
+
+# A stand-in for vyos.configsession whose commit does what vyos-configd does with a commit
+# script's messages (services/vyos-configd in the pinned 1.5 image): reopen the path
+# /proc/<session id>/fd/1 links to, else append to a log file nobody reads.
+_FAKE_CONFIGSESSION = r'''
+import os
+
+
+class ConfigSessionError(Exception):
+    pass
+
+
+class ConfigSession:
+    def __init__(self, session_id, app=None):
+        self.session_id = str(session_id)
+
+    def set(self, path):
+        pass
+
+    def delete(self, path):
+        pass
+
+    def discard(self):
+        pass
+
+    def commit(self):
+        try:
+            session_out, mode = os.readlink(f"/proc/{self.session_id}/fd/1"), "w"
+        except FileNotFoundError:
+            session_out, mode = "vyos-configd-script-stdout", "a"
+        with open(session_out, mode) as stream:
+            stream.write("\n" + os.environ["FAKE_MESSAGE"] + "\n\n")
+        if os.environ.get("FAKE_REFUSE"):
+            raise ConfigSessionError("[[service dhcp-server]] failed\nCommit failed\n\n")
+        return ""
+'''
+
+
+def _run_driver(tmp_path: Path, *, refuse: bool) -> subprocess.CompletedProcess:
+    package = tmp_path / "lib" / "vyos"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("")
+    (package / "configsession.py").write_text(_FAKE_CONFIGSESSION)
+    env = {"PATH": "/usr/bin:/bin", "PYTHONPATH": str(tmp_path / "lib"),
+           "FAKE_MESSAGE": "No DHCP address range or active static-mapping configured"}
+    if refuse:
+        env["FAKE_REFUSE"] = "1"
+    return subprocess.run(
+        [sys.executable, "-c", VYOS_CONFIG_SESSION_DRIVER],
+        input=json.dumps([["delete", "service", "dhcp-server", "shared-network-name", "N"]]),
+        capture_output=True, text=True, cwd=tmp_path, env=env, timeout=60)
+
+
+@pytest.mark.skipif(not Path("/proc/self/fd/1").exists(), reason="needs procfs")
+def test_a_refused_commit_carries_the_reason_vyos_configd_wrote(tmp_path) -> None:
+    """E20 dhcp_provisioning m2: VyOS refused a reservation delete because the subnet would
+    keep no range and no static mapping, and the subject read only `[[service dhcp-server]]
+    failed`. The reason went to configd's log file, the session not being named by a process."""
+    completed = _run_driver(tmp_path, refuse=True)
+    assert completed.returncode == 1
+    assert "No DHCP address range or active static-mapping configured" in completed.stderr, \
+        completed.stderr
+    assert "[[service dhcp-server]] failed" in completed.stderr
+    assert VYOS_DISCARD_CONFIRMED in completed.stderr
+    assert not (tmp_path / "vyos-configd-script-stdout").exists()
+
+
+@pytest.mark.skipif(not Path("/proc/self/fd/1").exists(), reason="needs procfs")
+def test_a_commit_keeps_what_vyos_configd_wrote_on_stdout(tmp_path) -> None:
+    completed = _run_driver(tmp_path, refuse=False)
+    assert completed.returncode == 0
+    assert "__ANI_VYOS_COMMIT_CONFIRMED__" in completed.stderr
+    assert "No DHCP address range" in completed.stdout, completed.stdout

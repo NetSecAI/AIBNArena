@@ -28,6 +28,7 @@ from benchmarks.platforms.containerlab import ANIRequestError
 from .ani_report import (
     ANI_VERSION,
     SELF_EXECUTE_MODE,
+    SUBMISSION_OPERATION,
     device_changes_from_ani_result,
     ani_category,
     objective_from_validation,
@@ -39,14 +40,20 @@ from .ani_report import (
 from .messages import (
     DIAGNOSIS_REQUEST,
     ModelActionError,
+    REASONING_TURNS_SENT_BACK,
+    assistant_message,
     assistant_tool_message,
+    keep_recent_reasoning,
     message_content,
+    message_reasoning,
     message_to_dict,
+    no_action_nudge,
     parse_answer,
     parse_diagnosis,
     parse_final_response,
     tool_call_parts,
     tool_calls,
+    unparsed_tool_call,
 )
 from .trace import Tracer
 
@@ -58,6 +65,12 @@ ModelCaller = Callable[[list[dict[str, Any]], float], Any]
 #: fault in a minute has its silence recorded, not the episode voided.
 DIAGNOSIS_SECONDS = 60.0
 
+#: What the report names as the origin of the rollback a subject tool performs on
+#: itself when its own write was half-applied. The model never selects this call; it
+#: carries `source` so a reader of the record can separate what the agent did from what
+#: the tool did on its behalf.
+APPLY_COMPENSATION_SOURCE = "apply_compensation_rollback"
+
 # A public success check describes one observed device state, not the rest of the
 # episode.  Any later operation which can change that state consumes the check: the
 # model must validate again before it may claim completion.
@@ -66,6 +79,25 @@ NETWORK_MUTATION_OPERATIONS = frozenset({
     "update_object",
     "rollback_config",
 })
+
+
+def can_have_changed_the_network(operation: str, arguments: Any, result: Any) -> bool:
+    """Whether a call may have changed the network, so that a public validation run before
+    it no longer describes the network after it.
+
+    Any write a tool received may have, whether applied, refused or indeterminate: a partial
+    or indeterminate writer failure is precisely when an older passing observation is least
+    safe to reuse. A call refused before any tool ran (`dispatched: false`) cannot, because
+    nothing reached a device. `langchain_agent`'s adapter keeps its validation by the same
+    rule (a call refused before any tool never reaches it), since that subject's
+    `verified` decides the same metric as this loop's. Until 2026-11-15 a refused call
+    cleared the validation here, and no write cleared it there.
+    """
+    if operation not in NETWORK_MUTATION_OPERATIONS:
+        return False
+    if isinstance(result, dict) and result.get("dispatched") is False:
+        return False
+    return True
 
 # Sanity questions are observational. Tool schemas are shared with repair episodes,
 # so the model can still *ask* for a writer; this positive allowlist is the authority
@@ -103,10 +135,9 @@ class SelfExecuteRuntime:
     # What the model endpoint said about itself: device, driver, engine settings.
     # Empty when the endpoint does not answer /server_info.
     serving: dict[str, Any] = field(default_factory=dict)
-    #: How many ANI operations the subject may make, or None for no cap. Enforced by
-    #: the ANI, where every operation passes: a call past the cap is refused by name
-    #: and recorded, so the episode ends with a report rather than a silent stop, and
-    #: the record says the cap was reached.
+    #: How many ANI calls the subject may make, or None for no cap. The ANI enforces
+    #: it: a call past the cap is refused by name and recorded, so the episode ends
+    #: with a report rather than a silent stop, and the record says the cap was reached.
     ani_call_limit: int | None = None
     #: Transcript bounds. All None by default, under which the loop sends every
     #: tool result whole and the transcript grows until the provider refuses it,
@@ -116,11 +147,23 @@ class SelfExecuteRuntime:
     #: serialized transcript may be when the model is called, with the results of
     #: reads a later identical read superseded elided first and the episode ended by
     #: name when that is not enough; `max_consecutive_rejections` ends an episode
-    #: after that many completion claims in a row the gate refused.
+    #: after that many completion claims in a row the gate refused;
+    #: `keep_recent_reads` keeps that many of the most recent read results whole and
+    #: turns every older one into a stub naming its call (`_elide_older_reads`);
+    #: `keep_recent_read_chars` does the same with a number of characters, the answers
+    #: to the model's last turn always kept.
     tool_result_chars: int | None = None
     context_budget_chars: int | None = None
     artifact_directory: str | None = None
     max_consecutive_rejections: int | None = None
+    keep_recent_reads: int | None = None
+    keep_recent_read_chars: int | None = None
+    #: End the episode on a reply with no valid tool call, as LangChain's `create_agent`
+    #: does, with the record `langchain_agent_v2` writes: a conclusion in the reply counts,
+    #: a `completed` no validation backs is recorded as failed, and any other reply, a
+    #: malformed call included, is `no_conclusion`. Off by default, under which the loop
+    #: answers such a reply and goes on. The step-back subjects turn it on.
+    end_on_no_tool_call: bool = False
 
 def ani_budget_holder(ani: Any) -> Any | None:
     """The object that owns the ANI budget, reached through any tool router wrapping it.
@@ -223,7 +266,7 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
     deadline = started + budget_seconds
     messages = [
         {"role": "system", "content": runtime.system_prompt},
-        {"role": "user", "content": json.dumps(public_task_for_model(task), indent=2)},
+        {"role": "user", "content": json.dumps(public_task_for_model(task, surface_names(runtime.ani)), indent=2)},
     ]
     device_changes: list[dict[str, Any]] = []
     operations: list[dict[str, Any]] = [
@@ -265,10 +308,34 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
     # which bounds it ran under and not only what happened.
     context = _empty_context(runtime)
     elided_messages: set[int] = set()
+    # What a subject adds to the transcript before a model call, when its router says it.
+    # It appends messages, may replace the content of one it added before, and returns the
+    # summaries of the ANI operations it made on its own behalf, each with its `source`.
+    # A subject that does not define it changes nothing.
+    before_model_call = getattr(runtime.ani, "before_model_call", None)
 
     while time.monotonic() < deadline:
+        if before_model_call is not None:
+            for row in before_model_call(messages, task=task) or []:
+                operations.append(dict(row))
+                if turns:
+                    # Placed inside the turn whose change it followed, as a nested call is.
+                    turns[-1]["operations"].append(len(operations))
+                runtime.trace("summary", f"ANI {row.get('operation')} ({row.get('source')})", row)
+            if time.monotonic() >= deadline:
+                continue
         remaining = max(1.0, deadline - time.monotonic())
         turn_started = time.monotonic()
+        if runtime.keep_recent_reads is not None or runtime.keep_recent_read_chars is not None:
+            # Every call, not only over a budget: the transcript the model reasons over
+            # stays the size of its recent work, and nothing ends the episode for it.
+            elided, chars = _elide_older_reads(messages, elided_messages, runtime.keep_recent_reads,
+                                               keep_chars=runtime.keep_recent_read_chars)
+            if elided:
+                context["elided_results"] += elided
+                context["events"].append({"turn": len(turns) + 1, "kind": "elided_older_reads",
+                                          "count": elided, "elided_chars": chars})
+        context["reasoning_dropped"] += keep_recent_reasoning(messages, REASONING_TURNS_SENT_BACK)
         prompt_chars = _transcript_chars(messages)
         if runtime.context_budget_chars is not None and prompt_chars > runtime.context_budget_chars:
             # Over budget before the provider sees it. Superseded reads go first,
@@ -309,16 +376,24 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
 
         calls = tool_calls(message)
         content = message_content(message)
+        reasoning = message_reasoning(message)
         # Closed here, before the tools run: what follows is execution, not thinking.
-        turn = _turn(turns, turn_started, kind="pending", content=content)
+        turn = _turn(turns, turn_started, kind="pending", content=content, reasoning=reasoning,
+                     finish_reason=_finish_reason(message))
         turns.append(turn)
         runtime.trace("full", "SUT raw model message", message_to_dict(message))
         if calls:
             try:
                 parsed_calls = [tool_call_parts(tool_call) for tool_call in calls]
-                assistant_message = assistant_tool_message(content, calls, parsed_calls)
+                replay = assistant_tool_message(content, calls, parsed_calls, reasoning)
             except ModelActionError as exc:
-                messages.append({"role": "assistant", "content": content or ""})
+                messages.append(assistant_message(content, reasoning))
+                if runtime.end_on_no_tool_call:
+                    turn.update(kind="malformed_tool_call", error=str(exc))
+                    error = str(exc)
+                    status = "failed"
+                    termination = {"cause": "no_conclusion", "detail": error, "turn": turn["turn"]}
+                    break
                 messages.append({
                     "role": "user",
                     "content": (
@@ -330,9 +405,11 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
                 turn.update(kind="malformed_tool_call", error=str(exc))
                 error = str(exc)
                 continue
-            messages.append(assistant_message)
+            messages.append(replay)
             turn["kind"] = "tool_calls"
             turn["tool_calls"] = [name for name, _, _ in parsed_calls]
+            # The conclusion the agent submitted through the ANI, which ends the episode.
+            submitted: dict[str, Any] | None = None
             for tool_name, arguments, tool_call_id in parsed_calls:
                 call_started = time.monotonic()
                 try:
@@ -355,8 +432,8 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
                 # result: a subject tool that reads the devices on its way to a write
                 # performs ANI operations the model did not choose, and until they are
                 # carried here they reach the judge in no `ani_operations` entry. The
-                # platform's own ledger still counts them; this is the report's copy,
-                # in the order the lab saw it.
+                # platform's own ledger still counts them; this is the report's copy, in
+                # the order the lab saw it.
                 for nested in _drain_nested_operations(runtime.ani):
                     operations.append(nested)
                     turn["operations"].append(len(operations))
@@ -372,10 +449,28 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
                 runtime.trace("summary", f"ANI {tool_name}", summary)
                 runtime.trace("full", f"ANI {tool_name} result", result)
                 device_changes.extend(device_changes_from_ani_result(result))
-                if tool_name in NETWORK_MUTATION_OPERATIONS:
+                nested_rollback = result.get("rollback") if isinstance(result, dict) else None
+                if isinstance(nested_rollback, dict) and nested_rollback.get("operation") == "rollback_config":
+                    # A compensated write performed a rollback inside the same call;
+                    # record it as the operation it was, not as a detail.
+                    compensation = operation_summary("rollback_config", nested_rollback, 0.0)
+                    # The tool issued this, not the model. Filed the way every other
+                    # self-issued call is (with a `source`), because a reader counting
+                    # what the agent chose to do must not count our own compensation:
+                    # these rows carry no arguments, so they are also byte-identical to
+                    # each other and the second would read as the model repeating itself.
+                    compensation["source"] = APPLY_COMPENSATION_SOURCE
+                    operations.append(compensation)
+                    # Linked to the turn whose call performed it, so the report's
+                    # timeline places it inside that call and not after the final answer.
+                    turn["operations"].append(len(operations))
+                    runtime.trace("summary", "ANI rollback_config (compensation)",
+                                  compensation)
+                if can_have_changed_the_network(tool_name, arguments, result):
                     # Invalidate even when the envelope says ``ok: false``. A partial
                     # or indeterminate writer failure is precisely when an older
-                    # passing observation is least safe to reuse.
+                    # passing observation is least safe to reuse. A dry run and a call
+                    # refused before any tool ran reach no device, and keep it.
                     latest_objective = None
                 objective = objective_from_validation(result)
                 if objective is not None:
@@ -392,14 +487,38 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
                     "tool_call_id": tool_call_id,
                     "content": _bounded_tool_content(runtime, tool_name, result, context, turn["turn"]),
                 })
+                if tool_name == SUBMISSION_OPERATION and isinstance(result, dict) and result.get("submitted"):
+                    # Submitting ends the episode, whatever it claims: the calls after it
+                    # in this turn are not sent. Not a gate either: a `completed` without a
+                    # passing validation stays the agent's claim, and `verified` says so.
+                    submitted = result
+                    break
+            if submitted is not None:
+                status = str(submitted["status"])
+                final_response = {
+                    "status": status,
+                    "summary": str(submitted.get("summary") or ""),
+                    "diagnosis": submitted.get("diagnosis"),
+                }
+                turn["kind"] = "final"
+                error = None if status == "completed" else final_response["summary"]
+                termination = {"cause": "own_conclusion", "detail": status, "turn": turn["turn"],
+                               "via": SUBMISSION_OPERATION}
+                break
             continue
 
         final = parse_final_response(content)
         if final is not None:
             if final["status"] == "completed" and not (latest_objective or {}).get("passed"):
+                if runtime.end_on_no_tool_call:
+                    final_response = dict(final)
+                    turn["kind"] = "final"
+                    error = "SUT claimed completion without a passing public validation"
+                    status = "failed"
+                    termination = {"cause": "completion_rejected", "detail": error, "turn": turn["turn"]}
+                    break
                 rejected_final = dict(final)
-                messages.append({
-                    "role": "assistant", "content": content})
+                messages.append(assistant_message(content, reasoning))
                 messages.append({
                     "role": "user",
                     "content": "Completion rejected: call execute_validation with type public_success_criteria before claiming success, or return status failed.",
@@ -425,13 +544,21 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
             termination = {"cause": "own_conclusion", "detail": status, "turn": turn["turn"]}
             break
 
-        messages.append({"role": "assistant", "content": content or ""})
+        messages.append(assistant_message(content, reasoning))
+        if runtime.end_on_no_tool_call:
+            turn.update(kind="no_action", error="neither ANI tool calls nor a final status object")
+            error = "model returned neither ANI tool calls nor a final status object"
+            status = "failed"
+            termination = {"cause": "no_conclusion", "detail": error, "turn": turn["turn"]}
+            break
         messages.append({
             "role": "user",
-            "content": "Use an ANI tool next, or return the required final JSON status object.",
+            "content": no_action_nudge(
+                content, "Use an ANI tool next, or return the required final JSON status object."),
         })
         turn.update(kind="no_action", error=(
-            "neither ANI tool calls nor a final status object"))
+            "a tool call written as text, not made" if unparsed_tool_call(content)
+            else "neither ANI tool calls nor a final status object"))
         error = "model returned neither ANI tool calls nor a final status object"
 
     elapsed = round(time.monotonic() - started, 3)
@@ -484,10 +611,12 @@ def run_self_execute(runtime: SelfExecuteRuntime, task: dict[str, Any]) -> dict[
             "ani_version": ANI_VERSION,
             "budget_seconds": budget_seconds,
             "elapsed_seconds": elapsed,
-            "tool_call_count": len(operations),
+            # The model's own calls: a row a call made on its own behalf (`source`)
+            # is inside that call, already counted.
+            "tool_call_count": sum(1 for operation in operations if not operation.get("source")),
             "interaction_limits": {
-                # The platform's own count, which includes the operations a subject's
-                # own tool performed on the way to answering one model call.
+                # The platform's own count, which includes the operations a subject tool
+                # performed on the way to answering one model call.
                 "ani": ani_budget_state(runtime.ani, runtime.ani_call_limit),
             },
             "llm_calls": llm_calls,
@@ -586,8 +715,8 @@ def _request_diagnosis(runtime: SelfExecuteRuntime,
 
 #: Tool names whose result may be elided once the same call was made again: the
 #: ANI's own reads, and a subject tool named as a read. A write's result carries the
-#: transaction and the precondition the next write is checked against, and a
-#: validation's is what the completion gate reads; neither is replaced whatever the
+#: transaction and the precondition the next write is checked against, a validation's
+#: is what the completion gate reads; none of those is replaced whatever the
 #: transcript costs.
 _READ_PREFIXES = ("get_", "list_", "lookup_", "query_", "search_", "describe_", "find_",
                   "read_", "show_")
@@ -597,15 +726,31 @@ def _is_read_operation(tool_name: str) -> bool:
     return ani_category(tool_name) == "read" or tool_name.startswith(_READ_PREFIXES)
 
 
+#: Reads `keep_recent_reads` and `keep_recent_read_chars` leave whole however old, and
+#: which the second does not count: the lab's topology, which the model needs for the
+#: whole episode.
+_NEVER_ELIDED_FOR_AGE = ("get_topology_simple",)
+
+#: The characters of recent read results the v2 subjects kept whole from 2026-11-15 to
+#: 2026-11-16 (`keep_recent_read_chars`). No subject ships it since: they keep the ten most
+#: recent reads (`keep_recent_reads`). IBN_SUT_KEEP_RECENT_READ_CHARS=60000 with
+#: IBN_SUT_KEEP_RECENT_READS=0 runs it for every subject of a run.
+KEEP_RECENT_READ_CHARS = 60_000
+
+
 def _empty_context(runtime: SelfExecuteRuntime) -> dict[str, Any]:
     """The transcript account an episode starts with, naming the bounds it ran under."""
     return {
         "budget_chars": runtime.context_budget_chars,
         "tool_result_chars": runtime.tool_result_chars,
         "max_consecutive_rejections": runtime.max_consecutive_rejections,
+        "keep_recent_reads": runtime.keep_recent_reads,
+        "keep_recent_read_chars": runtime.keep_recent_read_chars,
         "peak_prompt_chars": 0,
         "truncated_results": 0,
         "elided_results": 0,
+        "reasoning_turns_sent_back": REASONING_TURNS_SENT_BACK,
+        "reasoning_dropped": 0,
         "events": [],
     }
 
@@ -751,19 +896,120 @@ def _elide_superseded_reads(messages: list[dict[str, Any]], elided: set[int]) ->
     return count
 
 
+def _elide_older_reads(messages: list[dict[str, Any]], elided: set[int], keep: int | None,
+                       *, keep_chars: int | None = None) -> tuple[int, int]:
+    """Keep the most recent read results whole and stub every older one: the `keep` most
+    recent, or as many as hold no more than `keep_chars` characters together, or with both
+    the results both rules keep. How many went, and how many characters.
+
+    On long episodes reads are about half of what the transcript carries, a quarter of
+    them repeating an earlier call, and a model may drift past about 100 000 characters
+    (Qwen3.5-9B switched to Chinese there). An older read becomes
+    a stub naming its call, so the model knows what it asked and can ask again. Writes,
+    validations and the model's own messages are never touched; role and tool_call_id are
+    untouched, which is what the provider checks a transcript for.
+
+    In characters, the answers to the model's last turn always stay whole, since the model
+    has not seen them yet; the count then walks back from the most recent result until one
+    does not fit, and that one and every older one become stubs. Results already stubbed
+    count for nothing. A newer result only moves that boundary forward, so under either
+    rule a stub never comes back whole: `langchain_agent_v2`, which applies the rule afresh
+    to its whole transcript at each call (`agent.KeepRecentReads`), sends what this loop,
+    which keeps its stubs, sends (the context budget's elision of superseded reads aside,
+    which only this loop has).
+    """
+    calls: dict[str, tuple[str, str]] = {}
+    for message in messages:
+        if message.get("role") != "assistant":
+            continue
+        for tool_call in message.get("tool_calls") or []:
+            if not isinstance(tool_call, dict):
+                continue
+            function = tool_call.get("function") or {}
+            name = function.get("name") if isinstance(function, dict) else None
+            if isinstance(name, str) and tool_call.get("id") is not None:
+                calls[str(tool_call["id"])] = (name, _call_arguments(tool_call))
+    reads = [index for index, message in enumerate(messages)
+             if message.get("role") == "tool"
+             and str(message.get("tool_call_id")) in calls
+             and _is_read_operation(calls[str(message.get("tool_call_id"))][0])
+             and calls[str(message.get("tool_call_id"))][0] not in _NEVER_ELIDED_FOR_AGE]
+    older: set[int] = set()
+    if keep is not None:
+        older.update(reads[:max(0, len(reads) - keep)])
+    if keep_chars is not None:
+        unseen = _answers_to_the_last_turn(messages)
+        held = 0
+        for position in range(len(reads) - 1, -1, -1):
+            index = reads[position]
+            if index in elided:
+                continue
+            size = len(_content_text(messages[index]))
+            if index not in unseen and held + size > keep_chars:
+                older.update(reads[:position + 1])
+                break
+            held += size
+    if keep is not None and keep_chars is not None:
+        kept = f"only the {keep} most recent reads, up to {keep_chars} characters together,"
+    elif keep is not None:
+        kept = f"only the {keep} most recent reads"
+    else:
+        kept = f"only the most recent reads, up to {keep_chars} characters together,"
+    count = chars = 0
+    for index in reads:
+        if index not in older or index in elided:
+            continue
+        name, arguments = calls[str(messages[index].get("tool_call_id"))]
+        content = _content_text(messages[index])
+        replacement = {
+            "elided": True,
+            "operation": name,
+            "arguments": arguments[:300],
+            "sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+            "elided_chars": len(content),
+            "note": (f"An older read, elided to keep the conversation short: {kept} "
+                     "stay whole. Call it again to see it."),
+        }
+        messages[index] = {**messages[index], "content": json.dumps(replacement, sort_keys=True)}
+        elided.add(index)
+        count += 1
+        chars += len(content)
+    return count, chars
+
+
+def _content_text(message: dict[str, Any]) -> str:
+    """A message's content as the text the provider is sent, which is what a stub measures."""
+    content = message.get("content")
+    return content if isinstance(content, str) else json.dumps(content, default=str)
+
+
+def _answers_to_the_last_turn(messages: list[dict[str, Any]]) -> set[int]:
+    """The tool results after the last assistant message: what the model has not seen yet."""
+    last = max((index for index, message in enumerate(messages) if message.get("role") == "assistant"),
+               default=-1)
+    return {index for index, message in enumerate(messages)
+            if index > last and message.get("role") == "tool"}
+
+
 def _turn(turns: list[dict[str, Any]], started: float, *, kind: str,
-          content: str = "", error: str | None = None) -> dict[str, Any]:
+          content: str = "", error: str | None = None, reasoning: str = "",
+          finish_reason: str | None = None) -> dict[str, Any]:
     """One model turn, measured. Never its text: only how much of it there was.
 
     `content_chars` is what lets a report say a turn produced prose without carrying the
     prose; the text itself is in the trace file, which is where reasoning is allowed to
-    live and which the benchmark artifact references by path.
+    live and which the benchmark artifact references by path. `reasoning_chars` does the
+    same for the reasoning the reply carried apart from its content, under the name the
+    LangChain subject's turns use. `finish_reason` is the provider's: "length" marks a
+    reply cut at max_tokens, None a call that raised or a backend that did not say.
     """
     return {
         "turn": len(turns) + 1,
         "seconds": round(time.monotonic() - started, 3),
         "kind": kind,
         "content_chars": len(content),
+        "reasoning_chars": len(reasoning),
+        "finish_reason": finish_reason,
         "tool_calls": [],
         "operations": [],
         "error": error,
@@ -776,6 +1022,10 @@ def _message_metadata(message: Any, key: str) -> Any:
 
 def _provider_model(message: Any) -> str | None:
     value = _message_metadata(message, "_ibn_provider_model")
+    return str(value) if value not in (None, "") else None
+
+def _finish_reason(message: Any) -> str | None:
+    value = _message_metadata(message, "_ibn_finish_reason")
     return str(value) if value not in (None, "") else None
 
 def _message_token_usage(message: Any) -> dict[str, int | None]:
@@ -854,7 +1104,7 @@ def answer_sanity_question(runtime: SelfExecuteRuntime, task: dict[str, Any]) ->
     deadline = time.monotonic() + budget_seconds
     messages = [
         {"role": "system", "content": runtime.question_system_prompt},
-        {"role": "user", "content": json.dumps(public_task_for_model(task), indent=2)},
+        {"role": "user", "content": json.dumps(public_task_for_model(task, surface_names(runtime.ani)), indent=2)},
     ]
     evidence: list[str] = []
     while time.monotonic() < deadline:
@@ -912,6 +1162,21 @@ def answer_sanity_question(runtime: SelfExecuteRuntime, task: dict[str, Any]) ->
         messages.append({"role": "assistant", "content": content or ""})
         messages.append({"role": "user", "content": "Use ANI tools for evidence, then return the required answer JSON."})
     return {"answer": "Unable to answer within the ANI execution budget.", "evidence": evidence}
+
+def surface_names(ani: Any) -> list[str] | None:
+    """The names of the tools the model is handed: `ani.tool_schemas()`, which every
+    subject of this loop also gives its model caller. None when they cannot be read, and
+    the task then keeps the judge's list."""
+    schemas = getattr(ani, "tool_schemas", None)
+    if not callable(schemas):
+        return None
+    try:
+        return [str(schema["function"]["name"]) for schema in schemas()
+                if isinstance(schema, dict) and isinstance(schema.get("function"), dict)
+                and schema["function"].get("name")]
+    except Exception:  # noqa: BLE001 - a missing list is a worse prompt, not a lost episode
+        return None
+
 
 def execution_budget(task: dict[str, Any], max_execution_seconds: float) -> float:
     payload = task.get("execution_budget")

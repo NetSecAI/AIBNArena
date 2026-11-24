@@ -13,6 +13,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[3]
 SUBJECTS = (
     "sut/langchain_agent/a2a_server.py",
+    "sut/langchain_agent_v2/a2a_server.py",
+    "sut/step-back/dumb_baseline/a2a_server.py",
+    "sut/step-back/object_baseline/a2a_server.py",
+    "sut/step-back/full_baseline/a2a_server.py",
     "sut/langchain_rag_agent/a2a_server.py",
 )
 
@@ -39,4 +43,4 @@ def test_every_subject_advertises_a_distinct_agent_card_name() -> None:
         assert names[0] not in seen, (
             f"{relative} advertises {names[0]!r}, already used by {seen[names[0]]}")
         seen[names[0]] = relative
-    assert seen, "no subject server found"
+    assert len(seen) >= 3, seen

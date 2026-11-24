@@ -7,13 +7,13 @@
 <section>
   <h2>Endpoints</h2>
   <p class="note">
-    One entry is a provider: a base URL, the key it takes, and the models it serves.
-    Keys are stored in <code>webui/models.json</code>, readable by its owner alone and
+    One entry is a provider: OpenAI itself, OpenRouter, or another OpenAI-compatible endpoint
+    at its base URL, with the key it takes and the models it serves. Keys are stored in <code>webui/models.json</code>, readable by its owner alone and
     kept out of git. A key is never shown again, never sent back to this page, and never
     put on a command line — it reaches the subject through its environment.
   </p>
   <table id="endpoints">
-    <thead><tr><th>Name</th><th>Base URL</th><th>Key</th><th>Models</th><th></th></tr></thead>
+    <thead><tr><th>Name</th><th>Type</th><th>Base URL</th><th>Key</th><th>Models</th><th></th></tr></thead>
     <tbody></tbody>
   </table>
 </section>
@@ -23,11 +23,19 @@
   <form id="endpoint">
     <input type="hidden" id="id" />
     <div class="grid">
+      <label title="OpenAI: OpenAI's own API, at its fixed URL; the models are chosen from those the key can use. OpenRouter: OpenRouter's API, at its fixed URL; the models are chosen from its catalog, those taking tools. OpenAI-compatible endpoint: a LiteLLM or vLLM proxy, or another provider, at the base URL given.">
+        Type
+        <select id="provider">
+          <option value="openai">OpenAI</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="custom">OpenAI-compatible endpoint (base URL)</option>
+        </select>
+      </label>
       <label title="A label for this endpoint. It is what the launcher's model list shows next to each model this endpoint serves.">
         Name
         <input id="name" type="text" required placeholder="internal LiteLLM proxy" />
       </label>
-      <label title="OpenAI-compatible endpoint, as the subject's --api-base takes it: a LiteLLM or vLLM proxy, or a provider's own URL.">
+      <label id="api-base-field" title="OpenAI-compatible endpoint, as the subject's --api-base takes it: a LiteLLM or vLLM proxy, or a provider's own URL.">
         Base URL
         <input id="api_base" type="url" required placeholder="http://127.0.0.1:4000/v1" />
         <small>OpenAI-compatible endpoint, as the subject's <code>--api-base</code> takes it.</small>
@@ -40,8 +48,34 @@
       <label title="Comma-separated model ids this endpoint serves, exactly as litellm takes them. They are what the launcher's model field then offers.">
         Models
         <input id="models" type="text" placeholder="openai/gpt-5.4, openai/gpt-4o-mini" />
-        <small>Comma-separated model ids, exactly as litellm takes them.</small>
+        <small id="models-note">Comma-separated model ids, exactly as litellm takes them.</small>
       </label>
+    </div>
+    <div class="subgroup" id="openai-choice" hidden>
+      <h3 id="choice-title">OpenAI models</h3>
+      <div class="actions">
+        <button type="button" id="list-models">List the models</button>
+        <input id="model-filter" type="search" placeholder="filter, e.g. qwen" title="Shows only the listed models whose id holds this text." />
+        <small class="note" id="list-note"></small>
+      </div>
+      <div class="grid" id="openai-models"></div>
+    </div>
+    <div class="subgroup" id="thinking-choice">
+      <h3>Thinking</h3>
+      <p class="note">
+        How each model is asked to reason, chosen here and nowhere else: the Episode and
+        Campaign pages show it next to the model, and every run records it. <em>model
+        default</em> sends nothing. A model that does not reason (gpt-4o, gpt-4o-mini,
+        gpt-4.1) cannot be turned on, and each family takes its own effort levels:
+        gpt-5, gpt-5-mini and gpt-5-nano minimal to high, gpt-5.2 and gpt-5.4 none to
+        xhigh, the o-series low to high. A setting the family refuses is refused when the
+        endpoint is saved.
+      </p>
+      <table id="thinking-table">
+        <thead><tr><th>Model</th><th>Thinking</th><th>Effort</th><th>Style</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <small class="note" id="thinking-note">Type or tick a model above to choose how it thinks.</small>
     </div>
     <div class="actions">
       <button type="submit">Save endpoint</button>
@@ -55,6 +89,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/endpoint_sync.js"></script>
-<script src="/static/models.js"></script>
+<script src="{{ asset('endpoint_sync.js') }}"></script>
+<script src="{{ asset('models.js') }}"></script>
 {% endblock %}

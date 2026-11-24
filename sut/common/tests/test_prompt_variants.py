@@ -15,6 +15,7 @@ from sut.common import (
     available_variants,
     load_prompt,
     resolve_system_prompt,
+    with_prompt_section,
 )
 from sut.common.agent_config import ModelAgentConfig
 
@@ -161,3 +162,20 @@ def test_no_prompt_file_briefs_the_agent_on_the_environment() -> None:
         for label, pattern in forbidden.items():
             hits = sorted({match.group(0) for match in re.finditer(pattern, text, re.IGNORECASE)})
             assert not hits, f"{path} leaks {label}: {hits}"
+
+
+def test_a_section_goes_where_the_prompt_puts_its_token() -> None:
+    prompt = "# Role\n\nx\n\n# Context\n\n{CONTEXT}\n\n# Walk\n\ny\n\n# Finish\n\nreturn JSON"
+    filled = with_prompt_section(prompt, "{CONTEXT}", "Context", "Route")
+
+    assert filled == prompt.replace("{CONTEXT}", "Route")
+    assert filled.count("# Context") == 1
+
+
+def test_a_prompt_without_the_token_gets_the_section_before_finish() -> None:
+    """The terminal stanza the loop parses stays last whatever is added."""
+    filled = with_prompt_section("# Role\n\nx\n\n# Finish\n\nreturn JSON", "{CONTEXT}", "Context", "Route")
+    assert filled == "# Role\n\nx\n\n# Context\n\nRoute\n\n# Finish\n\nreturn JSON"
+
+    no_finish = with_prompt_section("# Role\n\nx\n", "{CONTEXT}", "Context", "Route")
+    assert no_finish == "# Role\n\nx\n\n# Context\n\nRoute\n\n"

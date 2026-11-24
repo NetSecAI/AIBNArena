@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 import difflib
+import gzip
 import json
 import secrets
+import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Iterator, Mapping
 
 from scenarios.oracle_loader import resolve_oracle
 
@@ -23,7 +25,7 @@ from .contracts import (
     ScenarioDefinition,
 )
 from .diagnosis import assess_diagnosis, reference_for_scenario
-from .metrics import calculate_shared_metrics
+from .metrics import calculate_shared_metrics, repair_without_change
 from .oracle_evaluator import OracleEvaluator
 from .provenance import collect_provenance
 from .tracing import TraceRecorder, TraceSink
@@ -76,10 +78,12 @@ class BenchmarkLifecycle:
         "snapshot_healthy",
         "inject_fault",
         "evaluate_degradation",
+        "prime_before_sut",
         "snapshot_before_sut",
         "invoke_sut",
         "snapshot_after_sut",
         "evaluate_repair_preservation",
+        "snapshot_post_repair",
         "calculate_metrics",
         "score_diagnosis",
         "restore_destroy",
@@ -106,6 +110,9 @@ class BenchmarkLifecycle:
         # phase (deployment, reference state, healthy oracle) would otherwise die
         # with UnboundLocalError there, outside the try, and write no result at all.
         injection_attempts: list[dict[str, Any]] = []
+        # Hoisted for the same reason: what the priming before the subject did, null when
+        # the platform cannot prime or the run failed before it.
+        priming_before_sut: dict[str, Any] | None = None
 
         with trace.phase("load_configuration"):
             config = deps.config_loader(config_path)
@@ -186,22 +193,38 @@ class BenchmarkLifecycle:
                         )
                     evaluations["expected_degradation"] = evaluation
                     _require_oracle(evaluation, attempts=injection_attempts)
+            # The network the subject is handed has fresh learned tables. A subject that
+            # places a Linux node from the ARP or MAC entry a neighbour holds for it finds
+            # none once the kernel drops an entry unused for 60 s, which it does when the
+            # host's ARP table, shared by every lab copy on the machine, holds 128 entries
+            # (`gc_thresh1`; checked on a two-node VyOS lab on 2026-11-16). Priming is
+            # traffic, so it comes after the last measurement before the subject, and it
+            # changes no configuration; the before_sut read then sees what the subject sees.
+            with trace.phase("prime_before_sut"):
+                priming_before_sut = prime_learned_tables(deps.platform)
             with trace.phase("snapshot_before_sut"):
                 snapshots.take("before_sut")
-            with trace.phase("invoke_sut"):
-                response = deps.sut_client.invoke(
-                    {
-                        "experiment_id": config.experiment_id,
-                        "scenario_id": sut_task_id,
-                        "success_criteria": scenario.success_criteria,
-                        "domain": scenario.domain,
-                        "intent": scenario.intent,
-                        "observation": public_observation(scenario.success_criteria, scenario.bindings),
-                    }
-                )
-                operations.merge(response.operations)
-            with trace.phase("snapshot_after_sut"):
-                snapshots.take("after_sut")
+            try:
+                with trace.phase("invoke_sut"):
+                    response = deps.sut_client.invoke(
+                        {
+                            "experiment_id": config.experiment_id,
+                            "scenario_id": sut_task_id,
+                            "success_criteria": scenario.success_criteria,
+                            "domain": scenario.domain,
+                            "intent": scenario.intent,
+                            "observation": public_observation(
+                                scenario.success_criteria, scenario.bindings,
+                                repair_throughput_reference(oracles.get("repair"), baseline)),
+                        }
+                    )
+                    operations.merge(response.operations)
+            finally:
+                # Also when the answer failed (a client timeout, a malformed report):
+                # the subject may have changed devices before it, and what it left is
+                # the evidence the record would otherwise lack.
+                with trace.phase("snapshot_after_sut"):
+                    snapshots.take("after_sut")
             with trace.phase("evaluate_repair_preservation"):
                 convergence_result = deps.platform.wait_for_convergence()
                 # Non-convergence is scoring evidence, not a lifecycle error. The
@@ -215,6 +238,9 @@ class BenchmarkLifecycle:
                         oracles["preservation"], baseline=baseline
                     )
                     operations.validations += 1
+            # After the oracles: its priming is traffic, and no measurement may see it.
+            with trace.phase("snapshot_post_repair"):
+                snapshots.take_post_repair()
             with trace.phase("calculate_metrics"):
                 metrics = calculate_shared_metrics(
                     evaluations, operations, fault_applicable=scenario.fault_applicable)
@@ -222,12 +248,17 @@ class BenchmarkLifecycle:
                 metrics["converged"] = convergence_result.get("converged") is True
                 metrics["sut_completed"] = response.result.get("status") == "completed"
                 metrics["sut_verified"] = response.result.get("verified") is True
-                metrics["success"] = all((
-                    metrics["environment_success"],
-                    metrics["converged"],
-                    metrics["sut_completed"],
-                    metrics["sut_verified"],
-                ))
+                # The scenario's verdict is the oracle's alone (2026-11-21, Hugo). Convergence
+                # and the subject's own end and check stay recorded beside it, not part of it:
+                # until then success also required all three.
+                metrics["success"] = metrics["environment_success"]
+                # Audit, not verdict: a repair the oracle passed on a lab the subject
+                # did not touch is not the subject's repair (metrics.repair_without_change).
+                metrics["repair_without_change"] = repair_without_change(
+                    evaluations.get("repair"),
+                    snapshots.changed_between("before_sut", "after_sut"),
+                    fault_applicable=scenario.fault_applicable,
+                )
 
                 if deps.domain_metrics is not None:
                     metrics.update(deps.domain_metrics(evaluations, response.result))
@@ -235,9 +266,12 @@ class BenchmarkLifecycle:
                 # Never raises: a judge that cannot be reached is written into the
                 # block as the reason the episode went unjudged, and the repair
                 # verdict above stands whatever happened here.
+                # A change request injects nothing, so there is no fault to have found:
+                # the block says so instead of scoring the subject against a request.
                 metrics["diagnosis"] = assess_diagnosis(
                     reference_for_scenario(scenario), response.result, deps.diagnosis_judge,
-                    fault_applicable=scenario.fault_applicable)
+                    fault_applicable=(scenario.fault_applicable
+                                      and not bool((scenario.fault or {}).get("change_request"))))
         except Exception as exc:
             failure = exc
             failure_phase = trace.failed_phase or trace.active_phase or "unknown"
@@ -269,6 +303,7 @@ class BenchmarkLifecycle:
             failure_phase,
             trace,
             device_configurations=snapshots.manifest(),
+            priming_before_sut=priming_before_sut,
         )
         with trace.phase("write_result"):
             output_path = deps.result_sink.write(result, config.result_dir)
@@ -304,6 +339,7 @@ class BenchmarkLifecycle:
         trace: TraceRecorder,
         *,
         device_configurations: Mapping[str, Any] | None = None,
+        priming_before_sut: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         durations = {phase: trace.phase_durations.get(phase, 0.0) for phase in self.PHASES}
         evaluation_payloads = {
@@ -353,6 +389,12 @@ class BenchmarkLifecycle:
             "device_configurations": (
                 dict(device_configurations) if device_configurations is not None else None
             ),
+            # What the priming before the subject did (`prime_before_sut`): the platform's
+            # counts, or its error; null when the platform cannot prime or the run ended
+            # before it.
+            "priming_before_sut": (
+                dict(priming_before_sut) if priming_before_sut is not None else None
+            ),
             "error": (
                 {
                     "phase": failure_phase or "unknown",
@@ -372,6 +414,13 @@ class DeviceSnapshots:
     it left, before convergence). Hugo asked for the per-device configuration before
     and after the subject's modification (2026-09-16).
 
+    The judge also keeps every device as `get_running_config(format="json")` answers it
+    (`collect_structured_device_data`), one compressed file per device beside its text,
+    so that the network can be analysed after the run, without a lab. It is taken
+    before and after the subject, and once more at the end of the episode
+    (`take_post_repair`). Hugo asked for it on 2026-10-27 for the LangChain subjects and
+    on 2026-11-10 for every subject.
+
     A platform without `collect_device_configurations` records nothing (the record
     says null). A snapshot that fails records its error and the episode goes on: this
     is evidence for the reader, not a lifecycle requirement.
@@ -379,11 +428,21 @@ class DeviceSnapshots:
 
     LABELS = ("healthy", "before_sut", "after_sut")
     DIFFS = (("healthy", "before_sut"), ("before_sut", "after_sut"))
+    #: The moments the structured read is kept: the network the subject was handed and
+    #: the one it left. Not `healthy`: 600 kB a moment on sme01-small before compression
+    #: (96 kB after), and the campaign records that carry these files are kept in git.
+    STRUCTURED_LABELS = ("before_sut", "after_sut")
+    #: The episode's last structured read: the network the subject left, once the
+    #: episode is over.
+    POST_REPAIR = "post_repair"
 
-    def __init__(self, platform: Any, directory: Path) -> None:
+    def __init__(self, platform: Any, directory: Path, *, structured: bool = True) -> None:
         self._collect = getattr(platform, "collect_device_configurations", None)
+        self._collect_structured = getattr(platform, "collect_structured_device_data", None) if structured else None
+        self._prime = getattr(platform, "prime_learned_tables", None) if structured else None
         self.directory = Path(directory)
         self.snapshots: dict[str, dict[str, Any]] = {}
+        self.structured: dict[str, dict[str, Any]] = {}
         self._texts: dict[str, dict[str, tuple[str, str]]] = {}
 
     @property
@@ -393,6 +452,26 @@ class DeviceSnapshots:
     def take(self, label: str) -> None:
         if not self.available:
             return
+        self._take_configuration(label)
+        if label in self.STRUCTURED_LABELS and callable(self._collect_structured):
+            self._take_structured(label)
+
+    def take_post_repair(self) -> None:
+        """`<device>/post_repair.json.gz`: the structured read of what the episode ended
+        with, once the network has converged and the oracles have measured it. The Linux
+        nodes send a frame first, so that the switches' learnt MAC addresses place them:
+        `after_sut`, which nothing primes, misses some of them. A priming that fails is
+        recorded and the read goes on."""
+        if not self.available or not callable(self._collect_structured):
+            return
+        try:
+            priming = dict(self._prime()) if callable(self._prime) else None
+        except Exception as exc:  # noqa: BLE001 - evidence, not a requirement
+            priming = {"error": f"{type(exc).__name__}: {exc}"}
+        self._take_structured(self.POST_REPAIR)
+        self.structured[self.POST_REPAIR]["priming"] = priming
+
+    def _take_configuration(self, label: str) -> None:
         try:
             collected = self._collect()
             devices = collected.get("devices") if isinstance(collected, Mapping) else None
@@ -419,6 +498,55 @@ class DeviceSnapshots:
         except Exception as exc:  # noqa: BLE001 - evidence, not a requirement
             self.snapshots[label] = {"ok": False, "error": f"{type(exc).__name__}: {exc}", "devices": {}}
 
+    def _take_structured(self, label: str) -> None:
+        """`<device>/<label>.json.gz`: the device's `get_running_config(format="json")`
+        record, with its container and roles, gzipped (SR Linux state alone is a few
+        hundred kilobytes a switch). Written for a device whose read failed too: its
+        error is the evidence."""
+        started = time.monotonic()
+        try:
+            collected = self._collect_structured()
+            devices = collected.get("devices") if isinstance(collected, Mapping) else None
+            if not isinstance(devices, Mapping):
+                error = (collected.get("error") if isinstance(collected, Mapping) else None) or "platform returned no devices"
+                self.structured[label] = {"ok": False, "error": str(error), "devices": {}}
+                return
+            entry: dict[str, Any] = {"ok": collected.get("ok") is True, "devices": {}}
+            for name, record in devices.items():
+                record = dict(record) if isinstance(record, Mapping) else {"ok": False, "error": "malformed record"}
+                data = json.dumps(record, ensure_ascii=False, sort_keys=True).encode("utf-8")
+                path = self.directory / str(name) / f"{label}.json.gz"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                # mtime=0: the same read gives the same bytes.
+                path.write_bytes(gzip.compress(data, mtime=0))
+                summary = {"kind": record.get("kind"), "ok": record.get("ok") is True,
+                           "roles": record.get("roles"), "file": str(path.relative_to(self.directory)),
+                           "bytes": len(data)}
+                if record.get("ok") is not True:
+                    summary["error"] = str(record.get("error") or "read failed")
+                entry["devices"][str(name)] = summary
+            entry["seconds"] = round(time.monotonic() - started, 3)
+            self.structured[label] = entry
+        except Exception as exc:  # noqa: BLE001 - evidence, not a requirement
+            self.structured[label] = {"ok": False, "error": f"{type(exc).__name__}: {exc}", "devices": {}}
+
+    def _compared(self, before: str, after: str) -> Iterator[tuple[str, list[str], list[str]]]:
+        """(device, lines before, lines after) for every device either snapshot read."""
+        for name in sorted(set(self._texts[before]) | set(self._texts[after])):
+            kind, old = self._texts[before].get(name, ("", ""))
+            kind_after, new = self._texts[after].get(name, (kind, ""))
+            kind = kind or kind_after
+            yield name, _stable_lines(kind, old), _stable_lines(kind, new)
+
+    def changed_between(self, before: str, after: str) -> list[str] | None:
+        """The devices whose configuration differs between two snapshots, written
+        nowhere. None when either snapshot is missing or one of its reads failed: an
+        unread device compares equal to itself and would pass for unchanged."""
+        if any((self.snapshots.get(label) or {}).get("ok") is not True or label not in self._texts
+               for label in (before, after)):
+            return None
+        return [name for name, old, new in self._compared(before, after) if old != new]
+
     def diffs(self) -> dict[str, dict[str, Any]]:
         """Unified diffs per device between consecutive snapshots, one file each,
         only where the configuration differs."""
@@ -428,11 +556,7 @@ class DeviceSnapshots:
                 continue
             key = f"{before}_to_{after}"
             changes[key] = {}
-            for name in sorted(set(self._texts[before]) | set(self._texts[after])):
-                kind, old = self._texts[before].get(name, ("", ""))
-                kind_after, new = self._texts[after].get(name, (kind, ""))
-                kind = kind or kind_after
-                old_lines, new_lines = _stable_lines(kind, old), _stable_lines(kind, new)
+            for name, old_lines, new_lines in self._compared(before, after):
                 if old_lines == new_lines:
                     continue
                 diff = list(difflib.unified_diff(old_lines, new_lines, fromfile=f"{name}/{before}.txt",
@@ -454,9 +578,12 @@ class DeviceSnapshots:
             "snapshots": self.snapshots,
             "changes": {},
             "changed_by_sut": [],
+            "structured": self.structured,
             "note": ("running configuration per device: healthy (after the reference state), before_sut "
                      "(the faulty network the subject was handed), after_sut (what it left, before "
-                     "convergence); diffs ignore Linux address lifetimes"),
+                     "convergence); diffs ignore Linux address lifetimes; structured: the "
+                     "get_running_config(format=json) record of every device at before_sut, after_sut "
+                     "and post_repair (after convergence, the oracles and priming), gzipped"),
         }
         try:
             manifest["changes"] = self.diffs()
@@ -476,6 +603,19 @@ def _stable_lines(kind: str, text: str) -> list[str]:
     if kind == "linux":
         lines = [line for line in lines if "valid_lft" not in line]
     return lines
+
+
+def prime_learned_tables(platform: Any) -> dict[str, Any] | None:
+    """Have the platform make its Linux nodes send a frame (`prime_learned_tables`), and
+    say what it did: its counts, `{"error": ...}` when it raised, None when it cannot.
+    Never raises: the subject is handed its task whatever happened here."""
+    prime = getattr(platform, "prime_learned_tables", None)
+    if not callable(prime):
+        return None
+    try:
+        return dict(prime())
+    except Exception as exc:  # noqa: BLE001 - evidence, not a requirement
+        return {"error": f"{type(exc).__name__}: {exc}"}
 
 
 def _require_ok(outcome: Mapping[str, Any], operation: str) -> None:
@@ -586,8 +726,32 @@ def _require_oracle(
     raise LifecycleError(detail)
 
 
+def repair_throughput_reference(
+    repair_oracle: Mapping[str, Any] | None, baseline: Mapping[str, Mapping[str, Any]],
+) -> float | None:
+    """The healthy rate the repair oracle holds the protected flow to, or None.
+
+    The shaped families' repair oracles ask the flow for the lower of its contract and what
+    the healthy network of the same episode measured (`baseline` with `combine: min`), each
+    with the same tolerance. This is that measurement: the healthy probe's reading of the
+    metric the oracle's baseline-relative throughput threshold names.
+    """
+    for probe in (repair_oracle or {}).get("probes") or []:
+        for threshold in probe.get("thresholds") or []:
+            relative = threshold.get("baseline")
+            if threshold.get("metric") != "throughput_mbps" or not isinstance(relative, Mapping):
+                continue
+            value = (baseline.get(str(probe.get("id"))) or {}).get(str(relative.get("metric")))
+            try:
+                return float(value) if value is not None else None
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
 def public_service_measurement(
     success_criteria: Mapping[str, Any] | None, bindings: Mapping[str, Any],
+    healthy_throughput_mbps: float | None = None,
 ) -> dict[str, Any] | None:
     """The flow the subject's own throughput check measures, or None when it has none.
 
@@ -598,6 +762,13 @@ def public_service_measurement(
     before 2026-09-16, so every qos episode of E1 and the first E3 qos episodes saw
     "missing public service measurement", could not pass their own validation and
     could not conclude "completed" however well they had repaired the link.
+
+    `healthy_throughput_mbps` is what the flow measured on the healthy network of the
+    episode (`repair_throughput_reference`), with which the ANI's check holds the flow to
+    the repair oracle's bar. Until 2026-11-15 the check asked for the contract alone: in
+    main03, 14 of the 24 healthy networks of campus_large read below it (5.96 to 6.28
+    against 6.8 Mbit/s), and a repair putting back exactly the healthy shaper could pass
+    the subject's own check there only on a luckier sample, while a success needs it.
     """
     criteria = (success_criteria or {}).get("all_of") if isinstance(success_criteria, Mapping) else None
     if not isinstance(criteria, list) or not any(
@@ -608,12 +779,77 @@ def public_service_measurement(
     destination_ip = bindings.get("destination_ip")
     if not (source and destination and destination_ip):
         return None
-    return {"source": str(source), "destination": str(destination), "destination_ip": str(destination_ip)}
+    service = {"source": str(source), "destination": str(destination), "destination_ip": str(destination_ip)}
+    if healthy_throughput_mbps is not None:
+        service["healthy_throughput_mbps"] = round(float(healthy_throughput_mbps), 3)
+    return service
+
+
+#: The paths a `segment_isolation` criterion measures, as the compiler bound them.
+SEGMENT_ISOLATION_PATHS = ("reachable_paths", "same_segment_paths", "isolated_paths", "preserved_paths")
+
+
+def public_segment_isolation(
+    success_criteria: Mapping[str, Any] | None, bindings: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """The paths the subject's own `segment_isolation` check measures, or None when the
+    criteria declare none.
+
+    The ANI reads them from the task's `observation.segment_isolation`, as it reads the
+    measured flow of a throughput criterion from `service_measurement`: the members of
+    the new VLAN, which pairs must answer, which must answer without crossing a router,
+    which must not answer at all, and which paths of the rest of the network must keep
+    working. All of it follows from the task's own wording; none of it says how to
+    build the VLAN.
+    """
+    criteria = (success_criteria or {}).get("all_of") if isinstance(success_criteria, Mapping) else None
+    if not isinstance(criteria, list) or not any(
+            isinstance(item, Mapping) and item.get("type") == "segment_isolation" for item in criteria):
+        return None
+    if not bindings.get("members"):
+        return None
+    return {
+        "members": [str(node) for node in bindings["members"]],
+        **{key: [str(path) for path in bindings.get(key) or []] for key in SEGMENT_ISOLATION_PATHS},
+    }
+
+
+def public_service_publication(
+    success_criteria: Mapping[str, Any] | None, bindings: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """What the subject's own `service_publication` check measures, or None when the criteria
+    declare none: the client outside, the service host and port it must reach, and the hosts
+    of the service's zone that must answer it on nothing else. All of it follows from the
+    task's wording; none of it says which ruleset to write."""
+    criteria = (success_criteria or {}).get("all_of") if isinstance(success_criteria, Mapping) else None
+    if not isinstance(criteria, list) or not any(
+            isinstance(item, Mapping) and item.get("type") == "service_publication" for item in criteria):
+        return None
+    if not (bindings.get("external_source") and bindings.get("service_node") and bindings.get("service_port")):
+        return None
+    return {
+        "source": str(bindings["external_source"]),
+        "service": str(bindings["service_node"]),
+        "port": int(bindings["service_port"]),
+        "transport": str(bindings.get("service_transport") or "tcp"),
+        "closed_hosts": [str(node) for node in bindings.get("closed_hosts") or []],
+    }
 
 
 def public_observation(
     success_criteria: Mapping[str, Any] | None, bindings: Mapping[str, Any],
+    healthy_throughput_mbps: float | None = None,
 ) -> dict[str, Any] | None:
-    """The observation the request carries: the measured flow when the criteria need one."""
-    service = public_service_measurement(success_criteria, bindings)
-    return {"service_measurement": service} if service else None
+    """The observation the request carries: the measured flow when the criteria need one,
+    what a change request is measured on when they declare one."""
+    observation: dict[str, Any] = {}
+    service = public_service_measurement(success_criteria, bindings, healthy_throughput_mbps)
+    if service:
+        observation["service_measurement"] = service
+    isolation = public_segment_isolation(success_criteria, bindings)
+    if isolation:
+        observation["segment_isolation"] = isolation
+    publication = public_service_publication(success_criteria, bindings)
+    if publication:
+        observation["service_publication"] = publication
+    return observation or None

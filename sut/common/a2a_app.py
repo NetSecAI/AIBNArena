@@ -184,15 +184,38 @@ def format_self_execute_report(payload: dict[str, Any]) -> str:
         lines.append("")
         lines.append("Tool calls")
         lines.append("-" * 10)
-    for index, item in enumerate(operations, start=1):
+
+    def call_line(prefix: str, item: dict[str, Any]) -> str:
         arguments = json.dumps(item.get("arguments") or {}, ensure_ascii=False, default=str)
-        line = (f"{index}. [{item.get('category', 'tool')}] {item.get('operation', 'n/a')} "
+        line = (f"{prefix}[{item.get('category', 'tool')}] {item.get('operation', 'n/a')} "
                 f"{compact_text(arguments)} · ok={item.get('ok')}")
         if item.get("duration_seconds") is not None:
             line += f" · {float(item['duration_seconds']):.1f}s"
         if item.get("error"):
             line += f" · error: {compact_text(item['error'], 160)}"
-        lines.append(line)
+        return line
+
+    # A row a call made on its own behalf (`source`) is not a call of the model's: it is
+    # shown under the call that made it, unnumbered, after that call (the compensating
+    # rollback); one recorded before any call waits for the next.
+    numbered = 0
+    owner: str | None = None
+    waiting: list[dict[str, Any]] = []
+    for item in operations:
+        if item.get("source"):
+            if owner is None:
+                waiting.append(item)
+            else:
+                lines.append(call_line(f"   ↳ inside {owner} ({item['source']}): ", item))
+            continue
+        numbered += 1
+        owner = str(item.get("operation", "n/a"))
+        lines.append(call_line(f"{numbered}. ", item))
+        for nested in waiting:
+            lines.append(call_line(f"   ↳ inside {owner} ({nested['source']}): ", nested))
+        waiting = []
+    for nested in waiting:
+        lines.append(call_line(f"   ↳ issued by the subject ({nested['source']}): ", nested))
 
     for index, item in enumerate(device_changes, start=1):
         if not isinstance(item, dict):

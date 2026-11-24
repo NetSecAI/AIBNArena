@@ -111,6 +111,89 @@ _EXAMPLES: tuple[tuple[str, str, str], ...] = (
 )
 
 
+#: The question asked about one fault of a combined scenario (`assess_diagnosis`).
+#: `fault-pluie-v2` asks whether A and B name *the same* fault, and a statement that
+#: names two faults is not the same as one of them: on the fifteen episodes of
+#: campaign_stepback_combined-20261118T150721Z, asked fault by fault under v2,
+#: gpt-4o-mini answered No to 21 of the 30 faults, among them both faults of
+#: statements naming each precisely (2026-11-19). This one asks whether B names A
+#: among whatever else it names.
+AMONG_PROMPT_ID = "fault-pluie-among-v1"
+
+_AMONG_INSTRUCTION = (
+    "You will receive two descriptions, A and B, about faults in a computer network. "
+    "A is one fault that was actually introduced; the network may have had other faults "
+    "beside it. B is what an engineer reported after troubleshooting: the faults they "
+    "identified, or the repairs they made, which imply the faults they corrected; it may "
+    "name several. Does B identify fault A, that is the same device and the same broken "
+    "configuration, whatever else it names? Judge the device and the cause, not the "
+    "wording: B may add symptoms, name other faults, mention other changes, or leave out "
+    "values. Answer with only one word, Yes or No."
+)
+
+#: Eight examples on the network of `_EXAMPLES`, alternating Yes and No, most B naming
+#: two faults. A Yes has A first, second, as a repair, or beside another change; each
+#: No is a different way of missing A: the right device with another cause, a repair
+#: of the symptom on the client instead of the server's cause, other faults only, and
+#: A's symptom named without its cause.
+_AMONG_EXAMPLES: tuple[tuple[str, str, str], ...] = (
+    ("On r1, interface eth2 lost its IPv4 address: 192.168.20.1/24 was removed, so "
+     "the interface has no address on the LAN-B segment.",
+     "r1: eth2 had no IPv4 address on the 192.168.20.0/24 LAN; srv1: its default route "
+     "pointed to 10.0.5.254 instead of 10.0.5.1.",
+     YES),
+    ("On r2, a traffic filter drops all traffic to subnet 172.16.30.0/24 (LAN-C "
+     "segment), applied on interface eth1.",
+     "r2: interface eth1 toward 172.16.30.0/24 was administratively down; pc1: eth0 had "
+     "a /32 mask instead of /24.",
+     NO),
+    ("On pc1, interface eth0 is configured with 10.1.1.5/32: the prefix length is "
+     "wrong, it should be 10.1.1.5/24.",
+     "Removed r2's filter that dropped traffic to 172.16.30.0/24, and corrected pc1's "
+     "eth0 from 10.1.1.5/32 to 10.1.1.5/24; every ping passes again.",
+     YES),
+    ("On the DHCP server dhcp1, the pool lan-users for subnet 10.2.0.0/24 was removed, "
+     "so clients on that subnet (pc2) get no lease.",
+     "pc2 had no IPv4 address, so I configured 10.2.0.20/24 on its eth0 with a default "
+     "route via 10.2.0.1; sw1's trunk Ethernet1 was missing VLAN 30, which I added.",
+     NO),
+    ("On sw1, VLAN 30 was removed from the allowed VLAN list of trunk Ethernet1, so the "
+     "endpoints of that VLAN behind the switch no longer reach their gateway.",
+     "dhcp1: the pool lan-users for 10.2.0.0/24 was missing; sw1: trunk Ethernet1 did "
+     "not carry VLAN 30, isolating the VLAN 30 desks from their gateway.",
+     YES),
+    ("On pc2, interface eth0 (LAN-A segment) is administratively down (shut down).",
+     "srv1's default gateway was 10.0.5.254 instead of 10.0.5.1, and r3 had IPv4 "
+     "forwarding disabled; both corrected.",
+     NO),
+    ("On r3, the static route to 10.20.0.0/16 (toward srv2 in servers) points to the "
+     "wrong next hop 10.0.0.9, an address on the wrong egress instead of the path via "
+     "10.0.0.2.",
+     "r3: the route to 10.20.0.0/16 used next hop 10.0.0.9 instead of 10.0.0.2; I also "
+     "brought pc2's eth0 back up and added its missing default route.",
+     YES),
+    ("On srv1, the default route points to 10.0.5.254, a gateway address that does not "
+     "exist on the servers segment; it should point to 10.0.5.1.",
+     "I found one fault: pc1 had a /32 mask on eth0, now /24. srv1 still cannot reach "
+     "other subnets.",
+     NO),
+)
+
+
+@dataclass(frozen=True)
+class JudgeQuestion:
+    """A prompt the judge can be asked under: its id, its instruction, its examples."""
+    prompt_id: str
+    instruction: str
+    examples: tuple[tuple[str, str, str], ...]
+
+
+#: Do A and B name the same fault: a scenario with one fault.
+SAME_FAULT = JudgeQuestion(PROMPT_ID, _INSTRUCTION, _EXAMPLES)
+#: Does B name fault A among others: one fault of a combined scenario.
+AMONG_FAULTS = JudgeQuestion(AMONG_PROMPT_ID, _AMONG_INSTRUCTION, _AMONG_EXAMPLES)
+
+
 def _pair(reference: str, hypothesis: str) -> str:
     return f'A: "{_quoted(reference)}"; B: "{_quoted(hypothesis)}"'
 
@@ -120,22 +203,23 @@ def _quoted(text: str) -> str:
     return " ".join(str(text).replace('"', "'").split())
 
 
-def prompt_messages(reference: str, hypothesis: str) -> list[dict[str, str]]:
+def prompt_messages(reference: str, hypothesis: str,
+                    question: JudgeQuestion = SAME_FAULT) -> list[dict[str, str]]:
     """The *-PLUIE style conversation: the question, the examples, then the data."""
     messages = [
-        {"role": "user", "content": _INSTRUCTION},
+        {"role": "user", "content": question.instruction},
         {"role": "assistant", "content": "Please provide the two descriptions for me to evaluate."},
     ]
-    for example_reference, example_hypothesis, answer in _EXAMPLES:
+    for example_reference, example_hypothesis, answer in question.examples:
         messages.append({"role": "user", "content": _pair(example_reference, example_hypothesis)})
         messages.append({"role": "assistant", "content": answer})
     messages.append({"role": "user", "content": _pair(reference, hypothesis)})
     return messages
 
 
-def prompt_sha256() -> str:
+def prompt_sha256(question: JudgeQuestion = SAME_FAULT) -> str:
     """Identity of the template, so two scores can be known to share their question."""
-    template = prompt_messages("{reference}", "{hypothesis}")
+    template = prompt_messages("{reference}", "{hypothesis}", question)
     return hashlib.sha256(json.dumps(template, sort_keys=True).encode("utf-8")).hexdigest()
 
 
@@ -147,6 +231,10 @@ class FaultReference:
     method: str | None
     operation: str | None
     target: str | None
+    #: A combined scenario's faults, each one a reference of its own, in injection
+    #: order; empty for a single fault. The judge scores each against the statement
+    #: (`assess_diagnosis`), since its question is about one fault.
+    components: tuple["FaultReference", ...] = ()
 
 
 def describe_fault(method: Mapping[str, Any] | None, bindings: Mapping[str, Any]) -> str:
@@ -189,6 +277,35 @@ def describe_fault(method: Mapping[str, Any] | None, bindings: Mapping[str, Any]
                 f"below the normal value, so normal-sized packets cannot pass.")
     if name == "set_ipv4_forwarding":
         return f"On {target}, IPv4 forwarding (routing between its interfaces) is disabled."
+    if name == "provision_isolated_vlan":
+        return (f"On {target}, nothing was broken: this is a change request. The subject was asked "
+                f"to create VLAN {b.get('vlan_id')} isolating {', '.join(map(str, b.get('group') or []))} with "
+                f"{b.get('service_node')}, which every endpoint reached on the reference network.")
+    if name == "provision_service_publication":
+        return (f"On {target}, nothing was broken: this is a change request. The subject was asked "
+                f"to secure {b.get('service')}: publish it to the {b.get('outside_zone')} zone on "
+                f"{b.get('service_transport') or 'tcp'}/{b.get('service_port')} of {b.get('service_node')} "
+                f"and on nothing else, which the reference policy did not publish at all.")
+    if name == "set_access_port_vlan":
+        return (f"On {target}, access port {interface} was moved from VLAN {b.get('vlan_id')} to "
+                f"VLAN {b.get('fault_vlan_id')}, so its endpoint sits in a broadcast domain whose "
+                f"gateway does not own its subnet; it should be in VLAN {b.get('vlan_id')}.")
+    if name == "set_switchport_mode":
+        return (f"On {target}, access port {interface} was put in trunk mode, so its endpoint's "
+                f"untagged frames fall into the trunk's native VLAN instead of VLAN "
+                f"{b.get('vlan_id')}; it should be an access port of VLAN {b.get('vlan_id')}.")
+    if name == "set_vlan_presence":
+        return (f"On {target}, VLAN {b.get('vlan_id')} was deleted from the switch's VLAN "
+                f"database, so the access ports assigned to it are inactive and its uplink no "
+                f"longer forwards it.")
+    if name == "set_trunk_allowed_vlan":
+        return (f"On {target}, VLAN {b.get('vlan_id')} was removed from the allowed VLAN list of "
+                f"trunk {interface}, so the endpoints of that VLAN behind the switch no longer "
+                f"reach their gateway.")
+    if name == "set_trunk_native_vlan":
+        return (f"On {target}, trunk {interface} has its native VLAN set to {b.get('vlan_id')}, so "
+                f"that VLAN leaves untagged and the far end, which expects it tagged, puts it in "
+                f"its own native VLAN instead.")
     if name == "set_default_route_presence":
         return f"On {target}, the default route (0.0.0.0/0) was removed, so it has no route to other networks."
     if name == "set_default_route_gateway":
@@ -298,12 +415,43 @@ def reference_for_scenario(scenario: ScenarioDefinition) -> FaultReference | Non
 
 
 def reference_for_method(method: Mapping[str, Any], bindings: Mapping[str, Any]) -> FaultReference:
+    if method.get("components"):
+        return _reference_for_combination(method, bindings)
     operation = method.get("operation") if isinstance(method.get("operation"), Mapping) else {}
     return FaultReference(
         text=describe_fault(method, bindings),
         method=(str(method["name"]) if method.get("name") else None),
         operation=(str(operation.get("name")) if operation.get("name") else None),
         target=(str(bindings.get("target")) if bindings.get("target") else None),
+    )
+
+
+def _reference_for_combination(method: Mapping[str, Any], bindings: Mapping[str, Any]) -> FaultReference:
+    """Every fault of a combined scenario, one sentence each, in injection order.
+
+    The bindings of each component sit under `bindings.components`, beside the method
+    that drew them; the method's own `components` list is only the selection. The
+    whole text names them all for the record and the report; each fault is also kept
+    as a reference of its own (`components`), which is what the judge is asked about.
+    """
+    parts = [part for part in (bindings.get("components") or []) if isinstance(part, Mapping)]
+    sentences, operations, targets, components = [], [], [], []
+    for index, part in enumerate(parts, start=1):
+        component_method = part.get("method") if isinstance(part.get("method"), Mapping) else {}
+        component_bindings = part.get("bindings") if isinstance(part.get("bindings"), Mapping) else {}
+        component = reference_for_method(component_method, component_bindings)
+        components.append(component)
+        sentences.append(f"Fault {index} of {len(parts)}: {component.text}")
+        if component.operation:
+            operations.append(component.operation)
+        if component.target and component.target not in targets:
+            targets.append(component.target)
+    return FaultReference(
+        text=" ".join(sentences) or describe_fault(None, bindings),
+        method=(str(method["name"]) if method.get("name") else None),
+        operation="+".join(operations) or None,
+        target=", ".join(targets) or None,
+        components=tuple(components),
     )
 
 
@@ -402,19 +550,20 @@ class PLUIEJudge:
         self._client = httpx.Client(base_url=config.api_base, headers=headers,
                                     timeout=config.timeout_seconds, transport=transport)
 
-    def identity(self) -> dict[str, Any]:
+    def identity(self, question: JudgeQuestion = SAME_FAULT) -> dict[str, Any]:
         return {"model": self.config.model, "api_base": self.config.api_base,
-                "prompt_id": PROMPT_ID, "prompt_sha256": prompt_sha256(),
+                "prompt_id": question.prompt_id, "prompt_sha256": prompt_sha256(question),
                 "reading": self.config.reading}
 
-    def score(self, reference: str, hypothesis: str) -> dict[str, Any]:
+    def score(self, reference: str, hypothesis: str,
+              question: JudgeQuestion = SAME_FAULT) -> dict[str, Any]:
         """log p(Yes) - log p(No) under the configured reading, audited."""
-        messages = prompt_messages(reference, hypothesis)
+        messages = prompt_messages(reference, hypothesis, question)
         if self.config.reading == "top_logprobs":
             scored = self._score_from_candidates(messages)
         else:
             scored = self._score_from_prompt_logprobs(messages)
-        self._audit(reference, hypothesis, scored)
+        self._audit(reference, hypothesis, scored, question)
         return scored
 
     def _score_from_prompt_logprobs(self, messages: list[dict[str, str]]) -> dict[str, Any]:
@@ -501,13 +650,14 @@ class PLUIEJudge:
                     "listed": len(candidates), "listed_mass": round(listed_mass, 6)},
         }
 
-    def _audit(self, reference: str, hypothesis: str, scored: Mapping[str, Any]) -> None:
+    def _audit(self, reference: str, hypothesis: str, scored: Mapping[str, Any],
+               question: JudgeQuestion = SAME_FAULT) -> None:
         """One JSON line per scoring call, with the raw candidates, in the audit log."""
         if not self.config.audit_log:
             return
         line = {
             "at": datetime.now(timezone.utc).isoformat(),
-            "judge": self.identity(),
+            "judge": self.identity(question),
             "reference": reference, "hypothesis": hypothesis,
             "score": scored["score"], "log_p_yes": scored["log_p_yes"], "log_p_no": scored["log_p_no"],
             "bound": scored.get("bound", False), "answer_tokens": scored["answer_tokens"],
@@ -586,6 +736,19 @@ def assess_diagnosis(reference: FaultReference | None, sut_result: Mapping[str, 
     subject stated nothing (then False: whatever the fault was, it did not say). It
     is None when the question was not asked, and `reason` says why: no fault to
     find, no method to describe, no judge configured, or a judge that failed.
+
+    A combined scenario's faults are judged one at a time, each against the whole
+    statement under `AMONG_FAULTS` (does B name fault A, whatever else it names), and
+    listed under `components`. `SAME_FAULT` asks whether A and B name the same fault:
+    asked about "Fault 1 of 2: ... Fault 2 of 2: ..." it has no rule for a statement
+    naming one of the two, and on 2026-11-18 (campaign_stepback_combined-20261118T150721Z,
+    gpt-4o-mini) it answered Yes to two such statements and No to a third, and No to
+    one naming both; asked about each fault alone, it answers No to a statement that
+    also names the other (`AMONG_PROMPT_ID`). The episode found the problem when it
+    found every fault, as its repair must fix every one; `score` and its two terms are
+    the lowest-scoring fault's, so `found` is still `score > 0`, and
+    `components_found` counts the faults found. The block's `judge` names the
+    question its faults were asked under.
     """
     hypothesis, source = hypothesis_of(sut_result if isinstance(sut_result, Mapping) else {})
     block: dict[str, Any] = {
@@ -614,20 +777,56 @@ def assess_diagnosis(reference: FaultReference | None, sut_result: Mapping[str, 
     if judge is None:
         block["reason"] = "no diagnosis judge configured"
         return block
+    faults = reference.components or (reference,)
+    combined = bool(reference.components)
+    if combined:
+        block["components"] = []
+    verdicts: list[dict[str, Any]] = []
+    where = ""
     try:
         block["judge"] = dict(judge.identity())
-        scored = judge.score(reference.text, hypothesis)
+        if combined:
+            block["judge"].update(prompt_id=AMONG_FAULTS.prompt_id,
+                                  prompt_sha256=prompt_sha256(AMONG_FAULTS))
+        for index, fault in enumerate(faults, start=1):
+            if combined:
+                where = f" (fault {index} of {len(faults)})"
+                scored = judge.score(fault.text, hypothesis, question=AMONG_FAULTS)
+            else:
+                scored = judge.score(fault.text, hypothesis)
+            verdict = _verdict(scored)
+            verdicts.append(verdict)
+            if combined:
+                block["components"].append({
+                    "index": index, "reference": fault.text, "method": fault.method,
+                    "operation": fault.operation, "target": fault.target, **verdict})
     except Exception as exc:  # noqa: BLE001 - the reason is recorded, the episode stands
-        block["reason"] = f"judge error: {type(exc).__name__}: {str(exc)[:300]}"
+        block["reason"] = f"judge error{where}: {type(exc).__name__}: {str(exc)[:300]}"
         return block
-    block["score"] = round(float(scored["score"]), 4)
-    block["log_p_yes"] = round(float(scored["log_p_yes"]), 4)
-    block["log_p_no"] = round(float(scored["log_p_no"]), 4)
-    block["found"] = block["score"] > 0
-    block["judge"].update({key: scored[key] for key in ("method", "bound", "answer_tokens") if key in scored})
+    lowest = min(verdicts, key=lambda verdict: verdict["score"])
+    block.update({key: lowest[key] for key in ("score", "log_p_yes", "log_p_no")})
+    block["found"] = all(verdict["found"] for verdict in verdicts)
+    if combined:
+        block["components_found"] = sum(verdict["found"] for verdict in verdicts)
+    block["judge"].update(lowest["judge"])
+    if any(verdict["judge"].get("bound") for verdict in verdicts):
+        block["judge"]["bound"] = True
     if getattr(judge, "config", None) is not None and getattr(judge.config, "audit_log", None):
         block["judge"]["audit_log"] = str(judge.config.audit_log)
     return block
+
+
+def _verdict(scored: Mapping[str, Any]) -> dict[str, Any]:
+    """One scored pair as the block writes it: the score, its two terms, and how the
+    judge read them."""
+    score = round(float(scored["score"]), 4)
+    return {
+        "found": score > 0,
+        "score": score,
+        "log_p_yes": round(float(scored["log_p_yes"]), 4),
+        "log_p_no": round(float(scored["log_p_no"]), 4),
+        "judge": {key: scored[key] for key in ("method", "bound", "answer_tokens") if key in scored},
+    }
 
 
 def judge_from_config(config: Mapping[str, Any] | None) -> PLUIEJudge | None:

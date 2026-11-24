@@ -20,7 +20,7 @@ from webui.routes import config, router
 async def lifespan(_app: FastAPI):
     # The runs and campaigns a previous server left, so "Recent runs" and
     # "Recent campaigns" survive a restart.
-    history.restore(MANAGER, config.absolute(config.log_dir))
+    history.restore(MANAGER, config.absolute(config.manual_dir))
     history.restore_campaigns(MANAGER, config.absolute(config.campaign_dir))
     yield
 

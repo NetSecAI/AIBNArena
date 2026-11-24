@@ -79,6 +79,9 @@ class MyAgent:
 deliberately *not* a user of this loop -- it owns its own, through
 `langchain.agents.create_agent`. That is the point of having it: it measures what the
 shared loop costs relative to an off-the-shelf agent runtime over the same ANI.
+[`sut/langchain_agent_v2/`](../langchain_agent_v2/) is that baseline without what coaches the model
+or corrects it: no send-back, note or nudge, no method in its prompt. The step-back subjects of
+[`sut/step-back/`](../step-back/) are that v2 with its reading taken in hand.
 
 The server side is shared too: `SelfExecuteAgentExecutor` (serializes episodes,
 keeps Uvicorn free to answer the agent card during a 300 s run), `build_ani` and
@@ -89,7 +92,8 @@ keeps Uvicorn free to answer the agent card during a 300 s run), `build_ani` and
 | Module | Holds |
 |---|---|
 | `self_execute.py` | The loop, the completion gate, the report, the sanity-question path |
-| `messages.py` | Duck-typed model-message accessors, JSON parsing, and the two prompt stanzas |
+| `messages.py` | Duck-typed model-message accessors, JSON parsing, the two prompt stanzas, and the nudge after a reply with no call |
+| `repeated_requests.py` | The note on a failed request repeated identically, shared by this loop and the LangChain baseline |
 | `ani_report.py` | ANI results → `device_changes[]`, `ani_operations[]`, the objective projection |
 | `agent_config.py` | `ModelAgentConfig` defaults, `env_fields(prefix)`, `resolve_endpoint` |
 | `litellm_backend.py` | The LiteLLM caller — the one replaceable piece |
@@ -123,11 +127,22 @@ needs no escaping.
 2. **Tool calls, if any.** Each is dispatched to the ANI; `ANIRequestError` becomes
    an `{"ok": false, ...}` tool result rather than a fatal error, so the model can
    react to its own bad argument. A passing `public_success_criteria` validation
-   marks the most recent action `verified_after_action`.
+   marks the most recent action `verified_after_action`. A `submit_result` the ANI
+   accepts (v0.4) ends the episode there: the calls after it in the turn are not
+   sent, its status is recorded as submitted, and `termination.via` names it. It is
+   not gated: a `completed` without a passing validation stays `completed`, with
+   `verified: false`.
 3. **Final JSON, if no tool calls.** `completed` claimed without a passing
    validation is **rejected**: the loop pushes back a corrective message and keeps
-   going. That gate is what stops a SUT from grading itself.
-4. **Neither.** The model is nudged and the loop continues.
+   going. That gate is what stops a SUT from grading itself through its text.
+4. **Neither.** The model is nudged and the loop continues. A reply whose text holds a tool
+   call written out (`<tool_call>` markup the provider's parser did not read) is told so
+   first, and its turn's error says so (`no_action_nudge`, since 2026-10-30: in E20 one
+   `wrong_routing_table.m3` episode spent 343 turns writing calls as text, each answered
+   with the bare nudge). The LangChain baseline's nudge uses the same function.
+   A runtime with `end_on_no_tool_call` ends the episode there instead, with no nudge, and on a
+   malformed call too; a `completed` written as text with no passing validation is recorded as
+   failed, as `langchain_agent_v2` records it.
 
 The default `status` is `"timeout"`, so anything that neither concludes nor fails
 lands there. `verified` requires both `status == "completed"` and a passing
@@ -137,6 +152,24 @@ The report has eight keys — `mode`, `status`, `verified`, `device_changes`,
 `ani_operations`, `execution`, `final_observation`, `error` — and only `mode` and
 `device_changes` are validated Judge-side by `parse_self_execute_report`. Correctness is
 never taken from the report: the Judge re-observes the lab itself.
+
+The transcript is sent whole at every call unless a bound is set (`ModelAgentConfig`, all
+off by default; `execution.context` records which ran and what each did):
+`tool_result_chars` cuts one tool result; `context_budget_chars` elides the results of
+reads a later identical read superseded and ends the episode when that is not enough;
+`keep_recent_reads` keeps the most recent read results whole and turns every older one
+into a stub naming its call, before every model call, without ever ending the episode
+(`_elide_older_reads`); `keep_recent_read_chars` does the same counted in characters, the
+answers to the model's last turn always kept whole, and with both a result stays whole only if
+each rule keeps it. Writes, validations and the model's own messages are never elided.
+The v2 subjects (`langchain_agent_v2` and the step-back subjects built on it) ship
+`keep_recent_reads` at 10; a subject whose runtime
+does not pass them runs without them. From 2026-11-15 to 2026-11-16 (main04) the v2 subjects
+shipped `keep_recent_read_chars` at `KEEP_RECENT_READ_CHARS`, 60 000, and no count instead, so that
+the rule did not depend on how large one subject's reads are; they were set back to ten after
+main04. `IBN_SUT_KEEP_RECENT_READS` and `IBN_SUT_KEEP_RECENT_READ_CHARS` set either rule for every
+subject of a run, 0 turning it off. `langchain_agent_v2`, which has no runtime of this loop, applies the same function
+from a middleware, and sends what this loop sends.
 
 ## Failure handling
 
@@ -164,7 +197,6 @@ survives to the final report), ANI errors, model exceptions, the sanity-question
 path, dry-run and disabled-self-execute short circuits, budget clamping, and the
 malformed-call recovery and provider failures above.
 
-The terminal stanzas every prompt must carry (`FINAL_STATUS_CONTRACT`,
-`ANSWER_CONTRACT`) are a hard requirement of the loop: `parse_final_response` rejects
-any other output shape, so a prompt that drops them never ends on the model's own
-conclusion.
+Two prompt checks have deliberately different strengths: the terminal stanzas are a
+hard assertion, while prompt-for-prompt equality between SUTs is only reported. That
+equality is a control convention, not a machine requirement.

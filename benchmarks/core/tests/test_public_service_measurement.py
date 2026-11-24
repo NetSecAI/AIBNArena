@@ -38,6 +38,35 @@ def test_an_incomplete_flow_is_left_out_rather_than_half_published():
     assert public_service_measurement(QOS_CRITERIA, {"protected_source": "user1"}) is None
 
 
+def test_the_flow_carries_the_healthy_rate_its_check_is_held_to():
+    assert public_observation(QOS_CRITERIA, QOS_BINDINGS, 6.2741) == {"service_measurement": {
+        "source": "user1", "destination": "external1", "destination_ip": "203.0.113.10",
+        "healthy_throughput_mbps": 6.274}}
+    connectivity = {"all_of": [{"type": "lab_connectivity"}]}
+    assert public_observation(connectivity, QOS_BINDINGS, 6.274) is None
+
+
+def test_the_healthy_rate_is_the_one_the_repair_oracle_reads():
+    """Both shaped families: the healthy probe's reading of the metric the repair oracle's
+    baseline-relative throughput threshold names, and nothing for any other oracle."""
+    from pathlib import Path
+
+    from benchmarks.core.lifecycle import repair_throughput_reference
+    from scenarios.oracle_loader import load_oracle
+
+    root = Path(__file__).resolve().parents[3]
+    for family in ("shaping-repair", "assured-bandwidth"):
+        document = load_oracle(root / "scenarios/oracles/qos" / family / "repair-v1.yaml")
+        [probe] = [probe for probe in document["probes"] if probe["type"] == "throughput"]
+        baseline = {probe["id"]: {"throughput_mbps": 6.274, "circuit_egress_mbps": 10.0}}
+        assert repair_throughput_reference(document, baseline) == 6.274, family
+        assert repair_throughput_reference(document, {}) is None, family
+    connectivity = load_oracle(root / "scenarios/oracles/connectivity/repair-v1.yaml")
+    assert repair_throughput_reference(
+        connectivity, {probe["id"]: {"throughput_mbps": 6.274} for probe in connectivity["probes"]}) is None
+    assert repair_throughput_reference(None, {}) is None
+
+
 def test_the_client_forwards_the_observation_it_was_handed(monkeypatch):
     captured = {}
 

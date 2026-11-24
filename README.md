@@ -92,10 +92,9 @@ The RAG subject starts the same way from `./sut/langchain_rag_agent/a2a_server.p
 The complete LangChain baseline matrix (two models, three scenarios, three seeds) is `experiments/run_langchain_baseline.sh`.
 ## Run from the web interface
 ```bash
-.venv/bin/python -m pip install -r requirements-webui.txt
 .venv/bin/python -m webui.main
 ```
-`webui/` serves the web interface on http://127.0.0.1:8080, a local front end for the two commands above. The **Episode** page runs one episode. It starts the subject, proves the process and model answering are the ones it started, runs the judge against it, and stops the subject whatever the outcome. The **Campaign** page runs a matrix of subjects × models × scenarios × seeds, starting each subject once per model and topology, then writes the campaign's comparison page and lays its records out under `reports/campaigns/`. The **Models** page registers the endpoints the models are served from. Same results and reports, same directories. See `webui/README.md`.
+`webui/` serves the web interface on http://127.0.0.1:8080 (or the next free port), a local front end for the two commands above. The **Episode** page runs one episode. It starts the subject, proves the process and model answering are the ones it started, runs the judge against it, and stops the subject whatever the outcome. The **Campaign** page runs a matrix of subjects × models × scenarios × seeds, starting each subject once per model and topology, then writes the campaign's comparison page and lays its records out under `reports/campaigns/`. The **Models** page registers the endpoints the models are served from. Same results and reports, same directories. See `webui/README.md`.
 ## Tests
 ```bash
 .venv/bin/python -m pytest -q
