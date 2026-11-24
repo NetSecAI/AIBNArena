@@ -1,0 +1,36 @@
+schema_version: "1.0"
+oracle_id: vlan.segment.healthy
+version: 1.0.0
+description: >-
+  Every topology-required path is loss-free and every isolated pair is blocked before
+  fault injection. The isolated pairs are measured here as well as after the repair, so
+  a lab that already leaks is refused before the subject is judged on it.
+domain: vlan
+phase: healthy
+probes:
+  - id: required_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: required_paths
+    protocol: icmp
+    scope: all
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+  - id: denied_paths
+    type: isolation_matrix
+    source: testbed
+    destination: isolation_requirements
+    protocol: icmp
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, blocked_checks, leaked_checks]
+    thresholds:
+      - {metric: leaked_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

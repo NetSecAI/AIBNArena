@@ -1,0 +1,54 @@
+schema_version: "0.1"
+version: "1.0.0"
+# Layer-2 faults on the access switches: the endpoint, its address and the gateway are
+# untouched, only which VLAN a switch port carries is wrong. Both methods cut the
+# endpoint from the gateway of its VLAN, so the connectivity matrix observes the fault;
+# the repair oracle also pings the isolated pairs, so a repair that merges broadcast
+# domains instead of restoring the intended one does not pass.
+#
+# Only VLAN membership is faulted here: an access port moved into another VLAN of its
+# switch, or a VLAN pruned from an uplink. The switch's port mode, VLAN database and
+# native VLAN are left alone.
+oracles:
+  healthy: {path: scenarios/oracles/vlan/healthy-v1.yaml, version: "1.0.0"}
+  expected_degradation: {path: scenarios/oracles/vlan/expected-degradation-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/vlan/repair-v1.yaml, version: "1.0.0"}
+  preservation: {path: scenarios/oracles/vlan/preservation-v1.yaml, version: "1.0.0"}
+scenario: vlan_misconfiguration
+task:
+  low: >-
+    Something on this network is not working the way it should. Put it back.
+  medium: >-
+    Restore the intended VLAN membership of the affected endpoints, so that each one
+    reaches the gateway of its own VLAN again, without disrupting the segments that still
+    work.
+  high: >-
+    {{affected_nodes}} can no longer reach the gateway of VLAN {{vlan_id}}, although nothing
+    changed on the endpoints themselves. Restore the intended connectivity for those
+    endpoints without disrupting the segments that still work.
+base_variant: medium
+success_criteria:
+  all_of:
+    - type: lab_connectivity
+extra_info:
+  origin: project-defined IBN task family
+  initial_condition: >-
+    the access switches carry each endpoint's VLAN from its access port to the gateway
+    over a tagged uplink; the fault changes exactly one VLAN membership on a switch
+  network_layers:
+    - L2 VLAN / IEEE 802.1Q
+  references:
+    - title: IEEE 802.1Q - Bridges and Bridged Networks
+      url: https://standards.ieee.org/ieee/802.1Q/10323/
+methods:
+  # The access port carries another VLAN of the same switch: the endpoint lands in a
+  # broadcast domain whose gateway does not own its subnet.
+  - id: 1
+    name: access_port_in_wrong_vlan
+    selector: {node: switch, interface: access}
+    operation: {name: set_access_port_vlan, value_source: other_switch_vlan}
+  # The uplink no longer allows the VLAN: the endpoints behind it lose their gateway.
+  - id: 2
+    name: trunk_vlan_pruned
+    selector: {node: switch, interface: trunk}
+    operation: {name: set_trunk_allowed_vlan, present: false}

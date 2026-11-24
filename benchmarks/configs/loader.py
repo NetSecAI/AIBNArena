@@ -179,6 +179,15 @@ def _oracle_bindings(
         bindings.setdefault("preservation_source", str(preserved["source"]))
         bindings.setdefault("preservation_destination", str(preserved["destination"]))
         bindings.setdefault("preservation_destination_ip", _node_ip(topology, str(preserved["destination"])))
+    # A combined scenario's oracles are composed from its components' own, each resolved
+    # with that component's bindings (scenarios/oracle_loader.py): each one is given here
+    # exactly what it would be given run alone.
+    if isinstance(original.get("components"), list):
+        bindings["components"] = [
+            {**part, "bindings": _oracle_bindings(
+                part.get("bindings") or {}, topology_document, str(part.get("domain") or ""))}
+            for part in original["components"]
+        ]
     return bindings
 
 

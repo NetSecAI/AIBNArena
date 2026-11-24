@@ -1,0 +1,14 @@
+schema_version: "1.0"
+oracle_id: combined.components.expected_degradation
+version: 1.0.0
+description: >-
+  Every fault of the combination must show, each on its own terms: the degradation
+  oracle of each component, resolved with that component's own blast radius, is one
+  group, and all of them must pass. A combination where one fault went in without
+  effect is not the task it claims to be. The blast radii are disjoint by construction
+  (the compiler refuses a draw where two of them meet), so one fault cannot pass for
+  another on the endpoints it cut.
+domain: combined
+phase: expected_degradation
+compose: {affected_nodes: component}
+success: {mode: all_groups}

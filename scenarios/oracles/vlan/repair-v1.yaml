@@ -1,0 +1,39 @@
+schema_version: "1.0"
+oracle_id: vlan.segment.repair
+version: 1.0.0
+description: >-
+  Every required path is carried again, and every isolated pair is still blocked.
+
+  The second probe is there for the repairs that reconnect an endpoint by widening a
+  broadcast domain rather than restoring the intended one -- every port in one VLAN, or a
+  trunk forwarding what it should not. Same limit as the filtering repair oracle: both
+  probes ping, so a leak that only TCP would show passes.
+domain: vlan
+phase: repair
+probes:
+  - id: required_paths
+    type: connectivity_matrix
+    source: testbed
+    destination: required_paths
+    protocol: icmp
+    scope: all
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, passed_checks, failed_checks]
+    thresholds:
+      - {metric: failed_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+  - id: denied_paths
+    type: isolation_matrix
+    source: testbed
+    destination: isolation_requirements
+    protocol: icmp
+    attempts: 3
+    timeout_seconds: 1
+    metrics: [success, total_checks, blocked_checks, leaked_checks]
+    thresholds:
+      - {metric: leaked_checks, operator: eq, value: 0}
+    aggregation: {method: all_attempts}
+    success: {mode: all}
+success: {mode: all}

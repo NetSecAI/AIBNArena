@@ -14,6 +14,10 @@ DOMAIN_PREFIXES = {
     "filtering": "policy",
     "qos": "quality",
     "security": "control",
+    "vlan": "segment",
+    # Several faults from several families in one task: the repair pass rate is over
+    # every component's probes together.
+    "combined": "compound",
 }
 
 
