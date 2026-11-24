@@ -5,14 +5,16 @@
 // reading sent with the request: vLLM gives the prompt's own log-probabilities, the exact
 // reading (`prompt_logprobs`); the OpenAI API only lists the candidates of a generated
 // token (`top_logprobs`). The model list offers the registered models of the kind chosen.
-// An endpoint is OpenAI's when it was registered as such or when its URL is OpenAI's; any
-// other is taken for vLLM.
+// An endpoint is read as the OpenAI API when it was registered as OpenAI or OpenRouter, or
+// when its URL is one of theirs: OpenRouter takes the OpenAI API's `logprobs` and
+// `top_logprobs`, not vLLM's `prompt_logprobs`. Any other is taken for vLLM.
 
 const JUDGE_OTHER = "\u0000judge-other";
 const JUDGE_READINGS = { vllm: "prompt_logprobs", openai: "top_logprobs" };
 
 function judgeKindOf(endpoint) {
-  return endpoint.provider === "openai" || /^https?:\/\/api\.openai\.com(\/|$)/.test(endpoint.api_base)
+  return ["openai", "openrouter"].includes(endpoint.provider)
+    || /^https?:\/\/(api\.openai\.com|openrouter\.ai)(\/|$)/.test(endpoint.api_base)
     ? "openai" : "vllm";
 }
 
@@ -54,7 +56,7 @@ function showJudgeFields() {
   const note = document.getElementById("judge-note");
   if (note) {
     note.textContent = kind && !judgeModels(kind).length
-      ? `No ${kind === "openai" ? "OpenAI" : "vLLM"} endpoint is registered: add one on the Models page, or type a model id.`
+      ? `No ${kind === "openai" ? "OpenAI or OpenRouter" : "vLLM"} endpoint is registered: add one on the Models page, or type a model id.`
       : "";
   }
 }

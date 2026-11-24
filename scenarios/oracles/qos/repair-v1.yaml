@@ -1,7 +1,19 @@
 schema_version: "1.0"
 oracle_id: qos.path.repair
-version: 1.0.0
-description: Loss and latency return close to their recorded baseline.
+version: 1.1.0
+description: >-
+  Loss and latency return close to their recorded baseline.
+
+  Thirty pings, not five. The corruption method loses each packet independently
+  with the drawn probability (20 to 50 %), so a lab left exactly as the fault set
+  it answers five pings without loss in 0.8^5 = 33 % to 0.5^5 = 3 % of the
+  draws. Measured from E12 to E16 (qos.link_impairment.m2, 31 % drawn): the
+  netem qdisc was still in place after 18 episodes and this oracle passed 3 of
+  them, 0.69^5 = 16 % expected. Thirty pings bring that to 0.8^30 = 0.12 % at
+  the bottom of the range. The healthy lab loses nothing (no loss over the 200
+  baseline pings of the 40 QoS records then), so a loss-free bar stays fair to a
+  real repair. The delay method is unaffected: its latency fails the second
+  threshold on every ping.
 domain: qos
 phase: repair
 probes:
@@ -10,7 +22,7 @@ probes:
     source: "${bindings.source}"
     destination: "${bindings.destination_ip}"
     protocol: icmp
-    attempts: 5
+    attempts: 30
     timeout_seconds: 2
     metrics: [packet_loss_percent, rtt_avg_ms]
     thresholds:

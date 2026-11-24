@@ -32,8 +32,15 @@ def _compiled_methods() -> list[tuple[str, dict[str, Any], dict[str, Any]]]:
         compiled = compiler.compile_scenarios(REPO_ROOT / "scenarios", expand_methods=True)
         for task in compiled.get("tasks", []):
             method = (task["private"].get("evaluator") or {}).get("selected_method")
-            if method and method.get("name") not in found:
-                found[method["name"]] = (task["id"], method, task["private"]["bindings"])
+            # A combined task's faults are its components', each described from its own
+            # method and bindings (D._reference_for_combination): those are what is checked.
+            pairs = (
+                [(part["method"], part["bindings"]) for part in task["private"]["bindings"]["components"]]
+                if method and method.get("components") else [(method, task["private"]["bindings"])]
+            )
+            for one, bindings in pairs:
+                if one and one.get("name") not in found:
+                    found[one["name"]] = (task["id"], one, bindings)
     return list(found.values())
 
 
@@ -47,6 +54,33 @@ def test_every_compiled_method_is_described_by_name_and_device():
         assert not text.startswith(f"On {target}, fault "), (scenario_id, "fell to the generic phrasing", text)
         assert text.endswith("."), (scenario_id, text)
         assert "None" not in text, (scenario_id, "an unbound value leaked", text)
+
+
+def test_a_combined_fault_is_described_one_component_at_a_time():
+    method = {"id": 1, "name": "a+b", "components": [{"id": "c1"}, {"id": "c2"}]}
+    bindings = {"affected_nodes": ["host-access-1", "web-dmz"], "components": [
+        {"id": "c1", "method": {"name": "router_ipv4_forwarding_disabled",
+                                "operation": {"name": "set_ipv4_forwarding", "enabled": False}},
+         "bindings": {"target": "wan-edge", "affected_nodes": ["srv-site"]}},
+        {"id": "c2", "method": {"name": "trunk_vlan_pruned",
+                                "operation": {"name": "set_trunk_allowed_vlan", "present": False}},
+         "bindings": {"target": "switch-access-1", "interface": "Ethernet1", "vlan_id": 100,
+                      "affected_nodes": ["host-access-1"]}},
+    ]}
+    reference = D.reference_for_method(method, bindings)
+    assert reference.text.startswith("Fault 1 of 2: On wan-edge, IPv4 forwarding")
+    assert "Fault 2 of 2: On switch-access-1, VLAN 100 was removed from the allowed VLAN list of trunk Ethernet1" in reference.text
+    assert reference.method == "a+b"
+    assert reference.operation == "set_ipv4_forwarding+set_trunk_allowed_vlan"
+    assert reference.target == "wan-edge, switch-access-1"
+    # Each fault is also a reference of its own, in injection order: the judge's question.
+    first, second = reference.components
+    assert first == D.FaultReference(
+        text="On wan-edge, IPv4 forwarding (routing between its interfaces) is disabled.",
+        method="router_ipv4_forwarding_disabled", operation="set_ipv4_forwarding", target="wan-edge")
+    assert second.text.startswith("On switch-access-1, VLAN 100 was removed") and second.target == "switch-access-1"
+    assert reference.text == f"Fault 1 of 2: {first.text} Fault 2 of 2: {second.text}"
+    assert not first.components, "a single fault has no components"
 
 
 def test_the_wording_carries_the_healthy_and_faulty_values():
@@ -337,6 +371,106 @@ def test_a_judged_diagnosis_records_the_verdict_and_who_gave_it():
     assert block["reason"] is None and block["applicable"] is True
     assert judge.calls == [(REFERENCE.text, "leaf1 does not forward")]
     assert D.assess_diagnosis(REFERENCE, {"diagnosis": {"text": "x"}}, FakeJudge(-0.4))["found"] is False
+
+
+FAULT_A = D.FaultReference(text="On fw1, a traffic filter drops all traffic to 10.0.2.0/24.",
+                           method="drop", operation="set_subnet_traffic_policy", target="fw1")
+FAULT_B = D.FaultReference(text="On srv1, interface eth1 is configured with 10.0.9.5/32.",
+                           method="prefix", operation="set_interface_ipv4_address", target="srv1")
+COMBINED = D.FaultReference(text=f"Fault 1 of 2: {FAULT_A.text} Fault 2 of 2: {FAULT_B.text}",
+                            method="drop+prefix", operation="set_subnet_traffic_policy+set_interface_ipv4_address",
+                            target="fw1, srv1", components=(FAULT_A, FAULT_B))
+
+
+class ScriptedJudge(FakeJudge):
+    """A score per reference sentence, as a judge asked about each fault answers."""
+
+    def __init__(self, scores):
+        super().__init__(None)
+        self.scores = scores
+        self.questions: list[str] = []
+
+    def score(self, reference, hypothesis, question=D.SAME_FAULT):
+        self.calls.append((reference, hypothesis))
+        self.questions.append(question.prompt_id)
+        result = self.scores[reference]
+        if isinstance(result, Exception):
+            raise result
+        return {"score": result, "log_p_yes": -0.1, "log_p_no": -0.1 - result, "method": "top_logprobs",
+                "bound": False, "answer_tokens": {"Yes": ["Yes"], "No": ["No"]}}
+
+
+def test_a_combined_fault_is_judged_one_fault_at_a_time():
+    judge = ScriptedJudge({FAULT_A.text: 18.0, FAULT_B.text: 6.5})
+    statement = {"diagnosis": {"text": "fw1 dropped 10.0.2.0/24; srv1 had a /32", "source": "final_response"}}
+    block = D.assess_diagnosis(COMBINED, statement, judge)
+    assert judge.calls == [(FAULT_A.text, "fw1 dropped 10.0.2.0/24; srv1 had a /32"),
+                           (FAULT_B.text, "fw1 dropped 10.0.2.0/24; srv1 had a /32")], \
+        "each fault alone, never the two-fault text"
+    assert judge.questions == [D.AMONG_PROMPT_ID] * 2, "asked whether B names A among others"
+    assert block["judge"]["prompt_id"] == D.AMONG_PROMPT_ID
+    assert block["judge"]["prompt_sha256"] == D.prompt_sha256(D.AMONG_FAULTS)
+    assert block["found"] is True and block["components_found"] == 2
+    assert block["score"] == 6.5 and block["log_p_no"] == -6.6, "the lowest fault's score and its terms"
+    assert block["reference"] == COMBINED.text, "the record still names every fault"
+    assert [part["index"] for part in block["components"]] == [1, 2]
+    assert block["components"][0] | {"judge": None} == {
+        "index": 1, "reference": FAULT_A.text, "method": "drop", "operation": "set_subnet_traffic_policy",
+        "target": "fw1", "found": True, "score": 18.0, "log_p_yes": -0.1, "log_p_no": -18.1, "judge": None}
+    assert block["components"][1]["judge"]["method"] == "top_logprobs"
+    assert block["judge"]["model"] == "fake" and block["judge"]["method"] == "top_logprobs"
+
+
+def test_a_combined_fault_is_found_only_when_every_fault_is():
+    judge = ScriptedJudge({FAULT_A.text: 12.0, FAULT_B.text: -5.0})
+    block = D.assess_diagnosis(COMBINED, {"diagnosis": {"text": "fw1 dropped 10.0.2.0/24"}}, judge)
+    assert block["found"] is False and block["components_found"] == 1
+    assert block["score"] == -5.0, "found is still score > 0"
+    assert [part["found"] for part in block["components"]] == [True, False]
+
+
+def test_a_combined_fault_the_judge_fails_on_is_unjudged_and_says_which():
+    judge = ScriptedJudge({FAULT_A.text: 12.0, FAULT_B.text: RuntimeError("down")})
+    block = D.assess_diagnosis(COMBINED, {"diagnosis": {"text": "x"}}, judge)
+    assert block["found"] is None and block["score"] is None
+    assert block["reason"] == "judge error (fault 2 of 2): RuntimeError: down"
+    assert [part["index"] for part in block["components"]] == [1], "what was scored is kept"
+
+
+def test_a_single_fault_block_has_no_components():
+    block = D.assess_diagnosis(REFERENCE, {"diagnosis": {"text": "x"}}, FakeJudge(2.0))
+    assert "components" not in block and "components_found" not in block
+    assert block["judge"]["prompt_id"] == D.PROMPT_ID
+
+
+def test_the_single_fault_question_is_unchanged_and_the_among_question_is_its_own():
+    # fault-pluie-v2's template, as every record since 2026-09-24 names it.
+    assert D.prompt_sha256() == "056e4cbd844edabfbf48e4323eb25b59884b63a1c41d4435cba847b0e759d939"
+    assert D.prompt_sha256(D.AMONG_FAULTS) != D.prompt_sha256()
+    messages = D.prompt_messages("A1", "B1", D.AMONG_FAULTS)
+    assert messages[0]["content"] == D.AMONG_FAULTS.instruction
+    assert [m["content"] for m in messages[3::2]] == [answer for *_, answer in D.AMONG_FAULTS.examples]
+    assert messages[-1]["content"] == 'A: "A1"; B: "B1"'
+    answers = [answer for *_, answer in D.AMONG_FAULTS.examples]
+    assert answers.count(D.YES) == answers.count(D.NO) == 4
+
+
+def test_the_judge_audits_the_question_it_was_asked(tmp_path):
+    def handler(request):
+        body = json.loads(request.content)
+        assert body["messages"][0]["content"] == D.AMONG_FAULTS.instruction
+        return httpx.Response(200, json={"choices": [{"logprobs": {"content": [{
+            "token": "Yes", "logprob": -0.01,
+            "top_logprobs": [{"token": "Yes", "logprob": -0.01}, {"token": "No", "logprob": -5.0}]}]}}]})
+
+    judge = D.PLUIEJudge(D.JudgeConfig(model="m", api_base="http://h/v1", reading="top_logprobs",
+                                       audit_log=str(tmp_path / "audit.jsonl")),
+                         transport=httpx.MockTransport(handler))
+    scored = judge.score("A1", "B1", question=D.AMONG_FAULTS)
+    assert scored["score"] == pytest.approx(4.99)
+    line = json.loads((tmp_path / "audit.jsonl").read_text().splitlines()[0])
+    assert line["judge"]["prompt_id"] == D.AMONG_PROMPT_ID
+    assert line["judge"]["prompt_sha256"] == D.prompt_sha256(D.AMONG_FAULTS)
 
 
 def test_the_questions_that_were_not_asked_are_not_zeros():

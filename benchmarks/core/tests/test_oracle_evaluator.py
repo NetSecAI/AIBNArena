@@ -41,6 +41,33 @@ class OracleEvaluatorTests(unittest.TestCase):
         )
         self.assertTrue(evaluation.passed)
 
+    def test_absolute_ceiling_is_scaled_by_its_factor(self) -> None:
+        """The circuit cap: the link rate plus a fifth, as an upper bound."""
+        document = {
+            "oracle_id": "qos.circuit",
+            "version": "1.0.0",
+            "phase": "repair",
+            "success": {"mode": "all"},
+            "probes": [
+                {
+                    "id": "protected_flow",
+                    "thresholds": [
+                        {"metric": "circuit_egress_mbps", "operator": "lte", "value": 10, "factor": 1.2}
+                    ],
+                    "success": {"mode": "all"},
+                }
+            ],
+        }
+
+        def passes(egress: Any) -> bool:
+            runner = StaticProbeRunner({"circuit_egress_mbps": egress})
+            return OracleEvaluator(runner).evaluate(document).passed
+
+        self.assertTrue(passes(11.9))
+        self.assertTrue(passes(12.0))
+        self.assertFalse(passes(12.1))
+        self.assertFalse(passes(None))
+
     def test_missing_metric_fails_closed(self) -> None:
         document = {
             "oracle_id": "connectivity.closed",

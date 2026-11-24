@@ -40,7 +40,8 @@ def test_server_parses_its_command_line(server: Path):
 LAUNCHER_FLAGS = (
     "--host", "--port", "--model", "--api-base", "--api-key", "--max-execution-seconds",
     "--max-tokens", "--scenario-topology", "--healthy-state",
-    "--prompt-variant", "--ani-call-limit", "--enable-thinking", "--min-retry-tokens", "--context-budget-chars", "--tool-result-chars",
+    "--prompt-variant", "--ani-call-limit",
+    "--enable-thinking", "--min-retry-tokens", "--context-budget-chars", "--tool-result-chars",
     "--artifact-directory", "--max-consecutive-rejections", "--debug-trace",
 )
 

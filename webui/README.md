@@ -317,6 +317,16 @@ server's real argparse by `webui/catalog/tests/`), topologies and testbeds from
 YAMLs filtered through `scenarios/topology_applicability.json`, and prompt
 variants from each subject's `prompts/` directory.
 
+Besides the two LangChain subjects, `langchain_agent_v2` (port 8010) and the step-back
+subjects of `sut/step-back/` are offered: `dumb_baseline` (8015),
+`object_baseline` (8016) and `full_baseline` (8017). Each takes `langchain_agent_v2`'s
+settings and is started as `python -m sut.step-back.<subject>.a2a_server`.
+
+Every topology in `scenarios/topologies/` can be chosen -- the SME labs, `clos01` and the three
+campus labs (`campus_small`, `campus_medium`, `campus_large`) -- in every domain that has a
+scenario applicable to it, through an experiment file pinning it to a testbed
+(`webui/catalog/tests/test_experiments.py` holds it).
+
 Scenario files are parsed once and kept between page loads; a file is read again
 only when it changes, so an edited scenario still shows on the next load.
 
@@ -339,8 +349,9 @@ judge's log-probabilities are read, and is sent as the reading: vLLM gives the p
 own log-probabilities of Yes and No, the exact reading (`prompt_logprobs`); the OpenAI API
 only lists the candidates of one generated token (`top_logprobs`; gpt-4.1, gpt-4o,
 gpt-4o-mini). **Judge model** then offers the models registered on the Models page for
-that kind -- an endpoint is OpenAI's when it was registered as such or when its URL is
-`api.openai.com`, any other is taken for vLLM -- or a model id typed by hand, which runs
+that kind -- an endpoint is read as the OpenAI API when it was registered as OpenAI or
+OpenRouter or when its URL is theirs (OpenRouter takes `top_logprobs`, not vLLM's
+`prompt_logprobs`), any other is taken for vLLM -- or a model id typed by hand, which runs
 on the subject's endpoint with the subject's key, so a judge on the same provider as the
 generator needs no second secret (`webui/static/judge_picker.js`). A recorded campaign's
 judge comes back under the kind its reading names. A chosen judge is named to `benchmarks/run.py` with its endpoint's
@@ -358,7 +369,7 @@ rows say it was not judged.
 
 ## Models and their keys
 
-The **Models** page registers endpoints of two types:
+The **Models** page registers endpoints of three types:
 
 - **OpenAI** — OpenAI's own API. No URL is asked for: it is
   `https://api.openai.com/v1`. Type the key, then **List the models of this key**:
@@ -367,6 +378,14 @@ The **Models** page registers endpoints of two types:
   (embedding, audio, image, moderation and search models are left out). Ticked or
   typed, a model is stored as litellm takes it, `openai/<id>`. An OpenAI endpoint is
   refused without a key.
+- **OpenRouter** — OpenRouter's API. No URL is asked for either: it is
+  `https://openrouter.ai/api/v1`. **List the models** offers OpenRouter's catalog, the
+  models that take tools only (a subject repairs through tool calls), with a filter box;
+  the catalog is public, so it lists without a key, and with the key when one is typed or
+  stored. A model is typed or ticked by its OpenRouter id (`qwen/qwen3-8b`,
+  `openai/gpt-4o`) and always stored under litellm's prefix, `openai/qwen/qwen3-8b` and
+  `openai/openai/gpt-4o`, so that OpenRouter receives its own id. An OpenRouter endpoint
+  is refused without a key.
 - **OpenAI-compatible endpoint** — a LiteLLM or vLLM proxy, or another provider, at
   the base URL given, with the model ids it serves typed — one entry covers every
   model behind a proxy. Entries stored before the type existed are of this type.
@@ -379,10 +398,11 @@ Advanced sections of the Episode and Campaign pages no longer offer it). Each mo
 an endpoint gets a row under *Thinking*: on, off or the model's default, an effort level
 and a style. The declaration is stored with the endpoint in `models.json` (`thinking`, by
 model id), and checked when the endpoint is saved by the rule the subjects apply at
-startup (`sut/common/thinking.py`): the GPT, o-series, Claude and Gemini families take
-an effort level, `minimal` to `high` (off sends `minimal`); Qwen takes a chat-template
-switch and no effort level; Gemma and Ministral ship reasoning as a separate checkpoint
-and cannot be turned on. The launch pages show each model's declaration next to it. A launch writes
+startup (`sut/common/thinking.py`): a model that does not reason (gpt-4o, gpt-4o-mini,
+gpt-4.1) cannot be turned on, and each family takes its own effort levels — gpt-5,
+gpt-5-mini and gpt-5-nano `minimal` to `high` (off sends `minimal`), gpt-5.2 and gpt-5.4
+`none` to `xhigh` (off sends `none`), the o-series and the other gpt-5.x `low` to `high`
+with no off. The launch pages show each model's declaration next to it. A launch writes
 it into the request it records: an episode's `enable_thinking`, `thinking_effort` and
 `thinking_style`, a campaign's `model_thinking`, as the declaration stood at launch, so a
 resumed or replayed campaign runs what it ran even if the declaration changed since. An

@@ -12,11 +12,18 @@ ORACLE_ROOT = ROOT / "scenarios" / "oracles"
 
 
 def _referenced_oracle_versions() -> dict[str, str]:
-    """{oracle path: version} as the scenario files declare them, all agreeing."""
+    """{oracle path: version} as the scenario files declare them, all agreeing.
+
+    Archived scenarios count: they stay runnable from `scenarios/archive`, and the
+    oracles they name stay where they are (`scenarios/archive/README.md`).
+    """
     import yaml
 
     versions: dict[str, str] = {}
-    for scenario in sorted((ROOT / "scenarios").glob("*/*.yaml")):
+    scenarios = (*(ROOT / "scenarios").glob("*/*.yaml"),
+                 *(ROOT / "scenarios" / "combined").glob("*/*.yaml"),
+                 *(ROOT / "scenarios" / "archive").glob("*/*.yaml"))
+    for scenario in sorted(scenarios):
         document = yaml.safe_load(scenario.read_text(encoding="utf-8")) or {}
         for reference in (document.get("oracles") or {}).values():
             if not isinstance(reference, dict) or "path" not in reference:

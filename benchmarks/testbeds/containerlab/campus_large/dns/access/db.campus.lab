@@ -1,0 +1,26 @@
+; Authoritative data for the campus LAN's own names (zone campus.lab), the domain
+; the LAN pools hand out. One record per endpoint, at the address its DHCP
+; reservation (or its static configuration) gives it -- the names the DHCP oracle
+; has a leased desk resolve, fully qualified, to prove its lease. The DMZ is not
+; here: it is dmz.lab, forwarded to dns-dmz.
+; Short TTL: the lab is redeployed often and records are read far more than cached.
+$TTL	60
+@	IN	SOA	dns-access-4.campus.lab. admin.campus.lab. (
+			1		; Serial
+			3600		; Refresh
+			600		; Retry
+			86400		; Expire
+			60 )		; Negative cache TTL
+
+@		IN	NS	dns-access-4.campus.lab.
+
+dns-access-4    IN	A	10.0.3.53
+app-access-6    IN	A	10.0.6.10
+host-access-1   IN	A	10.0.0.150
+host-access-2   IN	A	10.0.1.150
+host-access-3   IN	A	10.0.2.150
+host-access-4   IN	A	10.0.4.150
+host-access-5   IN	A	10.0.5.150
+host-access-7   IN	A	10.0.10.150
+host-access-8   IN	A	10.0.14.150
+phone-access-7  IN	A	10.0.11.150

@@ -31,12 +31,10 @@ def require_self_execute_contract(
     return modes
 
 
-def ani_contract() -> dict[str, Any]:
-    return {
-        "version": ANI_VERSION,
-        "operations": list(ANI_OPERATIONS),
-        "transport": "local-api-now; MCP-compatible-later",
-    }
+def agent_tools() -> list[str]:
+    """The tools the agent may call, by name: the request's `tools`. Until 2026-10-28 the
+    field was `ani`, the ANI's version, operations and an outdated transport note."""
+    return list(ANI_OPERATIONS)
 
 
 def self_execute_output_contract() -> dict[str, Any]:
@@ -104,7 +102,7 @@ def build_self_execute_request(
         observation=observation,
         success_criteria=success_criteria,
         execution_budget={"wall_clock_seconds": execution_budget_seconds},
-        ani=ani_contract(),
+        tools=agent_tools(),
     )
 
 

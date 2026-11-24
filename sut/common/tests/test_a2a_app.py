@@ -60,3 +60,26 @@ def test_the_report_lists_every_tool_call_with_the_arguments_the_model_chose() -
     assert lines[start + 5].startswith('4. [mutation] update_object {"target": "leaf2", "path": "xxx')
     assert lines[start + 5].endswith(" · ok=False · 1.0s · error: refused")
     assert len(lines[start + 5]) < 330
+
+
+def test_a_row_a_call_made_is_shown_under_it_and_never_numbered():
+    from sut.common.a2a_app import format_self_execute_report
+
+    report = format_self_execute_report({
+        "status": "completed", "execution": {"tool_call_count": 3},
+        "ani_operations": [
+            {"operation": "get_topology", "category": "read", "ok": True, "duration_seconds": 0.5},
+            {"operation": "update_config", "category": "mutation", "ok": False, "duration_seconds": 39.4,
+             "arguments": {"changes": []}},
+            {"operation": "rollback_config", "category": "mutation", "ok": True,
+             "source": "apply_compensation_rollback"},
+            {"operation": "execute_validation", "category": "validation", "ok": True, "duration_seconds": 30.0},
+        ],
+    })
+    lines = report.splitlines()
+    start = lines.index("Tool calls")
+    calls = lines[start + 2:start + 6]
+    assert calls[0].startswith("1. [read] get_topology")
+    assert calls[1].startswith("2. [mutation] update_config")
+    assert calls[2].startswith("   ↳ inside update_config (apply_compensation_rollback): [mutation] rollback_config")
+    assert calls[3].startswith("3. [validation] execute_validation")

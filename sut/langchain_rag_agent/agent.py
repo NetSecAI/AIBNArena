@@ -154,8 +154,8 @@ class LangChainRAGAgent(LangChainRepairAgent):
             tools.append(self._episode_search().tool(adapter.deadline))
         return tools
 
-    def _task_message(self, task: dict[str, Any], deadline: float) -> str:
-        message = super()._task_message(task, deadline)
+    def _task_message(self, task: dict[str, Any], deadline: float, surface: list[str] | None = None) -> str:
+        message = super()._task_message(task, deadline, surface)
         if self.config.rag_mode not in CONTEXT_MODES:
             return message
         excerpts = self._episode_search().context(task, deadline)

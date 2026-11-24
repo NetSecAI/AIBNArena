@@ -1,6 +1,6 @@
 schema_version: "1.0"
 oracle_id: qos.shaping_repair.repair
-version: 1.0.0
+version: 1.1.0
 description: >-
   This family degrades a policy and leaves the link idle, so the oracle offers the
   contention itself -- an unshaped link with nothing disputing it measures the same
@@ -10,6 +10,13 @@ description: >-
   fault was measured under -- a repair only counts if the class survives a link that
   is actually disputed, not one that happens to be quiet. Same floor as the
   degradation oracle, so the two cannot disagree about what "served" means.
+
+    And the circuit is still there. The protected flow alone cannot tell a
+  repaired policy from a circuit that was taken away: measured in e10, deleting the
+  root qdisc let the flow read some 80 Mbps, and raising the root rate to 16 or
+  60 Mbps cleared the floor as well. What leaves the shaped interface during the
+  sample, both flows together, is capped at the link rate plus a fifth for header
+  and burst accounting, so only a repair inside the circuit passes.
 domain: qos
 phase: repair
 probes:
@@ -25,6 +32,8 @@ probes:
       destination_ip: "${bindings.destination_ip}"
       assured_bandwidth_mbps: "${bindings.assured_bandwidth_mbps}"
       measurement_port: "${bindings.measurement_port}"
+      wan_edge: "${bindings.wan_edge}"
+      shaped_interface: "${bindings.shaped_interface}"
       background_source: "${bindings.background_source}"
       load_port: "${bindings.load_port}"
       link_mbps: "${bindings.link_mbps}"
@@ -32,7 +41,7 @@ probes:
       contended: true
     attempts: 1
     timeout_seconds: 60
-    metrics: [success, throughput_mbps, timed_out]
+    metrics: [success, throughput_mbps, circuit_egress_mbps, timed_out]
     thresholds:
       - metric: throughput_mbps
         operator: gte
@@ -40,6 +49,10 @@ probes:
         factor: 0.85
         baseline: {metric: throughput_mbps, factor: 0.85}
         combine: min
+      - metric: circuit_egress_mbps
+        operator: lte
+        value: "${bindings.link_mbps}"
+        factor: 1.2
     aggregation: {method: mean}
     success: {mode: all}
 success: {mode: all}

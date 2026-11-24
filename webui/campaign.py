@@ -88,7 +88,7 @@ class CampaignRequest(BaseModel):
     #: them resumes as it ran.
     enable_thinking: bool | None = None
     thinking_style: Literal["auto", "chat_template", "system_prompt"] | None = None
-    thinking_effort: Literal["minimal", "low", "medium", "high"] | None = None
+    thinking_effort: Literal["none", "minimal", "low", "medium", "high", "xhigh"] | None = None
     #: How each model of the matrix is asked to think, as its declaration (Models page)
     #: stated it at launch, by model id. Written into the request when the campaign
     #: starts, so a resume runs what the launch ran even if the declaration changed.

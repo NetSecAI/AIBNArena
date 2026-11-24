@@ -80,10 +80,16 @@ def _operation_counts(report: Mapping[str, Any]) -> OperationCounts:
             continue
         operation = str(item.get("operation", ""))
         category = item.get("category")
+        if item.get("source"):
+            # Issued by the subject's own code inside a call the model made. That call
+            # is counted, with its outcome; counting what it does inside would report
+            # reads and writes the agent never chose. The row stays in ani_operations,
+            # where it is the record of what the call did.
+            continue
         if item.get("dispatched") is False:
             # Refused by an interaction cap before anything ran: it is an attempt the
-            # subject made and a failed operation, but nothing was read, written,
-            # validated or built, so no category counter may claim it.
+            # subject made and a failed operation, but nothing was read, written or
+            # validated, so no category counter may claim it.
             counts.failed_operations += 1
             continue
         if category == "read" or operation in {"get_topology", "get_state", "get_running_config", "get_object"}:

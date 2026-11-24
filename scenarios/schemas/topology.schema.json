@@ -68,6 +68,31 @@
             "additionalProperties": false
           }
         },
+        "isolation_requirements": {
+          "type": "array",
+          "description": "Endpoint pairs the reference policy keeps apart. The judge pings each one and counts any reply as a leak, so a repair that loosened the policy to restore a required path is caught. Only declare pairs measured as blocked on the healthy lab: the healthy oracle checks them too.",
+          "items": {
+            "type": "object",
+            "required": [
+              "source",
+              "destination"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "destination": {
+                "type": "string",
+                "minLength": 1
+              },
+              "bidirectional": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
         "environment": {
           "type": "object",
           "required": [

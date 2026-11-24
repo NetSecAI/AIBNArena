@@ -1,0 +1,182 @@
+name: campus_small
+
+mgmt:
+  network: clab-campus_small
+  ipv4-subnet: 172.28.0.0/24
+
+topology:
+  kinds:
+    arista_ceos:
+      image: ceos:4.36.1F
+      startup-config: ceos/startup.cfg
+    vyosnetworks_vyos:
+      image: vyos:1.5-stream-2025-Q1
+    linux:
+      image: ghcr.io/hellt/network-multitool:latest
+
+  nodes:
+    # The one firewall: gateway of every LAN VLAN, the DMZ, the Internet. It
+    # drops the Docker-installed management default route: a kernel route beats
+    # the VyOS static default in the FIB, and traffic toward the DMZ and the
+    # Internet would otherwise leave through eth0.
+    firewall:
+      kind: vyosnetworks_vyos
+      exec:
+        - ip route del default dev eth0
+
+    # Pure layer-2 access switches, each trunked straight to the firewall.
+    # Arista cEOS. Their configuration is the reference state's; ceos/startup.cfg
+    # only takes them out of Zero Touch Provisioning.
+    switch-access-1:
+      kind: arista_ceos
+    switch-access-2:
+      kind: arista_ceos
+
+    # LAN desks. DHCP clients: address, default route and resolver all come from
+    # a reservation on the firewall, keyed on the MAC pinned in the links below.
+    # The reference state starts udhcpc.
+    host-access-1:
+      kind: linux
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+    host-access-2:
+      kind: linux
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+    host-access-3:
+      kind: linux
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+    host-access-4:
+      kind: linux
+      binds:
+        - dhcp/udhcpc.script:/opt/dhcp/udhcpc.script:ro
+      exec:
+        - ip link set eth1 up
+
+    # LAN resolver, in VLAN 130, the infrastructure VLAN that carries no users.
+    # The zone sources are mounted read-only and copied into /etc/bind by the
+    # reference state, which keeps the running config writable for a fault.
+    dns-access-4:
+      kind: linux
+      image: ubuntu/bind9:latest
+      binds:
+        - dns/access:/opt/dns-src:ro
+      exec:
+        - ip link set eth1 up
+        - ip address add 10.0.3.53/24 dev eth1
+        - ip route replace default via 10.0.3.1
+
+    # DMZ servers, cabled straight to the firewall. Addressed statically by the
+    # reference state: only the desks lease theirs.
+    web-dmz:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+    sftp-dmz:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+
+    # DMZ nameserver: authoritative for dmz.lab, on its own DMZ segment.
+    dns-dmz:
+      kind: linux
+      image: ubuntu/bind9:latest
+      binds:
+        - dns/dmz:/opt/dns-src:ro
+      exec:
+        - ip link set eth1 up
+        - ip address add 172.16.3.53/24 dev eth1
+        - ip route replace default via 172.16.3.254
+
+    # The Internet: holds the upstream gateway address the firewall routes its
+    # default to.
+    external1:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip address add 192.168.122.1/24 dev eth1
+        - ip route replace default via 192.168.122.202
+
+    # The remote site, reached over a shaped WAN (benchmarks/testbeds/campus_site.py):
+    # a second router on the way, a Linux edge whose eth2 is a 10 Mbit circuit, and
+    # the iperf3 sink behind it. router-wan drops the management default route for
+    # the same reason the firewall does.
+    router-wan:
+      kind: vyosnetworks_vyos
+      exec:
+        - ip route del default dev eth0
+    wan-edge:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+        - ip link set eth2 up
+    srv-site:
+      kind: linux
+      exec:
+        - ip link set eth1 up
+
+  links:
+    # One 802.1Q trunk per access switch, straight to the firewall.
+    # cEOS names containerlab's ethN EthernetN.
+    - endpoints: ["switch-access-1:eth1", "firewall:eth1"]
+    - endpoints: ["switch-access-2:eth1", "firewall:eth2"]
+
+    # Access ports. The desks' MACs are pinned: the firewall keys its DHCP
+    # reservations on them. Each spells the address it reserves.
+    - type: veth
+      endpoints:
+        - node: host-access-1
+          interface: eth1
+          mac: 02:00:0a:00:00:96
+        - node: switch-access-1
+          interface: eth3
+    - type: veth
+      endpoints:
+        - node: host-access-2
+          interface: eth1
+          mac: 02:00:0a:00:01:96
+        - node: switch-access-1
+          interface: eth4
+    - type: veth
+      endpoints:
+        - node: host-access-3
+          interface: eth1
+          mac: 02:00:0a:00:02:96
+        - node: switch-access-2
+          interface: eth3
+    - type: veth
+      endpoints:
+        - node: host-access-4
+          interface: eth1
+          mac: 02:00:0a:00:04:96
+        - node: switch-access-2
+          interface: eth4
+    - endpoints: ["dns-access-4:eth1", "switch-access-2:eth5"]
+
+    # DMZ and Internet, directly attached to the firewall.
+    - type: veth
+      endpoints:
+        - node: firewall
+          interface: eth3
+        - node: web-dmz
+          interface: eth1
+    - type: veth
+      endpoints:
+        - node: firewall
+          interface: eth4
+        - node: sftp-dmz
+          interface: eth1
+    - endpoints: ["firewall:eth5", "dns-dmz:eth1"]
+    - endpoints: ["firewall:eth6", "external1:eth1"]
+
+    # The remote site's leg, off the firewall's eth7.
+    - endpoints: ["firewall:eth7", "router-wan:eth1"]
+    - endpoints: ["router-wan:eth2", "wan-edge:eth1"]
+    - endpoints: ["wan-edge:eth2", "srv-site:eth1"]

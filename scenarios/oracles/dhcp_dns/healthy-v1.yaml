@@ -1,15 +1,19 @@
 schema_version: "1.0"
 oracle_id: dhcp_dns.provisioning.healthy
-version: 1.1.0
+version: 1.2.0
 description: >-
   Every topology-required path is loss-free before the provisioning fault. A DHCP
   client that never obtained a lease has no address to be reached at, so this also
   establishes that provisioning worked in the reference state. The affected client must
   also resolve a name of the lab's own zone: a lease is an address, a gateway and a
   resolver, and a reachable desk that cannot resolve was not provisioned either.
-  `web1` sits in the dmz zone, so the answer proves the search list the pool hands out
-  and the resolver's forwarding, not only that a resolver was named. The wait is what a
-  wrong resolver costs a musl getent (5 s per server, two attempts).
+  The name is the binding's `probe_name`: the client's own, in the zone of the
+  resolver its lease names, which holds a record for every endpoint of the lab
+  (`guest1.sme01.internal`, `host-access-4.campus.lab`). Fully qualified, because
+  containerlab writes every node's short name into each container's /etc/hosts,
+  which answers it with the management address whatever DHCP and DNS do -- as it
+  answered `web1`, the name asked for until 1.2.0. The wait is what a wrong resolver
+  costs a musl getent (5 s per server, two attempts).
 domain: dhcp_dns
 phase: healthy
 probes:
@@ -29,7 +33,7 @@ probes:
   - id: name_resolution
     type: dns
     source: "${bindings.client}"
-    destination: web1
+    destination: "${bindings.probe_name}"
     protocol: dns
     attempts: 2
     timeout_seconds: 12

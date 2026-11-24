@@ -45,6 +45,16 @@ _JSON_START_RE = re.compile(r"\{")
 # scored on which oracle happened to run.
 ASSURED_TOLERANCE = 0.85
 
+# How far above the link rate the shaped interface may send and still be the
+# circuit: the counter sees the headers and the burst accounting the line rate
+# leaves out. The healthy phases of the archived campaigns read 9.58 to 10.34 Mbps
+# out of the intact 10 Mbps circuit (60 samples); a repair that put the assured
+# class back and left the other at its fault rate over-committed HTB, and the
+# circuit sent 15.8 (E16 wan_shaping m4). The
+# shaped families' oracles state it as `factor: 1.2`, and the ANI validation caps
+# the circuit with it, for the same reason as the floor above.
+CIRCUIT_TOLERANCE = 1.2
+
 # Seconds of TCP ramp-up left out of the reported average. Measured on the lab:
 # a sample taken right after a policy change read 6.49 Mbps against an 8 Mbit
 # class and 8.65 Mbps once warm -- slow-start, not a broken policy, and enough to
@@ -96,6 +106,11 @@ def _last_line(output: str, width: int = 200) -> str:
 
 CONTENTION_NOT_OBSERVED = (
     "offered contention was not observed for the whole window; "
+    "the reading measures an idle link, not the policy"
+)
+
+FAULT_FLOOD_NOT_OBSERVED = (
+    "the fault's own flood was not running for the whole window; "
     "the reading measures an idle link, not the policy"
 )
 
@@ -231,6 +246,43 @@ def load_log_tail(env: Any, bindings: dict[str, Any]) -> str:
     return (result.stdout + result.stderr).strip()
 
 
+def circuit_tx_bytes(env: Any, circuit: tuple[str, str]) -> int | None:
+    """Bytes the shaped interface has sent so far, or None.
+
+    The protected flow alone cannot tell a repaired policy from a circuit that was
+    taken away: with the root qdisc deleted the flow reads some 80 Mbps and clears
+    any floor, and with the root rate raised it clears it too. What leaves the
+    shaped interface while the sample runs can: a circuit still in place lets out
+    about its own rate whatever is offered to it.
+    """
+    edge, interface = circuit
+    result = env.executor.run_shell(
+        env.config.nodes[edge],
+        f"cat /sys/class/net/{interface}/statistics/tx_bytes",
+        timeout_seconds=15,
+    )
+    try:
+        return int(result.stdout.strip().split()[-1])
+    except (IndexError, ValueError):
+        return None
+
+
+def circuit_egress_mbps(
+    before: int | None,
+    after: int | None,
+    elapsed_seconds: float,
+) -> float | None:
+    """Mean rate out of the shaped interface between two counter reads, in Mbps.
+
+    None when either read failed or the counter went backwards (an interface
+    recreated mid-sample): no number is better than a wrong one, and the judge
+    fails a threshold on a missing metric.
+    """
+    if before is None or after is None or after < before or elapsed_seconds <= 0:
+        return None
+    return round((after - before) * 8 / elapsed_seconds / 1_000_000, 3)
+
+
 def stop_background_load(env: Any, bindings: dict[str, Any]) -> Any:
     """Stop the contention this module started.
 
@@ -275,6 +327,8 @@ def measure_throughput(
     *,
     seconds: int,
     contended: bool,
+    circuit: tuple[str, str] | None = None,
+    fault_flood: bool = False,
 ) -> dict[str, Any]:
     """Measure the protected flow, optionally under offered contention.
 
@@ -283,22 +337,40 @@ def measure_throughput(
     before any fault looks like: it says the path can carry the rate at all, and
     separates a broken path from a broken policy.
 
-    The flood is looked for on the load source after it starts and again as soon
-    as the measurement returns. A sample the flood did not cover end to end is
-    reported with no throughput at all and the flood's own last words: an
-    idle-circuit reading looks exactly like a policy that is not degraded, and a
-    judge that thresholds the number would score it, so the number goes out as
-    ``unverified_throughput_mbps`` instead and ``throughput_mbps`` stays None.
+    With ``fault_flood`` the competing flow is the fault's own, already running on
+    the load source: the oracle neither starts it nor stops it, but it is looked
+    for all the same. A flood with a fixed duration can end before the episode
+    does, and the sample then lands on an idle link that an untouched network
+    passes (pistes_e19, B5).
+
+    The flood is looked for on the load source after it starts (the fault's, just
+    before the sample) and again as soon as the measurement returns. A sample the
+    flood did not cover end to end is reported with no throughput at all, and with
+    an offered flood's own last words: an idle-circuit reading looks exactly like a
+    policy that is not degraded, and a judge that thresholds the number would score
+    it, so the number goes out as ``unverified_throughput_mbps`` instead and
+    ``throughput_mbps`` stays None.
+
+    With ``circuit`` -- the shaping node and its shaped interface -- the bytes
+    that interface sends are read around the sample and reported as
+    ``circuit_egress_mbps``. The judge passes it to cap the circuit, and so does
+    the ANI validation of a criterion that declares ``max_circuit_mbps``.
     """
+    if contended and fault_flood:
+        raise ValueError("a competing flow is either the fault's own or the oracle's, not both")
     source = str(bindings["protected_source"])
     sink_ip = str(bindings["sink_ip"])
     port = int(bindings["measurement_port"])
     offered = None
     attempts = 0
-    checks: dict[str, int | None] = {"after_start": None, "after_measurement": None}
+    checks: dict[str, int | None] = (
+        {"before_measurement": None, "after_measurement": None} if fault_flood
+        else {"after_start": None, "after_measurement": None})
     observed = None
     log_tail = None
 
+    if fault_flood:
+        checks["before_measurement"] = flood_process_count(env, bindings)
     if contended:
         offered = load_mbps(bindings)
         # A fresh sink, then the flood, then one look once the client has had
@@ -314,6 +386,12 @@ def measure_throughput(
                 break
 
     timed_out = False
+    # The circuit counter brackets the client: both reads are timed from when
+    # they are issued, so the exec latency of each shifts both ends alike.
+    egress_started = time.monotonic()
+    egress_before = None if circuit is None else circuit_tx_bytes(env, circuit)
+    egress_after = None
+    egress_elapsed = 0.0
     try:
         try:
             result = env.executor.run_shell(
@@ -347,7 +425,12 @@ def measure_throughput(
                 "sh -c 'pkill -x iperf3 || true'",
                 timeout_seconds=15,
             )
-        if contended:
+        # Read before the flood is stopped, like the count below: once it is
+        # gone the interface idles and the mean says nothing about the circuit.
+        if circuit is not None:
+            egress_elapsed = time.monotonic() - egress_started
+            egress_after = circuit_tx_bytes(env, circuit)
+        if contended or fault_flood:
             # Read before the flood is stopped, or the count says nothing. The
             # timed-out client is looked at too: the flood's window outlives the
             # client's grace by _LOAD_MARGIN_SECONDS, so a flood gone now was
@@ -355,9 +438,11 @@ def measure_throughput(
             # timeout read 0.0 under contention, the fault at its worst; a
             # client that timed out with the flood dead read nothing anyone can
             # score. Both checks have to see it, with no exception for either.
+            # The fault's flood writes no report of its own, so it leaves no
+            # last words to read.
             checks["after_measurement"] = flood_process_count(env, bindings)
-            observed = bool(checks["after_start"]) and bool(checks["after_measurement"])
-            if not observed:
+            observed = all(bool(count) for count in checks.values())
+            if not observed and contended:
                 log_tail = load_log_tail(env, bindings)
     finally:
         if contended:
@@ -365,7 +450,7 @@ def measure_throughput(
 
     # A reading the flood did not cover is not a reading: the idle circuit
     # measures like an intact policy, and every oracle of the shaped families
-    # thresholds throughput_mbps alone, so the number has to leave that field or
+    # judges the protected flow on throughput_mbps, so the number has to leave that field or
     # healthy, degradation and repair would all score it. It is kept beside it,
     # unverified, so the record still says what the client saw.
     verified = observed is not False
@@ -392,10 +477,14 @@ def measure_throughput(
         "timed_out": timed_out,
         "throughput_mbps": throughput if verified else None,
         "unverified_throughput_mbps": None if verified else throughput,
+        # What left the shaped interface over the same window, protected flow
+        # and competing flow together. None when no circuit was named.
+        "circuit_egress_mbps": circuit_egress_mbps(egress_before, egress_after, egress_elapsed),
+        "circuit_window_seconds": None if circuit is None else round(egress_elapsed, 3),
         "output": output,
         "ok": verified and throughput is not None,
         "error": (
-            CONTENTION_NOT_OBSERVED if not verified
+            (FAULT_FLOOD_NOT_OBSERVED if fault_flood else CONTENTION_NOT_OBSERVED) if not verified
             else None if throughput is not None
             else NO_REPORT + _last_line(output)
         ),

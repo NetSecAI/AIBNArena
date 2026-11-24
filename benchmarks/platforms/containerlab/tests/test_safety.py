@@ -9,6 +9,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 import pytest
 
+from benchmarks.platforms.containerlab import safety as safety_module  # noqa: E402
 from benchmarks.platforms.containerlab.safety import (  # noqa: E402
     check_command_safety,
     parse_linux_config_command,

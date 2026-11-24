@@ -107,12 +107,12 @@ class EndpointRequest(BaseModel):
 
     `api_key` omitted means the stored one stays; an empty one clears it. The
     page cannot send back a key it was never given, so editing a name must not
-    be the same thing as deleting a credential. An `openai` endpoint takes no
-    URL: OpenAI's is fixed.
+    be the same thing as deleting a credential. An `openai` or `openrouter` endpoint
+    takes no URL: the provider's is fixed (`endpoints.FIXED_API_BASES`).
     """
 
     id: str | None = None
-    provider: Literal["openai", "custom"] = "custom"
+    provider: Literal["openai", "openrouter", "custom"] = "custom"
     name: str = ""
     api_base: str = ""
     models: list[str] = []
@@ -123,7 +123,7 @@ class EndpointRequest(BaseModel):
 
 
 class ModelListRequest(BaseModel):
-    """The key whose OpenAI models the page lists: one just typed, or a stored endpoint's (`id`)."""
+    """The key whose models the page lists: one just typed, or a stored endpoint's (`id`)."""
 
     api_key: str | None = None
     id: str | None = None
@@ -156,19 +156,19 @@ async def put_endpoint(entry: EndpointRequest) -> dict[str, Any]:
         thinking = {model.strip(): endpoints.clean_thinking(settings)
                     for model, settings in entry.thinking.items() if model.strip()}
         for model, settings in thinking.items():
-            # Checked under the name the subject is given: an OpenAI model as openai/<id>.
-            served = (model if entry.provider != "openai" or model.startswith(endpoints.OPENAI_PREFIX)
-                      else endpoints.OPENAI_PREFIX + model)
-            endpoints.check_thinking(served, settings)
+            # Checked under the name the subject is given (`endpoints.stored_model`): an
+            # OpenAI or OpenRouter model as openai/<id>.
+            endpoints.check_thinking(endpoints.stored_model(entry.provider, model), settings)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    if entry.provider == "openai":
-        name = entry.name.strip() or "OpenAI"
+    if entry.provider in endpoints.FIXED_API_BASES:
+        label = endpoints.PROVIDER_NAMES[entry.provider]
+        name = entry.name.strip() or label
         identifier = entry.id or endpoints.identifier(name)
         stored_key = next((item.api_key for item in endpoints.load() if item.id == identifier), None)
         if not (entry.api_key or (entry.api_key is None and stored_key)):
-            raise HTTPException(status_code=400, detail="an OpenAI endpoint needs its API key")
-        candidate = endpoints.openai_endpoint(identifier, name, models, entry.api_key, thinking)
+            raise HTTPException(status_code=400, detail=f"an {label} endpoint needs its API key")
+        candidate = endpoints.provider_endpoint(entry.provider, identifier, name, models, entry.api_key, thinking)
     else:
         name = entry.name.strip()
         api_base = entry.api_base.strip()
@@ -190,6 +190,20 @@ async def list_openai_models(request: ModelListRequest) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="type the OpenAI API key to list its models")
     try:
         models = await asyncio.to_thread(endpoints.openai_models, key)
+    except endpoints.ModelListUnavailable as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {"models": models}
+
+
+@router.post("/api/openrouter/models")
+async def list_openrouter_models(request: ModelListRequest) -> dict[str, Any]:
+    """The OpenRouter models a subject can run on: those taking tools. The key, typed or
+    stored, goes with the request and is never sent back."""
+    key = request.api_key
+    if not key and request.id:
+        key = next((item.api_key for item in endpoints.load() if item.id == request.id), None)
+    try:
+        models = await asyncio.to_thread(endpoints.openrouter_models, key)
     except endpoints.ModelListUnavailable as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     return {"models": models}

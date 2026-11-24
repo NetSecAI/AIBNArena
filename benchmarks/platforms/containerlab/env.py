@@ -97,6 +97,13 @@ class ContainerLabEnv:
                 continue
             results.append(self.executor.run_vyos_cli_batch(node, commands))
 
+        for target, commands in state.grouped_eos_commands().items():
+            node = self.config.nodes.get(target)
+            if node is None:
+                results.append(command_result_for_unknown_target(target, "\n".join(commands), self.config.nodes))
+                continue
+            results.append(self.executor.run_eos_cli_batch(node, commands))
+
         return results
 
     def inject_fault(self, fault_id: str) -> list[CommandResult]:
@@ -108,8 +115,10 @@ class ContainerLabEnv:
     def inject(self, fault: LabFault) -> list[CommandResult]:
         return self.injector.inject(fault)
 
-    def observe(self) -> Observation:
-        return self.observer.observe(self.config.default_connectivity_checks)
+    def observe(self, checks: list[tuple[str, ...]] | None = None) -> Observation:
+        """Run ``checks``, or every check the topology requires when None."""
+        return self.observer.observe(
+            self.config.default_connectivity_checks if checks is None else checks)
 
     def execute(self, machine: str, command: str) -> CommandResult:
         node = self._get_node(machine)
@@ -117,21 +126,28 @@ class ContainerLabEnv:
             return self.executor.run_srl_cli_batch(node, [command])
         if node.kind == "vyos":
             return self.executor.run_vyos_cli_batch(node, [command])
+        if node.kind == "arista_ceos":
+            return self.executor.run_eos_cli_batch(node, [command])
         return self.executor.run_linux_config(node, command)
 
     def verify(self) -> bool:
         return self.observation_is_healthy(self.observe())
 
-    def wait_until_healthy(self, timeout_seconds: float = 15.0, interval_seconds: float = 2.0) -> tuple[bool, Observation]:
+    def wait_until_healthy(
+        self,
+        timeout_seconds: float = 15.0,
+        interval_seconds: float = 2.0,
+        checks: list[tuple[str, ...]] | None = None,
+    ) -> tuple[bool, Observation]:
         deadline = time.monotonic() + timeout_seconds
-        last_observation = self.observe()
+        last_observation = self.observe(checks)
         while True:
             if self.observation_is_healthy(last_observation):
                 return True, last_observation
             if time.monotonic() >= deadline:
                 return False, last_observation
             time.sleep(interval_seconds)
-            last_observation = self.observe()
+            last_observation = self.observe(checks)
 
     @staticmethod
     def observation_is_healthy(observation: Observation) -> bool:

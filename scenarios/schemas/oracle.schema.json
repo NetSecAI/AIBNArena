@@ -9,7 +9,6 @@
     "version",
     "domain",
     "phase",
-    "probes",
     "success"
   ],
   "properties": {
@@ -34,7 +33,9 @@
         "dhcp_dns",
         "filtering",
         "qos",
-        "security"
+        "security",
+        "vlan",
+        "combined"
       ]
     },
     "phase": {
@@ -51,6 +52,22 @@
       "items": {
         "$ref": "#/$defs/probe"
       }
+    },
+    "compose": {
+      "description": "Assemble the probes from the oracles of the components named in bindings.components: each component's oracle for this phase, resolved with that component's bindings, becomes one group. affected_nodes 'union' resolves every component with the union of the blast radii instead of its own.",
+      "type": "object",
+      "required": [
+        "affected_nodes"
+      ],
+      "properties": {
+        "affected_nodes": {
+          "enum": [
+            "component",
+            "union"
+          ]
+        }
+      },
+      "additionalProperties": false
     },
     "success": {
       "$ref": "#/$defs/success"
@@ -91,6 +108,7 @@
             "http",
             "throughput",
             "connectivity_matrix",
+            "isolation_matrix",
             "security_event",
             "configuration"
           ]
@@ -113,9 +131,16 @@
           ]
         },
         "port": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 65535
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            },
+            {
+              "$ref": "#/$defs/binding_ref"
+            }
+          ]
         },
         "scope": {
           "enum": [
@@ -139,6 +164,58 @@
               "pattern": "^\\$\\{bindings\\.[a-zA-Z0-9_]+\\}$"
             }
           ]
+        },
+        "paths": {
+          "description": "The paths a matrix probe with destination bound_paths measures, as 'source->destination', usually bound from the scenario: a change request is judged on the reachability it asks for, not on the topology's own requirements.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[^\\s>]+->[^\\s>]+$"
+              }
+            },
+            {
+              "$ref": "#/$defs/binding_ref"
+            }
+          ]
+        },
+        "addressing": {
+          "description": "Which addresses a bound_paths probe pings: the one the descriptor declares for the destination, or every data-plane address it holds when measured (live), for hosts the subject was asked to re-address.",
+          "enum": [
+            "declared",
+            "live"
+          ]
+        },
+        "ports": {
+          "description": "A tcp isolation_matrix over bound_paths: test every TCP port the destination listens on when measured (listening), save those open_services keeps open. A port nothing listens on is refused whether a firewall is in the way or not, so only listening ports can show a rule opened too wide.",
+          "enum": [
+            "listening"
+          ]
+        },
+        "open_services": {
+          "description": "The 'node:port' a tcp isolation_matrix leaves out of its ports: the services the change is meant to open.",
+          "oneOf": [
+            {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[^\\s:]+:[0-9]+$"
+              }
+            },
+            {
+              "$ref": "#/$defs/binding_ref"
+            }
+          ]
+        },
+        "ttl": {
+          "description": "Time to live of a bound_paths connectivity probe's packets. At 1 only a destination in the source's own broadcast domain answers: a router on the way drops the packet.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
         },
         "attempts": {
           "type": "integer",
@@ -170,7 +247,10 @@
               "total_checks",
               "passed_checks",
               "failed_checks",
-              "timed_out"
+              "blocked_checks",
+              "leaked_checks",
+              "timed_out",
+              "circuit_egress_mbps"
             ]
           }
         },
@@ -284,6 +364,15 @@
                 }
               ]
             },
+            "wan_edge": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Node that shapes the circuit. With shaped_interface, the probe reads that interface's transmitted bytes around the sample and reports circuit_egress_mbps, so a repair that removed or widened the circuit shows up as egress above the link rate."
+            },
+            "shaped_interface": {
+              "type": "string",
+              "minLength": 1
+            },
             "destination": {
               "type": "string",
               "minLength": 1
@@ -304,9 +393,74 @@
             },
             "contended": {
               "type": "boolean"
+            },
+            "fault_flood": {
+              "type": "boolean",
+              "description": "The phase is measured under the fault's own flood, from background_source. The probe neither starts nor stops it, but looks for it before and after the sample, and a sample it did not cover reports no throughput_mbps: a flood with a fixed duration can end before the episode does, and an untouched network then passes. Only with contended: false."
             }
           },
+          "dependentRequired": {
+            "wan_edge": [
+              "shaped_interface"
+            ],
+            "shaped_interface": [
+              "wan_edge"
+            ],
+            "fault_flood": [
+              "background_source"
+            ]
+          },
           "additionalProperties": false
+        },
+        "groups": {
+          "description": "The groups of an all_groups oracle this probe counts for.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        }
+      },
+      "dependentRequired": {
+        "paths": [
+          "destination"
+        ],
+        "addressing": [
+          "paths"
+        ],
+        "ttl": [
+          "paths"
+        ],
+        "ports": [
+          "paths"
+        ],
+        "open_services": [
+          "paths"
+        ]
+      },
+      "if": {
+        "properties": {
+          "destination": {
+            "const": "bound_paths"
+          }
+        },
+        "required": [
+          "destination"
+        ]
+      },
+      "then": {
+        "required": [
+          "paths"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "connectivity_matrix",
+              "isolation_matrix"
+            ]
+          }
         }
       },
       "additionalProperties": false
@@ -425,13 +579,25 @@
           "enum": [
             "all",
             "any",
-            "minimum_pass_rate"
+            "minimum_pass_rate",
+            "all_groups"
           ]
         },
         "minimum_pass_rate": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "groups": {
+          "description": "all_groups: each group's own success rule, over the probes that name the group. The oracle passes when every group does.",
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/success"
+          }
         }
       },
       "allOf": [
@@ -457,5 +623,39 @@
       "pattern": "^\\$\\{bindings\\.[a-zA-Z0-9_]+\\}$"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "required": [
+        "probes"
+      ],
+      "not": {
+        "required": [
+          "compose"
+        ]
+      }
+    },
+    {
+      "required": [
+        "compose"
+      ],
+      "not": {
+        "required": [
+          "probes"
+        ]
+      },
+      "properties": {
+        "domain": {
+          "const": "combined"
+        },
+        "success": {
+          "properties": {
+            "mode": {
+              "const": "all_groups"
+            }
+          }
+        }
+      }
+    }
+  ]
 }

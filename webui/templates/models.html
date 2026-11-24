@@ -7,8 +7,8 @@
 <section>
   <h2>Endpoints</h2>
   <p class="note">
-    One entry is a provider: OpenAI itself, or another OpenAI-compatible endpoint at its
-    base URL, with the key it takes and the models it serves. Keys are stored in <code>webui/models.json</code>, readable by its owner alone and
+    One entry is a provider: OpenAI itself, OpenRouter, or another OpenAI-compatible endpoint
+    at its base URL, with the key it takes and the models it serves. Keys are stored in <code>webui/models.json</code>, readable by its owner alone and
     kept out of git. A key is never shown again, never sent back to this page, and never
     put on a command line — it reaches the subject through its environment.
   </p>
@@ -23,10 +23,11 @@
   <form id="endpoint">
     <input type="hidden" id="id" />
     <div class="grid">
-      <label title="OpenAI: OpenAI's own API, at its fixed URL; the models are chosen from those the key can use. OpenAI-compatible endpoint: a LiteLLM or vLLM proxy, or another provider, at the base URL given.">
+      <label title="OpenAI: OpenAI's own API, at its fixed URL; the models are chosen from those the key can use. OpenRouter: OpenRouter's API, at its fixed URL; the models are chosen from its catalog, those taking tools. OpenAI-compatible endpoint: a LiteLLM or vLLM proxy, or another provider, at the base URL given.">
         Type
         <select id="provider">
           <option value="openai">OpenAI</option>
+          <option value="openrouter">OpenRouter</option>
           <option value="custom">OpenAI-compatible endpoint (base URL)</option>
         </select>
       </label>
@@ -51,10 +52,11 @@
       </label>
     </div>
     <div class="subgroup" id="openai-choice" hidden>
-      <h3>OpenAI models</h3>
+      <h3 id="choice-title">OpenAI models</h3>
       <div class="actions">
-        <button type="button" id="list-models">List the models of this key</button>
-        <small class="note" id="list-note">OpenAI's chat models this key can use. Ticking one adds it to the Models field.</small>
+        <button type="button" id="list-models">List the models</button>
+        <input id="model-filter" type="search" placeholder="filter, e.g. qwen" title="Shows only the listed models whose id holds this text." />
+        <small class="note" id="list-note"></small>
       </div>
       <div class="grid" id="openai-models"></div>
     </div>
@@ -63,11 +65,10 @@
       <p class="note">
         How each model is asked to reason, chosen here and nowhere else: the Episode and
         Campaign pages show it next to the model, and every run records it. <em>model
-        default</em> sends nothing. Each family is asked the way the subjects ask it
-        (<code>sut/common/thinking.py</code>): the GPT, o-series, Claude and Gemini
-        families take an effort level, minimal to high; Qwen takes a chat-template switch
-        and no effort level; Gemma and Ministral ship reasoning as a separate checkpoint
-        and cannot be turned on. A setting the family refuses is refused when the
+        default</em> sends nothing. A model that does not reason (gpt-4o, gpt-4o-mini,
+        gpt-4.1) cannot be turned on, and each family takes its own effort levels:
+        gpt-5, gpt-5-mini and gpt-5-nano minimal to high, gpt-5.2 and gpt-5.4 none to
+        xhigh, the o-series low to high. A setting the family refuses is refused when the
         endpoint is saved.
       </p>
       <table id="thinking-table">

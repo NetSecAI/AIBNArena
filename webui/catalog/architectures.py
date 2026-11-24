@@ -63,6 +63,55 @@ ARCHITECTURES: tuple[Architecture, ...] = (
         default_model="openai/gpt-4o-mini",
         flags=SHARED_FLAGS | {"max_context_chars"},
     ),
+    # The baseline without what coaches the model or corrects it (sut/langchain_agent_v2/README.md).
+    Architecture(
+        key="langchain_agent_v2",
+        label="LangChain baseline v2",
+        module="sut.langchain_agent_v2.a2a_server",
+        identity="langchain_agent_v2",
+        env_prefix="LANGCHAIN_AGENT_V2",
+        default_port=8010,
+        default_model="openai/gpt-4o-mini",
+        flags=SHARED_FLAGS | {"max_context_chars"},
+    ),
+    # The step-back family (sut/step-back/): langchain_agent_v2 with its reading taken in
+    # hand, each server with v2's flags. The path has a hyphen, which `python -m` takes and
+    # no import statement can name.
+    # Every node's running configuration handed before the first turn, the ANI tools kept
+    # (sut/step-back/dumb_baseline/README.md).
+    Architecture(
+        key="dumb_baseline",
+        label="Dumb baseline",
+        module="sut.step-back.dumb_baseline.a2a_server",
+        identity="dumb_baseline",
+        env_prefix="DUMB_BASELINE",
+        default_port=8015,
+        default_model="openai/gpt-4o-mini",
+        flags=SHARED_FLAGS | {"max_context_chars"},
+    ),
+    # The topology handed before the first turn, get_object the one read tool
+    # (sut/step-back/object_baseline/README.md).
+    Architecture(
+        key="object_baseline",
+        label="Object baseline",
+        module="sut.step-back.object_baseline.a2a_server",
+        identity="object_baseline",
+        env_prefix="OBJECT_BASELINE",
+        default_port=8016,
+        default_model="openai/gpt-4o-mini",
+        flags=SHARED_FLAGS | {"max_context_chars"},
+    ),
+    # v2 without get_object: whole views only (sut/step-back/full_baseline/README.md).
+    Architecture(
+        key="full_baseline",
+        label="Full baseline",
+        module="sut.step-back.full_baseline.a2a_server",
+        identity="full_baseline",
+        env_prefix="FULL_BASELINE",
+        default_port=8017,
+        default_model="openai/gpt-4o-mini",
+        flags=SHARED_FLAGS | {"max_context_chars"},
+    ),
 )
 
 BY_KEY = {architecture.key: architecture for architecture in ARCHITECTURES}

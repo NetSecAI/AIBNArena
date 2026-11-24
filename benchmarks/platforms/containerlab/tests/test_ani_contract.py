@@ -111,6 +111,7 @@ def test_surface_is_exactly_the_six_declared_operations():
     # A scenario-specific repair tool would make the benchmark trivial.
     assert "clear_linux_netem" not in names
     assert "enable_srl_interface" not in names
+    assert "build_knowledge_graph" not in names
 
 
 def test_get_running_config_declares_the_format_option():
@@ -285,6 +286,17 @@ def test_json_format_rejects_a_platform_it_cannot_parse():
     assert result["ok"] is False
     assert result["nodes"][0]["ok"] is False
     assert "juniper_srx" in result["nodes"][0]["error"]
+
+
+def test_the_format_parameter_names_every_platform_the_json_read_serves():
+    """It said "SR Linux only" while the JSON read served VyOS, Linux and Arista EOS too; on
+    main03 that read was the one that showed a Linux node's QoS classes (v0.6)."""
+    schema = next(s for s in ContainerLabANI.tool_schemas() if s["function"]["name"] == "get_running_config")
+    text = schema["function"]["parameters"]["properties"]["format"]["description"]
+    assert "only" not in text
+    for platform in ("SR Linux", "VyOS", "Arista EOS", "Linux"):
+        assert f"on {platform} " in text, platform
+    assert "tc qdisc, class and filter for each interface" in text
 
 
 def test_non_json_output_is_reported_not_raised():
@@ -987,10 +999,15 @@ def test_each_change_earns_one_settle_not_one_per_validation():
     assert slept == [], "the settle belongs to the change, not to every later validation"
 
 
+# --------------------------------------------------------------------------- #
+# Offered tools: capabilities the platform announces but does not implement
+# --------------------------------------------------------------------------- #
+
+
 def test_unknown_operation_is_rejected():
     ani, _ = build_ani()
     try:
-        ani.dispatch("reboot_device", {})
+        ani.dispatch("build_knowledge_graph", {})
     except ANIRequestError as exc:
         assert "unsupported ANI operation" in str(exc)
     else:
@@ -1010,8 +1027,6 @@ def main() -> int:
             print(f"ok   {name}")
     print(f"\n{len(tests) - failures}/{len(tests)} passed")
     return 1 if failures else 0
-
-
 
 
 def test_a_criterion_type_sent_as_a_check_type_is_redirected_to_the_gate():
@@ -1119,3 +1134,205 @@ def test_without_a_budget_the_ani_dispatches_every_operation() -> None:
     for _ in range(5):
         assert ani.dispatch("get_topology", {}).get("ok") is not False
     assert ani.budget_state() == {"limit": None, "used": 5, "refused": 0, "reached": False}
+
+
+# --- submit_result (v0.4): the agent's own end of the episode ---------------------------
+
+def test_submit_result_records_the_conclusion_as_declared() -> None:
+    """Not a check: a completion with no validation behind it is still recorded as
+    submitted. Whether it holds is the judge's oracles' to say, from the network."""
+    ani, issued = build_ani()
+    result = ani.dispatch("submit_result", {"status": "Completed ", "summary": " enabled leaf1 e1-1 ",
+                                            "diagnosis": "leaf1 ethernet-1/1 admin-down"})
+    assert result == {"ok": True, "operation": "submit_result", "submitted": True, "status": "completed",
+                      "summary": "enabled leaf1 e1-1", "diagnosis": "leaf1 ethernet-1/1 admin-down"}
+    assert [(item["status"], item["summary"]) for item in ani.submissions] == [("completed", "enabled leaf1 e1-1")]
+    assert issued == [], "submitting touches no device"
+
+
+def test_submit_result_refuses_what_is_not_a_conclusion() -> None:
+    ani, _issued = build_ani()
+    for arguments, message in (({"status": "done", "summary": "x"}, "status must be one of"),
+                               ({"summary": "x"}, "status must be one of"),
+                               ({"status": "failed", "summary": "  "}, "summary must state")):
+        try:
+            ani.dispatch("submit_result", arguments)
+        except ANIRequestError as exc:
+            assert message in str(exc), exc
+        else:
+            raise AssertionError(f"submit_result accepted {arguments}")
+    assert ani.submissions == [], "a refused submission submits nothing"
+    without_diagnosis = ani.dispatch("submit_result", {"status": "failed", "summary": "no safe repair",
+                                                       "diagnosis": " "})
+    assert without_diagnosis["diagnosis"] is None
+
+
+def test_submit_result_is_accepted_past_the_budget_and_not_counted() -> None:
+    ani, _issued = build_ani()
+    ani.call_budget = 1
+    ani.dispatch("get_topology", {})
+    refused = ani.dispatch("get_topology", {})
+    assert "submit_result is still accepted" in refused["error"]
+    submitted = ani.dispatch("submit_result", {"status": "failed", "summary": "budget spent"})
+    assert submitted["submitted"] is True
+    assert ani.budget_state() == {"limit": 1, "used": 1, "refused": 1, "reached": True}
+
+
+def test_submit_result_is_declared_with_its_schema() -> None:
+    contract = {item["name"]: item for item in ContainerLabANI.tool_contract()}
+    assert contract["submit_result"]["type"] == "submit"
+    schema = next(s["function"] for s in ContainerLabANI.tool_schemas() if s["function"]["name"] == "submit_result")
+    assert schema["parameters"]["required"] == ["status", "summary"]
+    assert schema["parameters"]["properties"]["status"]["enum"] == ["completed", "failed"]
+    assert "stops the episode" in schema["description"]
+
+
+def _icmp_criterion(**extra) -> dict:
+    return {"success_criteria": {"all_of": [{
+        "type": "observed_icmp_service", "source": "finance1", "destination": "app1",
+        "destination_ip": "10.10.50.10", "max_packet_loss_percent": 0, **extra}]}}
+
+
+def test_the_public_icmp_criterion_sends_the_repair_oracles_thirty_pings() -> None:
+    """Three loss-free pings passed a path still corrupting 31 % of its packets a third
+    of the time (E16 link_impairment.m2). The criterion sends the count it
+    declares, past the 20-ping cap of an agent's own check, five a second."""
+    ani, issued = build_ani()
+    ani.evaluate_success_criteria(_icmp_criterion(count=30))
+    ani.evaluate_success_criteria(_icmp_criterion())
+    pings = [command for command in issued if command.startswith("ping")]
+    assert pings == ["ping -q -c 30 -i 0.2 -W 3 10.10.50.10"] * 2, pings
+    # A count past the criterion's own cap fails that criterion by name, without
+    # aborting the call.
+    result = ani.evaluate_success_criteria(_icmp_criterion(count=ani_module.PUBLIC_ICMP_MAX_COUNT + 1))
+    assert result["passed"] is False
+    assert "icmp count must be 1..50" in result["checks"][0]["error"]
+
+
+def test_an_agents_own_icmp_check_keeps_its_cap_and_pace() -> None:
+    ani, issued = build_ani()
+    check = {"type": "icmp", "source": "finance1", "destination_ip": "10.10.50.10"}
+    # The pace is the caller's, not the check's: a key the schema does not declare
+    # changes nothing.
+    ani.execute_validation([{**check, "count": 5, "interval_seconds": 0.01}], task={})
+    assert [command for command in issued if command.startswith("ping")] == [
+        "ping -q -c 5 -W 3 10.10.50.10"]
+    try:
+        ani.execute_validation([{**check, "count": 21}], task={})
+    except ANIRequestError as exc:
+        assert "1..20" in str(exc)
+    else:
+        raise AssertionError("an agent's icmp check must stay capped at 20 pings")
+
+
+def _ani_whose_ping_answers(stdout: str = "", stderr: str = "", returncode: int = 0):
+    """An ANI whose ping commands get this answer; the commands issued."""
+    ani, issued = build_ani()
+
+    def ping(node, command, timeout_seconds=None):
+        issued.append(command)
+        return CommandResult(target=node.name, command=command, returncode=returncode,
+                             stdout=stdout, stderr=stderr)
+
+    ani.env.executor.run_shell = ping
+    return ani, issued
+
+
+def test_an_icmp_check_from_a_node_without_ping_says_that_nothing_was_sent() -> None:
+    """A node with no ping program answered `passed: false, packet_loss_percent: 100.0`
+    although no packet left it (main04, 16 checks from the two DNS nodes). The check now
+    says that it did not run."""
+    ani, _ = _ani_whose_ping_answers(
+        stderr='OCI runtime exec failed: exec failed: unable to start container process: '
+               'exec: "ping": executable file not found in $PATH: unknown', returncode=126)
+    answer = ani.execute_validation(
+        [{"type": "icmp", "source": "finance1", "destination_ip": "10.10.50.10"}], task={})
+    check = answer["checks"][0]
+    assert answer["ok"] is False and check["passed"] is False
+    assert check["packet_loss_percent"] is None, check
+    assert "no ping program" in check["error"] and "finance1" in check["error"], check
+    # A ping that ran and lost everything is still a measured loss.
+    ani, _ = _ani_whose_ping_answers(
+        stdout="PING 10.10.50.10 (10.10.50.10): 56 data bytes\n\n--- 10.10.50.10 ping statistics ---\n"
+               "3 packets transmitted, 0 packets received, 100% packet loss\n", returncode=1)
+    check = ani.execute_validation(
+        [{"type": "icmp", "source": "finance1", "destination_ip": "10.10.50.10"}], task={})["checks"][0]
+    assert check["passed"] is False and check["packet_loss_percent"] == 100.0 and "error" not in check
+
+
+def test_an_icmp_check_to_the_management_network_is_refused_or_does_not_pass() -> None:
+    """A node name resolves to the node's management address, so a ping to it passed
+    whatever the network under repair did, and a typed management address did the same
+    (main04, 36 such passes). A typed one is refused before it is sent. A name is sent,
+    and does not pass when ping reports that it resolved into the management network."""
+    from benchmarks.platforms.containerlab.management import management_networks
+
+    ani, issued = _ani_whose_ping_answers()
+    network = management_networks(ani.env.config.topology_path)[0]
+    managed = str(next(network.hosts()))
+    try:
+        ani.execute_validation([{"type": "icmp", "source": "finance1", "destination_ip": managed}], task={})
+    except ANIRequestError as exc:
+        assert "management network" in str(exc) and managed in str(exc)
+    else:
+        raise AssertionError("a ping to a management address must be refused")
+    assert issued == [], issued
+
+    ani, _ = _ani_whose_ping_answers(
+        stdout=f"PING app1 ({managed}): 56 data bytes\n\n--- app1 ping statistics ---\n"
+               "3 packets transmitted, 3 packets received, 0% packet loss\n"
+               "round-trip min/avg/max = 0.1/0.2/0.3 ms\n")
+    check = ani.execute_validation(
+        [{"type": "icmp", "source": "finance1", "destination_ip": "app1"}], task={})["checks"][0]
+    assert check["passed"] is False and check["resolved_ip"] == managed, check
+    assert "management network" in check["error"], check
+
+    # A name the lab's own DNS resolves to an address of the network under repair passes.
+    ani, _ = _ani_whose_ping_answers(
+        stdout="PING app1.lab (10.10.50.10): 56 data bytes\n\n--- app1.lab ping statistics ---\n"
+               "3 packets transmitted, 3 packets received, 0% packet loss\n"
+               "round-trip min/avg/max = 0.1/0.2/0.3 ms\n")
+    check = ani.execute_validation(
+        [{"type": "icmp", "source": "finance1", "destination_ip": "app1.lab"}], task={})["checks"][0]
+    assert check["passed"] is True and check["packet_loss_percent"] == 0.0, check
+
+
+def test_an_icmp_destination_reaches_the_shell_as_one_word() -> None:
+    ani, issued = _ani_whose_ping_answers()
+    ani.execute_validation(
+        [{"type": "icmp", "source": "finance1", "destination_ip": "10.10.50.10; reboot"}], task={})
+    assert issued == ["ping -q -c 3 -W 3 '10.10.50.10; reboot'"], issued
+
+
+# --- prime_learned_tables (v0.11): the judge's priming, for a subject's own code ---------
+
+def test_prime_learned_tables_runs_the_judges_priming_and_writes_nothing() -> None:
+    """A subject's own code calls it before it reads the learned tables again, as the judge
+    primes before the subject: each Linux node forgets each data-plane next hop, then pings
+    it; each leased client asks its resolver (none here)."""
+    ani, issued = build_ani()
+    linux = [name for name, node in ani.env.config.nodes.items() if node.kind == "linux"]
+    assert linux, "the fixture lab has Linux nodes"
+
+    result = ani.dispatch("prime_learned_tables", {})
+
+    assert result == {"ok": True, "operation": "prime_learned_tables",
+                      "gateway_pings": len(linux), "resolver_queries": 0}
+    assert issued.count("ip neigh flush to 10.10.10.1") == len(linux)
+    assert issued.count("ping -c 1 -W 1 10.10.10.1") == len(linux)
+    assert set(issued) == {"ip -o -4 route show", "ip neigh flush to 10.10.10.1",
+                           "ping -c 1 -W 1 10.10.10.1", "cat /etc/resolv.conf"}, "traffic, no configuration"
+    assert ani.budget_state()["used"] == 1
+
+
+def test_prime_learned_tables_is_offered_to_no_model_and_spends_the_cap() -> None:
+    names = {schema["function"]["name"] for schema in ContainerLabANI.tool_schemas()}
+    assert ani_module.SUBJECT_OPERATIONS == ("prime_learned_tables",)
+    assert not set(ani_module.SUBJECT_OPERATIONS) & names
+    assert not set(ani_module.SUBJECT_OPERATIONS) & set(ANI_OPERATIONS)
+    ani, issued = build_ani()
+    ani.call_budget = 1
+    ani.dispatch("get_topology", {})
+    refused = ani.dispatch("prime_learned_tables", {})
+    assert refused["ok"] is False and refused["dispatched"] is False
+    assert "ping -c 1 -W 1 10.10.10.1" not in issued

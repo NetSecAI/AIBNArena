@@ -228,3 +228,82 @@ def test_listing_models_needs_a_key_and_reports_openais_refusal(store, monkeypat
     assert answer.status_code == 502
     assert "HTTP 401" in answer.json()["detail"]
     assert "sk-wrong" not in answer.text
+
+
+# --- OpenRouter --------------------------------------------------------------------------
+
+def test_an_openrouter_endpoint_has_openrouters_url_and_always_litellms_prefix():
+    """OpenRouter's own ids may start with openai/ too: its openai/gpt-4o is stored
+    openai/openai/gpt-4o, so that OpenRouter receives openai/gpt-4o."""
+    entry = endpoints.provider_endpoint("openrouter", "openrouter", "OpenRouter",
+                                        ("qwen/qwen3-8b", "openai/gpt-4o", "qwen/qwen3-8b"), "or-test")
+    assert entry.provider == "openrouter"
+    assert entry.api_base == endpoints.OPENROUTER_API_BASE == "https://openrouter.ai/api/v1"
+    assert entry.models == ("openai/qwen/qwen3-8b", "openai/openai/gpt-4o")
+    assert [endpoints.served_name(model) for model in entry.models] == ["qwen/qwen3-8b", "openai/gpt-4o"]
+    assert [endpoints.page_model("openrouter", model) for model in entry.models] == ["qwen/qwen3-8b", "openai/gpt-4o"]
+
+
+def _openrouter_listing(models, *, status=200, key=None):
+    def handler(request):
+        assert str(request.url) == f"{endpoints.OPENROUTER_API_BASE}/models"
+        assert request.headers.get("authorization") == (f"Bearer {key}" if key else None)
+        if status != 200:
+            return httpx.Response(status, json={"error": {"message": "unavailable"}})
+        return httpx.Response(200, json={"data": models})
+    return httpx.MockTransport(handler)
+
+
+def test_openrouters_models_are_those_a_subject_can_call_tools_with():
+    listed = [
+        {"id": "qwen/qwen3-8b", "supported_parameters": ["tools", "temperature"],
+         "architecture": {"output_modalities": ["text"]}},
+        {"id": "openai/gpt-4o", "supported_parameters": ["tools"], "architecture": {"output_modalities": ["text"]}},
+        {"id": "some/no-tools", "supported_parameters": ["temperature"], "architecture": {"output_modalities": ["text"]}},
+        {"id": "some/image-maker", "supported_parameters": ["tools"], "architecture": {"output_modalities": ["image"]}},
+    ]
+    assert endpoints.openrouter_models(transport=_openrouter_listing(listed)) == ["openai/gpt-4o", "qwen/qwen3-8b"]
+    # The key, when there is one, goes with the request.
+    assert endpoints.openrouter_models("or-test", transport=_openrouter_listing(listed, key="or-test"))
+    with pytest.raises(ModelListUnavailable, match="HTTP 503"):
+        endpoints.openrouter_models(transport=_openrouter_listing([], status=503))
+
+
+def test_the_page_saves_an_openrouter_endpoint_without_a_url(store):
+    client = TestClient(app)
+    answer = client.put("/api/endpoints", json={
+        "provider": "openrouter", "models": ["qwen/qwen3-8b"], "api_key": "or-test",
+        "api_base": "http://ignored.example/v1"})
+    assert answer.status_code == 200, answer.text
+    saved = answer.json()
+    assert (saved["provider"], saved["name"], saved["api_base"]) == (
+        "openrouter", "OpenRouter", "https://openrouter.ai/api/v1")
+    assert saved["models"] == ["openai/qwen/qwen3-8b"] and saved["has_key"] is True
+    assert "or-test" not in answer.text
+    assert credentials("openai/qwen/qwen3-8b", store).api_key == "or-test"
+
+
+def test_an_openrouter_endpoint_without_a_key_is_refused(store):
+    answer = TestClient(app).put("/api/endpoints", json={"provider": "openrouter", "models": ["qwen/qwen3-8b"]})
+    assert answer.status_code == 400 and "OpenRouter endpoint needs its API key" in answer.json()["detail"]
+    assert not store.exists()
+
+
+def test_an_openrouter_models_thinking_is_checked_under_the_name_the_subject_is_given(store):
+    """openai/gpt-4o on OpenRouter is gpt-4o, which does not reason."""
+    answer = TestClient(app).put("/api/endpoints", json={
+        "provider": "openrouter", "models": ["openai/gpt-4o"], "api_key": "or-test",
+        "thinking": {"openai/gpt-4o": {"enable_thinking": True}}})
+    assert answer.status_code == 400 and "does not reason" in answer.json()["detail"]
+
+
+def test_the_page_lists_openrouters_models_with_the_stored_key_never_sent_back(store, monkeypatch):
+    seen = []
+    monkeypatch.setattr(endpoints, "openrouter_models", lambda key: seen.append(key) or ["qwen/qwen3-8b"])
+    save([endpoints.provider_endpoint("openrouter", "openrouter", "OpenRouter", (), "or-test")], store)
+    client = TestClient(app)
+    answer = client.post("/api/openrouter/models", json={"id": "openrouter"})
+    assert answer.status_code == 200 and answer.json() == {"models": ["qwen/qwen3-8b"]}
+    assert seen == ["or-test"] and "or-test" not in answer.text
+    # OpenRouter's catalog is public: listing it needs no key.
+    assert client.post("/api/openrouter/models", json={}).status_code == 200 and seen[-1] is None

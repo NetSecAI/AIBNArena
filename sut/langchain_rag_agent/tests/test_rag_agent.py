@@ -8,13 +8,13 @@ from pathlib import Path
 import pytest
 
 from sut.common.tests.test_recorded_parameters import REQUIRED
-from sut.langchain_agent.agent import LangChainAgentConfig, LangChainRepairAgent, StructuredConclusion
+from sut.langchain_agent.agent import LangChainAgentConfig, LangChainRepairAgent
 from sut.langchain_rag_agent import LangChainRAGAgent, LangChainRAGAgentConfig
 from sut.langchain_rag_agent.agent import DEFAULT_RAG_DIRECTORY
 from sut.langchain_rag_agent.retrieval import CorpusError
 
 ANI_TOOLS = ["get_topology", "get_state", "get_running_config", "get_object",
-             "update_config", "update_object", "execute_validation", "rollback_config"]
+             "update_config", "update_object", "execute_validation", "rollback_config", "submit_result"]
 
 TASK = {
     "intent": "Restore the intended IPv4 connectivity: an interface was administratively disabled.",
@@ -40,6 +40,8 @@ Traffic shaping on VyOS uses `set qos policy shaper`.
 
 class FakeANI:
     def dispatch(self, operation, arguments, *, task=None):
+        if operation == "submit_result":
+            return {"ok": True, "operation": operation, "submitted": True, **arguments}
         if operation == "update_config":
             return {"ok": True, "operation": operation, "transaction_id": "tx1",
                     "changes": [{"target": "leaf1", "commands": ["x"], "result": {"ok": True, "safe": True}}]}
@@ -65,7 +67,8 @@ class Graph:
 def repaired(tools):
     tools["update_config"].invoke({"changes": [{"target": "leaf1", "commands": ["x"]}]})
     tools["execute_validation"].invoke({"checks": [{"type": "public_success_criteria"}]})
-    return {"structured_response": StructuredConclusion(status="completed", summary="validated")}
+    tools["submit_result"].invoke({"status": "completed", "summary": "validated"})
+    return {"messages": []}
 
 
 @pytest.fixture
@@ -153,8 +156,9 @@ def test_a_search_answers_with_ranked_excerpts_and_is_not_an_ani_operation(docum
     assert "set qos policy shaper" in found["results"][0]["text"]
     assert nothing["results"] == [] and "other words" in nothing["note"]
     # Searches are counted apart: the ANI counts are the baseline's.
-    assert report["execution"]["tool_call_count"] == 2
-    assert [item["operation"] for item in report["ani_operations"]] == ["update_config", "execute_validation"]
+    assert report["execution"]["tool_call_count"] == 3
+    assert [item["operation"] for item in report["ani_operations"]] == [
+        "update_config", "execute_validation", "submit_result"]
     rag = report["execution"]["rag"]
     assert rag["tool_searches"] == 2 and rag["context_excerpts"] == 0
     assert [item["query"] for item in rag["searches"]] == ["shaper qos policy", "zzz"]

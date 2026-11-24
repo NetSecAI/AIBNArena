@@ -1,0 +1,18 @@
+options {
+	directory "/var/cache/bind";
+
+	// Resolver for the DMZ segments and authoritative for dmz.lab (see
+	// named.conf.local). The original lab also forwarded everything
+	// else to Google Public DNS (8.8.8.8); that forward is dropped for the same
+	// reason as on dns-access-4 (../access/named.conf.options): this lab's
+	// Internet runs no resolver, and a global forwarder disables the built-in
+	// empty reverse zones every name ping relies on.
+	recursion yes;
+	allow-query { any; };
+	allow-recursion { any; };
+
+	dnssec-validation no;
+
+	listen-on { any; };
+	listen-on-v6 { none; };
+};

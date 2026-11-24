@@ -4,7 +4,7 @@ from .a2a import A2AClient, A2ASubject
 from .a2a_contracts import (
     A2A_CONTRACT_VERSION,
     SELF_EXECUTE_MODE,
-    ani_contract,
+    agent_tools,
     build_self_execute_request,
     parse_self_execute_report,
     require_self_execute_contract,
@@ -31,7 +31,7 @@ __all__ = [
     "A2ASubject",
     "A2A_CONTRACT_VERSION",
     "SELF_EXECUTE_MODE",
-    "ani_contract",
+    "agent_tools",
     "build_self_execute_request",
     "parse_self_execute_report",
     "require_self_execute_contract",

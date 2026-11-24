@@ -3,14 +3,16 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Literal
 
 from langchain.agents import create_agent
-from langchain.agents.structured_output import ToolStrategy
+from langchain.agents.middleware import AgentMiddleware, after_model, before_model
 from langchain_core.callbacks import UsageMetadataCallbackHandler
+from langchain_core.messages import HumanMessage
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_litellm import ChatLiteLLM
 import litellm
@@ -25,42 +27,53 @@ from sut.common import (
     resolve_system_prompt,
     thinking_record,
 )
-from sut.common.ani_report import public_task_for_model
+from sut.common.ani_report import SUBMISSION_OPERATION, public_task_for_model
+from sut.common.repeated_requests import RepeatedRequests
+from sut.common.messages import (
+    REASONING_KEY,
+    REASONING_TURNS_SENT_BACK,
+    keep_recent_reasoning,
+    no_action_nudge,
+    unparsed_tool_call,
+)
 from sut.common.self_execute import ani_budget_state, exception_cause
+from sut.common.agent_config import request_max_tokens
 from sut.common.serving_info import probe_serving
 from sut.common.thinking import apply_directive, resolve_thinking
 from sut.common.tool_schema_transport import TOOL_ARGUMENT_TRANSPORT, declare_nullable_types
 from sut.common.trace import Tracer
-from .ani_tools import LangChainANIAdapter, RepeatedANIRequestError
+from .ani_tools import LangChainANIAdapter
 
 
 class StructuredConclusion(BaseModel):
-    """Model-produced terminal decision; execution evidence is derived from ANI."""
+    """The JSON conclusion a model may write as text; execution evidence is derived from ANI.
+
+    The other end is the `submit_result` tool, whose arguments the ANI checks itself.
+    """
 
     status: Literal["completed", "failed"]
     summary: str = Field(description="Concise outcome based only on observed ANI evidence")
 
 
 class NoConclusion(ValueError):
-    """The graph ended without the structured conclusion the prompt requires.
+    """The graph ended without a conclusion: no submit_result, no JSON conclusion.
 
-    A model that stops in prose leaves `structured_response` empty (langchain's
-    factory returns None rather than raising), which is a different end from a call
-    that failed and must not be filed as one.
+    A model that stops in prose ends the graph without either, which is a different
+    end from a call that failed and must not be filed as one.
     """
 
 
 def termination_cause(exc: BaseException, deadline: float) -> str:
     """Name how an episode ended, in the vocabulary the shared loop uses.
 
-    The three ends this subject has and the loop does not are named for what they
-    are: its own stop rule on repeated failed requests, a graph that ended without a
-    conclusion, and LangGraph's step cap. Filing any of them under model_error or
-    budget would record a cause that did not hold. Everything else is read the way
-    the loop reads it: from the clock first, the provider's text second.
+    The two ends this subject has and the loop does not are named for what they are:
+    a graph that ended without a conclusion, and LangGraph's step cap. Filing either
+    under model_error or budget would record a cause that did not hold. Everything
+    else is read the way the loop reads it: from the clock first, the provider's text
+    second. Until 2026-10-30 a third, `repeated_failed_requests`, ended the episode on
+    the third identical failed request; the request is now answered with a note
+    (`sut.common.repeated_requests`), as the shared loop's are, and nothing ends.
     """
-    if isinstance(exc, RepeatedANIRequestError):
-        return "repeated_failed_requests"
     if isinstance(exc, NoConclusion):
         return "no_conclusion"
     if isinstance(exc, GraphRecursionError):
@@ -84,6 +97,13 @@ def _generation_records(response: Any) -> list[dict[str, Any]]:
                 # Where a provider returns reasoning separately it lands here.
                 if isinstance(extra, dict) and extra.get("reasoning_content"):
                     record["reasoning_content"] = extra["reasoning_content"]
+            # ChatLiteLLM puts the provider's finish_reason in generation_info; other
+            # chat models put it in the message's response_metadata.
+            for source in (getattr(generation, "generation_info", None),
+                           getattr(message, "response_metadata", None)):
+                if isinstance(source, dict) and source.get("finish_reason"):
+                    record["finish_reason"] = str(source["finish_reason"])
+                    break
             records.append(record)
     return records
 
@@ -91,10 +111,9 @@ def _generation_records(response: Any) -> list[dict[str, Any]]:
 def _conclusion_in_text(state: Any) -> dict[str, Any] | None:
     """The conclusion the prompt asks for, when the model wrote it as text.
 
-    The prompt ends with "return only JSON: {status, summary}". A model that does
-    exactly that answers in its message content rather than through the structured
-    output tool, and langchain then leaves `structured_response` empty. That answer
-    is the conclusion the contract asks for, so it is read as one: the last message
+    The prompt offers two ends: the submit_result tool, or "return only this JSON:
+    {status, summary}". A model that takes the second answers in its message content,
+    and that answer is the conclusion the contract asks for, so it is read as one: the last message
     must be the model's and its content must validate as StructuredConclusion (a
     ```json fence or surrounding prose around the object is tolerated). Anything
     else is still no conclusion.
@@ -140,12 +159,15 @@ def _model_turn(number: int, started: float | None, generations: list[dict[str, 
              for call in (record.get("tool_calls") or []) if isinstance(call, dict)]
     text = "".join(str(record.get("text") or "") for record in generations)
     reasoning = sum(len(str(record.get("reasoning_content") or "")) for record in generations)
+    finish_reason = next((record["finish_reason"] for record in generations
+                          if record.get("finish_reason")), None)
     return {
         "turn": number,
         "seconds": round(time.monotonic() - started, 3) if started is not None else None,
         "kind": "tool_calls" if names else "text",
         "content_chars": len(text),
         "reasoning_chars": reasoning,
+        "finish_reason": finish_reason,
         "tool_calls": names,
         "operations": [],
         "error": None,
@@ -200,6 +222,26 @@ class RunUsageCallback(UsageMetadataCallbackHandler):
                        {"turn": self.llm_calls, "generations": generations})
         super().on_llm_end(response, **kwargs)
 
+    def close_unanswered_turn(self, error: str) -> None:
+        """Record the model call the episode ended in, as the shared loop records it: a
+        call made (`llm_calls`), its seconds, and `kind` "error" with why no answer came.
+
+        `asyncio.wait_for` cancels that call at the deadline, and this callback files a turn
+        only when a call answers, so until 2026-11-15 the record lost it: in main03 up to
+        490 s of a budget end were in no turn of this subject, where the shared loop
+        files the same call (`self_execute._turn`). A call that answered leaves no turn
+        open, and then nothing happens.
+        """
+        if self._turn_started is None:
+            return
+        self._attribute_operations()
+        self.llm_calls += 1
+        turn = _model_turn(self.llm_calls, self._turn_started, [])
+        turn.update(kind="error", error=error)
+        self.model_turns.append(turn)
+        self._turn_started = None
+        self._operations_at_end = self._count_operations()
+
     def snapshot(self) -> dict[str, Any]:
         self._attribute_operations()
         usage = {
@@ -226,11 +268,14 @@ class RunUsageCallback(UsageMetadataCallbackHandler):
 class LangChainAgentConfig(ModelAgentConfig):
     max_context_chars: int = 12_000
     artifact_directory: str = "reports/manual/results/artifacts"
-    recursion_limit: int = 1_000
-    #: What the model is bound with when langchain would force a tool call. Its
-    #: ToolStrategy binds every turn with tool_choice="any" (a tool or the conclusion
-    #: tool, nothing else); "auto" lets the server's own tool parser read the model's
-    #: call, see `TOOL_CHOICE_NOTE`. "required" keeps langchain's forcing.
+    #: LangGraph steps, four per turn with this subject's two middlewares: 1 000 was 250
+    #: turns, fewer than a 3 600 s episode holds at 6 to 9 s a turn (one E20
+    #: wrong_routing_table.m3 episode took 379), so it would end an episode the budget had
+    #: not. A runaway guard only: the budget bounds the episode, as it does the shared loop's.
+    recursion_limit: int = 10_000
+    #: What the tools are bound with. "auto" lets the server's own tool parser read the
+    #: model's call, see `TOOL_CHOICE_NOTE`; "required" forces a tool call every turn,
+    #: and the only end left is then submit_result.
     tool_choice: str = "auto"
     #: Extra fields for the request body, as a JSON object: what an OpenAI-compatible
     #: gateway reads beyond the standard fields, such as OpenRouter's provider pin
@@ -271,21 +316,22 @@ def parse_extra_body(text: str | None) -> dict[str, Any]:
 
 
 TOOL_CHOICE_NOTE = (
-    "langchain's ToolStrategy binds the tools with tool_choice='any', so every turn must "
-    "end in a tool call. vLLM implements a forced choice as a JSON grammar that engages "
-    "after the reasoning block; a model that answers a tool result without closing its "
-    "<think> block (Qwen3.5-9B does, most turns) never reaches the grammar, and the reply "
-    "is finish_reason=tool_calls with an empty tool_calls list and no content, which ends "
-    "the graph on the second turn. Bound with 'auto', the server's tool parser reads the "
-    "model's own call, and a turn without one ends the graph as a missing conclusion, "
-    "which the record names.")
+    "A forced tool choice ('any', 'required') means every turn must end in a tool call. "
+    "vLLM implements it as a JSON grammar that engages after the reasoning block; a model "
+    "that answers a tool result without closing its <think> block (Qwen3.5-9B does, most "
+    "turns) never reaches the grammar, and the reply is finish_reason=tool_calls with an "
+    "empty tool_calls list and no content, which ends the graph on the second turn. Bound "
+    "with 'auto', the server's tool parser reads the model's own call, and a turn without "
+    "one ends the graph on its text: a JSON conclusion, or a missing conclusion the record "
+    "names. Until 2026-10-07 langchain's ToolStrategy forced 'any' on every turn; "
+    "submit_result has replaced it.")
 
 
 class ForcedToolChoiceRelaxed(ChatLiteLLM):
     """ChatLiteLLM that binds the tools the way the served parser needs them.
 
-    A forced tool choice ("any", "required") is bound as the configured one instead;
-    a named tool, "none" or "auto" pass through (`TOOL_CHOICE_NOTE` says why). And
+    No choice or a forced one ("any", "required") is bound as the configured one
+    instead; a named tool, "none" or "auto" pass through (`TOOL_CHOICE_NOTE` says why). And
     every optional container parameter is offered with an explicit type rather than
     pydantic's anyOf, so an XML tool-call parser hands a list over as JSON and not
     as a quoted string (sut.common.tool_schema_transport).
@@ -294,7 +340,7 @@ class ForcedToolChoiceRelaxed(ChatLiteLLM):
     tool_choice_override: str | None = None
 
     def bind_tools(self, tools, tool_choice=None, **kwargs):
-        if self.tool_choice_override is not None and tool_choice in ("any", "required"):
+        if self.tool_choice_override is not None and tool_choice in (None, "any", "required"):
             tool_choice = self.tool_choice_override
         tools = [declare_nullable_types(convert_to_openai_tool(tool)) for tool in tools]
         # LiteLLM validates tool_choice against its own model registry and rejects it for
@@ -303,6 +349,23 @@ class ForcedToolChoiceRelaxed(ChatLiteLLM):
         # sent rather than let the first turn fail (as sut/common/litellm_backend.py does).
         kwargs.setdefault("allowed_openai_params", ["tool_choice"])
         return super().bind_tools(tools, tool_choice=tool_choice, **kwargs)
+
+    def _create_message_dicts(self, messages, stop):
+        """The request messages, with past reasoning sent back the way the server reads it.
+
+        langchain_litellm returns every past turn with its reasoning as `reasoning_content`.
+        vLLM reads only `reasoning` from a request message, so that reasoning never reached
+        the chat template, and the model saw a run of empty think blocks as the LiteLLM loop
+        did (sut.common.messages.REASONING_KEY). Here the reasoning moves to that key and
+        stays on the last REASONING_TURNS_SENT_BACK assistant turns only, as in the loop.
+        """
+        message_dicts, params = super()._create_message_dicts(messages, stop)
+        for message in message_dicts:
+            reasoning = message.pop("reasoning_content", None)
+            if message.get("role") == "assistant" and reasoning:
+                message[REASONING_KEY] = reasoning
+        keep_recent_reasoning(message_dicts, REASONING_TURNS_SENT_BACK)
+        return message_dicts, params
 
 
 class LangChainRepairAgent:
@@ -313,6 +376,8 @@ class LangChainRepairAgent:
     #: Where this subject's `prompts/` directory is. A subject built on this one
     #: ships its own prompts and points this at its own package.
     subject_dir = Path(__file__).resolve().parent
+    #: What an episode's ANI calls go through. A subject built on this one may name its own.
+    adapter_class: ClassVar[type[LangChainANIAdapter]] = LangChainANIAdapter
 
     def __init__(
         self,
@@ -371,7 +436,8 @@ class LangChainRepairAgent:
         litellm.suppress_debug_info = True
         kwargs: dict[str, Any] = {
             "model": self.config.model,
-            "max_tokens": self.config.max_tokens,
+            # None (no limit) leaves max_tokens out of the request, see request_max_tokens.
+            "max_tokens": request_max_tokens(self.config.max_tokens),
             # ChatLiteLLM forwards its declared fields and `model_kwargs` to
             # litellm.completion; an unknown keyword such as extra_body= is dropped by
             # pydantic without a word. So the thinking request travels inside
@@ -386,8 +452,7 @@ class LangChainRepairAgent:
             kwargs["api_key"] = self.config.api_key
         if self.config.temperature is not None:
             kwargs["temperature"] = self.config.temperature
-        if self.config.tool_choice not in ("any", "required"):
-            kwargs["tool_choice_override"] = self.config.tool_choice
+        kwargs["tool_choice_override"] = self.config.tool_choice
         return ForcedToolChoiceRelaxed(**kwargs)
 
     def invoke(self, task_json: str) -> str:
@@ -405,12 +470,13 @@ class LangChainRepairAgent:
                 termination={"cause": "dry_run",
                              "detail": "dry-run does not execute ANI operations", "turn": 0}))
         deadline = started + budget
-        adapter = LangChainANIAdapter(
+        adapter = self.adapter_class(
             self.ani,
             task=task,
             artifact_directory=Path(self.config.artifact_directory),
             max_context_chars=self.config.max_context_chars,
             deadline=deadline,
+            budget_seconds=budget,
         )
         self._trace.begin_episode(
             f"{self.config.model}-{task.get('scenario_id') or 'episode'}"
@@ -421,15 +487,17 @@ class LangChainRepairAgent:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 raise TimeoutError("execution budget exhausted before agent creation")
+            tools = self._tools(adapter)
             graph = self.agent_factory(
                 model=self._model(request_timeout=remaining),
-                tools=self._tools(adapter),
+                tools=tools,
                 system_prompt=self.system_prompt,
-                response_format=ToolStrategy(StructuredConclusion),
+                middleware=self._middleware(adapter),
             )
             # Built before the clock is read again, so whatever building it costs
             # is spent inside the budget the graph is then given.
-            message = self._task_message(task, deadline)
+            message = self._task_message(
+                task, deadline, [name for tool in tools if (name := getattr(tool, "name", None))])
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 raise TimeoutError("execution budget exhausted before graph invocation")
@@ -443,42 +511,49 @@ class LangChainRepairAgent:
                 ),
                 timeout=remaining,
             ))
-            conclusion = state.get("structured_response") if isinstance(state, dict) else None
-            if hasattr(conclusion, "model_dump"):
-                conclusion = conclusion.model_dump()
-            conclusion_source = "structured_response" if isinstance(conclusion, dict) else None
-            if not isinstance(conclusion, dict):
-                # The prompt asks for the conclusion as JSON text; a model that obeys
-                # it never calls the structured-output tool (_conclusion_in_text).
+            # The submission first: once the ANI accepted it the graph stopped there,
+            # whatever the last message says. Otherwise the JSON the prompt allows as text.
+            conclusion = adapter.trace.submission
+            conclusion_source = "submit_result" if conclusion is not None else None
+            if conclusion is None:
                 conclusion = _conclusion_in_text(state)
                 conclusion_source = "final_message" if isinstance(conclusion, dict) else None
             if not isinstance(conclusion, dict):
-                raise NoConclusion("LangChain agent returned no structured_response")
+                raise NoConclusion("LangChain agent ended without submit_result or a JSON conclusion")
             report = self._report(adapter, conclusion, budget, time.monotonic() - started, None,
                                   _best_telemetry(state, usage_callback), conclusion_source=conclusion_source)
         except TimeoutError:
             # ExecutionBudgetExceeded from a tool, the two pre-checks and wait_for all
             # land here: the clock ended the episode.
+            usage_callback.close_unanswered_turn("execution budget exceeded")
             report = self._report(
                 adapter, None, budget, time.monotonic() - started, "execution budget exceeded",
                 usage_callback.snapshot(),
                 termination={"cause": "budget", "detail": "execution budget exceeded",
                              "turn": usage_callback.llm_calls})
         except Exception as exc:
+            # A model call under way when the graph raised is a turn, as in the shared loop;
+            # any other end leaves no call open.
+            usage_callback.close_unanswered_turn(str(exc))
+            termination = {"cause": termination_cause(exc, deadline),
+                           "detail": str(exc)[:200], "turn": usage_callback.llm_calls}
             report = self._report(
                 adapter, None, budget, time.monotonic() - started, str(exc),
-                usage_callback.snapshot(),
-                termination={"cause": termination_cause(exc, deadline),
-                             "detail": str(exc)[:200], "turn": usage_callback.llm_calls})
+                usage_callback.snapshot(), termination=termination)
         return json.dumps(report)
+
+    def _middleware(self, adapter: LangChainANIAdapter) -> list[Any]:
+        """What runs around the model's turns in one episode."""
+        return [_stop_after_submission(adapter), _nudge_on_no_action(adapter), SubmissionInListedOrder()]
 
     def _tools(self, adapter: LangChainANIAdapter) -> list[Any]:
         """The tools one episode is given: the ANI's, and nothing else here."""
         return adapter.tools()
 
-    def _task_message(self, task: dict[str, Any], deadline: float) -> str:
-        """The first user message: the public task, and nothing else here."""
-        return json.dumps(public_task_for_model(task), sort_keys=True)
+    def _task_message(self, task: dict[str, Any], deadline: float, surface: list[str] | None = None) -> str:
+        """The first user message: the public task, its `tools` naming the episode's
+        tools (`surface`), and nothing else here."""
+        return json.dumps(public_task_for_model(task, surface), sort_keys=True)
 
     def _report(self, adapter: LangChainANIAdapter | None, conclusion: dict[str, Any] | None, budget: float, elapsed: float, error: str | None, telemetry: dict[str, Any] | None = None, *, termination: dict[str, Any] | None = None, conclusion_source: str | None = None) -> dict[str, Any]:
         trace = adapter.trace if adapter else None
@@ -490,8 +565,15 @@ class LangChainRepairAgent:
         validation = trace.final_validation if trace else None
         verified = bool(validation and validation.get("passed"))
         requested_status = str((conclusion or {}).get("status") or "failed")
-        status = "completed" if requested_status == "completed" and verified else "failed"
-        if requested_status == "completed" and not verified and error is None:
+        submitted = conclusion_source == "submit_result"
+        # A submission is recorded as declared: submitting ends the episode whatever it
+        # claims, and `verified` says whether a validation passed. The JSON written as
+        # text keeps its gate: a completion without a passing validation is a failure.
+        if submitted:
+            status = requested_status
+        else:
+            status = "completed" if requested_status == "completed" and verified else "failed"
+        if requested_status == "completed" and not verified and error is None and not submitted:
             error = "SUT claimed completion without a passing public validation"
         if conclusion is not None and requested_status == "failed" and error is None:
             # The loop files a self-declared failure under `error` (self_execute.py);
@@ -501,10 +583,12 @@ class LangChainRepairAgent:
             # The two ends a conclusion can have, named as the shared loop names them:
             # the gate refusing a completion claim, or the subject's own conclusion.
             turn = int(telemetry.get("llm_calls") or 0)
-            if requested_status == "completed" and not verified:
+            if requested_status == "completed" and not verified and not submitted:
                 termination = {"cause": "completion_rejected", "detail": error, "turn": turn}
             else:
                 termination = {"cause": "own_conclusion", "detail": requested_status, "turn": turn}
+                if submitted:
+                    termination["via"] = "submit_result"
         device_changes = list(trace.device_changes if trace else [])
         if verified:
             for action in device_changes:
@@ -536,8 +620,26 @@ class LangChainRepairAgent:
                 # (summarize_campaign, evaluation_parameters) reads this subject's end
                 # from the name it gives rather than guessing from status and error.
                 "termination": termination,
-                # How the conclusion reached the harness: the structured-output tool,
-                # or the JSON text the prompt asks for (None when there was none).
+                # Identical failed requests (`sut.common.repeated_requests`): from the
+                # third with no applied write between them, the answer carries a note and
+                # the episode goes on; `notes` names each, `resets` each write that started
+                # the count again. Records from 2026-10-27 to 2026-10-29 have `stop_rule`
+                # instead, when the third ended the episode (`repeated_failed_requests`).
+                "repeated_requests": (trace.repeated_requests.record() if trace
+                                      else RepeatedRequests().record()),
+                # The one `failed` sent back with more than half the budget left, or
+                # None. Records before 2026-10-30 have no key.
+                "early_failure_pushback": trace.early_failure_pushback if trace else None,
+                # The one `completed` sent back for want of a passing public validation
+                # since the last write, or None. Records before 2026-10-29 have no key.
+                "unverified_completion_pushback": trace.unverified_completion_pushback if trace else None,
+                # Each reply with neither a tool call nor a conclusion sent back to the
+                # model with the shared loop's nudge. Records before 2026-10-29 have no
+                # key: such a reply ended the episode with no conclusion.
+                "no_action_nudges": list(trace.no_action_nudges if trace else []),
+                # How the conclusion reached the harness: submit_result, or the JSON
+                # text the prompt allows (None when there was none). Records before
+                # 2026-10-07 say structured_response, langchain's conclusion tool.
                 "conclusion_source": conclusion_source,
                 "interaction_limits": {
                     "ani": ani_budget_state(self.ani, self.config.ani_call_limit),
@@ -546,7 +648,8 @@ class LangChainRepairAgent:
                 "llm_calls": telemetry["llm_calls"],
                 "model_parameters": {
                     "model": self.config.model,
-                    "max_tokens": self.config.max_tokens,
+                    # null when no output limit was sent (--max-tokens 0, none or unlimited)
+                    "max_tokens": request_max_tokens(self.config.max_tokens),
                     "temperature": self.config.temperature,
                     "max_context_chars": self.config.max_context_chars,
                     "max_execution_seconds": self.config.max_execution_seconds,
@@ -572,6 +675,9 @@ class LangChainRepairAgent:
                     # Extra request fields the run sent (a gateway's provider pin), so a
                     # result says which provider served it, not only which model.
                     "request_extra_body": parse_extra_body(self.config.request_extra_body) or None,
+                    # How many past turns went back with their reasoning; unknown for a
+                    # supplied model, which builds its own requests.
+                    "reasoning_turns_sent_back": REASONING_TURNS_SENT_BACK if self.model is None else None,
                     # How thinking was requested and which mechanism the model
                     # family resolved to, so a result can be read without
                     # inferring it from the model name.
@@ -591,7 +697,8 @@ class LangChainRepairAgent:
             # to tell a self-concluded episode from one the clock or an error ended.
             # `summary` stays: earlier records of this subject carry it.
             "final_response": (
-                {"status": requested_status, "summary": str(conclusion.get("summary") or "")}
+                {"status": requested_status, "summary": str(conclusion.get("summary") or ""),
+                 **({"diagnosis": conclusion.get("diagnosis")} if submitted else {})}
                 if conclusion is not None else None),
             "summary": (conclusion or {}).get("summary"),
             "error": error,
@@ -606,6 +713,119 @@ class LangChainRepairAgent:
         if value <= 0:
             value = self.config.max_execution_seconds
         return min(value, self.config.max_execution_seconds)
+
+
+class SubmissionInListedOrder(AgentMiddleware):
+    """A model message that carries `submit_result` beside other calls runs its calls one
+    at a time, in the order the model listed them.
+
+    `create_agent` runs the calls of one message at the same time. The adapter refuses a
+    call once a submission exists (`LangChainANIAdapter._invoke`), so with a submission in
+    the message, which calls reached the ANI was a matter of timing: a call listed after
+    the submission was sent in about half of the runs, and one listed before it was refused
+    in about half. For a write that decided whether the network changed after the agent's
+    own end. In the listed order a call before the submission is sent and one after it is
+    not, as in the shared loop (`sut.common.self_execute`), which runs every message in order.
+
+    A message with no submission, or with a submission alone, is left as it is.
+    """
+
+    #: A call waits this long for the one listed before it, then runs anyway: a call that
+    #: never returned must not hold the episode.
+    WAIT_SECONDS = 900.0
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._finished: dict[str, threading.Event] = {}
+        self._lock = threading.Lock()
+
+    def _turn(self, request: Any) -> tuple[threading.Event | None, threading.Event | None]:
+        """The event of the call listed before this one, and this call's own."""
+        messages = (request.state or {}).get("messages") if isinstance(request.state, dict) else None
+        calls = list(getattr(messages[-1], "tool_calls", None) or []) if messages else []
+        identifiers = [str(call.get("id")) for call in calls]
+        mine = str((request.tool_call or {}).get("id"))
+        if (len(calls) < 2 or mine not in identifiers
+                or not any(call.get("name") == SUBMISSION_OPERATION for call in calls)):
+            return None, None
+        with self._lock:
+            events = [self._finished.setdefault(identifier, threading.Event()) for identifier in identifiers]
+        position = identifiers.index(mine)
+        return (events[position - 1] if position else None), events[position]
+
+    def wrap_tool_call(self, request: Any, handler: Any) -> Any:
+        before, own = self._turn(request)
+        if before is not None:
+            before.wait(self.WAIT_SECONDS)
+        try:
+            return handler(request)
+        finally:
+            if own is not None:
+                own.set()
+
+    async def awrap_tool_call(self, request: Any, handler: Any) -> Any:
+        before, own = self._turn(request)
+        if before is not None:
+            await asyncio.to_thread(before.wait, self.WAIT_SECONDS)
+        try:
+            return await handler(request)
+        finally:
+            if own is not None:
+                own.set()
+
+
+def _stop_after_submission(adapter: LangChainANIAdapter) -> Any:
+    """Middleware ending the graph before the next model call once a submission exists.
+
+    `return_direct` would not do it: it stops only when every call of the turn asked
+    for it, and a model may send submit_result alongside a read.
+    """
+    @before_model(can_jump_to=["end"])
+    def stop_after_submission(state: Any, runtime: Any) -> dict[str, Any] | None:
+        return {"jump_to": "end"} if adapter.trace.submission is not None else None
+
+    return stop_after_submission
+
+
+#: What the model is told after a reply with neither a tool call nor a conclusion: the
+#: shared loop's own nudge, with this subject's two ends named.
+NO_ACTION_NUDGE = ("Use an ANI tool next, or conclude with submit_result or the required final JSON "
+                   "status object.")
+
+
+def _nudge_on_no_action(adapter: LangChainANIAdapter) -> Any:
+    """Middleware sending a reply with no tool call and no conclusion back to the model.
+
+    `create_agent` ends the graph on a model message with no tool call, and the episode
+    then ended with no conclusion: three in E19 (disable_routing.m1, drop_traffic.m3,
+    wrong_routing_table.m3), each a reply of 915 to 3 226 characters that thought in its
+    content and stopped. The shared loop nudges such a reply and goes on; so does this,
+    every time, bounded by the budget and the recursion limit as the loop is by its
+    budget. A JSON conclusion written as text is a conclusion and ends the graph as before.
+    """
+    @after_model(can_jump_to=["model"])
+    def nudge_on_no_action(state: Any, runtime: Any) -> dict[str, Any] | None:
+        if adapter.trace.submission is not None:
+            return None
+        messages = state.get("messages") if isinstance(state, dict) else None
+        if not messages:
+            return None
+        last = messages[-1]
+        if getattr(last, "type", None) != "ai" or getattr(last, "tool_calls", None):
+            return None
+        if _conclusion_in_text({"messages": [last]}) is not None:
+            return None
+        content = getattr(last, "content", "") or ""
+        adapter.trace.no_action_nudges.append({
+            "operations_before": len(adapter.trace.operations),
+            "reply_chars": len(content if isinstance(content, str) else json.dumps(content, default=str)),
+            # A tool call written as text, which the nudge then names (sut.common.messages).
+            "unparsed_tool_call": unparsed_tool_call(content),
+        })
+        return {"messages": [HumanMessage(content=no_action_nudge(content, NO_ACTION_NUDGE))],
+                "jump_to": "model"}
+
+    return nudge_on_no_action
 
 
 def _state_telemetry(state: Any) -> dict[str, Any]:

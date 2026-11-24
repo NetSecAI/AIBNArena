@@ -9,9 +9,10 @@ than importing it: a SUT must not depend on the judge that scores it.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
-from benchmarks.platforms.containerlab import ANI_VERSION
+from benchmarks.platforms.containerlab import ANI_OPERATIONS, ANI_VERSION
 
 SELF_EXECUTE_MODE = "self_execute"
 
@@ -28,12 +29,41 @@ __all__ = [
 ]
 
 
-def public_task_for_model(task: dict[str, Any]) -> dict[str, Any]:
-    return {
+#: What the judge hands a subject for its ANI and not for its model: the rate the protected
+#: flow measured on the healthy network of the episode, which the ANI's throughput check holds
+#: the flow to (`healthy_throughput_mbps`, benchmarks/core/lifecycle.py). Shown to the model
+#: under `observation` in main04, it was read as the rate under the fault in turn 1 of all 8
+#: QoS episodes; a subject then tuned qos m3's class rates from 7.651 Mbit/s and never
+#: measured the 0.0 the removed classifier left. The ANI still reads it from the whole task.
+JUDGE_ONLY_OBSERVATION_KEYS = ("healthy_throughput_mbps",)
+
+
+def public_task_for_model(task: dict[str, Any], surface: Iterable[str] | None = None) -> dict[str, Any]:
+    """The task as the model reads it.
+
+    Given `surface`, the names of the tools the model is handed, `tools` names those
+    rather than the judge's list. The judge declares the platform's operations; a subject
+    offers its own selection of them beside tools of its own (the documentation search),
+    and a tool named to the model that it cannot call invites the call. A platform operation the judge did not declare stays out.
+
+    The observation leaves out what only the ANI uses (`JUDGE_ONLY_OBSERVATION_KEYS`); the
+    task itself, which the subject hands its ANI, is not changed.
+    """
+    public = {
         key: task.get(key)
-        for key in ("intent", "question", "constraints", "observation", "success_criteria", "execution_budget", "ani")
+        for key in ("intent", "question", "constraints", "observation", "success_criteria", "execution_budget", "tools")
         if task.get(key) is not None
     }
+    if isinstance(public.get("observation"), dict):
+        public["observation"] = {
+            name: ({key: value for key, value in entry.items() if key not in JUDGE_ONLY_OBSERVATION_KEYS}
+                   if isinstance(entry, dict) else entry)
+            for name, entry in public["observation"].items()
+        }
+    if surface is not None and isinstance(public.get("tools"), list):
+        declared = set(public["tools"])
+        public["tools"] = [name for name in surface if name in declared or name not in ANI_OPERATIONS]
+    return public
 
 
 def task_summary(task: dict[str, Any]) -> dict[str, Any]:
@@ -66,6 +96,13 @@ def device_changes_from_ani_result(result: dict[str, Any]) -> list[dict[str, Any
             "result": action_result,
             "verified_after_action": False,
         })
+    # A subject write that failed half-way compensates itself and carries the
+    # rollback_config envelope under "rollback"; those are device mutations too and
+    # the report must count them, or a compensated failure reads as fewer actions
+    # than an uncompensated one.
+    rollback = result.get("rollback")
+    if isinstance(rollback, dict) and rollback.get("operation") == "rollback_config":
+        changes.extend(device_changes_from_ani_result(rollback))
     return changes
 
 
@@ -80,9 +117,12 @@ def objective_from_validation(result: dict[str, Any]) -> dict[str, Any] | None:
 
 #: The ANI operations, by what they do to the lab. A summary is categorised by these
 #: first, and by what the call turned out to perform second; see `operation_category`.
-READ_OPERATIONS = ("get_topology", "get_state", "get_running_config", "get_object")
+#: `get_topology_simple` is a subject's narrower answer from one `get_topology` read.
+READ_OPERATIONS = ("get_topology", "get_topology_simple", "get_state", "get_running_config", "get_object")
 MUTATION_OPERATIONS = ("update_config", "update_object", "rollback_config")
 VALIDATION_OPERATION = "execute_validation"
+#: The agent's own end of the episode (ANI v0.4): neither a read, a write nor a check.
+SUBMISSION_OPERATION = "submit_result"
 
 
 def ani_category(operation: str) -> str | None:
@@ -98,19 +138,23 @@ def ani_category(operation: str) -> str | None:
         return "mutation"
     if operation == VALIDATION_OPERATION:
         return "validation"
+    if operation == SUBMISSION_OPERATION:
+        return "submission"
     return None
 
 
 def operation_category(operation: str, result: dict[str, Any]) -> str:
     """What the call did, not only what it was named.
 
-    The name settles it for the ANI's own operations. A subject tool of its own that
-    dispatches to the ANI is settled by the envelope it answers with: one that sends
-    a change through `update_config` and returns the ANI's result unwrapped made a
-    device change, whatever it is called, and filing it under the generic `tool` would
-    hide it from every counter keyed on the category. A call that never reached the ANI
-    keeps its own name in the envelope, so a failure before dispatch stays `tool`,
-    which is what it is.
+    The name settles it for the ANI's own operations.
+
+    A SUT tool that dispatches to the ANI is settled by the envelope it answers with: a
+    tool that sends its change through `update_config` and returns the ANI's own result
+    unwrapped performed a mutation, and categorising it by its tool name would file a
+    real device change under the generic `tool`, where every counter keyed on the
+    category misses it. A call that never reached the ANI keeps its own name in the
+    envelope, so a dry run and a failure before dispatch stay `tool`, which is what
+    they are.
     """
     category = ani_category(operation)
     if category is not None:

@@ -56,10 +56,88 @@ def load_oracle(path: str | Path, *, expected_version: str | None = None) -> dic
 
 
 def resolve_oracle(document: Mapping[str, Any], bindings: Mapping[str, Any]) -> dict[str, Any]:
-    """Resolve exact binding placeholders; interpolation and expressions are forbidden."""
+    """Resolve exact binding placeholders; interpolation and expressions are forbidden.
+
+    A composed oracle (one with a `compose` block, which the combined scenarios use)
+    is assembled first from the oracles of the components the bindings name.
+    """
+    if "compose" in document:
+        return _compose(document, bindings)
     resolved = _resolve(copy.deepcopy(dict(document)), bindings)
     validate_oracle(resolved, source=str(document.get("oracle_id", "<memory>")))
     return resolved
+
+
+_REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _component_oracle_path(path: str) -> Path:
+    candidate = Path(path)
+    return candidate if candidate.is_absolute() else _REPOSITORY_ROOT / candidate
+
+
+def _compose(document: Mapping[str, Any], bindings: Mapping[str, Any]) -> dict[str, Any]:
+    """Assemble a composed oracle from the oracles of the combination's components.
+
+    Each component's oracle for this phase -- loaded at the version its scenario pins
+    and resolved with the bindings that component drew -- becomes one group, so the
+    component's own success rule (`any` across a DHCP fault's two symptoms, say) still
+    decides it. A probe two components declare identically after resolution is kept
+    once and counts for both: the required-paths matrix is measured a single time
+    however many components ask for it. The oracle passes when every group does.
+    """
+    source = str(document.get("oracle_id", "<memory>"))
+    components = bindings.get("components")
+    if not isinstance(components, list) or len(components) < 2:
+        raise OracleValidationError(
+            f"composed oracle {source} needs bindings.components naming at least two components")
+    phase = str(document["phase"])
+    scope = str(document["compose"]["affected_nodes"])
+    probes: list[dict[str, Any]] = []
+    seen: dict[str, int] = {}
+    groups: dict[str, Any] = {}
+    for component in components:
+        group = str(component.get("id") or "")
+        reference = (component.get("oracles") or {}).get(phase)
+        if not group or not isinstance(reference, Mapping):
+            raise OracleValidationError(
+                f"composed oracle {source}: a component has no id or no {phase} oracle reference")
+        if group in groups:
+            raise OracleValidationError(f"composed oracle {source}: component id {group} repeats")
+        child = load_oracle(_component_oracle_path(str(reference["path"])),
+                            expected_version=str(reference["version"]))
+        if "compose" in child:
+            raise OracleValidationError(f"composed oracle {source}: components cannot be composed oracles")
+        if child["phase"] != phase:
+            raise OracleValidationError(
+                f"composed oracle {source}: {reference['path']} is a {child['phase']} oracle, not {phase}")
+        child_bindings = dict(component.get("bindings") or {})
+        if scope == "union":
+            child_bindings["affected_nodes"] = list(bindings.get("affected_nodes") or [])
+        resolved = resolve_oracle(child, child_bindings)
+        groups[group] = copy.deepcopy(resolved["success"])
+        for probe in resolved["probes"]:
+            key = json.dumps({k: v for k, v in probe.items() if k not in {"id", "groups"}},
+                             sort_keys=True, default=str)
+            if key in seen:
+                probes[seen[key]]["groups"].append(group)
+                continue
+            seen[key] = len(probes)
+            probes.append({**probe, "id": f"{group}_{probe['id']}", "groups": [group]})
+    composed = {
+        "schema_version": document["schema_version"],
+        "oracle_id": document["oracle_id"],
+        "version": document["version"],
+        "description": document.get("description", ""),
+        "domain": document["domain"],
+        "phase": phase,
+        "probes": probes,
+        "success": {"mode": "all_groups", "groups": groups},
+    }
+    if not composed["description"]:
+        del composed["description"]
+    validate_oracle(composed, source=source)
+    return composed
 
 
 def _resolve(value: Any, bindings: Mapping[str, Any]) -> Any:

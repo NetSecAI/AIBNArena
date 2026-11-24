@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 from benchmarks.core import OracleEvaluator
 from benchmarks.platforms.containerlab.compiled_topology import CompiledContainerLabTopology
@@ -167,6 +168,142 @@ def test_preservation_oracle_passes_vacuously_through_the_evaluator() -> None:
     assert probe.metrics["vacuous"] is True
     assert probe.metrics["total_checks"] == 0
     assert probe.metrics["failed_checks"] == 0
+
+
+FIREWALL_TOPOLOGY = ROOT / "scenarios/topologies/sme_leaf_firewall_dmz.yaml"
+FILTERING_ORACLES = ROOT / "scenarios/oracles/filtering"
+
+
+def _firewall_platform(open_paths: dict[tuple[str, str], float]) -> tuple[ContainerlabPlatform, list[dict]]:
+    """The firewall lab, pinging with a stub that answers per (source, destination).
+
+    Each listed pair answers with its packet loss; every other pair answers with
+    full loss, which is what the healthy policy does to an isolated pair.
+    """
+    platform = ContainerlabPlatform()
+    platform.topology_document = CompiledContainerLabTopology.from_file(FIREWALL_TOPOLOGY).document
+    topology = platform.topology_document["topology"]
+    names = {_address(topology, node): node for node in topology["nodes"] if _has_address(topology, node)}
+    pings: list[dict] = []
+
+    def ping(probe):
+        pings.append(dict(probe))
+        loss = open_paths.get((str(probe["source"]), names[str(probe["destination"])]), 100.0)
+        return {
+            "success": loss == 0.0,
+            "packet_loss_percent": loss,
+            "rtt_min_ms": None if loss == 100.0 else 1.0,
+            "rtt_avg_ms": None if loss == 100.0 else 1.0,
+            "rtt_max_ms": None if loss == 100.0 else 1.0,
+        }
+
+    platform._icmp = ping  # type: ignore[method-assign]
+    return platform, pings
+
+
+def _address(topology: dict, node: str) -> str:
+    from benchmarks.platforms.containerlab.platform import _node_ip
+
+    return _node_ip(topology, node)
+
+
+def _has_address(topology: dict, node: str) -> bool:
+    try:
+        _address(topology, node)
+    except ProbeExecutionError:
+        return False
+    return True
+
+
+def test_isolation_matrix_passes_when_every_isolated_pair_is_blocked() -> None:
+    platform, pings = _firewall_platform({})
+
+    outcome = platform._isolation_matrix({"attempts": 3, "timeout_seconds": 1})
+
+    assert len(pings) == outcome["total_checks"] == 6
+    assert outcome["blocked_checks"] == 6
+    assert outcome["leaked_checks"] == 0
+    assert outcome["success"] is True
+    assert ("web1", "finance1") in {(check["source"], check["destination"]) for check in outcome["checks"]}
+
+
+def test_a_single_reply_is_a_leak() -> None:
+    """A policy that lets one packet in three through is open, not mostly closed."""
+    platform, _ = _firewall_platform({("web1", "finance1"): 66.7})
+
+    outcome = platform._isolation_matrix({"attempts": 3, "timeout_seconds": 1})
+
+    leaked = [(check["source"], check["destination"]) for check in outcome["checks"] if check["leaked"]]
+    assert leaked == [("web1", "finance1")]
+    assert outcome["leaked_checks"] == 1
+    assert outcome["blocked_checks"] == 5
+    assert outcome["success"] is False
+
+
+def test_isolation_matrix_ignores_the_affected_scope() -> None:
+    """A widened rule leaks between nodes the fault never touched."""
+    platform, pings = _firewall_platform({})
+
+    outcome = platform._isolation_matrix({
+        "attempts": 1, "timeout_seconds": 1, "scope": "unaffected", "affected_nodes": ["web1", "app1"],
+    })
+
+    assert outcome["total_checks"] == len(pings) == 6
+
+
+def test_topology_without_isolation_requirements_raises_rather_than_passing() -> None:
+    platform, pings = _firewall_platform({})
+    topology = dict(platform.topology_document["topology"])
+    topology.pop("isolation_requirements")
+    platform.topology_document = {"topology": topology}
+
+    with pytest.raises(ProbeExecutionError, match="isolation_requirements"):
+        platform._isolation_matrix({"attempts": 1, "timeout_seconds": 1})
+    assert pings == []
+
+
+def test_bidirectional_isolation_pairs_are_checked_both_ways() -> None:
+    platform, _ = _firewall_platform({})
+    topology = dict(platform.topology_document["topology"])
+    topology["isolation_requirements"] = [{"source": "guest1", "destination": "finance1", "bidirectional": True}]
+    platform.topology_document = {"topology": topology}
+
+    outcome = platform._isolation_matrix({"attempts": 1, "timeout_seconds": 1})
+
+    assert [(check["source"], check["destination"]) for check in outcome["checks"]] == [
+        ("guest1", "finance1"), ("finance1", "guest1"),
+    ]
+
+
+@pytest.mark.parametrize("phase", ["healthy", "repair"])
+def test_the_filtering_oracle_fails_an_accept_all_repair(phase: str) -> None:
+    """Measured in e10 (filtering.zone_policy_enforcement.high.m2): turning the
+    injected match-all deny into a match-all accept restored every required path
+    and passed the old oracle. It also opens web1 -> finance1."""
+    scenario = yaml.safe_load((ROOT / "scenarios/filtering/zone_policy_enforcement.yaml").read_text())
+    pinned = scenario["oracles"][phase]["version"]
+    oracle = resolve_oracle(
+        load_oracle(FILTERING_ORACLES / f"{phase}-v1.yaml", expected_version=pinned),
+        {"affected_nodes": ["app1", "web1"]},
+    )
+    topology = CompiledContainerLabTopology.from_file(FIREWALL_TOPOLOGY).document["topology"]
+    required: dict[tuple[str, str], float] = {}
+    for requirement in topology["connectivity_requirements"]:
+        required[(requirement["source"], requirement["destination"])] = 0.0
+        if requirement.get("bidirectional"):
+            required[(requirement["destination"], requirement["source"])] = 0.0
+
+    restored, _ = _firewall_platform(required)
+    assert OracleEvaluator(restored).evaluate(oracle).passed is True
+
+    widened, _ = _firewall_platform({**required, ("web1", "finance1"): 0.0})
+    evaluation = OracleEvaluator(widened).evaluate(oracle)
+    assert evaluation.passed is False
+    required_paths, denied_paths = evaluation.probes
+    assert required_paths.passed is True
+    assert denied_paths.probe_id == "denied_paths"
+    assert denied_paths.passed is False
+    assert denied_paths.metrics["leaked_checks"] == 1
 
 
 def test_reference_state_waits_for_configured_convergence(tmp_path: Path) -> None:

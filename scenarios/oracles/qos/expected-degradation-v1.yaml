@@ -1,7 +1,16 @@
 schema_version: "1.0"
 oracle_id: qos.path.expected_degradation
-version: 1.0.0
-description: Loss or latency must degrade materially relative to the recorded baseline.
+version: 1.1.0
+description: >-
+  Loss or latency must degrade materially relative to the recorded baseline.
+
+  Thirty pings and a 5 % loss bar (two lost), where it was ten pings and 20 %.
+  The corruption method draws 20 to 50 %, so the old bar sat at the bottom of
+  the range: at 20 % drawn, two losses in ten came up in 62 % of the draws, and
+  with the default single injection attempt the other 38 % ended the episode
+  before the subject ran. From E12 to E16, at 31 % drawn, most episodes
+  measured exactly 20 %. Two losses in thirty come up in 99 % of the draws at
+  20 %; the healthy lab loses none.
 domain: qos
 phase: expected_degradation
 probes:
@@ -10,11 +19,11 @@ probes:
     source: "${bindings.source}"
     destination: "${bindings.destination_ip}"
     protocol: icmp
-    attempts: 10
+    attempts: 30
     timeout_seconds: 6
     metrics: [packet_loss_percent, rtt_avg_ms]
     thresholds:
-      - {metric: packet_loss_percent, operator: gte, value: 20}
+      - {metric: packet_loss_percent, operator: gte, value: 5}
       - metric: rtt_avg_ms
         operator: gte
         baseline: {metric: rtt_avg_ms, factor: 2, offset: 20}

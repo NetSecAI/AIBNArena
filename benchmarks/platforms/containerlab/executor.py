@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import secrets
 import shlex
 import subprocess
 from dataclasses import dataclass
@@ -106,9 +107,34 @@ import gc
 import json
 import os
 import sys
-import uuid
+import tempfile
 
-from vyos.configsession import ConfigSession
+from vyos.configsession import ConfigSession, ConfigSessionError
+
+
+def commit(session):
+    # vyos-configd writes a commit script's messages, the reason a commit is refused among
+    # them, to the path /proc/<session id>/fd/1 links to. The session is named by this
+    # process for that, and stdout is a file during the commit: a pipe's link is no path.
+    with tempfile.NamedTemporaryFile("w+", prefix="ani-commit-") as messages:
+        sys.stdout.flush()
+        saved = os.dup(1)
+        os.dup2(messages.fileno(), 1)
+        try:
+            output, refusal = session.commit(), None
+        except ConfigSessionError as exc:
+            # Only the text: holding the exception would tie this frame, and the session
+            # in it, into a cycle that outlives the teardown below.
+            output, refusal = None, str(exc).strip()
+        finally:
+            os.dup2(saved, 1)
+            os.close(saved)
+        messages.seek(0)
+        text = messages.read().strip()
+    if refusal is not None:
+        raise ConfigSessionError("\n".join(part for part in (text, refusal) if part))
+    return "\n".join(part for part in (text, (output or "").strip()) if part)
+
 
 session = None
 exit_status = 0
@@ -116,8 +142,7 @@ try:
     commands = json.load(sys.stdin)
     if not isinstance(commands, list) or not commands:
         raise ValueError("commands must be a non-empty list")
-    session_id = f"ani-{os.getpid()}-{uuid.uuid4().hex[:12]}"
-    session = ConfigSession(session_id, app="ibn-eval-ani")
+    session = ConfigSession(str(os.getpid()), app="ibn-eval-ani")
     for tokens in commands:
         if not isinstance(tokens, list) or len(tokens) < 2:
             raise ValueError("each command needs a verb and configuration path")
@@ -128,7 +153,7 @@ try:
             session.delete(path)
         else:
             raise ValueError(f"unsupported configuration verb: {verb!r}")
-    output = session.commit()
+    output = commit(session)
     if output:
         print(output)
     print("__ANI_VYOS_COMMIT_CONFIRMED__", file=sys.stderr)
@@ -191,6 +216,45 @@ VYOS_SHELL_CONTROL_TOKENS = frozenset({
 
 SRL_CLI_CONTROL_TOKENS = frozenset({";", "|", "&", ">", ">>", "<", "<<"})
 
+#: What an EOS configuration line may not start with, after an optional `no` or
+#: `default`. The session is the executor's (`configure`, `commit`, `abort`, `end`,
+#: and `exit` or `quit`, which at the top level leave it for exec mode, where the
+#: lines after them would run as commands; `do` runs one from inside it);
+#: the rest leaves the configuration for the switch's shell, flash or lifecycle --
+#: `bash` and `run` execute programs, `event-handler`, `daemon`, `schedule` and
+#: `alias` install ones that run later, `copy`/`delete`/`write`/`rename` touch flash,
+#: `reload`, `zerotouch` and `boot` restart the switch -- or its access (`username`,
+#: `aaa`, `management`), which is the lab's and not the network under repair.
+EOS_FORBIDDEN_VERBS = frozenset({
+    "configure", "commit", "abort", "end", "exit", "quit", "do", "bash", "run", "event-handler", "daemon",
+    "schedule", "alias", "copy", "delete", "write", "rename", "reload", "zerotouch",
+    "boot", "username", "aaa", "management", "enable", "disable", "terminal", "show",
+    "clear", "send",
+})
+EOS_CLI_CONTROL_TOKENS = frozenset({"|", ">", ">>"})
+
+
+#: The `!` notes of an EOS session that mean a line will not take effect.
+EOS_FATAL_NOTES = ("Interface does not exist",)
+
+
+def _eos_errors(output: str) -> list[str]:
+    """The lines an EOS session prints when a line does not apply as written.
+
+    `%` lines are errors (`% Invalid input at line 7`). A `!` line at the margin is a
+    note, and most say nothing against the line: re-entering the MLAG peer-link or
+    its SVI on an aggregate that already holds them prints `! Interface
+    Port-Channel999 is configured as the MLAG peer link`, which a reference state
+    re-applied on a healthy switch would otherwise fail on. One does: `! Interface
+    does not exist. The configuration will not take effect until the module is
+    inserted.` EOS keeps such a line for a module a container never gets, where the
+    other platforms refuse it outright, so it fails the batch too. A diff never
+    starts a line with either: its context lines are indented by one space.
+    """
+    return [line.strip() for line in output.splitlines()
+            if line.startswith("%")
+            or (line.startswith("! ") and any(note in line for note in EOS_FATAL_NOTES))]
+
 
 def _without_protocol_markers(stderr: str) -> str:
     markers = {VYOS_COMMIT_CONFIRMED, VYOS_DISCARD_CONFIRMED}
@@ -230,8 +294,14 @@ class ContainerLabExecutor:
         finally:
             self._accept_noop_commit = previous
 
+    #: containerlab returns once every node reports ready, and a cEOS switch takes about
+    #: 90 s to: campus_large, eleven of them beside three VyOS routers, deployed in
+    #: 335 s alone on the host (2026-10-26), past the 300 s this was.
+    DEPLOY_TIMEOUT_SECONDS = 900
+
     def deploy(self) -> subprocess.CompletedProcess[str]:
-        return self.runner.run(["containerlab", "deploy", "-t", str(self.topology_path)], timeout_seconds=300)
+        return self.runner.run(["containerlab", "deploy", "-t", str(self.topology_path)],
+                               timeout_seconds=self.DEPLOY_TIMEOUT_SECONDS)
 
     def destroy(self) -> subprocess.CompletedProcess[str]:
         return self.runner.run(
@@ -603,6 +673,142 @@ class ContainerLabExecutor:
                 raise ValueError(
                     f"SR Linux command contains CLI control token {controls[0]!r}")
             tokenized.append(tokens)
+        return tokenized
+
+    def run_eos_cli(self, node: LabNode, command: str, timeout_seconds: int | None = None) -> CommandResult:
+        """Run one EOS exec-mode command (`show ...`) and return what EOS printed."""
+        if not command.strip() or any(character in command for character in ("\x00", "\r", "\n")):
+            reason = "an EOS command must be one non-empty line"
+            return CommandResult(target=node.name, command=command, returncode=126,
+                                 safe=False, reason=reason, stderr=reason)
+        completed = self.runner.run(
+            ["docker", "exec", node.container_name, "Cli", "-p", "15", "-c", command],
+            timeout_seconds=timeout_seconds or 60,
+        )
+        # Cli echoes the command it was handed on a `> ` line before some outputs.
+        stdout = "\n".join(line for line in completed.stdout.splitlines()
+                           if line.strip() != f"> {command}")
+        return CommandResult(
+            target=node.name,
+            command=command,
+            returncode=completed.returncode,
+            stdout=stdout,
+            stderr=completed.stderr,
+        )
+
+    def _eos_session(self, node: LabNode, session: str, lines: list[str],
+                     timeout_seconds: int, *, leave: bool = True) -> subprocess.CompletedProcess[str]:
+        # `end` leaves the session pending; after `commit` or `abort` the session is
+        # already closed and `end` would be refused in exec mode.
+        script = "\n".join([f"configure session {session}", *lines, *(["end"] if leave else []), ""])
+        return self.runner.run(
+            ["docker", "exec", "-i", node.container_name, "Cli", "-p", "15"],
+            timeout_seconds=timeout_seconds,
+            input_text=script,
+        )
+
+    def _abort_eos_session(self, node: LabNode, session: str) -> None:
+        # Best effort: EOS keeps five pending sessions at most, and one left behind is
+        # one fewer for every later writer on the node.
+        try:
+            self._eos_session(node, session, ["abort"], 60, leave=False)
+        except Exception:  # noqa: BLE001 - the caller reports the failure that led here
+            pass
+
+    def run_eos_cli_batch(self, node: LabNode, commands: list[str], timeout_seconds: int | None = None) -> CommandResult:
+        """Apply EOS configuration lines in one named session: committed whole or not at all.
+
+        Three steps, because an EOS session survives between two `Cli` runs. The lines
+        go into a fresh session with no commit, and EOS reports there every line it
+        refused; the session's diff then says whether anything would change; only a
+        clean session with a diff is committed. Anything else is aborted, so a failure
+        returned here means the running configuration is what it was. The one outcome
+        this cannot settle is a commit whose acknowledgement was lost, which is raised
+        as indeterminate.
+        """
+        try:
+            self.parse_eos_cli_batch(commands)
+        except ValueError as exc:
+            reason = str(exc)
+            return CommandResult(target=node.name, command="\n".join(commands), returncode=126,
+                                 safe=False, reason=reason, stderr=reason)
+
+        session = f"ani-{secrets.token_hex(6)}"
+        timeout = timeout_seconds or 120
+        try:
+            staged = self._eos_session(node, session, [*commands, "show session-config diffs"], timeout)
+        except Exception:
+            self._abort_eos_session(node, session)
+            raise
+        errors = _eos_errors(staged.stdout + staged.stderr)
+        if staged.returncode != 0 or errors:
+            self._abort_eos_session(node, session)
+            detail = "; ".join(errors) or f"Cli exited {staged.returncode}"
+            return CommandResult(
+                target=node.name,
+                command="\n".join(commands),
+                returncode=staged.returncode or 1,
+                stdout=staged.stdout,
+                stderr=detail,
+                reason=f"EOS refused the batch ({detail}); the session was aborted, nothing was committed",
+            )
+        diff = staged.stdout.strip()
+        if not diff:
+            self._abort_eos_session(node, session)
+            if self._accept_noop_commit:
+                return CommandResult(target=node.name, command="\n".join(commands), returncode=0,
+                                     stdout="already in the requested state")
+            raise NoChangeExecutionError(
+                f"EOS reported no difference from the running configuration: the node is "
+                f"already in the requested state, nothing was written (node {node.name}, "
+                f"{len(commands)} command(s))")
+
+        try:
+            committed = self._eos_session(node, session, ["commit"], timeout, leave=False)
+        except Exception as exc:
+            raise IndeterminateExecutionError(
+                f"EOS commit of session {session} on {node.name} did not answer: {exc}") from exc
+        commit_errors = _eos_errors(committed.stdout + committed.stderr)
+        if committed.returncode == 0 and not commit_errors:
+            return CommandResult(target=node.name, command="\n".join(commands), returncode=0,
+                                 stdout=diff, stderr=committed.stderr)
+        pending = self.run_eos_cli(node, "show configuration sessions")
+        if pending.ok and any(line.split()[:2] == [session, "pending"]
+                              for line in pending.stdout.splitlines() if line.split()):
+            self._abort_eos_session(node, session)
+            detail = "; ".join(commit_errors) or f"Cli exited {committed.returncode}"
+            return CommandResult(
+                target=node.name, command="\n".join(commands), returncode=committed.returncode or 1,
+                stdout=committed.stdout, stderr=detail,
+                reason=f"EOS refused the commit ({detail}); the session was aborted, nothing was committed",
+            )
+        raise IndeterminateExecutionError(
+            f"EOS commit of session {session} on {node.name} failed without leaving the session "
+            f"pending (return code {committed.returncode}){_output_tail(committed)}")
+
+    @staticmethod
+    def parse_eos_cli_batch(commands: list[str]) -> list[list[str]]:
+        """Validate EOS configuration lines before a session is opened."""
+        if not commands:
+            raise ValueError("an EOS configuration batch must not be empty")
+        tokenized: list[list[str]] = []
+        for command in commands:
+            if any(character in command for character in ("\x00", "\r", "\n", ";")):
+                raise ValueError("EOS configuration commands must be one line each")
+            words = command.split()
+            if not words:
+                raise ValueError("an EOS configuration line must not be empty")
+            controls = sorted(set(words) & EOS_CLI_CONTROL_TOKENS)
+            if controls:
+                raise ValueError(f"EOS command contains CLI control token {controls[0]!r}")
+            verb = words[0].lower()
+            if verb in {"no", "default"} and len(words) > 1:
+                verb = words[1].lower()
+            if verb in EOS_FORBIDDEN_VERBS:
+                raise ValueError(
+                    f"EOS configuration commands must not start with {verb!r}: the session "
+                    "is the ANI's, and that command reaches beyond the switch's configuration")
+            tokenized.append(words)
         return tokenized
 
     @staticmethod

@@ -25,6 +25,18 @@
     "sme_wan_edge_qos": {
       "forwarding_model": "routed_wan_edge",
       "note": "Same routed leaf-spine fabric as sme_leaf_spine_dmz_small, plus a Linux WAN edge dual-homed to both spines, between the fabric and the simulated Internet. Its egress interface carries the topology's qos_policy: a two-class HTB hierarchy on a 10 Mbps link, which is what every QoS scenario here shapes, breaks, or contends for."
+    },
+    "campus_medium": {
+      "forwarding_model": "switched_firewall",
+      "note": "The reference campus lab, on its original Arista cEOS switches, with its two firewalls merged into one (2026-10-28). Four layer-2 access switches, each bundling an uplink to either aggregate into one LACP port-channel, and two aggregates forming an MLAG pair carry five VLANs to the firewall's bond0 (an LACP bundle over the pair), the gateway of every VLAN (bond0 vifs). The one VyOS firewall filters between the user groups with intra-zone filtering, holds the DMZ (web, SFTP, DNS segments) and the simulated Internet (external1), the LAN egress policy, the only NAT and both DHCP services, on campus_small's ports for everything but the LAN. Neither aggregate holds an address: one that routed would be a way around the firewall. A remote site hangs off the firewall's eth7 (benchmarks/testbeds/campus_site.py): router-wan (VyOS), then wan-edge, a Linux router whose eth2 is a 10 Mbit circuit carrying the topology's qos_policy, then srv-site, the iperf3 sink. The firewall routes the site's prefix explicitly through router-wan, a second router a route can be made to loop with, and its default leads elsewhere, so wrong_routing_table and the shaped QoS families bind."
+    },
+    "campus_small": {
+      "forwarding_model": "switched_firewall",
+      "note": "campus_medium folded onto one firewall: two layer-2 Arista access switches trunk five VLANs straight to a single VyOS firewall, the gateway of every VLAN (eth1/eth2 vifs), which holds the TRUST, DMZ and UNTRUST zones, intra-zone filtering between the user groups, the NAT and both DHCP services. Same endpoints, resolvers, addresses and rulesets as campus_medium, minus the transit link. A remote site hangs off the firewall's eth7 (benchmarks/testbeds/campus_site.py): router-wan (VyOS), then wan-edge, a Linux router whose eth2 is a 10 Mbit circuit carrying the topology's qos_policy, then srv-site, the iperf3 sink. The firewall routes the site's prefix explicitly through router-wan, a second router a route can be made to loop with, and its default leads elsewhere, so wrong_routing_table and the shaped QoS families bind."
+    },
+    "campus_large": {
+      "forwarding_model": "switched_firewall",
+      "note": "campus_medium grown by a third building and two business VLANs, everything medium holds at the same name, port and address. Eight layer-2 Arista access switches carry ten VLANs to the one firewall: those of buildings A and B dual-homed to an MLAG pair of aggregates that the firewall reaches through bond0 (bond0 vifs), building C's two single-homed to a standalone aggregate on eth8 (eth8 vifs): CORP and VOIP in two buildings, GUESTS in two, BMS, INFRA, FINANCE and SERVERS. A group spans buildings through one VLAN per access switch rather than one stretched VLAN, so each DHCP pool still serves one desk; the rulesets name groups, and reach the new subnets through them. The DMZ, the Internet and the remote site off the firewall's eth7 are medium's."
     }
   },
   "scenarios": {
@@ -36,7 +48,10 @@
         "sme_leaf_spine_dmz_vlan",
         "sme_leaf_firewall_dmz",
         "sme_leaf_spine_dmz_dns",
-        "sme_wan_edge_qos"
+        "sme_wan_edge_qos",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "absorbed": [
         "connectivity/vlan_disable_interface.yaml",
@@ -52,7 +67,10 @@
         "sme_leaf_spine_dmz_vlan",
         "sme_leaf_firewall_dmz",
         "sme_leaf_spine_dmz_dns",
-        "sme_wan_edge_qos"
+        "sme_wan_edge_qos",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "absorbed": [
         "connectivity/vlan_remove_ip.yaml",
@@ -68,7 +86,10 @@
         "sme_leaf_spine_dmz_vlan",
         "sme_leaf_firewall_dmz",
         "sme_leaf_spine_dmz_dns",
-        "sme_wan_edge_qos"
+        "sme_wan_edge_qos",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "absorbed": [
         "connectivity/vlan_disable_routing.yaml",
@@ -84,7 +105,10 @@
         "sme_leaf_spine_dmz_vlan",
         "sme_leaf_firewall_dmz",
         "sme_leaf_spine_dmz_dns",
-        "sme_wan_edge_qos"
+        "sme_wan_edge_qos",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "absorbed": [
         "connectivity/vlan_drop_traffic_to_from_subnet.yaml",
@@ -96,7 +120,10 @@
       "scenario": "wrong_routing_table",
       "topologies": [
         "clos01_mvp",
-        "sme_leaf_spine_dmz_small"
+        "sme_leaf_spine_dmz_small",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "excluded": {
         "sme_leaf_spine_dmz_vlan": "Structurally inexpressible: every VLAN prefix is directly connected on the spine IRBs, so m1-m4 find no required remote route to corrupt. Only m5 (endpoint_wrong_default_gateway) would bind.",
@@ -109,7 +136,10 @@
       "scenario": "zone_policy_enforcement",
       "topologies": [
         "sme_leaf_firewall_dmz",
-        "sme_leaf_spine_dmz_dns"
+        "sme_leaf_spine_dmz_dns",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "note": "Filtering faults act on the zone model itself rather than on an address list: a ruleset unbound from its pair, a deny placed ahead of the permits, or an interface that leaves its zone. Each binds only to a pair the topology declares it accepts and that a required flow actually crosses -- a pair absent from zone_policies has no ruleset and is denied by the zone model, so there is nothing there to break. Requires a topology declaring zone_policies and a node with the zone_policy capability, which today means a VyOS enforcer.",
       "excluded": {
@@ -122,7 +152,10 @@
     "dhcp_dns/dhcp_provisioning.yaml": {
       "scenario": "dhcp_provisioning",
       "topologies": [
-        "sme_leaf_spine_dmz_dns"
+        "sme_leaf_spine_dmz_dns",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "note": "Configuration-level DHCP faults on one reservation pool of the server: the pool deleted so its subnet is no longer served, the default-router option pointed at an address nobody holds, or the name-server option dropped or pointed at a host that runs no resolver. Requires a topology declaring a dhcp service with per-client pools and endpoints whose address_assignment is dhcp.",
       "excluded": {
@@ -150,7 +183,10 @@
     "qos/wan_shaping_policy_repair.yaml": {
       "scenario": "wan_shaping_policy_repair",
       "topologies": [
-        "sme_wan_edge_qos"
+        "sme_wan_edge_qos",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "excluded": {
         "clos01_mvp": "Needs a topology declaring a qos_policy on a shaped WAN edge; without a bottleneck there is no contention and the policy would have nothing to protect.",
@@ -193,7 +229,10 @@
         "sme_leaf_spine_dmz_vlan",
         "sme_leaf_firewall_dmz",
         "sme_leaf_spine_dmz_dns",
-        "sme_wan_edge_qos"
+        "sme_wan_edge_qos",
+        "campus_medium",
+        "campus_small",
+        "campus_large"
       ],
       "excluded": {
         "clos01_mvp": "Pre-existing: the MVP topology declares no services, no security zones, and no attachable attacker, so no security scenario can bind against it. Recorded here rather than fixed, so the catalog compiles against every topology it ships with."

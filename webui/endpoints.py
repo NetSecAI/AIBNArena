@@ -3,8 +3,10 @@
 One entry is a provider -- a base URL and the key it takes -- and the models it
 serves, because a LiteLLM or vLLM proxy serves many models behind one key. Its type
 says which: `openai` is OpenAI's own API, whose URL is fixed (`OPENAI_API_BASE`) and
-whose models are listed from the key (`openai_models`); `custom` is any other
-OpenAI-compatible endpoint, at the URL given.
+whose models are listed from the key (`openai_models`); `openrouter` is OpenRouter,
+whose URL is fixed too (`OPENROUTER_API_BASE`) and whose models are listed from its
+catalog (`openrouter_models`); `custom` is any other OpenAI-compatible endpoint, at the
+URL given.
 
 Each model of an endpoint may also carry how it is asked to think (`thinking`:
 `enable_thinking`, `thinking_effort`, `thinking_style`), chosen when the model is
@@ -38,6 +40,12 @@ STORE = REPOSITORY / "webui" / "models.json"
 
 #: OpenAI's own API: an `openai` endpoint has this URL whatever was typed.
 OPENAI_API_BASE = "https://api.openai.com/v1"
+#: OpenRouter's API, OpenAI-compatible: an `openrouter` endpoint has this URL whatever was typed.
+OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
+#: The endpoint types whose URL is fixed, so the page asks for none.
+FIXED_API_BASES = {"openai": OPENAI_API_BASE, "openrouter": OPENROUTER_API_BASE}
+#: How the page names each type, in what it answers.
+PROVIDER_NAMES = {"openai": "OpenAI", "openrouter": "OpenRouter", "custom": "endpoint"}
 #: The prefix a model id takes for LiteLLM's OpenAI provider (`served_name` strips it).
 OPENAI_PREFIX = "openai/"
 
@@ -82,7 +90,7 @@ class Endpoint:
     api_base: str
     models: tuple[str, ...] = ()
     api_key: str | None = field(default=None, repr=False)
-    #: `openai` or `custom`; an entry written before the type existed is `custom`.
+    #: `openai`, `openrouter` or `custom`; an entry written before the type existed is `custom`.
     provider: str = "custom"
     #: How each model is asked to think, by model id (`clean_thinking`). A model absent
     #: here is run with its subject's own default.
@@ -105,15 +113,42 @@ def _prefixed(model: str) -> str:
     return model if model.startswith(OPENAI_PREFIX) else OPENAI_PREFIX + model
 
 
+def stored_model(provider: str, model: str) -> str:
+    """A model as typed on the page, as the subject is given it.
+
+    Every registered endpoint is reached through LiteLLM's `openai/` provider, which strips
+    that prefix before the request (`served_name`). An OpenAI model takes it whether or not
+    it was typed with it (`gpt-5` is `openai/gpt-5`). An OpenRouter model always takes it,
+    because OpenRouter's own ids may start with `openai/` too: `openai/gpt-4o` there is
+    `openai/openai/gpt-4o` here, and OpenRouter receives `openai/gpt-4o`. Any other endpoint's
+    model is as typed.
+    """
+    if provider == "openai":
+        return _prefixed(model)
+    if provider == "openrouter":
+        return OPENAI_PREFIX + model
+    return model
+
+
+def page_model(provider: str, model: str) -> str:
+    """The model as the page shows it: `stored_model` undone."""
+    return model.removeprefix(OPENAI_PREFIX) if provider in FIXED_API_BASES else model
+
+
+def provider_endpoint(provider: str, id_: str, name: str, models: tuple[str, ...], api_key: str | None,
+                      thinking: Mapping[str, Mapping[str, Any]] | None = None) -> Endpoint:
+    """An endpoint of a provider whose URL is fixed (`FIXED_API_BASES`): each model and its
+    thinking settings under the name the subject is given (`stored_model`)."""
+    named = tuple(dict.fromkeys(stored_model(provider, model) for model in models))
+    settings = {stored_model(provider, model): value for model, value in (thinking or {}).items()}
+    return Endpoint(id=id_, name=name, api_base=FIXED_API_BASES[provider], models=named, api_key=api_key,
+                    provider=provider, thinking=declared_thinking(named, settings))
+
+
 def openai_endpoint(id_: str, name: str, models: tuple[str, ...], api_key: str | None,
                     thinking: Mapping[str, Mapping[str, Any]] | None = None) -> Endpoint:
-    """An endpoint of OpenAI's own API: its URL fixed, each model under LiteLLM's `openai/`
-    prefix whether or not it was typed with it (`gpt-5` is `openai/gpt-5`), its thinking
-    settings with it."""
-    named = tuple(dict.fromkeys(_prefixed(model) for model in models))
-    settings = {_prefixed(model): value for model, value in (thinking or {}).items()}
-    return Endpoint(id=id_, name=name, api_base=OPENAI_API_BASE, models=named, api_key=api_key,
-                    provider="openai", thinking=declared_thinking(named, settings))
+    """An endpoint of OpenAI's own API (`provider_endpoint`)."""
+    return provider_endpoint("openai", id_, name, models, api_key, thinking)
 
 
 def declared_thinking(models: tuple[str, ...], thinking: Mapping[str, Any] | None) -> dict[str, dict[str, Any]]:
@@ -288,7 +323,7 @@ _CHAT = re.compile(r"^(gpt-|chatgpt-|o\d)")
 
 
 class ModelListUnavailable(RuntimeError):
-    """OpenAI did not list the models of this key."""
+    """The provider did not list its models."""
 
 
 def openai_models(
@@ -315,3 +350,33 @@ def openai_models(
     except (ValueError, KeyError, TypeError) as exc:
         raise ModelListUnavailable("OpenAI's answer is not a model list") from exc
     return sorted(name for name in listed if _CHAT.match(name) and not _NOT_CHAT.search(name))
+
+
+def openrouter_models(
+    api_key: str | None = None,
+    *,
+    timeout: float = 30.0,
+    transport: httpx.BaseTransport | None = None,
+) -> list[str]:
+    """The OpenRouter models a subject can run on, as OpenRouter lists them (`GET /models`), sorted.
+
+    Only those that take tools and answer in text: a subject repairs the network through
+    tool calls, and a model offered without them could only end its episode with no call.
+    The catalog is OpenRouter's whole one; the key, when given, is sent with the request.
+    """
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    try:
+        with httpx.Client(timeout=timeout, transport=transport) as client:
+            response = client.get(f"{OPENROUTER_API_BASE}/models", headers=headers)
+    except httpx.HTTPError as exc:
+        raise ModelListUnavailable(f"OpenRouter did not answer ({type(exc).__name__}: {exc})") from exc
+    if response.status_code >= 400:
+        raise ModelListUnavailable(f"OpenRouter refused: HTTP {response.status_code} {_error_message(response)}")
+    try:
+        listed = response.json().get("data") or []
+        usable = [str(item["id"]) for item in listed
+                  if "tools" in (item.get("supported_parameters") or [])
+                  and "text" in ((item.get("architecture") or {}).get("output_modalities") or ["text"])]
+    except (ValueError, KeyError, TypeError, AttributeError) as exc:
+        raise ModelListUnavailable("OpenRouter's answer is not a model list") from exc
+    return sorted(set(usable))

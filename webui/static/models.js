@@ -1,14 +1,35 @@
 // The endpoints page. It never receives a stored key, only whether one is set,
 // so editing an endpoint leaves its key alone unless a new one is typed.
 //
-// An endpoint is of one of two types. OpenAI's own API has a fixed URL, so the
-// form asks for none, and its models are chosen from those the key can use, which
-// the server lists (/api/openai/models) and never answers with the key. Any other
-// OpenAI-compatible endpoint is given by its base URL and its model ids typed.
+// An endpoint is of one of three types. OpenAI's own API and OpenRouter have a fixed URL,
+// so the form asks for none, and their models are chosen from those the server lists
+// (/api/openai/models from the key, /api/openrouter/models from OpenRouter's catalog),
+// never answering with the key. Any other OpenAI-compatible endpoint is given by its base
+// URL and its model ids typed.
 
 const $ = (id) => document.getElementById(id);
 const body = document.querySelector("#endpoints tbody");
-const PROVIDER_LABELS = { openai: "OpenAI", custom: "compatible endpoint" };
+const PROVIDER_LABELS = { openai: "OpenAI", openrouter: "OpenRouter", custom: "compatible endpoint" };
+// The types whose URL is fixed, and what the form says for each.
+const FIXED = {
+  openai: {
+    label: "OpenAI",
+    models: "gpt-5.4, gpt-4o-mini",
+    note: "OpenAI model ids, comma separated, or ticked below. The launcher offers each as openai/<id>.",
+    list: "/api/openai/models",
+    listed: "OpenAI's chat models this key can use. Ticking one adds it to the Models field.",
+    needsKey: true,
+  },
+  openrouter: {
+    label: "OpenRouter",
+    models: "qwen/qwen3-8b, openai/gpt-4o-mini",
+    note: "OpenRouter model ids, comma separated, or ticked below. The launcher offers each as openai/<id>.",
+    list: "/api/openrouter/models",
+    listed: "OpenRouter's models that take tools, as a subject needs. Ticking one adds it to the Models field.",
+    needsKey: false,
+  },
+};
+const fixedType = () => FIXED[$("provider").value];
 
 function report(message, failed) {
   const feedback = $("feedback");
@@ -17,7 +38,8 @@ function report(message, failed) {
   feedback.textContent = message;
 }
 
-// An OpenAI model is stored as litellm takes it, `openai/<id>`; the form shows the id.
+// An OpenAI or OpenRouter model is stored as litellm takes it, `openai/<id>`; the form shows
+// the id. Only the first prefix goes: OpenRouter's `openai/gpt-4o` is stored `openai/openai/gpt-4o`.
 const bare = (model) => model.replace(/^openai\//, "");
 const typed = () => $("models").value.split(",").map((model) => model.trim()).filter(Boolean);
 
@@ -26,8 +48,8 @@ const typed = () => $("models").value.split(",").map((model) => model.trim()).fi
 // field shows it, and only the models in that field are sent.
 const THINKING_CHOICES = {
   enable_thinking: [["", "model default"], ["true", "on"], ["false", "off"]],
-  thinking_effort: [["", "unset"], ["minimal", "minimal"], ["low", "low"],
-    ["medium", "medium"], ["high", "high"]],
+  thinking_effort: [["", "unset"], ["none", "none"], ["minimal", "minimal"], ["low", "low"],
+    ["medium", "medium"], ["high", "high"], ["xhigh", "xhigh"]],
   thinking_style: [["", "unset"], ["auto", "auto"], ["chat_template", "chat_template"],
     ["system_prompt", "system_prompt"]],
 };
@@ -85,16 +107,26 @@ function thinkingPayload() {
 }
 
 function showProvider() {
-  const openai = $("provider").value === "openai";
-  $("api-base-field").hidden = openai;
-  $("api_base").required = !openai;
-  $("name").required = !openai;
-  $("name").placeholder = openai ? "OpenAI" : "internal LiteLLM proxy";
-  $("models").placeholder = openai ? "gpt-5.4, gpt-4o-mini" : "openai/gpt-5.4, openai/gpt-4o-mini";
-  $("models-note").textContent = openai
-    ? "OpenAI model ids, comma separated, or ticked below. The launcher offers each as openai/<id>."
-    : "Comma-separated model ids, exactly as litellm takes them.";
-  $("openai-choice").hidden = !openai;
+  const fixed = fixedType();
+  $("api-base-field").hidden = Boolean(fixed);
+  $("api_base").required = !fixed;
+  $("name").required = !fixed;
+  $("name").placeholder = fixed ? fixed.label : "internal LiteLLM proxy";
+  $("models").placeholder = fixed ? fixed.models : "openai/gpt-5.4, openai/gpt-4o-mini";
+  $("models-note").textContent = fixed ? fixed.note : "Comma-separated model ids, exactly as litellm takes them.";
+  $("openai-choice").hidden = !fixed;
+  if (fixed) {
+    $("choice-title").textContent = `${fixed.label} models`;
+    if (!$("openai-models").children.length) $("list-note").textContent = fixed.listed;
+  }
+}
+
+// OpenRouter lists hundreds of models: the filter hides those whose id does not hold it.
+function filterModels() {
+  const wanted = $("model-filter").value.trim().toLowerCase();
+  for (const label of $("openai-models").children) {
+    label.hidden = Boolean(wanted) && !label.textContent.toLowerCase().includes(wanted);
+  }
 }
 
 function tickTyped() {
@@ -124,24 +156,27 @@ function drawModels(models) {
     container.append(label);
   }
   tickTyped();
+  filterModels();
 }
 
 async function listModels() {
+  const fixed = fixedType();
+  if (!fixed) return;
   const payload = {};
   if ($("api_key").value) payload.api_key = $("api_key").value;
   else if ($("id").value) payload.id = $("id").value;
   const note = $("list-note");
   note.classList.remove("error");
-  if (!payload.api_key && !payload.id) {
+  if (fixed.needsKey && !payload.api_key && !payload.id) {
     note.textContent = "Type the API key first: the models listed are the ones it can use.";
     note.classList.add("error");
     return;
   }
-  note.textContent = "Asking OpenAI…";
+  note.textContent = `Asking ${fixed.label}…`;
   let response;
   let answer;
   try {
-    response = await fetch("/api/openai/models", {
+    response = await fetch(fixed.list, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -159,8 +194,8 @@ async function listModels() {
   }
   drawModels(answer.models);
   note.textContent = answer.models.length
-    ? `${answer.models.length} chat models this key can use. Ticking one adds it to the Models field.`
-    : "OpenAI lists no chat model for this key.";
+    ? `${answer.models.length} models listed by ${fixed.label}. Ticking one adds it to the Models field.`
+    : `${fixed.label} lists no model a subject can use.`;
 }
 
 function edit(endpoint) {
@@ -168,21 +203,22 @@ function edit(endpoint) {
   $("id").value = endpoint.id;
   $("provider").value = endpoint.provider || "custom";
   $("name").value = endpoint.name;
-  $("api_base").value = endpoint.provider === "openai" ? "" : endpoint.api_base;
-  $("models").value = (endpoint.provider === "openai"
-    ? endpoint.models.map(bare) : endpoint.models).join(", ");
-  // Keyed as the field shows the models: an OpenAI model without its openai/ prefix.
+  const fixed = FIXED[endpoint.provider];
+  $("api_base").value = fixed ? "" : endpoint.api_base;
+  $("models").value = (fixed ? endpoint.models.map(bare) : endpoint.models).join(", ");
+  // Keyed as the field shows the models: an OpenAI or OpenRouter model without its openai/ prefix.
   thinkingDraft = Object.fromEntries(Object.entries(endpoint.thinking || {}).map(
-    ([model, settings]) => [endpoint.provider === "openai" ? bare(model) : model, { ...settings }]));
+    ([model, settings]) => [fixed ? bare(model) : model, { ...settings }]));
   drawThinking();
   $("api_key").value = "";
   $("key-note").textContent = endpoint.has_key
     ? "A key is stored. Type a new one to replace it."
     : "No key stored for this endpoint.";
   $("openai-models").replaceChildren();
+  $("model-filter").value = "";
   $("list-note").textContent = "";
   showProvider();
-  if (endpoint.provider === "openai" && endpoint.has_key) listModels();
+  if (fixed && (endpoint.has_key || !fixed.needsKey)) listModels();
   window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
 
@@ -193,9 +229,9 @@ function clearForm() {
   $("key-note").textContent = "";
   $("feedback").hidden = true;
   $("openai-models").replaceChildren();
+  $("model-filter").value = "";
   $("list-note").classList.remove("error");
-  $("list-note").textContent =
-    "OpenAI's chat models this key can use. Ticking one adds it to the Models field.";
+  $("list-note").textContent = "";
   thinkingDraft = {};
   drawThinking();
   showProvider();
@@ -245,7 +281,15 @@ async function refresh() {
 }
 
 $("reset").addEventListener("click", clearForm);
-$("provider").addEventListener("change", showProvider);
+$("provider").addEventListener("change", () => {
+  // Another provider's list is not this one's.
+  $("openai-models").replaceChildren();
+  $("model-filter").value = "";
+  $("list-note").classList.remove("error");
+  $("list-note").textContent = "";
+  showProvider();
+});
+$("model-filter").addEventListener("input", filterModels);
 $("models").addEventListener("input", () => { tickTyped(); drawThinking(); });
 $("list-models").addEventListener("click", listModels);
 

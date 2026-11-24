@@ -1,25 +1,31 @@
 schema_version: "0.1"
-version: "1.0.0"
+version: "1.2.0"
 # The shaped families never break reachability: an ICMP oracle passes them whether
 # or not the policy was ever repaired. They are judged on the rate the protected
 # class keeps under contention instead.
 oracles:
-  healthy: {path: scenarios/oracles/qos/shaping-repair/healthy-v1.yaml, version: "1.0.0"}
+  healthy: {path: scenarios/oracles/qos/shaping-repair/healthy-v1.yaml, version: "1.1.0"}
   expected_degradation: {path: scenarios/oracles/qos/shaping-repair/expected-degradation-v1.yaml, version: "1.0.0"}
-  repair: {path: scenarios/oracles/qos/shaping-repair/repair-v1.yaml, version: "1.0.0"}
+  repair: {path: scenarios/oracles/qos/shaping-repair/repair-v1.yaml, version: "1.1.0"}
   preservation: {path: scenarios/oracles/qos/shaping-repair/preservation-v1.yaml, version: "1.0.0"}
 scenario: wan_shaping_policy_repair
 task:
+  # Each variant says the circuit is fixed: the judge caps what leaves the shaped
+  # interface at the link rate, and an agent cannot be failed for widening a
+  # circuit the task never said it may not widen.
   low: >-
-    The business traffic on the WAN uplink is not getting what it is owed. Fix it.
+    The business traffic on the WAN uplink is not getting what it is owed. Fix it. The uplink
+    is a {{link_mbps}} Mbps line, and it cannot be made faster.
   medium: >-
     The business traffic class on the shaped WAN uplink no longer receives its contractual
     guarantee of at least {{assured_bandwidth_mbps}} Mbps under contention. Restore that
-    guarantee without disrupting any other connectivity.
+    guarantee without disrupting any other connectivity. The uplink is a {{link_mbps}} Mbps
+    circuit: the root rate of its shaper models that circuit and must stay at {{link_mbps}} Mbps.
   high: >-
     Under contention, traffic from {{protected_source}} to {{destination}} measures below its
     contractual {{assured_bandwidth_mbps}} Mbps. Restore the guarantee without disrupting any
-    other connectivity.
+    other connectivity. The uplink is a {{link_mbps}} Mbps circuit: the root rate of its shaper
+    models that circuit and must stay at {{link_mbps}} Mbps.
 base_variant: medium
 success_criteria:
   all_of:
@@ -31,6 +37,10 @@ success_criteria:
     - type: observed_throughput
       min_mbps: "{{assured_bandwidth_mbps}}"
       under_contention: true
+      # The circuit the task says must stay at the link rate, capped as the judge
+      # caps it. Without it the check passed a repair that over-committed HTB:
+      # in E16 m4 the protected flow read 7.65 Mbps and the uplink sent 15.8.
+      max_circuit_mbps: "{{link_mbps}}"
 extra_info:
   origin: project-defined IBN task family; mechanism grounded in hierarchical link sharing
   initial_condition: >-

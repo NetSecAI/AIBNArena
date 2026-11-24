@@ -44,7 +44,10 @@ class OracleEvaluator:
                     threshold_results=checks,
                 )
             )
-        passed = _combine(tuple(item.passed for item in probes), oracle["success"])
+        if oracle["success"]["mode"] == "all_groups":
+            passed = _combine_groups(oracle["probes"], probes, oracle["success"])
+        else:
+            passed = _combine(tuple(item.passed for item in probes), oracle["success"])
         return OracleEvaluation(
             oracle_id=str(oracle["oracle_id"]),
             version=str(oracle["version"]),
@@ -104,6 +107,32 @@ class OracleEvaluator:
             return bool(_OPERATORS[str(threshold["operator"])](actual, expected))
         except (KeyError, TypeError, ValueError):
             return False
+
+
+def _combine_groups(
+    declared: Any,
+    evaluated: list[ProbeEvaluation],
+    success: Mapping[str, Any],
+) -> bool:
+    """Every group passes under its own rule, over the probes that name it.
+
+    A composed oracle (scenarios/oracle_loader.py) keeps each component's oracle as a
+    group, so a DHCP component still passes on either of its two symptoms while a
+    connectivity component beside it needs its one. A group no probe names, or an
+    oracle with no group at all, fails: nothing was measured for it.
+    """
+    groups = success.get("groups") or {}
+    if not groups:
+        return False
+    for group, rule in groups.items():
+        values = tuple(
+            item.passed
+            for probe, item in zip(declared, evaluated)
+            if group in (probe.get("groups") or ())
+        )
+        if not values or not _combine(values, rule):
+            return False
+    return True
 
 
 def _combine(values: tuple[bool, ...], success: Mapping[str, Any]) -> bool:

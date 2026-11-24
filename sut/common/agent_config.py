@@ -39,7 +39,7 @@ class ModelAgentConfig:
     #: Which system prompt to run with; "default" is the one the subject ships.
     #: Any other name is a file under the subject's prompts/ directory.
     prompt_variant: str = "default"
-    #: How many ANI operations the subject may make in one episode, or None for no
+    #: How many ANI calls the subject may make in one episode, or None for no
     #: cap. A call past the cap is refused by name, never dispatched.
     ani_call_limit: int | None = None
     #: The smallest output reservation a provider context rejection may retry
@@ -60,6 +60,15 @@ class ModelAgentConfig:
     context_budget_chars: int | None = None
     artifact_directory: str | None = None
     max_consecutive_rejections: int | None = None
+    #: How many of the most recent read results stay whole in the transcript, older
+    #: ones becoming a stub that names the call; None keeps every result whole. A
+    #: subject may ship its own default; the environment sets it, 0 turning it off.
+    keep_recent_reads: int | None = None
+    #: The same rule counted in characters: the most recent read results stay whole as
+    #: long as they hold no more than this many together, older ones become stubs, and
+    #: the answers to the model's last turn always stay whole. With both set, a result
+    #: stays whole only if each rule keeps it. The environment sets it, 0 turning it off.
+    keep_recent_read_chars: int | None = None
     # Where per-episode trace files are written. Empty keeps the trace in the
     # server log only, which is the previous behaviour.
     trace_directory: str | None = None
@@ -99,7 +108,7 @@ class ModelAgentConfig:
             or os.getenv("IBN_SUT_THINKING_EFFORT")
             or cls.thinking_effort,
             "temperature": float(temperature) if temperature else None,
-            "max_tokens": int(os.getenv(f"{prefix}_MAX_TOKENS", cls.max_tokens)),
+            "max_tokens": parse_max_tokens(os.getenv(f"{prefix}_MAX_TOKENS", cls.max_tokens)),
             "dry_run": os.getenv(f"{prefix}_DRY_RUN", "").lower() in {"1", "true", "yes"},
             "self_execute": os.getenv(f"{prefix}_SELF_EXECUTE", "true").lower() not in {"0", "false", "no"},
             "max_execution_seconds": float(os.getenv(f"{prefix}_MAX_EXECUTION_SECONDS", cls.max_execution_seconds)),
@@ -124,6 +133,12 @@ class ModelAgentConfig:
             "max_consecutive_rejections": optional_int(
                 os.getenv(f"{prefix}_MAX_CONSECUTIVE_REJECTIONS")
                 or os.getenv("IBN_SUT_MAX_CONSECUTIVE_REJECTIONS")),
+            "keep_recent_reads": optional_recent_reads(
+                os.getenv(f"{prefix}_KEEP_RECENT_READS")
+                or os.getenv("IBN_SUT_KEEP_RECENT_READS"), cls.keep_recent_reads),
+            "keep_recent_read_chars": optional_recent_reads(
+                os.getenv(f"{prefix}_KEEP_RECENT_READ_CHARS")
+                or os.getenv("IBN_SUT_KEEP_RECENT_READ_CHARS"), cls.keep_recent_read_chars),
             "trace_directory": (
                 os.getenv(f"{prefix}_TRACE_DIRECTORY")
                 or os.getenv("IBN_SUT_TRACE_DIRECTORY")
@@ -144,6 +159,47 @@ def optional_int(value: str | None) -> int | None:
     if parsed < 0:
         raise ValueError(f"interaction limit must not be negative: {value!r}")
     return parsed
+
+
+#: What --max-tokens and `<PREFIX>_MAX_TOKENS` take for "no output limit", in any case.
+NO_OUTPUT_LIMIT_WORDS = ("0", "none", "unlimited")
+
+
+def parse_max_tokens(value: str | int) -> int:
+    """The output limit of one model call, a positive number of tokens or 0 for none.
+
+    0, none and unlimited give 0. A call made under 0 sends no max_tokens
+    (`request_max_tokens`). vLLM 0.19 then lets the reply run to what the context window
+    leaves after the prompt (`get_max_tokens` gives max_model_len minus the prompt), unless the
+    model's generation_config sets max_new_tokens, which those of Qwen3.8-27B and
+    Qwen3.5-9B do not. A fixed large limit is not the same. vLLM refuses a request whose
+    prompt and limit together exceed the window, which a long episode reaches.
+    """
+    text = str(value).strip().lower()
+    if text in NO_OUTPUT_LIMIT_WORDS:
+        return 0
+    tokens = int(text)
+    if tokens < 0:
+        raise ValueError(f"max_tokens must be a positive integer, or one of {NO_OUTPUT_LIMIT_WORDS}: {value!r}")
+    return tokens
+
+
+def request_max_tokens(max_tokens: int) -> int | None:
+    """What a model call sends as max_tokens. The configured limit, or None, sent as no
+    max_tokens at all, when the configuration is 0 (no limit)."""
+    return max_tokens if max_tokens > 0 else None
+
+
+def optional_recent_reads(value: str | None, default: int | None) -> int | None:
+    """How many recent reads, or how many of their characters, stay whole: the subject's
+    default when the environment says nothing, and None - every result whole - when it
+    says 0."""
+    if value is None or not value.strip():
+        return default
+    parsed = int(value)
+    if parsed < 0:
+        raise ValueError(f"the reads kept must not be negative: {value!r}")
+    return parsed or None
 
 
 def optional_bool(value: str | None) -> bool | None:

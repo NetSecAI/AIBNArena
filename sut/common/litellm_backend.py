@@ -12,7 +12,7 @@ import re
 import time
 from typing import Any, Callable
 
-from .agent_config import ModelAgentConfig
+from .agent_config import ModelAgentConfig, request_max_tokens
 from .thinking import ThinkingPlan, apply_directive, resolve_thinking
 from .trace import Tracer
 
@@ -113,8 +113,12 @@ class LiteLLMModelCaller:
             # Those endpoints do support tool calls, so whitelist the parameter rather than
             # let the whole ReAct loop fail on the first call.
             "allowed_openai_params": ["tool_choice"],
-            "max_tokens": self.max_tokens,
             "timeout": max(1.0, min(remaining_seconds, self.max_execution_seconds)),
+            # The OpenAI client under LiteLLM retries a timed-out request twice with the
+            # same timeout, so a call given the last 258 s of the budget could take three
+            # times that and answer after the judge had stopped waiting. Retries are made
+            # below instead, each with what is left of the budget.
+            "max_retries": 0,
         }
         if self.api_base is not None:
             kwargs["api_base"] = self.api_base
@@ -134,7 +138,7 @@ class LiteLLMModelCaller:
             "model": self.model,
             "litellm_model": model_name,
             "api_base": self.api_base,
-            "max_tokens": self.max_tokens,
+            "max_tokens": request_max_tokens(self.max_tokens),
             "remaining_budget_seconds": round(remaining_seconds, 3),
             "ani_tools": [item["function"]["name"] for item in self.tool_schemas()],
         })
@@ -146,15 +150,22 @@ class LiteLLMModelCaller:
         # only a provider-confirmed context overflow may reduce it, and retry the exact
         # same messages so no evidence or CAS precondition is discarded.
         deadline = time.monotonic() + max(1.0, remaining_seconds)
-        output_tokens = self.max_tokens
+        # None means no output limit (max_tokens 0). The request then carries no max_tokens, the
+        # server reserves what the window leaves, and a context rejection is the prompt's
+        # own, which a smaller reservation cannot cure.
+        output_tokens = request_max_tokens(self.max_tokens)
         # How far this call was pushed off its configured reservation. Reported on
         # the message, and on the exception when no message comes back, because a
         # response produced under a 62-token reservation is not the same evidence
         # as one produced under the configured 8000, and the report would otherwise
         # show only the configured number.
         reservation = {"reductions": 0, "min_max_tokens": output_tokens}
+        transient_retries = 0
         while True:
-            kwargs["max_tokens"] = output_tokens
+            if output_tokens is None:
+                kwargs.pop("max_tokens", None)
+            else:
+                kwargs["max_tokens"] = output_tokens
             kwargs["timeout"] = max(
                 1.0,
                 min(deadline - time.monotonic(), self.max_execution_seconds),
@@ -162,7 +173,20 @@ class LiteLLMModelCaller:
             try:
                 response = completion(**kwargs)
             except Exception as exc:
-                reduced = _context_retry_tokens(exc, output_tokens)
+                # A rate limit, a 5xx or a dropped connection is retried, as the client
+                # would have, but only while the budget lasts. A timeout is not: the
+                # call was given everything that was left.
+                pause = min(30.0, 2.0 * 2 ** transient_retries)
+                if _transient(litellm, exc) and deadline - time.monotonic() > pause + 1.0:
+                    transient_retries += 1
+                    self.trace("summary", "Retrying model call after a transient provider error", {
+                        "error": f"{type(exc).__name__}: {str(exc)[:200]}",
+                        "retry": transient_retries,
+                        "pause_seconds": pause,
+                    })
+                    time.sleep(pause)
+                    continue
+                reduced = None if output_tokens is None else _context_retry_tokens(exc, output_tokens)
                 # The floor raises the provider's own error rather than a wrapper
                 # naming the floor: the loop classifies the episode by that text,
                 # and the exception's own fields say how far the call got.
@@ -196,6 +220,9 @@ class LiteLLMModelCaller:
             }
             payload["_ibn_provider_model"] = getattr(response, "model", None)
             payload["_ibn_reservation"] = dict(reservation)
+            # "length" is how a reply cut at max_tokens is told from one that chose
+            # to make no call: both reach the loop as content and nothing else.
+            payload["_ibn_finish_reason"] = getattr(response.choices[0], "finish_reason", None)
             return payload
 
 
@@ -235,6 +262,20 @@ def _context_retry_tokens(exc: Exception, requested: int) -> int | None:
         available = int(limit_match.group("limit")) - int(input_match.group("input"))
         reduced = min(reduced, max(1, available - 256))
     return reduced if reduced < requested else None
+
+
+#: LiteLLM's exceptions for a provider that may answer if asked again. Looked up by
+#: name on the module: a stand-in module without them retries nothing.
+_TRANSIENT_ERRORS = ("RateLimitError", "InternalServerError", "ServiceUnavailableError",
+                     "BadGatewayError", "APIConnectionError")
+
+
+def _transient(litellm: Any, exc: Exception) -> bool:
+    timeout = getattr(litellm, "Timeout", None)
+    if isinstance(timeout, type) and isinstance(exc, timeout):
+        return False
+    return any(isinstance(cls, type) and isinstance(exc, cls)
+               for cls in (getattr(litellm, name, None) for name in _TRANSIENT_ERRORS))
 
 
 def litellm_model_name(model: str, api_base: str | None) -> str:

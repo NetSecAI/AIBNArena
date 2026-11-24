@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml
 
 from .compiler import ScenarioCompiler
+from .loader import DOMAINS
 
 
 def main() -> int:
@@ -14,7 +15,7 @@ def main() -> int:
     parser.add_argument("--scenarios", default="scenarios", help="Scenario catalog root")
     parser.add_argument("--output", required=True, help="Compiled suite YAML")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--domain", action="append", choices=["connectivity", "dhcp_dns", "filtering", "qos", "security"])
+    parser.add_argument("--domain", action="append", choices=list(DOMAINS))
     parser.add_argument("--single-method", action="store_true", help="Choose one scenario method per connectivity scenario instead of expanding all methods")
     parser.add_argument("--security-mode", action="append", choices=["exploit", "detect", "correct", "prevent"])
     parser.add_argument(

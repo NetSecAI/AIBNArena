@@ -77,7 +77,7 @@ class EpisodeRequest(BaseModel):
     # thinking: it is chosen when the model is declared (Models page) and written here at
     # launch from that declaration (`endpoints.with_thinking`), so the record states it.
     thinking_style: Literal["auto", "chat_template", "system_prompt"] | None = None
-    thinking_effort: Literal["minimal", "low", "medium", "high"] | None = None
+    thinking_effort: Literal["none", "minimal", "low", "medium", "high", "xhigh"] | None = None
 
     def sut_url(self, port: int) -> str:
         return f"http://{self.host}:{port}"

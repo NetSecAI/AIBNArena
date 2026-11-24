@@ -6,7 +6,9 @@ from ipaddress import ip_interface
 from pathlib import Path
 from typing import Any
 
+from benchmarks.testbeds.campus_fabric import vlan_name
 from scenarios.access import CompiledScenarioInstance
+from scenarios.compiler.compiler import CHANGE_REQUEST_OPERATIONS
 from scenarios.compiler.loader import load_yaml
 from scenarios.compiler.topology import TopologyIndex
 
@@ -190,12 +192,14 @@ def vyos_interface_path(name: str) -> str:
 
     ``eth3`` is a plain ethernet interface, ``eth1.10`` is VLAN 10 carried on
     ``eth1`` -- which VyOS addresses as a ``vif`` of the parent, not as an
-    interface of its own.
+    interface of its own. ``bond0`` and ``bond0.10`` are the same under
+    ``interfaces bonding``: an 802.3ad bundle and its VLANs.
     """
     port, index = split_interface(name)
+    family = "bonding" if port.startswith("bond") else "ethernet"
     if name == port:
-        return f"interfaces ethernet {port}"
-    return f"interfaces ethernet {port} vif {index}"
+        return f"interfaces {family} {port}"
+    return f"interfaces {family} {port} vif {index}"
 
 
 def acl_interface_key(name: str) -> str:
@@ -229,6 +233,15 @@ _ZONE_OPERATIONS = {
     "set_zone_pair_binding",
     "set_zone_rule_precedence",
     "set_zone_interface_membership",
+}
+
+# The vlan family: switch-side 802.1Q settings of an access switch (scenarios/vlan).
+_VLAN_OPERATIONS = {
+    "set_access_port_vlan",
+    "set_switchport_mode",
+    "set_vlan_presence",
+    "set_trunk_allowed_vlan",
+    "set_trunk_native_vlan",
 }
 
 _DHCP_OPERATIONS = {
@@ -301,12 +314,30 @@ class CompiledContainerLabTopology:
         private = instance.private
         bindings = private["bindings"]
         method = private["evaluator"].get("selected_method") or {}
+        if method.get("components"):
+            return self._materialize_combination(instance)
         operation = method.get("operation")
         if not isinstance(operation, dict) or not operation.get("name"):
             raise UnsupportedScenarioError(
                 f"{instance.id}: selected method has no semantic operation"
             )
 
+        if str(operation["name"]) in CHANGE_REQUEST_OPERATIONS:
+            # Nothing is broken: the subject is asked to build something, and the
+            # network it is handed is the reference one. The degradation oracle
+            # checks instead that what it is asked for is not already there.
+            return LabFault(
+                id=instance.id,
+                description=f"Compiled {private['scenario_definition']} change request.",
+                intent=instance.intent,
+                expected_failure="The change the request asks for is not yet in place.",
+                commands=[],
+                expected_affected_nodes=[
+                    str(node) for node in bindings.get("affected_nodes", [])
+                ],
+                restore_commands=[],
+                change_request=True,
+            )
         return LabFault(
             id=instance.id,
             description=f"Compiled {private['scenario_definition']} scenario.",
@@ -319,17 +350,65 @@ class CompiledContainerLabTopology:
             restore_commands=self._render_restore_operation(operation, bindings),
         )
 
+    def _materialize_combination(self, instance: CompiledScenarioInstance) -> LabFault:
+        """One fault made of every component's, injected in order and undone in reverse.
+
+        Each component renders exactly as it would alone, from its own method and
+        bindings. The restore runs the components backwards, so whatever one fault laid
+        over another is lifted first. The compiler guarantees disjoint blast radii, not
+        disjoint devices: two components on the same firewall go in as consecutive
+        commands, which the injector batches into one commit.
+        """
+        private = instance.private
+        parts = private["bindings"].get("components") or []
+        if len(parts) < 2:
+            raise UnsupportedScenarioError(f"{instance.id}: a combination needs at least two components")
+        commands: list[StateCommand] = []
+        restores: list[list[StateCommand]] = []
+        for part in parts:
+            operation = (part.get("method") or {}).get("operation")
+            if not isinstance(operation, dict) or not operation.get("name"):
+                raise UnsupportedScenarioError(
+                    f"{instance.id}: component {part.get('id')} has no semantic operation")
+            commands.extend(self._render_operation(operation, part["bindings"]))
+            restores.append(self._render_restore_operation(operation, part["bindings"]))
+        return LabFault(
+            id=instance.id,
+            description=(f"Compiled {private['scenario_definition']} combination of "
+                         f"{len(parts)} faults."),
+            intent=instance.intent,
+            expected_failure="The degradation oracle of every component must fail.",
+            commands=commands,
+            expected_affected_nodes=[
+                str(node) for node in private["bindings"].get("affected_nodes", [])
+            ],
+            restore_commands=[command for block in reversed(restores) for command in block],
+        )
+
     def _render_restore_operation(
         self,
         operation: dict[str, Any],
         bindings: dict[str, Any],
     ) -> list[StateCommand]:
         operation_name = str(operation["name"])
+        if operation_name in _VLAN_OPERATIONS:
+            node = self.topology.nodes.get(str(bindings["target"]))
+            if not node:
+                raise UnsupportedScenarioError(f"topology has no target node '{bindings['target']}'")
+            return self._render_vlan_operation(node, operation, bindings, restore=True)
         if operation_name == "set_interface_admin_state":
-            return self._render_operation(
+            commands = self._render_operation(
                 {**operation, "enabled": not bool(operation.get("enabled"))},
                 bindings,
             )
+            # The kernel drops the routes out of a link taken down and does not
+            # bring them back with it. Same rule as `_render_interface_ipv4_restore`:
+            # a multi-homed Linux node is a forwarder, with no default route to restore.
+            target = str(bindings["target"])
+            if (self.topology.nodes[target]["kind"] == "linux"
+                    and len(self.topology.interfaces(target)) == 1):
+                commands.append(self._endpoint_default_route_restore(bindings))
+            return commands
         if operation_name == "set_interface_mtu":
             target = str(bindings["target"])
             interface = str(bindings["interface"])
@@ -404,6 +483,8 @@ class CompiledContainerLabTopology:
             raise UnsupportedScenarioError(f"topology has no target node '{target}'")
 
         operation_name = str(operation["name"])
+        if operation_name in _VLAN_OPERATIONS:
+            return self._render_vlan_operation(node, operation, bindings)
         if operation_name == "set_forwarded_traffic_policy":
             return self._render_forwarded_traffic_policy(node, operation, bindings)
         if operation_name in _ZONE_OPERATIONS:
@@ -496,6 +577,61 @@ class CompiledContainerLabTopology:
                 f"operation '{operation_name}' is missing binding {exc}"
             ) from exc
         return [StateCommand(target=target, mode=mode, command=command)]
+
+    @staticmethod
+    def _render_vlan_operation(
+        node: dict[str, Any],
+        operation: dict[str, Any],
+        bindings: dict[str, Any],
+        *,
+        restore: bool = False,
+    ) -> list[StateCommand]:
+        """A switch-side VLAN fault, or its restore, as EOS configuration lines.
+
+        Each fault changes one line of what benchmarks/testbeds/campus_fabric.py renders
+        for the healthy state, and each restore writes that line back as it renders it:
+        the VLAN's name included, since `vlan N` alone would recreate a VLAN the healthy
+        configuration does not hold. The lines go in as one EOS session, so a fault is
+        committed whole or not at all.
+        """
+        target = str(bindings["target"])
+        if node["kind"] != "arista_ceos":
+            raise UnsupportedScenarioError(
+                f"VLAN faults are rendered for arista_ceos access switches, not {node['kind']!r}")
+        name = str(operation["name"])
+        interface = str(bindings["interface"])
+        vlan_id = int(bindings["vlan_id"])
+
+        def eos(*lines: str) -> list[StateCommand]:
+            return [StateCommand(target, "eos_cli", line) for line in lines]
+
+        if name == "set_access_port_vlan":
+            vlan = vlan_id if restore else int(bindings["fault_vlan_id"])
+            return eos(f"interface {interface}", f"switchport access vlan {vlan}")
+        if name == "set_switchport_mode":
+            if operation.get("mode") != "trunk":
+                raise UnsupportedScenarioError("set_switchport_mode currently supports mode='trunk'")
+            # The port keeps `switchport access vlan N` as a trunk, so going back to
+            # access mode is all the restore has to say.
+            mode = "access" if restore else "trunk"
+            return eos(f"interface {interface}", f"switchport mode {mode}")
+        if name == "set_vlan_presence":
+            if operation.get("present") is not False:
+                raise UnsupportedScenarioError("set_vlan_presence currently supports present=false")
+            if restore:
+                return eos(f"vlan {vlan_id}", f"name {vlan_name(vlan_id)}")
+            return eos(f"no vlan {vlan_id}")
+        if name == "set_trunk_allowed_vlan":
+            if operation.get("present") is not False:
+                raise UnsupportedScenarioError("set_trunk_allowed_vlan currently supports present=false")
+            verb = "add" if restore else "remove"
+            return eos(f"interface {interface}", f"switchport trunk allowed vlan {verb} {vlan_id}")
+        if name == "set_trunk_native_vlan":
+            # The healthy trunk declares no native VLAN, so it has EOS's default.
+            if restore:
+                return eos(f"interface {interface}", "no switchport trunk native vlan")
+            return eos(f"interface {interface}", f"switchport trunk native vlan {vlan_id}")
+        raise UnsupportedScenarioError(f"VLAN operation '{name}' has no rendering")
 
     @staticmethod
     def _bridge_domain_membership(bindings: dict[str, Any], bridge_domain: str) -> str:
@@ -877,9 +1013,11 @@ class CompiledContainerLabTopology:
         bindings: dict[str, Any],
     ) -> list[StateCommand]:
         target = str(bindings["target"])
+        if node["kind"] == "vyos":
+            return self._render_vyos_static_route_operation(operation, bindings)
         if node["kind"] != "nokia_srlinux":
             raise UnsupportedScenarioError(
-                "static route faults currently require nokia_srlinux"
+                "static route faults currently require nokia_srlinux or vyos"
             )
         network_instance = str(node.get("network_instance", "default"))
         route_prefix = str(bindings["route_prefix"])
@@ -977,6 +1115,8 @@ class CompiledContainerLabTopology:
     ) -> list[StateCommand]:
         target = str(bindings["target"])
         node = self.topology.nodes[target]
+        if node["kind"] == "vyos":
+            return self._render_vyos_static_route_restore(operation, bindings)
         network_instance = str(node.get("network_instance", "default"))
         route_prefix = str(bindings["route_prefix"])
         group = str(bindings["temporary_next_hop_group"])
@@ -1035,6 +1175,130 @@ class CompiledContainerLabTopology:
                 ),
             ])
         return commands
+
+    def _render_vyos_static_route_operation(
+        self,
+        operation: dict[str, Any],
+        bindings: dict[str, Any],
+    ) -> list[StateCommand]:
+        """The static-route faults on VyOS, where a next hop is an address, not a group.
+
+        A VyOS route balances over every next hop set under it, so a `set` alone
+        would add the fault beside the healthy next hop rather than in its place:
+        the route is deleted and rewritten. That delete is why the reference
+        state must route the destination prefix explicitly on the target -- and,
+        for a loop, on the loop peer: a batch deleting an absent path fails whole,
+        and a route the target only reaches through its default has nothing to
+        rewrite. The descriptor says so in the node's `static_routes`, which the
+        compiler binds to and which the restore writes back.
+        """
+        target = str(bindings["target"])
+        route_prefix = str(bindings["route_prefix"])
+        operation_name = str(operation["name"])
+
+        if operation_name == "set_static_route_next_hop":
+            self._require_declared_route(target, route_prefix)
+            return self._vyos_route_via(
+                target, route_prefix, [str(bindings["fault_next_hop"])]
+            )
+
+        if operation_name == "set_static_route_disposition":
+            if operation.get("disposition") != "blackhole":
+                raise UnsupportedScenarioError(
+                    "set_static_route_disposition currently supports blackhole"
+                )
+            return [
+                self._vyos(target, f"set protocols static route {route_prefix} blackhole")
+            ]
+
+        if operation_name == "create_static_route_loop":
+            peer = self._vyos_loop_peer(bindings)
+            self._require_declared_route(target, route_prefix)
+            self._require_declared_route(peer, route_prefix)
+            return [
+                *self._vyos_route_via(
+                    target, route_prefix, [str(bindings["target_to_loop_peer"])]
+                ),
+                *self._vyos_route_via(
+                    peer, route_prefix, [str(bindings["loop_peer_to_target"])]
+                ),
+            ]
+
+        raise UnsupportedScenarioError(
+            f"unsupported static route operation '{operation_name}'"
+        )
+
+    def _render_vyos_static_route_restore(
+        self,
+        operation: dict[str, Any],
+        bindings: dict[str, Any],
+    ) -> list[StateCommand]:
+        target = str(bindings["target"])
+        route_prefix = str(bindings["route_prefix"])
+        operation_name = str(operation["name"])
+
+        if operation_name == "set_static_route_disposition":
+            # The blackhole is a more specific route the reference state never had.
+            return [self._vyos(target, f"delete protocols static route {route_prefix}")]
+
+        commands = self._vyos_route_via(
+            target,
+            route_prefix,
+            self._vyos_next_hops(bindings, "canonical_next_hops", target),
+        )
+        if operation_name == "create_static_route_loop":
+            peer = self._vyos_loop_peer(bindings)
+            commands.extend(self._vyos_route_via(
+                peer,
+                route_prefix,
+                self._vyos_next_hops(bindings, "loop_peer_canonical_next_hops", peer),
+            ))
+        return commands
+
+    def _require_declared_route(self, node: str, route_prefix: str) -> None:
+        """Refuse to rewrite a route the descriptor does not say the node holds.
+
+        Without the declaration nothing guarantees the route is in the reference
+        state, and the fault would only fail on the device, its batch refused.
+        """
+        routes = self.topology.static_routes(node)
+        if not routes or not routes.get(route_prefix, {}).get("next_hops"):
+            raise UnsupportedScenarioError(
+                f"a VyOS route fault rewrites the route {node} holds to {route_prefix}: "
+                f"declare it in {node}'s static_routes"
+            )
+
+    def _vyos_loop_peer(self, bindings: dict[str, Any]) -> str:
+        peer = str(bindings["loop_peer"])
+        peer_node = self.topology.nodes.get(peer)
+        if not peer_node or peer_node["kind"] != "vyos":
+            raise UnsupportedScenarioError(
+                "static route loop peer must be vyos, like its target"
+            )
+        return peer
+
+    @staticmethod
+    def _vyos_next_hops(bindings: dict[str, Any], key: str, node: str) -> list[str]:
+        next_hops = [str(address) for address in bindings.get(key) or []]
+        if not next_hops:
+            raise UnsupportedScenarioError(
+                f"no healthy next hop toward {bindings['destination_gateway']} "
+                f"is known on {node} to restore {bindings['route_prefix']} to"
+            )
+        return next_hops
+
+    def _vyos_route_via(
+        self, target: str, route_prefix: str, next_hops: list[str]
+    ) -> list[StateCommand]:
+        return [
+            self._vyos(target, f"delete protocols static route {route_prefix}"),
+            *(
+                self._vyos(
+                    target, f"set protocols static route {route_prefix} next-hop {next_hop}"
+                )
+                for next_hop in next_hops
+            ),
+        ]
 
     def _render_interface_ipv4_operation(
         self,

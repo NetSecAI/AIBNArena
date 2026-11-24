@@ -1,0 +1,18 @@
+// DMZ services are served by their own resolver (dns-dmz, 172.16.3.53,
+// authoritative for dmz.lab). Forward just that zone there.
+//
+// The query crosses the firewall from TRUST to DMZ: TRUST-DMZ rules 60/65
+// accept port 53 toward the SRV-DNS-DMZ address-group.
+zone "dmz.lab" {
+	type forward;
+	forward only;
+	forwarders {
+		172.16.3.53;
+	};
+};
+
+// The LAN's own names: the endpoints this resolver answers for itself.
+zone "campus.lab" {
+	type master;
+	file "/etc/bind/db.campus.lab";
+};

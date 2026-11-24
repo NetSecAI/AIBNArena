@@ -5,8 +5,8 @@ from typing import Any, Mapping
 
 from benchmarks.core import BenchmarkLifecycle
 from benchmarks.core.contracts import OperationCounts, OracleEvaluation, ProbeEvaluation
-from benchmarks.core.metrics import calculate_shared_metrics, preservation_vacuous
-from benchmarks.core.reporting import validate_result
+from benchmarks.core.metrics import calculate_shared_metrics, preservation_vacuous, repair_without_change
+from benchmarks.core.reporting import repair_without_change_of, validate_result
 
 
 # The shape the containerlab platform returns for an unaffected scope that
@@ -147,7 +147,8 @@ def result_payload(metrics: Mapping[str, Any]) -> dict[str, Any]:
                 name: 0
                 for name in (
                     "llm_calls", "ani_reads", "ani_mutations", "validations",
-                    "successful_mutations", "failed_operations", "unsafe_operations",
+                    "successful_mutations", "failed_operations",
+                    "unsafe_operations",
                 )
             },
             "input_tokens": None,
@@ -183,3 +184,78 @@ class ResultSchemaTests(unittest.TestCase):
         # acceptance above is the schema's verdict and not a silent pass.
         with self.assertRaises(ValueError):
             validate_result({**payload, "unexpected": True})
+
+
+def repair(passed: bool) -> OracleEvaluation:
+    return OracleEvaluation(oracle_id="qos.path.repair", version="1.1.0", phase="repair",
+                            passed=passed, probes=())
+
+
+def snapshot(command: str = "ip address show; ip route show; tc qdisc/class/filter show") -> dict[str, Any]:
+    return {"ok": True, "devices": {
+        "finance1": {"kind": "linux", "ok": True, "command": command},
+        "leaf1": {"kind": "nokia_srlinux", "ok": True, "command": "info from running /"},
+    }}
+
+
+def record(*, passed: bool = True, changed: list[str] | None = None,
+           command: str | None = None, metrics: dict[str, Any] | None = None) -> dict[str, Any]:
+    """A record written before `repair_without_change` existed: E12-E16 look like this."""
+    taken = snapshot() if command is None else snapshot(command)
+    return {
+        "metrics": {"fault_applicable": True} if metrics is None else metrics,
+        "evaluations": {"repair": {"passed": passed}},
+        "device_configurations": {"snapshots": {"before_sut": taken, "after_sut": taken},
+                                  "changed_by_sut": changed or []},
+    }
+
+
+class RepairWithoutChangeTests(unittest.TestCase):
+    def test_a_pass_on_an_untouched_lab_is_marked(self) -> None:
+        self.assertIs(True, repair_without_change(repair(True), [], fault_applicable=True))
+
+    def test_a_pass_after_a_change_and_a_failed_repair_are_not(self) -> None:
+        self.assertIs(False, repair_without_change(repair(True), ["finance1"], fault_applicable=True))
+        self.assertIs(False, repair_without_change(repair(False), [], fault_applicable=True))
+
+    def test_it_is_not_asked_where_nothing_can_answer(self) -> None:
+        # A healthy lab has nothing to repair, a missing oracle no verdict, and a
+        # missing snapshot no evidence that nothing changed.
+        self.assertIsNone(repair_without_change(repair(True), [], fault_applicable=False))
+        self.assertIsNone(repair_without_change(None, [], fault_applicable=True))
+        self.assertIsNone(repair_without_change(repair(True), None, fault_applicable=True))
+
+    def test_the_marker_validates_in_a_result(self) -> None:
+        metrics = calculate_shared_metrics(passing_phases(), OperationCounts())
+        for value in (True, False, None):
+            validate_result(result_payload({**metrics, "repair_without_change": value}))
+
+
+class RepairWithoutChangeOfRecordTests(unittest.TestCase):
+    def test_the_recorded_marker_is_read_as_it_is(self) -> None:
+        recorded = record(changed=["finance1"], metrics={"repair_without_change": True})
+        self.assertIs(True, repair_without_change_of(recorded))
+        self.assertIsNone(repair_without_change_of(record(metrics={"repair_without_change": None})))
+
+    def test_an_older_record_is_derived_from_its_snapshots(self) -> None:
+        self.assertIs(True, repair_without_change_of(record()))
+        self.assertIs(False, repair_without_change_of(record(changed=["finance1"])))
+        self.assertIs(False, repair_without_change_of(record(passed=False)))
+        # Records from before the no-fault episodes carry no fault_applicable.
+        self.assertIs(True, repair_without_change_of(record(metrics={})))
+
+    def test_a_snapshot_blind_to_traffic_control_cannot_vouch(self) -> None:
+        # Before 2026-09-26 a Linux host was read without tc: a netem repair left no
+        # trace, and "unchanged" would accuse a subject that removed the qdisc.
+        self.assertIsNone(repair_without_change_of(record(command="ip address show; ip route show")))
+
+    def test_no_fault_no_verdict_or_a_failed_snapshot_answer_none(self) -> None:
+        self.assertIsNone(repair_without_change_of(record(metrics={"fault_applicable": False})))
+        unjudged = record()
+        unjudged["evaluations"] = {}
+        self.assertIsNone(repair_without_change_of(unjudged))
+        failed = record()
+        failed["device_configurations"]["snapshots"]["after_sut"] = {"ok": False, "devices": {}}
+        self.assertIsNone(repair_without_change_of(failed))
+        self.assertIsNone(repair_without_change_of({**record(), "device_configurations": None}))
+

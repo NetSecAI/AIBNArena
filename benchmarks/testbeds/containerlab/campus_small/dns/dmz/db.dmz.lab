@@ -1,0 +1,21 @@
+; Authoritative data for the DMZ service names (zone dmz.lab).
+; Short TTL: the lab is redeployed often and records are read far more than cached.
+$TTL	60
+@	IN	SOA	dns-dmz.dmz.lab. admin.dmz.lab. (
+			1		; Serial
+			3600		; Refresh
+			600		; Retry
+			86400		; Expire
+			60 )		; Negative cache TTL
+
+@		IN	NS	dns-dmz.dmz.lab.
+
+; DMZ infrastructure -- static address, set by the reference state.
+dns-dmz		IN	A	172.16.3.53
+
+; DMZ services -- addresses pinned by the dhcp-server static-mappings of
+; the firewall (states/generate_healthy_state.py), so these records
+; stay valid across redeployments. Changing a mapping means changing the record
+; here too, and the address in scenarios/topologies/campus_small.yaml.
+web-dmz		IN	A	172.16.2.10
+sftp-dmz	IN	A	172.16.1.10

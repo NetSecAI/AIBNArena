@@ -76,10 +76,11 @@ def test_server_carries_every_field_of_its_config(server: Path):
     and discarded, and every run bound "auto" whatever the environment said (fixed
     2026-09-24). The scan above could not see it, since it knows only the fields the
     shared env_fields reads. What a server must carry is every field of the config
-    class it builds, the subject's own included.
+    class it builds, the subject's own included. A field the class fixes (`init=False`)
+    is no setting: no construction can carry it.
     """
     block = _construction_block(server)
     carried = set(re.findall(r"^\s+([a-z_]+)=", block, flags=re.M))
     missing = sorted(field.name for field in dataclasses.fields(_config_class(server))
-                     if field.name not in carried and field.name not in EXEMPT)
+                     if field.init and field.name not in carried and field.name not in EXEMPT)
     assert not missing, f"{server.relative_to(ROOT)} drops config fields: {missing}"

@@ -8,7 +8,7 @@ from typing import Literal
 
 from .types import CommandResult, LabNode
 
-CommandMode = Literal["shell", "srl_cli", "vyos_cli"]
+CommandMode = Literal["shell", "srl_cli", "vyos_cli", "eos_cli"]
 
 
 @dataclass(frozen=True)
@@ -48,6 +48,18 @@ class LabState:
         grouped: dict[str, list[str]] = defaultdict(list)
         for command in self.commands:
             if command.mode == "vyos_cli":
+                grouped[command.target].append(command.command)
+        return dict(grouped)
+
+    def grouped_eos_commands(self) -> dict[str, list[str]]:
+        """EOS configuration lines per node, in order: one configuration session each.
+
+        Order matters on EOS where it does not on the other two: a line applies in the
+        mode the lines before it entered (`interface Ethernet3`, then its settings).
+        """
+        grouped: dict[str, list[str]] = defaultdict(list)
+        for command in self.commands:
+            if command.mode == "eos_cli":
                 grouped[command.target].append(command.command)
         return dict(grouped)
 

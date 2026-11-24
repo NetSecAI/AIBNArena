@@ -18,6 +18,10 @@ class LabFault:
     expected_failure: str = ""
     expected_affected_nodes: list[str] = field(default_factory=list)
     restore_commands: list[StateCommand] = field(default_factory=list)
+    #: The scenario asks for a change instead of breaking something: nothing is
+    #: injected, and ``expected_affected_nodes`` are the hosts whose required paths
+    #: the change reshapes on purpose, which the repair convergence does not wait on.
+    change_request: bool = False
 
     @classmethod
     def from_mapping(cls, payload: dict) -> "LabFault":
@@ -33,6 +37,7 @@ class LabFault:
             restore_commands=[
                 StateCommand(**item) for item in payload.get("restore_commands", [])
             ],
+            change_request=bool(payload.get("change_request", False)),
         )
 
 

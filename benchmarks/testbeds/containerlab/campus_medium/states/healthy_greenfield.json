@@ -1,0 +1,3261 @@
+{
+  "id": "campus_medium_unshaped_site_healthy",
+  "description": "Healthy reference state for campus_medium, the reference campus lab with its two firewalls merged into one. Four layer-2 Arista access switches, each bundling an uplink to either aggregate into one LACP port-channel, and two aggregates forming an MLAG pair carry five VLANs (CORP, VOIP, BMS, INFRA, GUESTS) to the firewall's bond0, an LACP bundle over the pair. The firewall is the gateway of every VLAN: it filters between the user groups with intra-zone filtering, holds the DMZ (web, SFTP and DNS segments) and the Internet segment, enforces LAN-to-DMZ and egress policy, masquerades toward the Internet, serves the desks' DHCP reservations and shapes its LAN bundle. dns-access-4 is the LAN resolver and forwards dmz.lab to dns-dmz, which is authoritative for it. On eth7 the firewall reaches a remote site through router-wan and wan-edge, a Linux router whose eth2 is a 10 Mbit circuit to srv-site, the iperf3 sink. wan-edge:eth2 carries the circuit and no class policy: the link is first come, first served. This is the state assured_bandwidth starts from.",
+  "commands": [
+    {
+      "target": "host-access-1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "host-access-1",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "host-access-1",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -t 4 -T 2 -A 3 -x hostname:host-access-1'"
+    },
+    {
+      "target": "host-access-2",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "host-access-2",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "host-access-2",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -t 4 -T 2 -A 3 -x hostname:host-access-2'"
+    },
+    {
+      "target": "host-access-3",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "host-access-3",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "host-access-3",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -t 4 -T 2 -A 3 -x hostname:host-access-3'"
+    },
+    {
+      "target": "host-access-4",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "host-access-4",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "host-access-4",
+      "mode": "shell",
+      "command": "sh -c 'kill $(cat /var/run/udhcpc.eth1.pid 2>/dev/null) 2>/dev/null; udhcpc -i eth1 -b -p /var/run/udhcpc.eth1.pid -s /opt/dhcp/udhcpc.script -t 4 -T 2 -A 3 -x hostname:host-access-4'"
+    },
+    {
+      "target": "web-dmz",
+      "mode": "shell",
+      "command": "sh -c 'pidof nginx >/dev/null || nginx'"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "ip address replace 10.0.3.53/24 dev eth1"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "ip route replace default via 10.0.3.1"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "ip address replace 172.16.3.53/24 dev eth1"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "ip route replace default via 172.16.3.254"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip address replace 192.168.122.1/24 dev eth1"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "ip route replace default via 192.168.122.202"
+    },
+    {
+      "target": "sftp-dmz",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "sftp-dmz",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "sftp-dmz",
+      "mode": "shell",
+      "command": "ip address replace 172.16.1.10/24 dev eth1"
+    },
+    {
+      "target": "sftp-dmz",
+      "mode": "shell",
+      "command": "ip route replace default via 172.16.1.254"
+    },
+    {
+      "target": "web-dmz",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "web-dmz",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "web-dmz",
+      "mode": "shell",
+      "command": "ip address replace 172.16.2.10/24 dev eth1"
+    },
+    {
+      "target": "web-dmz",
+      "mode": "shell",
+      "command": "ip route replace default via 172.16.2.254"
+    },
+    {
+      "target": "sftp-dmz",
+      "mode": "shell",
+      "command": "sh -c 'echo search dmz.lab > /etc/resolv.conf; echo nameserver 172.16.3.53 >> /etc/resolv.conf'"
+    },
+    {
+      "target": "web-dmz",
+      "mode": "shell",
+      "command": "sh -c 'echo search dmz.lab > /etc/resolv.conf; echo nameserver 172.16.3.53 >> /etc/resolv.conf'"
+    },
+    {
+      "target": "external1",
+      "mode": "shell",
+      "command": "sysctl -w net.ipv4.ip_forward=0"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/db.campus.lab /etc/bind/db.campus.lab"
+    },
+    {
+      "target": "dns-access-4",
+      "mode": "shell",
+      "command": "rndc reload"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.options /etc/bind/named.conf.options"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/named.conf.local /etc/bind/named.conf.local"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "cp /opt/dns-src/db.dmz.lab /etc/bind/db.dmz.lab"
+    },
+    {
+      "target": "dns-dmz",
+      "mode": "shell",
+      "command": "rndc reload"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "vlan 100"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "name VLAN_100"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel1"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-aggregate-1, switch-aggregate-2"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 100"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet1"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet2"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet3"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "description Access port to host-access-1"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "switchport mode access"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "switchport access vlan 100"
+    },
+    {
+      "target": "switch-access-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "vlan 110"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "name VLAN_110"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel1"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-aggregate-1, switch-aggregate-2"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 110"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet1"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet2"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet3"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "description Access port to host-access-2"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "switchport mode access"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "switchport access vlan 110"
+    },
+    {
+      "target": "switch-access-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "vlan 120"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "name VLAN_120"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel1"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-aggregate-1, switch-aggregate-2"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 120"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "interface Ethernet1"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "interface Ethernet2"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "interface Ethernet3"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "description Access port to host-access-3"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "switchport mode access"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "switchport access vlan 120"
+    },
+    {
+      "target": "switch-access-3",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "vlan 130"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "name VLAN_130"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "vlan 140"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "name VLAN_140"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel1"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-aggregate-1, switch-aggregate-2"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 130,140"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "interface Ethernet1"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "interface Ethernet2"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "interface Ethernet3"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "description Access port to host-access-4"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "switchport mode access"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "switchport access vlan 140"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "interface Ethernet4"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "description Access port to dns-access-4"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "switchport mode access"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "switchport access vlan 130"
+    },
+    {
+      "target": "switch-access-4",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "vlan 100"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "name VLAN_100"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "vlan 110"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "name VLAN_110"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "vlan 120"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "name VLAN_120"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "vlan 130"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "name VLAN_130"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "vlan 140"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "name VLAN_140"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "vlan 4094"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "name MLAG_PEER"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "trunk group MLAGPEER"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no spanning-tree vlan-id 4094"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel1"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Trunk to firewall"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 100,110,120,130,140"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "mlag 1"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet1"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel2"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-1"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 100"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "mlag 2"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet2"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel2"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "channel-group 2 mode active"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel3"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-2"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 110"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "mlag 3"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet3"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel3"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "channel-group 3 mode active"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel4"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-3"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 120"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "mlag 4"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet4"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel4"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "channel-group 4 mode active"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel5"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-4"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 130,140"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "mlag 5"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet5"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel5"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "channel-group 5 mode active"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel999"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description MLAG peer-link to switch-aggregate-2"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "switchport trunk group MLAGPEER"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet6"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel999"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "channel-group 999 mode active"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Ethernet7"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel999"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "channel-group 999 mode active"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "interface Vlan4094"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "description MLAG peer keepalives"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no autostate"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "ip address 172.31.0.1/30"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "mlag configuration"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "domain-id CAMPUS_MLAG"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "local-interface Vlan4094"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "peer-address 172.31.0.2"
+    },
+    {
+      "target": "switch-aggregate-1",
+      "mode": "eos_cli",
+      "command": "peer-link Port-Channel999"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "vlan 100"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "name VLAN_100"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "vlan 110"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "name VLAN_110"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "vlan 120"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "name VLAN_120"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "vlan 130"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "name VLAN_130"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "vlan 140"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "name VLAN_140"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "vlan 4094"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "name MLAG_PEER"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "trunk group MLAGPEER"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no spanning-tree vlan-id 4094"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel1"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Trunk to firewall"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 100,110,120,130,140"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "mlag 1"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet1"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel1"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "channel-group 1 mode active"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel2"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-1"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 100"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "mlag 2"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet2"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel2"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "channel-group 2 mode active"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel3"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-2"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 110"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "mlag 3"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet3"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel3"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "channel-group 3 mode active"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel4"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-3"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 120"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "mlag 4"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet4"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel4"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "channel-group 4 mode active"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel5"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Trunk to switch-access-4"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport trunk allowed vlan 130,140"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "mlag 5"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet5"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel5"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "channel-group 5 mode active"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Port-Channel999"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description MLAG peer-link to switch-aggregate-1"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport mode trunk"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "switchport trunk group MLAGPEER"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet6"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel999"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "channel-group 999 mode active"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Ethernet7"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description Member of Port-Channel999"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "channel-group 999 mode active"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "interface Vlan4094"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "description MLAG peer keepalives"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no autostate"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "ip address 172.31.0.2/30"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "no shutdown"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "mlag configuration"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "domain-id CAMPUS_MLAG"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "local-interface Vlan4094"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "peer-address 172.31.0.1"
+    },
+    {
+      "target": "switch-aggregate-2",
+      "mode": "eos_cli",
+      "command": "peer-link Port-Channel999"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth0 description 'Management Interface'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth0 ipv6 address no-default-link-local"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 description 'LACP bundle to the MLAG pair, VLANs 100,110,120,130,140'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 mode 802.3ad"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 lacp-rate fast"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 hash-policy layer3+4"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth1 description 'Member of bond0, to switch-aggregate-1'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 member interface eth1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth2 description 'Member of bond0, to switch-aggregate-2'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 member interface eth2"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service lldp interface eth1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service lldp interface eth2"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 100 address 10.0.0.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 100 description 'CORP gateway VLAN_100'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 110 address 10.0.1.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 110 description 'VOIP gateway VLAN_110'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 120 address 10.0.2.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 120 description 'BMS gateway VLAN_120'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 130 address 10.0.3.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 130 description 'INFRA gateway VLAN_130'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 140 address 10.0.4.1/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces bonding bond0 vif 140 description 'GUESTS gateway VLAN_140'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth3 address 172.16.2.254/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth3 description 'DMZ web-server segment'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth4 address 172.16.1.254/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth4 description 'DMZ SFTP-server segment'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth5 address 172.16.3.254/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth5 description 'DMZ DNS-server segment'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth6 address 192.168.122.202/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth6 description 'Untrust / Internet segment'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth7 address 10.255.254.0/31"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth7 description 'WAN to the remote site, through router-wan'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 0.0.0.0/0 next-hop 192.168.122.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.1.0.0/24 next-hop 10.255.254.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK bandwidth 1gbit"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK description 'CoS bond0 - deterministic VyOS shaper'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 100 bandwidth 50%"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 100 description CORP-USERS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 100 match CORP vif 100"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 100 priority 2"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 110 bandwidth 15%"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 110 description VOIP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 110 match VOIP vif 110"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 110 priority 1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 110 ceiling 100%"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 120 bandwidth 10%"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 120 description BMS-DEVICES"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 120 match BMS vif 120"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 120 priority 4"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 140 bandwidth 25%"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 140 description GUESTS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 140 match GUESTS vif 140"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK class 140 priority 5"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK default bandwidth 1%"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos policy shaper QOS-UPLINK default priority 6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set qos interface bond0 egress QOS-UPLINK"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall global-options state-policy established action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall global-options state-policy related action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall group address-group SRV-DNS address 10.0.3.53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall group address-group SRV-DNS-DMZ address 172.16.3.53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall group address-group SRV-FTP address 172.16.1.10"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall group network-group BMS network 10.0.2.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall group network-group CORP network 10.0.0.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall group network-group GUESTS network 10.0.4.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall group network-group VOIP network 10.0.1.0/24"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 10 description 'ALLOW-DNS-dmz-udp dst=SRV-DNS-DMZ'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 10 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 10 destination group address-group SRV-DNS-DMZ"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 10 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 15 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 15 description 'ALLOW-DNS-dmz-tcp dst=SRV-DNS-DMZ'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 15 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 15 destination group address-group SRV-DNS-DMZ"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 15 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 20 description ALLOW-UTILS-junos-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-INTRA rule 20 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-LOCAL default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-LOCAL rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-LOCAL rule 20 description ALLOW-GATEWAY-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-LOCAL rule 20 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 10 description ALLOW-HTTP-junos-http"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 10 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 10 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 20 description ALLOW-HTTP-junos-https"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 20 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 20 destination port 443"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 30 description ALLOW-HTTP-junos-http-ext"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 30 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 30 destination port 8080"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 40 description ALLOW-UTILS-junos-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 40 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 50 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 50 description ALLOW-UTILS-junos-dns-tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 50 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 50 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 60 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 60 description ALLOW-UTILS-junos-dns-udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 60 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name DMZ-UNTRUST rule 60 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name LOCAL-OUT default-action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name LOCAL-OUT description 'Router own outbound traffic (unfiltered, as before the local zone)'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 10 description ALLOW-MGMT-ssh"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 10 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 10 destination port 22"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 20 description ALLOW-MGMT-https-api"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 20 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 20 destination port 443"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 30 description ALLOW-MGMT-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name MGMT-LOCAL rule 30 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name SITE-LOCAL default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name SITE-LOCAL rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name SITE-LOCAL rule 10 description ALLOW-SITE-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name SITE-LOCAL rule 10 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 10 description 'ACCES-FTP-junos-ftp dst=SRV-FTP'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 10 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 10 destination group address-group SRV-FTP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 10 destination port 21"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 15 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 15 description 'ACCES-SFTP-ssh dst=SRV-FTP'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 15 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 15 destination group address-group SRV-FTP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 15 destination port 22"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 20 description 'ACCES-FTP-junos-ping dst=SRV-FTP'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 20 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 20 destination group address-group SRV-FTP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 30 description ALLOW-NFS-APP-NFSv4"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 30 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 30 destination port 2049"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 40 description ALLOW-PING-junos-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 40 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 50 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 50 description ALLOW-WEB-junos-http"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 50 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 50 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 60 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 60 description 'ACCES-DNS-udp dst=SRV-DNS-DMZ'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 60 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 60 destination group address-group SRV-DNS-DMZ"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 60 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 65 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 65 description 'ACCES-DNS-tcp dst=SRV-DNS-DMZ'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 65 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 65 destination group address-group SRV-DNS-DMZ"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-DMZ rule 65 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 10 description ALLOW-CORP-to-BMS-https"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 10 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 10 source group network-group CORP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 10 destination group network-group BMS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 10 destination port 443"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 11 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 11 description ALLOW-CORP-to-BMS-bacnet"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 11 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 11 source group network-group CORP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 11 destination group network-group BMS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 11 destination port 47808"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 12 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 12 description ALLOW-CORP-to-BMS-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 12 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 12 source group network-group CORP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 12 destination group network-group BMS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 20 description ALLOW-CORP-to-VOIP-sip"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 20 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 20 source group network-group CORP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 20 destination group network-group VOIP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 20 destination port 5060"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 22 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 22 description ALLOW-CORP-to-VOIP-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 22 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 22 source group network-group CORP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 22 destination group network-group VOIP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 30 description 'ALLOW-DNS-infra-udp dst=SRV-DNS'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 30 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 30 destination group address-group SRV-DNS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 30 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 35 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 35 description 'ALLOW-DNS-infra-tcp dst=SRV-DNS'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 35 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 35 destination group address-group SRV-DNS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 35 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 40 description 'ALLOW-UTILS-ping dst=SRV-DNS'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 40 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-INTRA rule 40 destination group address-group SRV-DNS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL rule 10 description ALLOW-DHCP-server"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL rule 10 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL rule 10 destination port 67"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL rule 20 description ALLOW-GATEWAY-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-LOCAL rule 20 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 10 description ALLOW-CORP-to-SITE"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 10 source group network-group CORP"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 20 description ALLOW-BMS-to-SITE"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 20 source group network-group BMS"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 40 description ALLOW-UTILS-junos-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-SITE rule 40 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 10 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 10 description ALLOW-INTERNET-junos-http"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 10 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 10 destination port 80"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 20 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 20 description ALLOW-INTERNET-junos-https"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 20 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 20 destination port 443"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 30 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 30 description ALLOW-INTERNET-junos-http-ext"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 30 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 30 destination port 8080"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 40 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 40 description ALLOW-UTILS-junos-ping"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 40 protocol icmp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 50 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 50 description ALLOW-UTILS-junos-dns-tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 50 protocol tcp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 50 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 60 action accept"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 60 description ALLOW-UTILS-junos-dns-udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 60 protocol udp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall ipv4 name TRUST-UNTRUST rule 60 destination port 53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ interface eth3"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ interface eth4"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ interface eth5"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ from LOCAL firewall name LOCAL-OUT"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ from TRUST firewall name TRUST-DMZ"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone DMZ intra-zone-filtering firewall name DMZ-INTRA"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone LOCAL default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone LOCAL local-zone"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone LOCAL from DMZ firewall name DMZ-LOCAL"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone LOCAL from MGMT firewall name MGMT-LOCAL"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone LOCAL from SITE firewall name SITE-LOCAL"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone LOCAL from TRUST firewall name TRUST-LOCAL"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone MGMT default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone MGMT interface eth0"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone MGMT from LOCAL firewall name LOCAL-OUT"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone SITE default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone SITE interface eth7"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone SITE from LOCAL firewall name LOCAL-OUT"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone SITE from TRUST firewall name TRUST-SITE"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST interface bond0.100"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST interface bond0.110"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST interface bond0.120"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST interface bond0.130"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST interface bond0.140"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST from LOCAL firewall name LOCAL-OUT"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone TRUST intra-zone-filtering firewall name TRUST-INTRA"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone UNTRUST default-action drop"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone UNTRUST interface eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone UNTRUST from DMZ firewall name DMZ-UNTRUST"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone UNTRUST from LOCAL firewall name LOCAL-OUT"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set firewall zone UNTRUST from TRUST firewall name TRUST-UNTRUST"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set system conntrack modules ftp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set system conntrack modules nfs"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set system conntrack modules sip"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set system conntrack modules tftp"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 100 description 'NAT MASQ trust->untrust'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 100 outbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 100 source address 10.0.0.0/8"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 100 translation address masquerade"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 200 description 'NAT NAT-INTERNET DMZ->untrust'"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 200 outbound-interface name eth6"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 200 source address 172.16.0.0/16"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set nat source rule 200 translation address masquerade"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_100 subnet 10.0.0.0/24 subnet-id 100"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_100 subnet 10.0.0.0/24 option default-router 10.0.0.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_100 subnet 10.0.0.0/24 option name-server 10.0.3.53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_100 subnet 10.0.0.0/24 option domain-name campus.lab"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_100 subnet 10.0.0.0/24 lease 86400"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_100 subnet 10.0.0.0/24 static-mapping host-access-1 mac 02:00:0a:00:00:96"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_100 subnet 10.0.0.0/24 static-mapping host-access-1 ip-address 10.0.0.150"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_110 subnet 10.0.1.0/24 subnet-id 110"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_110 subnet 10.0.1.0/24 option default-router 10.0.1.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_110 subnet 10.0.1.0/24 option name-server 10.0.3.53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_110 subnet 10.0.1.0/24 option domain-name campus.lab"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_110 subnet 10.0.1.0/24 lease 86400"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_110 subnet 10.0.1.0/24 static-mapping host-access-2 mac 02:00:0a:00:01:96"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_110 subnet 10.0.1.0/24 static-mapping host-access-2 ip-address 10.0.1.150"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_120 subnet 10.0.2.0/24 subnet-id 120"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_120 subnet 10.0.2.0/24 option default-router 10.0.2.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_120 subnet 10.0.2.0/24 option name-server 10.0.3.53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_120 subnet 10.0.2.0/24 option domain-name campus.lab"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_120 subnet 10.0.2.0/24 lease 86400"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_120 subnet 10.0.2.0/24 static-mapping host-access-3 mac 02:00:0a:00:02:96"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_120 subnet 10.0.2.0/24 static-mapping host-access-3 ip-address 10.0.2.150"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_140 subnet 10.0.4.0/24 subnet-id 140"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_140 subnet 10.0.4.0/24 option default-router 10.0.4.1"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_140 subnet 10.0.4.0/24 option name-server 10.0.3.53"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_140 subnet 10.0.4.0/24 option domain-name campus.lab"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_140 subnet 10.0.4.0/24 lease 86400"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_140 subnet 10.0.4.0/24 static-mapping host-access-4 mac 02:00:0a:00:04:96"
+    },
+    {
+      "target": "firewall",
+      "mode": "vyos_cli",
+      "command": "set service dhcp-server shared-network-name VLAN_140 subnet 10.0.4.0/24 static-mapping host-access-4 ip-address 10.0.4.150"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth0 description 'Management Interface'"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth0 ipv6 address no-default-link-local"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth1 address 10.255.254.1/31"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth1 description 'Link to firewall'"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth2 address 10.255.254.2/31"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set interfaces ethernet eth2 description 'Link to wan-edge'"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.0.0.0/16 next-hop 10.255.254.0"
+    },
+    {
+      "target": "router-wan",
+      "mode": "vyos_cli",
+      "command": "set protocols static route 10.1.0.0/24 next-hop 10.255.254.3"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "ip address replace 10.255.254.3/31 dev eth1"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "ip link set eth2 up"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "ip link set eth2 mtu 1500"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "ip address replace 10.1.0.1/24 dev eth2"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "sysctl -w net.ipv4.ip_forward=1"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "ip route replace 10.0.0.0/16 via 10.255.254.2"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "sh -c 'tc qdisc del dev eth2 root 2>/dev/null || true'"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "tc qdisc add dev eth2 root handle 1: htb default 20"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "tc class add dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit"
+    },
+    {
+      "target": "wan-edge",
+      "mode": "shell",
+      "command": "tc class add dev eth2 parent 1:1 classid 1:20 htb rate 10mbit ceil 10mbit"
+    },
+    {
+      "target": "srv-site",
+      "mode": "shell",
+      "command": "ip link set eth1 up"
+    },
+    {
+      "target": "srv-site",
+      "mode": "shell",
+      "command": "ip link set eth1 mtu 1500"
+    },
+    {
+      "target": "srv-site",
+      "mode": "shell",
+      "command": "ip address replace 10.1.0.10/24 dev eth1"
+    },
+    {
+      "target": "srv-site",
+      "mode": "shell",
+      "command": "ip route replace default via 10.1.0.1"
+    },
+    {
+      "target": "srv-site",
+      "mode": "shell",
+      "command": "sh -c 'pkill -x iperf3 || true'"
+    },
+    {
+      "target": "srv-site",
+      "mode": "shell",
+      "command": "sh -c 'setsid iperf3 -s -p 5201 >/dev/null 2>&1 </dev/null &'"
+    },
+    {
+      "target": "srv-site",
+      "mode": "shell",
+      "command": "sh -c 'setsid iperf3 -s -p 5202 >/dev/null 2>&1 </dev/null &'"
+    }
+  ]
+}

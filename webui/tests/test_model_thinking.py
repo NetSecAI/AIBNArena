@@ -66,11 +66,9 @@ def test_a_declaration_is_cleaned_and_checked_by_the_subjects_own_rule():
     with pytest.raises(ValueError):
         clean_thinking({"enable_thinking": "maybe"})
     check_thinking("openai/gpt-5-mini", {"enable_thinking": True, "thinking_effort": "high"})
-    with pytest.raises(ValueError, match="no reasoning switch"):
-        check_thinking("ministral-3-8b-instruct", {"enable_thinking": True})
-    with pytest.raises(ValueError, match="not an effort level"):
-        check_thinking("qwen3-8b", {"enable_thinking": True, "thinking_effort": "high"})
-    with pytest.raises(ValueError, match="unknown thinking_effort 'xhigh'"):
+    with pytest.raises(ValueError, match="does not reason"):
+        check_thinking("openai/gpt-4o-mini", {"enable_thinking": True})
+    with pytest.raises(ValueError, match="not 'xhigh'"):
         check_thinking("openai/gpt-5-mini", {"enable_thinking": True, "thinking_effort": "xhigh"})
 
 
@@ -82,15 +80,13 @@ def test_the_models_page_saves_a_declaration_the_family_accepts(store):
     assert answer.json()["thinking"] == {"openai/gpt-5-mini": {"enable_thinking": True, "thinking_effort": "medium"}}
 
 
-@pytest.mark.parametrize("endpoint,model,settings,reason", [
-    ({"name": "local relay", "api_base": "http://127.0.0.1:18002/v1"},
-     "ministral-3-8b-instruct", {"enable_thinking": True}, "no reasoning switch"),
-    ({"provider": "openai", "api_key": "sk-test"},
-     "gpt-5-mini", {"enable_thinking": True, "thinking_effort": "xhigh"}, "unknown thinking_effort 'xhigh'"),
+@pytest.mark.parametrize("model,settings,reason", [
+    ("gpt-4o-mini", {"enable_thinking": True}, "does not reason"),
+    ("gpt-5-mini", {"enable_thinking": True, "thinking_effort": "xhigh"}, "not 'xhigh'"),
 ])
-def test_the_models_page_refuses_a_declaration_the_family_cannot_honour(store, endpoint, model, settings, reason):
+def test_the_models_page_refuses_a_declaration_the_family_cannot_honour(store, model, settings, reason):
     answer = client.put("/api/endpoints", json={
-        **endpoint, "models": [model], "thinking": {model: settings}})
+        "provider": "openai", "models": [model], "api_key": "sk-test", "thinking": {model: settings}})
     assert answer.status_code == 400 and reason in answer.json()["detail"]
     assert not store.exists()
 
@@ -112,10 +108,10 @@ def test_an_episode_is_compiled_with_its_models_declaration(store):
 
 def test_an_episode_its_model_cannot_think_for_is_refused_before_it_starts(store):
     # A declaration written by hand, past the Models page's own check.
-    save([Endpoint(id="proxy", name="proxy", api_base="http://x/v1", models=("ministral-3-8b-instruct",),
-                   thinking={"ministral-3-8b-instruct": {"enable_thinking": True}})], store)
-    answer = client.post("/api/runs", json={**EPISODE, "model": "ministral-3-8b-instruct"})
-    assert answer.status_code == 400 and "no reasoning switch" in answer.json()["detail"]
+    save([Endpoint(id="proxy", name="proxy", api_base="http://x/v1", models=("openai/gpt-4o-mini",),
+                   thinking={"openai/gpt-4o-mini": {"enable_thinking": True}})], store)
+    answer = client.post("/api/runs", json={**EPISODE, "model": "openai/gpt-4o-mini"})
+    assert answer.status_code == 400 and "does not reason" in answer.json()["detail"]
     assert not MANAGER.busy
 
 

@@ -40,11 +40,13 @@ REPAIRS = [
     ("linux", "route", "default", {"delete": True}, ["ip route del default"], []),
     ("linux", "qos", "eth1", {"delete_root": True}, ["tc qdisc del dev eth1 root"], []),
     ("linux", "qos", "eth2", {"htb": {"default": 20, "rate": "10mbit",
-                                       "classes": [{"id": "1:10", "rate": "8mbit", "ceil": "10mbit", "prio": 1}],
+                                       "classes": [{"id": "1:10", "rate": "8mbit", "ceil": "10mbit", "prio": 1},
+                                                   {"id": "1:20", "rate": "2mbit", "ceil": "10mbit", "prio": 2}],
                                        "filters": [{"src": "10.10.10.0/24", "flowid": "1:10"}]}},
      ["tc qdisc replace dev eth2 root handle 1: htb default 20",
       "tc class replace dev eth2 parent 1: classid 1:1 htb rate 10mbit ceil 10mbit",
       "tc class replace dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1",
+      "tc class replace dev eth2 parent 1:1 classid 1:20 htb rate 2mbit ceil 10mbit prio 2",
       "tc filter add dev eth2 parent 1: protocol ip prio 1 u32 match ip src 10.10.10.0/24 flowid 1:10"], []),
     ("linux", "qos", "eth2", {"class": {"id": "1:10", "rate": "8mbit", "ceil": "10mbit", "prio": 1}},
      ["tc class change dev eth2 parent 1:1 classid 1:10 htb rate 8mbit ceil 10mbit prio 1"], []),
@@ -137,11 +139,23 @@ def test_the_faults_repairs_compile_to_their_native_commands(platform, kind, nam
     ("linux", "interface", "eth1", {"address": "10.10.20.10"}, "prefix length"),
     ("linux", "interface", "eth1; reboot", {"mtu": 1500}, "name must be"),
     ("nokia_srlinux", "acl", "guard", {"unbind_interfaces": ["ethernet-1/20"]}, "delete: true"),
-    ("linux", "qos", "eth2", {"class": {"id": "1:10"}}, "needs id and rate"),
+    ("linux", "qos", "eth2", {"class": {"id": "1:10"}}, "needs id and rate.*this one has id: class is one object"),
+    # E20 LangChain wan_shaping m1 to m3: 30 refusals of classes keyed by a name said the
+    # class needed id and rate, which the model had given one level down.
+    ("linux", "qos", "eth2", {"htb": {"rate": "10mbit", "classes": {"default": {"id": 20, "rate": "10mbit"}}}},
+     r"this one has default: htb.classes is a list of class objects, such as \[\{"),
     # a number given as an object must be refused by name, not escape as a TypeError
     # (E4 wan_shaping.high.m1, 2026-09-20: the agent put the class list under htb.default)
     ("linux", "qos", "eth2", {"htb": {"default": {"ceil": "20mbit", "classes": []}}}, "htb.default must be an integer"),
     ("linux", "qos", "eth2", {"htb": {"default": "twenty"}}, "htb.default must be an integer"),
+    # E19 LangChain wan_shaping m1 and m4: keys the htb object does not have were ignored,
+    # and each built an HTB root with no class, the 10 Mbit circuit then unshaped.
+    ("linux", "qos", "eth2", {"htb": {"root": "1: htb default 10"}}, "htb has no key root"),
+    ("linux", "qos", "eth2", {"htb": {"handle": 1, "quantum": 1514}}, "htb has no key handle, quantum"),
+    ("linux", "qos", "eth2", {"htb": {"default": 20, "classes": [{"id": "1:20", "rate": "2mbit"}]}}, "htb needs rate"),
+    ("linux", "qos", "eth2", {"htb": {"rate": "10mbit"}}, "must create the default class 1:20"),
+    ("linux", "qos", "eth2", {"htb": {"default": 20, "rate": "10mbit",
+                                      "classes": [{"id": "1:10", "rate": "8mbit"}]}}, "must create the default class 1:20"),
     ("linux", "qos", "eth2", {"class": {"id": "1:10", "rate": "8mbit", "prio": {"high": True}}}, "class.prio must be an integer"),
     ("linux", "qos", "eth2", {"htb": {"filters": [{"dst": "10.10.20.0/24", "flowid": "1:10", "prio": [1]}]}}, "filters.prio must be an integer"),
 ])

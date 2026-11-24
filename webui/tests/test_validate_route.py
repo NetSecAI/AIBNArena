@@ -31,7 +31,8 @@ CAMPAIGN = {
 def test_the_catalog_offers_the_repository_as_it_stands():
     document = client.get("/api/catalog").json()
     assert {item["key"] for item in document["architectures"]} == {
-        "langchain_agent", "langchain_rag_agent"}
+        "langchain_agent", "langchain_rag_agent", "langchain_agent_v2",
+        "dumb_baseline", "object_baseline", "full_baseline"}
     smoke = next(item for item in document["experiments"] if item["key"] == "connectivity-smoke")
     assert "disable_interface" in {scenario["name"] for scenario in smoke["scenarios"]}
 

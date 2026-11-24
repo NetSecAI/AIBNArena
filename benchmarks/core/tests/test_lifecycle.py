@@ -20,6 +20,7 @@ from benchmarks.core import (
 from benchmarks.core.metrics import calculate_shared_metrics
 from benchmarks.core.reporting import validate_result
 from benchmarks.core.sut_client import _operation_counts
+from sut.common.ani_report import operation_category
 from scripts.generate_report import render_html, render_json, report_document
 
 
@@ -83,13 +84,14 @@ class QueuedProbeRunner:
 
 
 class FakeSUT:
-    def __init__(self) -> None:
+    def __init__(self, result: Mapping[str, Any] | None = None) -> None:
         self.last_task: Mapping[str, Any] | None = None
+        self.result = dict(result or {"status": "completed", "verified": True})
 
     def invoke(self, task: Mapping[str, Any]) -> SUTResponse:
         self.last_task = task
         return SUTResponse(
-            result={"status": "completed", "verified": True},
+            result=dict(self.result),
             identity="test-sut",
             version="1.2.3",
             reported_model="reported/model",
@@ -417,6 +419,39 @@ def _retry_fixture(root: Path, *, experiment_id: str, injection_attempts: int) -
     return scenario, documents, config
 
 
+class SuccessIsTheOraclesVerdictTests(unittest.TestCase):
+    """`metrics.success` is the oracle's verdict alone; the subject's own end and last public
+    check are recorded beside it, never part of it."""
+
+    def _metrics(self, result: Mapping[str, Any]) -> dict[str, Any]:
+        with tempfile.TemporaryDirectory() as temporary:
+            scenario, documents, config = _retry_fixture(
+                Path(temporary), experiment_id="verdict", injection_attempts=1)
+            lifecycle = BenchmarkLifecycle(LifecycleDependencies(
+                config_loader=lambda path: config,
+                scenario_loader=lambda path: scenario,
+                oracle_loader=lambda path, version: documents[str(path)],
+                platform=FakePlatform(),
+                evaluator=OracleEvaluator(QueuedProbeRunner()),
+                sut_client=FakeSUT(result),
+                result_sink=ResultWriter(),
+                repository=Path(__file__).resolve().parents[3],
+            ))
+            return json.loads(lifecycle.run("experiment.toml").read_text(encoding="utf-8"))["metrics"]
+
+    def test_a_repair_the_oracle_passes_succeeds_without_the_subjects_check(self) -> None:
+        metrics = self._metrics({"status": "completed", "verified": False})
+        self.assertTrue(metrics["environment_success"])
+        self.assertFalse(metrics["sut_verified"])
+        self.assertTrue(metrics["success"])
+
+    def test_a_repair_the_oracle_passes_succeeds_whatever_the_subject_concluded(self) -> None:
+        metrics = self._metrics({"status": "failed", "verified": False})
+        self.assertTrue(metrics["environment_success"])
+        self.assertFalse(metrics["sut_completed"])
+        self.assertTrue(metrics["success"])
+
+
 def _retry_lifecycle(scenario, documents, config, platform, probe_results) -> BenchmarkLifecycle:
     return BenchmarkLifecycle(LifecycleDependencies(
         config_loader=lambda path: config,
@@ -588,6 +623,8 @@ class EarlyFailureTests(unittest.TestCase):
             self.assertNotIn("injection", payload["metrics"])
             self.assertEqual(0, payload["operation_counts"]["validations"])
             self.assertEqual(["deploy_or_reset", "cleanup:restore"], platform.actions)
+            # The run ended before the subject's priming, which the record says as null.
+            self.assertIsNone(payload["priming_before_sut"])
 
 
 def test_operation_counts_keep_ani_categories_disjoint_and_do_not_double_count_unsafe():
@@ -637,6 +674,46 @@ def test_operation_counts_keep_a_refused_read_as_an_attempt_but_not_a_success():
     assert counts.failed_operations == 2
     # A validation that ran and failed is still a validation.
     assert counts.validations == 1
+
+
+def test_a_subject_tool_that_sent_no_command_is_not_a_mutation():
+    """A subject tool that writes through the ANI is judged by what it dispatched, not by
+    its name.
+
+    It answers a change it cannot express and a dry run with its own name in `operation`,
+    and a real push with the ANI result of the `update_config` it sent. Only the second
+    reached a device, so only the second may count as a mutation -- which on a no-fault
+    plate is the whole verdict: a subject that sent no command changed nothing and passes.
+    """
+    for label, result in (
+        ("nothing to send", {"ok": False, "operation": "push_changes", "applied": False}),
+        ("dry run", {"ok": True, "operation": "push_changes", "applied": False}),
+    ):
+        counts = _operation_counts({
+            "ani_operations": [{
+                "operation": "push_changes",
+                "category": operation_category("push_changes", result),
+                "ok": result["ok"],
+            }],
+            "execution": {"llm_calls": 1},
+        })
+        metrics = calculate_shared_metrics({}, counts, fault_applicable=False)
+        assert counts.ani_mutations == 0, label
+        assert metrics["false_positive"] is False, label
+
+    dispatched = {"ok": True, "operation": "update_config", "changes": [{"target": "leaf1"}]}
+    counts = _operation_counts({
+        "ani_operations": [{
+            "operation": "push_changes",
+            "category": operation_category("push_changes", dispatched),
+            "ok": True,
+        }],
+        "execution": {"llm_calls": 1},
+    })
+
+    assert counts.ani_mutations == 1
+    assert counts.successful_mutations == 1
+    assert calculate_shared_metrics({}, counts, fault_applicable=False)["false_positive"] is True
 
 
 if __name__ == "__main__":
@@ -770,3 +847,24 @@ def test_a_throughput_criterion_hands_the_subject_the_flow_it_must_measure() -> 
             lifecycle.run("experiment.toml")
             assert sut.last_task["observation"] == expected, criteria
             assert sut.last_task["success_criteria"] == criteria
+
+        # A repair oracle that also holds the flow to the healthy rate hands that rate over,
+        # as the healthy oracle measured it before the fault: the subject's check then asks
+        # what the oracle asks (`repair_throughput_reference`).
+        relative = {"metric": "throughput_mbps", "operator": "gte", "value": 8, "factor": 0.85,
+                    "baseline": {"metric": "throughput_mbps", "factor": 0.85}, "combine": "min"}
+        repair = oracle("repair")
+        repair["probes"] = [{**repair["probes"][0], "thresholds": [relative]}]
+        sut = FakeSUT()
+        lifecycle = BenchmarkLifecycle(LifecycleDependencies(
+            config_loader=lambda path: config, scenario_loader=lambda path: scenario_with(qos_criteria, bindings),
+            oracle_loader=lambda path, version: {**documents, "repair": repair}[str(path)], platform=FakePlatform(),
+            evaluator=OracleEvaluator(QueuedProbeRunner([
+                {**HEALTHY_DRAW, "throughput_mbps": 6.2741}, DEGRADED_DRAW,
+                {"packet_loss_percent": 0.0, "throughput_mbps": 6.0}, {"packet_loss_percent": 0.0}])),
+            sut_client=sut, result_sink=ResultWriter(),
+            repository=Path(__file__).resolve().parents[3], trace_sink=lambda event, payload: None))
+        lifecycle.run("experiment.toml")
+        assert sut.last_task["observation"] == {"service_measurement": {
+            "source": "user1", "destination": "external1", "destination_ip": "203.0.113.10",
+            "healthy_throughput_mbps": 6.274}}
